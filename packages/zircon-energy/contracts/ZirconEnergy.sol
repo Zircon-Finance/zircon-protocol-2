@@ -4,6 +4,7 @@ pragma solidity ^0.5.16;
 import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import "./interfaces/IUniswapV2ERC20.sol";
+import "./libraries/SafeMath.sol";
 
 
 contract ZirconEnergy is IZirconEnergy {
@@ -42,13 +43,11 @@ contract ZirconEnergy is IZirconEnergy {
 
   All checks can be set by governance. Important to ensure that this doesn't brick the funds somehow.
 
-
   addInsurance function can be called by governance to increase a pool's insurance share, which can be used to bail out pools by gov
-
-
-
-
   */
+
+  using SafeMath for uint112;
+  using SafeMath for uint256;
 
   struct Pylon {
     address pairAddress;
@@ -69,13 +68,18 @@ contract ZirconEnergy is IZirconEnergy {
 
   mapping(address => PairFields) public pairToPylon;
 
-  address pylonFactory;
+  address energyFactory;
 
   uint lastPtBalance; //Used to track balances and sync up in case of donations
 
 
-  constructor(address _pylonFactory) {
-    pylonFactory = _pylonFactory;
+  constructor(address _energyFactory) public {
+    energyFactory = _energyFactory;
+  }
+
+  function initialize(address pylonA, address pylonB) external {
+    require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
+
   }
 
   function breakPiggybank(uint _requestedLiquidity) external returns (uint returnedLiquidity) {
@@ -96,30 +100,30 @@ contract ZirconEnergy is IZirconEnergy {
   }
 
   //Should be called by Pylon factory during creation
-  function registerPylon(address _pylonAddress, address _pairAddress, address _token0, address _token1, bool floatToken0, uint _insurancePerMille) external {
-    require(msg.sender == pylonFactory, "ZE: Forbidden");
-
-    Pylon memory pylonData = (
-      _pairAddress,
-      floatToken0 ? _token0 : _token1,
-      floatToken0 ? _token0 : _token1,
-      _insurancePerMille, //Insurance factor for this pool, should be modifiable somehow.
-      1, //Balances initialized to 1 to avoid potential division by 0
-      1,
-    );
-
-    //TODO: Do we need input sanitation on the addresses?
-
-    pylonAccounts[_pylonAddress] = pylonData;
-    //pairToPylon[_pairAddress] = (address(0), address(0));
-
-    if(floatToken0) {
-      pairToPylon[_pairAddress].pylonFloat0 = _pylonAddress;
-    } else {
-      pairToPylon[_pairAddress].pylonFloat1 = _pylonAddress;
-    }
-
-  }
+//  function registerPylon(address _pylonAddress, address _pairAddress, address _token0, address _token1, bool floatToken0, uint _insurancePerMille) external {
+//    require(msg.sender == pylonFactory, "ZE: Forbidden");
+//
+//    Pylon memory pylonData = Pylon(
+//      _pairAddress,
+//      floatToken0 ? _token0 : _token1,
+//      floatToken0 ? _token0 : _token1,
+//      _insurancePerMille, //Insurance factor for this pool, should be modifiable somehow.
+//      1, //Balances initialized to 1 to avoid potential division by 0
+//      1
+//    );
+//
+//    //TODO: Do we need input sanitation on the addresses?
+//
+//    pylonAccounts[_pylonAddress] = pylonData;
+//    //pairToPylon[_pairAddress] = (address(0), address(0));
+//
+//    if(floatToken0) {
+//      pairToPylon[_pairAddress].pylonFloat0 = _pylonAddress;
+//    } else {
+//      pairToPylon[_pairAddress].pylonFloat1 = _pylonAddress;
+//    }
+//
+//  }
 
   //Called by pair mintFee to register inflow. Any excess is spread evenly.
   function syncFee(address _pairAddress) external {
@@ -127,7 +131,7 @@ contract ZirconEnergy is IZirconEnergy {
     //This function gets called by every time there is a mintFee.
     //This distributes the fees between pair-only (100% revenue), pylon1 and pylon 2 (split between insurance and revenue)
 
-    uint _feeLiquidity = IUniswapV2ERC20(_pairAddress).balanceOf(address(self)) - lastPtBalance;
+    uint _feeLiquidity = IUniswapV2ERC20(_pairAddress).balanceOf(address(this)) - lastPtBalance;
 
 
     address _pylonFloat0 = pairToPylon[_pairAddress].pylonFloat0;
@@ -146,7 +150,6 @@ contract ZirconEnergy is IZirconEnergy {
       pylonRef.insuranceUni += float0Fee.mul(_insurancePerMille)/1000;
       pylonRef.revenueUni += float0Fee.mul(1000 - _insurancePerMille)/1000;
       _returnExcess(_pylonFloat0);
-
     }
 
     if (_pylonFloat1 != address(0)) {
@@ -165,7 +168,7 @@ contract ZirconEnergy is IZirconEnergy {
 
     pairToPylon[_pairAddress].revenueUni += _feeLiquidity.mul(pairLiquidity)/ptTotalSupply;
 
-    lastPtBalance = IUniswapV2ERC20(_pairAddress).balanceOf(address(self));
+    lastPtBalance = IUniswapV2ERC20(_pairAddress).balanceOf(address(this));
 
   }
 
@@ -191,16 +194,16 @@ contract ZirconEnergy is IZirconEnergy {
 
   //TODO: Add extensive checks and limits system to the extractToken flow
 
-  function extractToken() {
+  function extractToken() external {
 
   }
 
 
-  function migrateState() {
+  function migrateState() external {
 
   }
 
-  function setInsuranceFactor() {
+  function setInsuranceFactor() external {
 
   }
 
