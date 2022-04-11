@@ -77,7 +77,7 @@ contract ZirconEnergy is IZirconEnergy {
     energyFactory = _energyFactory;
   }
 
-  function initialize(address pylonA, address pylonB) external {
+  function initialize(address pylon) external {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
 
   }
