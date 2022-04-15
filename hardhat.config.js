@@ -32,9 +32,9 @@ module.exports = {
       chainId: 1287,
     },
     dev: {
-      url: 'http://127.0.0.1:9933',
+      url: 'http://127.0.0.1:7545',
       accounts: [privateKeyDev],
-      network_id: '1281',
+      network_id: '5777',
       chainId: 1281,
     },
   },
@@ -48,7 +48,16 @@ module.exports = {
             runs: 1000,
           },
         },
-      }
+      },
+      {
+        version: '0.6.6',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      },
     ],
   }
   ,

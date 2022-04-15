@@ -1,6 +1,7 @@
 require('dotenv').config()
 require("@nomiclabs/hardhat-waffle");
 require('hardhat-contract-sizer');
+require("hardhat-dependency-compiler");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -24,6 +25,12 @@ module.exports = {
       tasks: ["compile"],
     }
   },
+  dependencyCompiler: {
+    paths: [
+      '@zircon/periphery/contracts/Token.sol',
+      '@zircon/periphery/contracts/WETH.sol',
+    ],
+  },
   networks: {
     hardhat: {},
     moonbase: {
@@ -32,9 +39,9 @@ module.exports = {
       chainId: 1287,
     },
     dev: {
-      url: 'http://127.0.0.1:9933',
+      url: 'http://127.0.0.1:7545',
       accounts: [privateKeyDev],
-      network_id: '1281',
+      network_id: '5777',
       chainId: 1281,
     },
   },
@@ -48,7 +55,16 @@ module.exports = {
             runs: 1000,
           },
         },
-      }
+      },
+      {
+        version: '0.6.6',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      },
     ],
   }
   ,

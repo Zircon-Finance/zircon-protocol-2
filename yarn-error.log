@@ -1,0 +1,40 @@
+Arguments: 
+  /Users/vittori/.nvm/versions/node/v12.14.1/bin/node /usr/local/Cellar/yarn/1.22.17_2/libexec/bin/yarn.js add mocha --dev
+
+PATH: 
+  /Users/vittori/.nvm/versions/node/v12.14.1/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/vittori/.cargo/bin
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  12.14.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/vittori/Develop/zircon/zircon-protocol/package.json: Unexpected token } in JSON at position 87
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "root",
+    "private": true,
+    "devDependencies": {
+      "lerna": "^4.0.0",
+    },
+    "scripts": {
+      "test": "mocha \"./packages/*/test\""
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

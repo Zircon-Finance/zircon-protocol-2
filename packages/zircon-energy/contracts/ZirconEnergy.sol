@@ -5,9 +5,9 @@ import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import "./interfaces/IUniswapV2ERC20.sol";
 import "./libraries/SafeMath.sol";
-//import "zircon-protocol/contracts/core/interfaces/IZirconPair.sol";
+import "zircon-protocol/contracts/core/interfaces/IZirconPair.sol";
 
-contract ZirconEnergy is IZirconEnergy{
+contract ZirconEnergy is IZirconEnergy {
 
   /*
   Zircon Energy is the protocol-wide accumulator of revenue.
@@ -67,24 +67,24 @@ contract ZirconEnergy is IZirconEnergy{
   uint lastPtBalance; //Used to track balances and sync up in case of donations
   bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
-  constructor(address _energyFactory) public {
-    energyFactory = _energyFactory;
+  constructor() public {
+    energyFactory = msg.sender;
   }
 
   function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille) external {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
 
-    //bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
-//    (address tokenA, address tokenB) = true ? (_token0, _token1) : (_token1, _token0);
-//    pylon = Pylon(
-//      _pylon,
-//      _pair,
-//      tokenA,
-//      tokenB,
-//      _insurancePerMille,
-//      1,
-//      1
-//    );
+    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
+    (address tokenA, address tokenB) = true ? (_token0, _token1) : (_token1, _token0);
+    pylon = Pylon(
+      _pylon,
+      _pair,
+      tokenA,
+      tokenB,
+      _insurancePerMille,
+      1,
+      1
+    );
 
 
   }
@@ -96,11 +96,11 @@ contract ZirconEnergy is IZirconEnergy{
   }
 
   modifier _onlyPylon() {
-    require(pylon.pylonAddress != msg.sender, "ZE: Not Pylon");
+    require(pylon.pylonAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
   modifier _onlyPair() {
-    require(pylon.pairAddress != msg.sender, "ZE: Not Pylon");
+    require(pylon.pairAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
 
