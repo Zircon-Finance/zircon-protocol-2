@@ -3,7 +3,8 @@ pragma solidity =0.5.16;
 //import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import './ZirconPoolToken.sol';
 import './ZirconPylon.sol';
-//import '../energy/interfaces/IZirconEnergyFactory.sol';
+import "@zircon/energy/contracts/interfaces/IZirconEnergyRevenue.sol";
+import '@zircon/energy/contracts/interfaces/IZirconEnergyFactory.sol';
 
 contract ZirconPylonFactory is IZirconPylonFactory {
     mapping(address => mapping(address => address)) public getPylon;
@@ -49,9 +50,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
             pylon := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
     }
-    function createEnergy(address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) private {
-        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
+    function createEnergy(address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) private returns (address energy){
+        energy = IZirconEnergyFactory(energyFactory).createEnergy( _pylonAddress, _pairAddress, _tokenA, _tokenB);
+//        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
+//        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
     }
 
     // Adding Pylon
@@ -64,14 +66,15 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         address poolTokenA = createTokenAddress(_tokenA, pylonAddress); // Float
         address poolTokenB = createTokenAddress(_tokenB, pylonAddress); // Anchor
 
-        ZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory);
+        address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
+
+        IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy);
 
         ZirconPoolToken(poolTokenA).initialize(_tokenA, _pairAddress, pylonAddress, false);
         ZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
 
         emit PylonCreated(_tokenA, _tokenB, poolTokenA, poolTokenB, pylonAddress, _pairAddress);
 
-        createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
 
         getPylon[_tokenA][_tokenB] = pylonAddress;
         allPylons.push(pylonAddress);

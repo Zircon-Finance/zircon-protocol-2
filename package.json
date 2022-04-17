@@ -20,6 +20,7 @@
   },
   "scripts": {
     "test": "lerna exec -- mocha",
-    "compile": "lerna exec -- npx hardhat compile"
+    "compile": "lerna exec -- npx hardhat compile",
+    "ctest": "lerna exec -- npx hardhat compile && lerna exec -- mocha"
   }
 }

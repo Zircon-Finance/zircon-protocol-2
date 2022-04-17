@@ -1,23 +1,38 @@
 pragma solidity =0.5.16;
+import "./interfaces/IUniswapV2ERC20.sol";
+import "./libraries/SafeMath.sol";
 
+import "@zircon/core/contracts/interfaces/IZirconPair.sol";
 contract ZirconEnergyRevenue {
+    using SafeMath for uint112;
+    using SafeMath for uint256;
+
+    uint public reserve;
     address public energyfactory;
-    struct Pair {
+    struct Zircon {
         address pairAddress;
         address floatToken;
         address anchorToken;
         address energy0;
         address energy1;
+        address pylon0;
+        address pylon1;
     }
-    Pair pair;
+    Zircon zircon;
+    bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
+
+    function _safeTransfer(address token, address to, uint value) private {
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FAILED');
+    }
 
 
     modifier _onlyEnergy() {
-        require(msg.sender == pair.energy0 || msg.sender == pair.energy1, "ZE: Not Pylon");
+        require(msg.sender == zircon.energy0 || msg.sender == zircon.energy1, "ZE: Not Pylon");
         _;
     }
     modifier _onlyPair() {
-        require(pair.pairAddress == msg.sender, "ZE: Not Pylon");
+        require(zircon.pairAddress == msg.sender, "ZE: Not Pylon");
         _;
     }
 
@@ -25,22 +40,39 @@ contract ZirconEnergyRevenue {
         energyfactory = msg.sender;
     }
 
-    function initialize(address _pair, address _tokenA, address _tokenB, address energy0, address energy1) external {
+    function initialize(address _pair, address _tokenA, address _tokenB, address energy0, address energy1, address pylon0, address pylon1) external {
         require(energyfactory == msg.sender, "ZER: Not properly called");
-        bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
+        bool isFloatToken0 = IZirconPair(_pair).token0() == _tokenA;
         (address tokenA, address tokenB) = true ? (_tokenA, _tokenB) : (_tokenA, _tokenB);
-        pair = Pair(
+        zircon = Zircon(
         _pair,
         tokenA,
         tokenB,
         energy0,
-        energy1
+        energy1,
+        pylon0,
+        pylon1
         );
 
     }
 
-    function sync() external _onlyEnergy {}
+    function calculate() external _onlyPair {
+        uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
+        require(balance > reserve, "ZER: Not sent");
 
-    function calculate() external _onlyPair {}
+        uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);
+        uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
+        uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
+
+        uint amount = balance.sub(reserve);
+
+        uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
+        uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
+
+        _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
+        _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
+
+        reserve = (balance.sub(pylon0Liq)).sub(pylon1Liq);
+    }
 
 }

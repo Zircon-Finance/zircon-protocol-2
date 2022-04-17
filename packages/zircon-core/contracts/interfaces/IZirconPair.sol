@@ -52,28 +52,7 @@ interface IZirconPair {
     function skim(address to) external;
     function sync() external;
 
-    function initialize(address, address) external;
-
-    //--------------------------------------------------
-    //-------------------Open Zircon Diff--------------------
-
-    function swapNoFee(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function addApprovedUser(address _user) external;
-    function removeApprovedUser(address _user) external;
-
     function tryLock() external;
 
-    event UserAdded(address);
-    event UserRemoved(address);
-    event SwapNoFee(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-
-    //-------------------Close Zircon Diff--------------------
-    //--------------------------------------------------
+    function initialize(address, address, address) external;
 }

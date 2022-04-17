@@ -33,7 +33,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     }
 
     // *** HELPER FUNCTIONS *****
-    function _getPylon(address tokenA, address tokenB) internal returns (address pylon){
+    function _getPylon(address tokenA, address tokenB) internal view returns (address pylon){
         pylon = ZirconPeripheralLibrary.pylonFor(pylonFactory, tokenA, tokenB, UniswapV2Library.pairFor(factory, tokenA, tokenB));
     }
 
@@ -49,7 +49,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
 
 
 
-    function _getAmounts(uint amountDesiredToken, uint amountDesiredETH, uint amountTokenMin, uint amountETHMin, bool isAnchor, address tokenA, address tokenB) internal returns (uint amountA, uint amountB){
+    function _getAmounts(uint amountDesiredToken, uint amountDesiredETH, uint amountTokenMin, uint amountETHMin, bool isAnchor, address tokenA, address tokenB) internal view returns (uint amountA, uint amountB){
         uint atA =  !isAnchor ? amountDesiredToken : amountDesiredETH;
         uint atB = !isAnchor ?  amountDesiredETH : amountDesiredToken;
         uint aminA = !isAnchor ? amountTokenMin : amountETHMin;
@@ -104,7 +104,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         uint deadline
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB){
         // Initializes the pylon
-        (address pair, address pylon) = _initializePylon(tokenA, tokenB);
+        (, address pylon) = _initializePylon(tokenA, tokenB);
         // Desired amounts
         amountA = amountDesiredA;
         amountB = amountDesiredB;
@@ -233,7 +233,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         uint amountBDesired,
         uint amountAMin,
         uint amountBMin
-    ) internal virtual _addLiquidityChecks(tokenA, tokenB) returns (uint amountA, uint amountB) {
+    ) internal virtual _addLiquidityChecks(tokenA, tokenB) view returns (uint amountA, uint amountB) {
         // create the pair if it doesn't exist yet
         (uint reserveA, uint reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
         if (reserveA == 0 && reserveB == 0) {

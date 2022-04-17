@@ -3,11 +3,12 @@ const {expandTo18Decimals} = require("./utils");
 
 exports.coreFixtures = async function coreFixtures(address) {
     // deploy tokens
-    let factory = await ethers.getContractFactory('ZirconFactory');
-    let factoryInstance = await factory.deploy(address);
-
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
     let factoryEnergyInstance = await factoryEnergy.deploy();
+
+    let factory = await ethers.getContractFactory('ZirconFactory');
+    let factoryInstance = await factory.deploy(factoryEnergyInstance.address);
+
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
     let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address);
 
@@ -17,7 +18,7 @@ exports.coreFixtures = async function coreFixtures(address) {
     let tok1 = await ethers.getContractFactory('Token');
     let tk1 = await tok1.deploy('Token2', 'TOK2');
 
-    await factoryInstance.createPair(tk0.address, tk1.address);
+    await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
     let pairContract = await ethers.getContractFactory("ZirconPair");
     let pair = await pairContract.attach(lpAddress);

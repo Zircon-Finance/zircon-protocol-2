@@ -5,7 +5,7 @@ import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import "./interfaces/IUniswapV2ERC20.sol";
 import "./libraries/SafeMath.sol";
-import "zircon-protocol/contracts/core/interfaces/IZirconPair.sol";
+import "@zircon/core/contracts/interfaces/IZirconPair.sol";
 
 contract ZirconEnergy is IZirconEnergy {
 

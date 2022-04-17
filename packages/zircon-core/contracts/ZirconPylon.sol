@@ -33,6 +33,7 @@ contract ZirconPylon is IZirconPylon{
     address public pairFactoryAddress;
     address public floatPoolTokenAddress;
     address public anchorPoolTokenAddress;
+    address public energyAddress;
 
     // Indicates if in the pair the token0 is float or anchor
     bool public isFloatReserve0;
@@ -140,13 +141,13 @@ contract ZirconPylon is IZirconPylon{
 
 
     //Helper function to calculate slippage-adjusted share of pool
-    function _disincorporateAmount(uint _amountIn, bool isAnchor) private returns (uint amount0, uint amount1) {
+    function _disincorporateAmount(uint _amountIn, bool isAnchor) private view returns (uint amount0, uint amount1) {
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
         amount0 = !isAnchor ? _amountIn/2 : ZirconLibrary.getAmountOut(_amountIn/2, _reservePair1, _reservePair0);
         amount1 = isAnchor ? _amountIn/2 : ZirconLibrary.getAmountOut(_amountIn/2, _reservePair0, _reservePair1);
     }
 
-    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, IZirconPoolToken pt) private returns (uint liquidity, uint amountInAdjusted){
+    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, IZirconPoolToken pt) private view returns (uint liquidity, uint amountInAdjusted){
         (uint112 _pairReserve0, uint112 _pairReserve1) = getPairReservesNormalized();
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
 
@@ -166,7 +167,7 @@ contract ZirconPylon is IZirconPylon{
     // @_anchorPoolTokenAddress -> Contains Address Of Anchor PT
     // @floatToken -> Float token
     // @anchorToken -> Anchor token
-    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress) external lock {
+    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy) external lock {
         require(msg.sender == factoryAddress, 'Zircon: FORBIDDEN'); // sufficient check
         floatPoolTokenAddress = _floatPoolTokenAddress;
         anchorPoolTokenAddress = _anchorPoolTokenAddress;
@@ -174,6 +175,7 @@ contract ZirconPylon is IZirconPylon{
         isFloatReserve0 = IZirconPair(_pairAddress).token0() == _floatToken;
         pylonToken = PylonToken(_floatToken, _anchorToken);
         pairFactoryAddress = _pairFactoryAddress;
+        energyAddress = _energy;
 
         maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         dynamicFeePercentage = IZirconPylonFactory(factoryAddress).dynamicFeePercentage();
@@ -230,14 +232,14 @@ contract ZirconPylon is IZirconPylon{
         uint ptl = 0;
         if (max0 < newReserve0) {
             _safeTransfer(pylonToken.float, pairAddress, uint112(newReserve0.sub(max0)));
-            (ptl,,,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
+            (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
             reserve0 = max0;
         } else {
             reserve0 = uint112(newReserve0);
         }
         if (max1 < newReserve1) {
             _safeTransfer(pylonToken.anchor, pairAddress, uint112(newReserve1.sub(max1)));
-            (ptl,,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
+            (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
             reserve1 = max1;
         }else{
             reserve1 = uint112(newReserve1);
@@ -282,7 +284,7 @@ contract ZirconPylon is IZirconPylon{
             if(py != 0) _safeTransfer(pylonToken.anchor, pairAddress, py);
             (uint ptLiquidty) = IZirconPair(pairAddress).mint(address(this));
             // Removing tokens sent to the pair to balances
-            uint fee =  ptLiquidity.mul(dynamicFeePercentage)/100;
+            uint fee =  ptLiquidty.mul(dynamicFeePercentage)/100;
             _mintFee(fee);
 
             balance0 -= px;
@@ -313,14 +315,9 @@ contract ZirconPylon is IZirconPylon{
 
     // *** MINT FEE ****
     // @amount and @poolToken
-    function _mintFee(uint amount) private returns (bool minted){
+    function _mintFee(uint amount) private{
         if (amount != 0) {
-            address feeTo = IUniswapV2Factory(pairFactoryAddress).feeTo();
-            minted = feeTo != address(0);
-            if (minted) {
-                _safeTransfer(pairAddress, feeTo, amount);
-                //IZirconPoolToken(poolToken).mint(feeTo, amount);
-            }
+            _safeTransfer(pairAddress, energyAddress, amount);
         }
     }
 
@@ -435,7 +432,6 @@ contract ZirconPylon is IZirconPylon{
     //TODO: Transfer first then calculate on basis of pool token share how many share we should give to the user
     function mintAsync(address to, bool shouldMintAnchor) external lock isInitialized returns (uint liquidity){
         sync();
-        address feeTo = IUniswapV2Factory(pairFactoryAddress).feeTo();
         address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
 
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
@@ -621,7 +617,7 @@ contract ZirconPylon is IZirconPylon{
         // variables declaration
         uint _gamma = gammaMulDecimals;
         uint _vab = virtualAnchorBalance;
-        (uint _reserve0, uint _reserve1) = getPairReservesTranslated(0,0); // gas savings
+        (uint _reserve0,) = getPairReservesTranslated(0,0); // gas savings
         (uint112 _pylonReserve0, uint112 _pylonReserve1,) = getSyncReserves();
 
         //Calculates maxPTs that can be serviced through Pylon Reserves

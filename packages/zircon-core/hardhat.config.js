@@ -29,6 +29,7 @@ module.exports = {
     paths: [
       '@zircon/periphery/contracts/Token.sol',
       '@zircon/periphery/contracts/WETH.sol',
+      '@zircon/energy/contracts/interfaces/IZirconEnergyRevenue.sol',
     ],
   },
   networks: {
