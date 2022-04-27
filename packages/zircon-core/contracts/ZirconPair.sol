@@ -12,7 +12,7 @@ import "./ZirconERC20.sol";
 import "./interfaces/IZirconFactory.sol";
 //import "./libraries/////console.sol";
 import "./libraries/ZirconLibrary.sol";
-import "@zircon/energy/contracts/interfaces/IZirconEnergyRevenue.sol";
+import "./energy/interfaces/IZirconEnergyRevenue.sol";
 
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.

@@ -5,18 +5,18 @@ exports.coreFixtures = async function coreFixtures(address) {
     // deploy tokens
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
     let factoryEnergyInstance = await factoryEnergy.deploy();
+    // console.log(factoryEnergy);
+    // Deploy Tokens
+    let tok0 = await ethers.getContractFactory('Token');
+    let tk0 = await tok0.deploy('Token1', 'TOK1');
+    let tok1 = await ethers.getContractFactory('Token');
+    let tk1 = await tok1.deploy('Token2', 'TOK2');
 
     let factory = await ethers.getContractFactory('ZirconFactory');
     let factoryInstance = await factory.deploy(factoryEnergyInstance.address);
 
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
     let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address);
-
-    // Deploy Tokens
-    let tok0 = await ethers.getContractFactory('Token');
-    let tk0 = await tok0.deploy('Token1', 'TOK1');
-    let tok1 = await ethers.getContractFactory('Token');
-    let tk1 = await tok1.deploy('Token2', 'TOK2');
 
     await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
@@ -29,7 +29,7 @@ exports.coreFixtures = async function coreFixtures(address) {
 
     await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
     let pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
-    let energy = await factoryEnergyInstance.createEnergy(pylonAddress, lpAddress, token0.address, token1.address)
+    // let energy = await factoryEnergyInstance.createEnergy(pylonAddress, lpAddress, token0.address, token1.address)
     let zPylon = await ethers.getContractFactory('ZirconPylon');
     let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
     let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');

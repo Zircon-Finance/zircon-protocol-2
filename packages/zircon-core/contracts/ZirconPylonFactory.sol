@@ -3,8 +3,8 @@ pragma solidity =0.5.16;
 //import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import './ZirconPoolToken.sol';
 import './ZirconPylon.sol';
-import "@zircon/energy/contracts/interfaces/IZirconEnergyRevenue.sol";
-import '@zircon/energy/contracts/interfaces/IZirconEnergyFactory.sol';
+import "./energy/interfaces/IZirconEnergyRevenue.sol";
+import './energy/interfaces/IZirconEnergyFactory.sol';
 
 contract ZirconPylonFactory is IZirconPylonFactory {
     mapping(address => mapping(address => address)) public getPylon;
@@ -52,7 +52,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     }
     function createEnergy(address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) private returns (address energy){
         energy = IZirconEnergyFactory(energyFactory).createEnergy( _pylonAddress, _pairAddress, _tokenA, _tokenB);
-//        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
+        //energyRev = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, address(this));
+
+        //        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
 //        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
     }
 
@@ -61,10 +63,12 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESSES');
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PYLON_EXISTS');
+        console.log(block.number);
 
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
         address poolTokenA = createTokenAddress(_tokenA, pylonAddress); // Float
         address poolTokenB = createTokenAddress(_tokenB, pylonAddress); // Anchor
+        console.log(energyFactory);
 
         address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
 

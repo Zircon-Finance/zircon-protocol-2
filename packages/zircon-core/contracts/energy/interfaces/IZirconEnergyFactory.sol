@@ -13,6 +13,6 @@ interface IZirconEnergyFactory {
 
     // Functions
     function createEnergy(address, address, address, address) external returns (address energy);
-    function createEnergyRevenue(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy);
+    function createEnergyRev(address, address, address, address) external returns (address energy);
 
 }

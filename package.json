@@ -19,8 +19,8 @@
     "mocha": "*"
   },
   "scripts": {
-    "test": "lerna exec -- mocha",
-    "compile": "lerna exec -- npx hardhat compile",
-    "ctest": "lerna exec -- npx hardhat compile && lerna exec -- mocha"
+    "test": "yarn workspaces run test",
+    "ctest": "yarn workspaces run ctest",
+    "compile": "yarn workspaces run compile"
   }
 }

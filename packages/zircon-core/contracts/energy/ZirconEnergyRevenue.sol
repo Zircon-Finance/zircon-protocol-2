@@ -1,8 +1,8 @@
 pragma solidity =0.5.16;
 import "./interfaces/IUniswapV2ERC20.sol";
 import "./libraries/SafeMath.sol";
+import "../interfaces/IZirconPair.sol";
 
-import "@zircon/core/contracts/interfaces/IZirconPair.sol";
 contract ZirconEnergyRevenue {
     using SafeMath for uint112;
     using SafeMath for uint256;
