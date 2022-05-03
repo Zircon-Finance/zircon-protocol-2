@@ -38,12 +38,14 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
                 hex'70b59aaab68b848676659466c3d0dc4caa0e90d66d182fa9a16554970643f348' // init code hash
             ))));
     }
+
     function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) internal returns (address pylon) {
+        console.log("pair address", pair);
         pylon = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 pylonFactory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'70b59aaab68b848676659466c3d0dc4caa0e90d66d182fa9a16554970643f348' // init code hash
+                hex'eaa34be9dea5307ca9fb916abd42d5e428dc2b05df8b4870315a5b61d9fa5aac' // init code hash
             ))));
     }
 
@@ -62,7 +64,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         address energy0 = energyFor(token0, _pair);
         address energy1 = energyFor(token1, _pair);
         address pylon0 = pylonFor(token0, token1, _pair, _pylonFactory);
-        address pylon1 = pylonFor(token0, token1, _pair, _pylonFactory);
+        address pylon1 = pylonFor(token1, token0, _pair, _pylonFactory);
         IZirconEnergyRevenue(energy).initialize(_pair, token0, token1, energy0, energy1, pylon0, pylon1);
         getEnergyRevenue[token0][token1] = energy;
         allEnergiesRevenue.push(energy);

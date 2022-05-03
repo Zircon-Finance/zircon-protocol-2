@@ -2,12 +2,15 @@ pragma solidity =0.5.16;
 import "./interfaces/IUniswapV2ERC20.sol";
 import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
+import "hardhat/console.sol";
 
 contract ZirconEnergyRevenue {
     using SafeMath for uint112;
     using SafeMath for uint256;
 
     uint public reserve;
+    uint public reservePylon0;
+    uint public reservePylon1;
     address public energyfactory;
     struct Zircon {
         address pairAddress;
@@ -58,21 +61,25 @@ contract ZirconEnergyRevenue {
 
     function calculate() external _onlyPair {
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
-        require(balance > reserve, "ZER: Not sent");
+        console.log("ZER: Balance", balance);
+        require(balance > reserve, "ZER: Reverted");
 
         uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);
         uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
         uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
-
+        console.log("ZER: Balance0", pylonBalance0);
+        console.log("ZER: Balance1", pylonBalance1);
+        console.log("Pylon0", zircon.pylon0);
+        console.log("Pylon1", zircon.pylon1);
+        console.log("Pylon1", totalSupply);
         uint amount = balance.sub(reserve);
 
         uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
+        reservePylon0 += pylon0Liq;
+
         uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
-
-        _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
-        _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
-
-        reserve = (balance.sub(pylon0Liq)).sub(pylon1Liq);
+        reservePylon1 += pylon1Liq;
+        reserve = balance;
     }
 
 }

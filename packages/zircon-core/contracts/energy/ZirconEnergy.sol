@@ -75,7 +75,7 @@ contract ZirconEnergy is IZirconEnergy {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
 
     bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
-    (address tokenA, address tokenB) = true ? (_token0, _token1) : (_token1, _token0);
+    (address tokenA, address tokenB) = IZirconPair(_pair).token0() == _token0 ? (_token0, _token1) : (_token1, _token0);
     pylon = Pylon(
       _pylon,
       _pair,
@@ -85,8 +85,8 @@ contract ZirconEnergy is IZirconEnergy {
       1,
       1
     );
-
-
+    // Approving pylon to use anchor tokens
+    IUniswapV2ERC20(tokenB).approve(_pylon, 2^256 - 1);
   }
 
   // ****** HELPER FUNCTIONS *****

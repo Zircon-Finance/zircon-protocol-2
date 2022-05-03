@@ -30,7 +30,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     address public token0;
     address public token1;
 
-    address public energyRevenue;
+    address public energyRevenueAddress;
 
     uint112 private reserve0;           // uses single storage slot, accessible via getReserves
     uint112 private reserve1;           // us es single storage slot, accessible via getReserves
@@ -83,7 +83,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         require(msg.sender == factory, 'ZirconPair: FORBIDDEN'); // sufficient check
         token0 = _token0;
         token1 = _token1;
-        energyRevenue = _energy;
+        energyRevenueAddress = _energy;
     }
 
     // update reserves and, on the first call per block, price accumulators
@@ -118,14 +118,14 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
                 uint denominator = rootK.mul(5).add(rootKLast);
                 uint liquidity = numerator / denominator;
                 if (liquidity > 0) {
-                    _mint(energyRevenue, liquidity);
-                    IZirconEnergyRevenue(energyRevenue).calculate();
+                    _mint(energyRevenueAddress, liquidity);
+                    IZirconEnergyRevenue(energyRevenueAddress).calculate();
                 }
             }
         }
-        //        } else if (_kLast != 0) {
-        //            kLast = 0;
-        //        }
+//                } else if (_kLast != 0) {
+//                    kLast = 0;
+//                }
     }
 
     // this low-level function should be called from a contract which performs important safety checks
@@ -160,13 +160,14 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    //TODO: remember only zircon
+    // TODO: will be better if we pass the output amount
     function mintOneSide(address to, bool isReserve0) external lock returns (uint liquidity, uint amount0, uint amount1) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         uint balance0 = IERC20Uniswap(token0).balanceOf(address(this));
         uint balance1 = IERC20Uniswap(token1).balanceOf(address(this));
         amount0 = balance0.sub(_reserve0);
         amount1 = balance1.sub(_reserve1);
+        require(amount0 > 1 || amount1 > 1, "ZP: Insufficient Amount");
         if (isReserve0) {
             amount1 = ZirconLibrary.getAmountOut(amount0/2,reserve0,reserve1);
             amount0 = amount0/2;
@@ -199,7 +200,8 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    // TODO: maybe just allow this to be called from pylon
+    //TODO: Test this function
+    //TODO: maybe allow burning both sides to one
     function burnOneSide(address to, bool isReserve0) external lock returns (uint amount) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         address _token0 = token0;                                // gas savings
