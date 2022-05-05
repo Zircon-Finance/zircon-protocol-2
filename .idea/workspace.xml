@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="696f19a9-dd2c-418f-a2c7-68e785a7d4a8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/packages/zircon-core/test/energy-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../data.json" beforeDir="false" afterPath="$PROJECT_DIR$/../data.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zircon-lambda/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../zircon-lambda/.idea/.gitignore" beforeDir="false" />
@@ -38,16 +37,13 @@
       <change beforePath="$PROJECT_DIR$/../zircon-landing/static/litepaper.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/static/litepaper.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zircon-landing/static/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/static/robots.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPair.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPair.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergy.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergy.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergyRevenue.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergyRevenue.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/interfaces/IZirconPair.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/interfaces/IZirconPair.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/core-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/core-test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/factory-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/factory-test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/energy-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/energy-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/test/shared/fixtures.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/shared/fixtures.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +117,8 @@
       <workItem from="1651136147082" duration="16534000" />
       <workItem from="1651224529749" duration="10944000" />
       <workItem from="1651301774410" duration="5184000" />
-      <workItem from="1651491118989" duration="13644000" />
+      <workItem from="1651491118989" duration="15946000" />
+      <workItem from="1651596642382" duration="29190000" />
     </task>
     <servers />
   </component>

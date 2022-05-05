@@ -35,9 +35,11 @@ exports.coreFixtures = async function coreFixtures(address) {
     let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
     let pylonInstance = await zPylon.attach(pylonAddress);
 
+    let energyContract = await ethers.getContractFactory('ZirconEnergy')
     console.log("keccak256 bytecode poolToken", ethers.utils.keccak256(poolToken1.bytecode))
     console.log("keccak256 bytecode pairContract", ethers.utils.keccak256(pairContract.bytecode))
     console.log("keccak256 bytecode pylon", ethers.utils.keccak256(zPylon.bytecode))
+    console.log("keccak256 bytecode energy", ethers.utils.keccak256(energyContract.bytecode))
     let poolAddress0 = await pylonInstance.floatPoolTokenAddress();
     let poolAddress1 = await pylonInstance.anchorPoolTokenAddress();
 

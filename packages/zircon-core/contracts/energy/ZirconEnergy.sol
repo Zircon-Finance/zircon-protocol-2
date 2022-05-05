@@ -11,11 +11,8 @@ contract ZirconEnergy is IZirconEnergy {
 
   /*
   Zircon Energy is the protocol-wide accumulator of revenue.
-  It keeps a "bank account" balance for each Pylon and splits it into pure revenue + insurance portion balance
+  Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
 
-  Ok but how do you split them? You only know balances and delta balances. Especially difficult with double pylons.
-  We modify mintFee to trigger calls on ZirconEnergy (need an interface for this)
-  TODO: mintFee kinda needs to be modified to know which Pylon called it. Yeah it needs to be modified, only way
   We handle donations by dumping them into the insurance pool, spread evenly between pylons.
 
   The insurance portion gets used by breakPiggybank, called by Pylons, to finance withdrawals, which is done by sending
@@ -87,6 +84,7 @@ contract ZirconEnergy is IZirconEnergy {
     );
     // Approving pylon to use anchor tokens
     IUniswapV2ERC20(tokenB).approve(_pylon, 2^256 - 1);
+    IUniswapV2ERC20(_pair).approve(_pylon, 2^256 - 1);
   }
 
   // ****** HELPER FUNCTIONS *****

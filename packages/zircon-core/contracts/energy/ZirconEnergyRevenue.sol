@@ -9,8 +9,6 @@ contract ZirconEnergyRevenue {
     using SafeMath for uint256;
 
     uint public reserve;
-    uint public reservePylon0;
-    uint public reservePylon1;
     address public energyfactory;
     struct Zircon {
         address pairAddress;
@@ -67,19 +65,15 @@ contract ZirconEnergyRevenue {
         uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);
         uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
         uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
-        console.log("ZER: Balance0", pylonBalance0);
-        console.log("ZER: Balance1", pylonBalance1);
-        console.log("Pylon0", zircon.pylon0);
-        console.log("Pylon1", zircon.pylon1);
-        console.log("Pylon1", totalSupply);
         uint amount = balance.sub(reserve);
 
         uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
-        reservePylon0 += pylon0Liq;
-
         uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
-        reservePylon1 += pylon1Liq;
-        reserve = balance;
+
+        _safeTransfer(zircon.pairAddress, zircon.pylon0, pylon0Liq);
+        _safeTransfer(zircon.pairAddress, zircon.pylon1, pylon1Liq);
+
+        reserve = balance.sub(pylon0Liq.add(pylon1Liq));
     }
 
 }

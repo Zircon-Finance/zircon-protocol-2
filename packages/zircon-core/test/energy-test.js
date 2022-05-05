@@ -32,7 +32,7 @@ async function getOutputAmount(input, inputReserves, outputReserves) {
 }
 
 // TODO: See case where we have a big dump
-describe("Pylon", () => {
+describe("Energy", () => {
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
@@ -109,34 +109,37 @@ describe("Pylon", () => {
         await pylonInstance.mintPoolTokens(account.address, true);
 
         let energyAddress = await pair.energyRevenueAddress()
-        expect(await pair.balanceOf(energyAddress)).to.eq("205432199665942569") // TODO: Change fee percentage
+        expect(await pair.balanceOf(energyAddress)).to.eq("189197849219453481") // TODO: Change fee percentage
 
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
         let zirconEnergyRevenue = await zEnergyRev.attach(energyAddress);
         console.log("pair address", await pair.address)
         console.log("pb", await pair.balanceOf(pylonInstance.address))
         console.log(pylonInstance.address);
-        expect(await zirconEnergyRevenue.reservePylon0()).to.eq("16234350446489088") // TODO: Change fee percentage
+        expect(await zirconEnergyRevenue.reserve()).to.eq("189197849219453481") // TODO: Change fee percentage
 
     });
 
     it('should send fees on swap to energy revenue on opposite pylon', async function () {
-        await init(expandTo18Decimals(10), expandTo18Decimals(  100))
+        await init(expandTo18Decimals(100), expandTo18Decimals(10))
         await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
         let pylonAddress = await factoryPylonInstance.getPylon(token1.address, token0.address)
-
         let zPylon = await ethers.getContractFactory('ZirconPylon')
         pylonInstance = await zPylon.attach(pylonAddress);
         let t = token0
         token0 = token1
         token1 = t
-
-
         // Time to swap, let's generate some fees
         await token0.transfer(pair.address, expandTo18Decimals(1))
-        await pair.swap(0, ethers.BigNumber.from('1662497915624478906'), account.address, '0x', overrides)
+        await pair.swap(ethers.BigNumber.from('1662497915624478906'), 0, account.address, '0x', overrides)
         // Minting tokens is going to trigger a change in the VAB & VFB so let's check
-        const newAmount0 = ethers.BigNumber.from('5000000000000000')
+        // Let's transfer some tokens to the Pylon
+        await token0.transfer(pylonInstance.address, expandTo18Decimals(5))
+        await token1.transfer(pylonInstance.address, expandTo18Decimals(2))
+        //Let's initialize the Pylon, this should call two sync
+        await pylonInstance.initPylon(account.address, overrides)
+
+        const newAmount0 = expandTo18Decimals(1)
         await token0.transfer(pylonInstance.address, newAmount0)
         await pylonInstance.mintPoolTokens(account.address, false)
 
@@ -145,20 +148,20 @@ describe("Pylon", () => {
         await pylonInstance.mintPoolTokens(account.address, true);
 
         let energyAddress = await pair.energyRevenueAddress()
-        expect(await pair.balanceOf(energyAddress)).to.eq("205432199665942569") // TODO: Change fee percentage
+        expect(await pair.balanceOf(energyAddress)).to.eq("189221549869019978") // TODO: Change fee percentage
 
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
         let zirconEnergyRevenue = await zEnergyRev.attach(energyAddress);
         console.log("pair address", await pair.address)
         console.log("pb", await pair.balanceOf(pylonInstance.address))
         console.log(pylonInstance.address);
-        expect(await zirconEnergyRevenue.reservePylon0()).to.eq("16234350446489088") // TODO: Change fee percentage
+        expect(await zirconEnergyRevenue.reserve()).to.eq("189221549869019978") // TODO: Change fee percentage
 
     });
 
-    // it('should add fees on swap to energy ', function () {
-    //
-    // });
+    it('burning with energy on omega', function () {
+
+    });
 
 })
 
