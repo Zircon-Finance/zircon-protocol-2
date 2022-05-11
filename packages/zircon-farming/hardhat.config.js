@@ -26,12 +26,6 @@ module.exports = {
       tasks: ["compile"],
     }
   },
-  dependencyCompiler: {
-    paths: [
-      '@zircon/periphery/contracts/Token.sol',
-      '@zircon/periphery/contracts/WETH.sol',
-    ],
-  },
   networks: {
     hardhat: {},
     moonbase: {
@@ -49,16 +43,7 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: '0.5.16',
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 1000,
-          },
-        },
-      },
-      {
-        version: '0.6.6',
+        version: '0.6.12',
         settings: {
           optimizer: {
             enabled: true,

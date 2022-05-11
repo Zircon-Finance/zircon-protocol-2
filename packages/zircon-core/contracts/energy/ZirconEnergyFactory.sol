@@ -40,7 +40,6 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) internal returns (address pylon) {
-        console.log("pair address", pair);
         pylon = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 pylonFactory,

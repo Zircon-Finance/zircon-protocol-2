@@ -113,8 +113,6 @@ describe("Energy", () => {
 
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
         let zirconEnergyRevenue = await zEnergyRev.attach(energyAddress);
-        console.log("pair address", await pair.address)
-        console.log("pb", await pair.balanceOf(pylonInstance.address))
         console.log(pylonInstance.address);
         expect(await zirconEnergyRevenue.reserve()).to.eq("189197849219453481") // TODO: Change fee percentage
 
@@ -152,8 +150,6 @@ describe("Energy", () => {
 
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
         let zirconEnergyRevenue = await zEnergyRev.attach(energyAddress);
-        console.log("pair address", await pair.address)
-        console.log("pb", await pair.balanceOf(pylonInstance.address))
         console.log(pylonInstance.address);
         expect(await zirconEnergyRevenue.reserve()).to.eq("189221549869019978") // TODO: Change fee percentage
 

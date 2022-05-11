@@ -1,20 +1,9 @@
 {
-  "name": "@zircon/core",
+  "name": "@zircon/farming",
   "version": "1.0.0",
-  "description": "Core Contracts",
-  "engines": {
-    "node": ">=10"
-  },
-  "homepage": "https://zircon.finance",
-  "repository": {
-    "directory": "",
-    "type": "git",
-    "url": "https://github.com/Zircon-Finance/zircon-protocol"
-  },
-  "files": [
-    "artifacts",
-    "contracts"
-  ],
+  "main": "index.js",
+  "author": "David Vittori",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
@@ -27,19 +16,20 @@
     "mocha": "*"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "2.5.0",
-    "@uniswap/lib": "^4.0.1-alpha",
-    "@uniswap/v2-core": "^1.0.1",
-    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "@openzeppelin/contracts": "3.2.0",
     "dotenv": "^10.0.0",
     "hardhat-watcher": "^2.1.1",
-    "solidity-docgen": "^0.6.0-beta.10",
-    "zircon-energy": "^1.0.0-alpha.6"
+    "solidity-docgen": "^0.6.0-beta.10"
+
   },
   "scripts": {
     "deploy": "npx hardhat run --network moonbase scripts/deploy-script.js",
     "test": "mocha",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test"
-  }
+  },
+  "files": [
+    "artifacts",
+    "contracts"
+  ]
 }

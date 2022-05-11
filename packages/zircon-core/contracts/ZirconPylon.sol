@@ -680,7 +680,10 @@ contract ZirconPylon is IZirconPylon{
             virtualFloatBalance -= virtualFloatBalance.mul(_liquidity)/_totalSupply;
         }
     }
-
+    /// @notice Omega is the slashing factor. It's always equal to 1 if pool has gamma above 50%
+    /// If it's below 50%, it begins to go below 1 and thus slash any withdrawal.
+    /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
+    /// Also note that a dump of 60% only generates about 10% of slashing.
     function handleOmegaSlashing(uint ptu, address _to) private returns (uint retPtu, uint extraPercentage){
         (, uint reserveAnchor,) = getSyncReserves();
         (, uint pairReserves1)  = getPairReservesTranslated(0,0);
@@ -689,10 +692,7 @@ contract ZirconPylon is IZirconPylon{
             reserveAnchor,
             gammaMulDecimals,
             virtualAnchorBalance);
-        //Omega is the slashing factor. It's always equal to 1 if pool has gamma above 50%
-        //If it's below 50%, it begins to go below 1 and thus slash any withdrawal.
-        //Note that in practice this system doesn't activate unless the syncReserves are empty.
-        //Also note that a dump of 60% only generates about 10% of slashing.
+
         (extraPercentage) = sendSlashing(omegaMulDecimals, ptu, _to);
         retPtu = omegaMulDecimals.mul(ptu)/1e18;
     }
