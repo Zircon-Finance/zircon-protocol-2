@@ -138,6 +138,19 @@ contract ZirconEnergy is IZirconEnergy {
     syncFee();
   }
 
+  function getFeeByGamma(uint gammaMulDecimals) external pure returns (uint amount) {
+    if (gammaMulDecimals <= 600000000000000000 && gammaMulDecimals >= 400000000000000000) {
+      amount = 1000000000000000;
+    }else if (gammaMulDecimals <= 750000000000000000 && gammaMulDecimals >= 250000000000000000) {
+      amount = 25000000000000000;
+    }else if (gammaMulDecimals <= 850000000000000000 && gammaMulDecimals >= 150000000000000000) {
+      amount = 50000000000000000;
+    }else if (gammaMulDecimals <= 950000000000000000 && gammaMulDecimals >= 50000000000000000) {
+      amount = 75000000000000000;
+    }else {
+      amount = 100000000000000000;
+    }
+  }
 
   //    uint float0Liquidity;
 //    uint float1Liquidity;

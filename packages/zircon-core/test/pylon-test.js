@@ -503,7 +503,6 @@ describe("Pylon", () => {
         await poolTokenInstance1.transfer(pylonInstance.address, liquidityMinted)
         await pylonInstance.burn(account2.address, true) //Burns to an account2
 
-
         console.log("initialFloat", floatSum)
         console.log("initialAnchor", anchorSum)
         console.log("floatBalance (should be 0)", await token0.balanceOf(account2.address))
@@ -525,7 +524,7 @@ describe("Pylon", () => {
         //45454545454545454
         //954545454545454544
 
-        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("221393514592797990"))
+        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("221587343040186454"))
         expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("43181818181818181"))
 
         await token0.transfer(pylonInstance.address, token0Amount.div(220))
@@ -553,8 +552,8 @@ describe("Pylon", () => {
         await poolTokenInstance1.transfer(pylonInstance.address, ptb.div(2))
         await pylonInstance.burnAsync(account2.address, true)
         //TODO: After using energy this value dropped
-        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("101016047951302985"))
-        expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("201632503095280142"))
+        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("99744448161032031"))
+        expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("198700160345792012"))
 
         //Anchor burn is a bit sussy but mostly right (amounts are a weird percentage but close to what you'd expect. Maybe it's the fee?)
 
@@ -562,8 +561,8 @@ describe("Pylon", () => {
         await poolTokenInstance0.transfer(pylonInstance.address, ftb.div(2))
         await pylonInstance.burnAsync(account2.address, false)
 
-        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("216753615257390768"))
-        expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("432354244161447790"))
+        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("213758547402019105"))
+        expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("425047664590109966"))
 
         await token1.transfer(pylonInstance.address, tokenAmount.div(220))
         await pylonInstance.mintPoolTokens(account.address, true);
@@ -708,12 +707,13 @@ describe("Pylon", () => {
         console.log("vfb", vfb)
         console.log("gamma", gamma)
     });
+
     it('should dump::anchor', async function () {
         // Let's initialize the pool and pylon
-        await addLiquidity(expandTo18Decimals(1700), expandTo18Decimals(  5300))
+        await addLiquidity(expandTo18Decimals(1700), expandTo18Decimals(5300))
         // Let's transfer some tokens to the Pylon
         await token0.transfer(pylonInstance.address, expandTo18Decimals(1700).div(11))
-        await token1.transfer(pylonInstance.address, expandTo18Decimals(  5300).div(11))
+        await token1.transfer(pylonInstance.address, expandTo18Decimals(5300).div(11))
         //Let's initialize the Pylon, this should call two sync
         await pylonInstance.initPylon(account.address)
         expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from("154545454545454544454"))
@@ -763,5 +763,8 @@ describe("Pylon", () => {
         console.log("vfb", vfb)
         console.log("gamma", gamma)
     });
-
+    //TODO: Test energy system
+    //TODO: Create Exponential fees on burn async
+    // Exponential Fees has to be 0.01 on 50 Gamma, and 0.75 on 100 or 0 gamma
+    // Exponential fees has to be half to revenue, half to insurance
 })

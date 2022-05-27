@@ -18,12 +18,14 @@ contract ZirconPoolToken is ZirconERC20 {
     }
 
     function mint(address account, uint256 amount) lock external {
-        require(msg.sender == pylon, 'ZirconPoolToken: FORBIDDEN'); // sufficient check
+        require(msg.sender == pylon, 'ZirconPoolToken: FORBIDDEN');
+        // sufficient check
         _mint(account, amount);
     }
 
     function burn(address account, uint256 amount) lock external {
-        require(msg.sender == pylon, 'ZirconPoolToken: FORBIDDEN'); // sufficient check
+        require(msg.sender == pylon, 'ZirconPoolToken: FORBIDDEN');
+        // sufficient check
         _burn(account, amount);
     }
 
@@ -33,7 +35,8 @@ contract ZirconPoolToken is ZirconERC20 {
 
     // called once by the factory at time of deployment
     function initialize(address _token0, address _pair, address _pylon, bool _isAnchor) external {
-        require(msg.sender == factory, 'ZirconPoolToken: FORBIDDEN'); // sufficient check
+        require(msg.sender == factory, 'ZirconPoolToken: FORBIDDEN');
+        // sufficient check
         token = _token0;
         pair = _pair;
         isAnchor = _isAnchor;

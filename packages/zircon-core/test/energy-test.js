@@ -155,9 +155,67 @@ describe("Energy", () => {
 
     });
 
-    it('burning with energy on omega', function () {
+    it('burning with energy', function () {
+        let token1Amount = expandTo18Decimals(10)
+        let token0Amount = expandTo18Decimals(5)
+
+        let floatSum = token0Amount.div(11)
+        let anchorSum = token1Amount.div(220).add(token1Amount.div(11))
+
+        //Pylon init with 1/11 of token amounts into pylon.
+        await init(token0Amount, token1Amount)
+
+
+        // Minting some float/anchor tokens (1/20 of Pylon)
+        await token1.transfer(pylonInstance.address, token1Amount.div(220))
+        console.log("Anchors sent for minting: ", token1Amount.div(220))
+        let initialPTS = await poolTokenInstance1.balanceOf(account.address);
+        console.log("initialPTS: ", initialPTS);
+        await pylonInstance.mintPoolTokens(account.address, true);
+
+
+
+        //Initiating burn. This burns the 1/20 of Anchors sent before.
+        let ptb = await poolTokenInstance1.balanceOf(account.address);
+
+        console.log("ptb: ", ptb);
+        let liquidityMinted = ptb.sub(initialPTS);
+        console.log("liquidityMinted: ", liquidityMinted);
+        await poolTokenInstance1.transfer(pylonInstance.address, liquidityMinted)
+        await pylonInstance.burn(account2.address, true) //Burns to an account2
+
+        console.log("initialFloat", floatSum)
+        console.log("initialAnchor", anchorSum)
+        console.log("floatBalance (should be 0)", await token0.balanceOf(account2.address))
+        console.log("anchorBalance (should be roughly 1/20 of token1 minus fees and slippage)", await token1.balanceOf(account2.address))
+
+        ptb = await poolTokenInstance0.balanceOf(account.address)
+        expect(ptb).to.eq(ethers.BigNumber.from("454545454545453545"))
+
+        //Burns half of the floats now
+        let ftb = await poolTokenInstance0.balanceOf(account.address)
+        await poolTokenInstance0.transfer(pylonInstance.address, ftb.div(2))
+
+        await pylonInstance.burn(account2.address, false)
+        console.log("Burn tests complete\ninitialFloat", floatSum)
+        console.log("initialAnchor", anchorSum)
+        console.log("Account2 Float (1/20 of token1 minus slippage)", await token0.balanceOf(account2.address))
+        console.log("Account2 Anchor (same as before)", await token1.balanceOf(account2.address))
+        //45454545454545454
+        //45454545454545454
+        //954545454545454544
+
+        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("221587343040186454"))
+        expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("43181818181818181"))
+
+        await token0.transfer(pylonInstance.address, token0Amount.div(220))
+        await pylonInstance.mintPoolTokens(account.address, false);
+
+        ptb = await poolTokenInstance0.balanceOf(account.address)
+        //249999999999999500
+        //454545454545453545
+        expect(ptb).to.eq(ethers.BigNumber.from("249999999999999500"))
+
 
     });
-
 })
-

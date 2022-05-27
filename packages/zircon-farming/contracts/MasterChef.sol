@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -8,6 +9,11 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 import "./ZirconToken.sol";
 import "./ZirconFarm.sol";
+
+
+// TODO: MasterChef Gamma Based
+// Probably create a gamma pair Anchor/Float rebalancing APR with Gamma ( maybe difficult for real time thing )
+// So we can have
 
 
 interface IMigratorChef {
@@ -64,14 +70,13 @@ contract MasterChef is Ownable {
     // The SYRUP TOKEN!
     ZirconFarm public syrup;
     // Dev address.
-    address public devaddr;
+    // address public devaddr;
     // CAKE tokens created per block.
     uint256 public cakePerBlock;
     // Bonus muliplier for early cake makers.
     uint256 public BONUS_MULTIPLIER = 1;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
     IMigratorChef public migrator;
-
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
@@ -88,19 +93,18 @@ contract MasterChef is Ownable {
     constructor(
         ZirconToken _cake,
         ZirconFarm _syrup,
-        address _devaddr,
+    //        address _devaddr,
         uint256 _cakePerBlock,
         uint256 _startBlock
     ) public {
         cake = _cake;
         syrup = _syrup;
-        devaddr = _devaddr;
+        //        devaddr = _devaddr;
         cakePerBlock = _cakePerBlock;
         startBlock = _startBlock;
 
         // staking pool
         poolInfo.push(PoolInfo({lpToken: _cake, allocPoint: 1000, lastRewardBlock: startBlock, accCakePerShare: 0}));
-
         totalAllocPoint = 1000;
     }
 
@@ -110,6 +114,10 @@ contract MasterChef is Ownable {
 
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
+    }
+
+    function getPools() public view returns(PoolInfo[] memory) {
+        return poolInfo;
     }
 
     // Add a new lp to the pool. Can only be called by the owner.
@@ -127,7 +135,7 @@ contract MasterChef is Ownable {
         poolInfo.push(
             PoolInfo({lpToken: _lpToken, allocPoint: _allocPoint, lastRewardBlock: lastRewardBlock, accCakePerShare: 0})
         );
-        updateStakingPool();
+        //        updateStakingPool();
     }
 
     // Update the given pool's CAKE allocation point. Can only be called by the owner.
@@ -143,20 +151,20 @@ contract MasterChef is Ownable {
         poolInfo[_pid].allocPoint = _allocPoint;
         if (prevAllocPoint != _allocPoint) {
             totalAllocPoint = totalAllocPoint.sub(prevAllocPoint).add(_allocPoint);
-            updateStakingPool();
+            //            updateStakingPool();
         }
     }
 
-    function updateStakingPool() internal {
-        uint256 length = poolInfo.length;
-        uint256 points = 0;
-        for (uint256 pid = 1; pid < length; ++pid) { points = points.add(poolInfo[pid].allocPoint); }
-        if (points != 0) {
-            points = points.div(3);
-            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(points);
-            poolInfo[0].allocPoint = points;
-        }
-    }
+    //    function updateStakingPool() internal {
+    //        uint256 length = poolInfo.length;
+    //        uint256 points = 0;
+    //        for (uint256 pid = 1; pid < length; ++pid) { points = points.add(poolInfo[pid].allocPoint); }
+    //        if (points != 0) {
+    //            points = points.div(3);
+    //            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(points);
+    //            poolInfo[0].allocPoint = points;
+    //        }
+    //    }
 
     // Set the migrator contract. Can only be called by the owner.
     function setMigrator(IMigratorChef _migrator) public onlyOwner {
@@ -181,7 +189,7 @@ contract MasterChef is Ownable {
     }
 
     // View function to see pending CAKEs on frontend.
-    function pendingCake(uint256 _pid, address _user) external view returns (uint256) {
+    function pending(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accCakePerShare = pool.accCakePerShare;
@@ -215,7 +223,7 @@ contract MasterChef is Ownable {
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
         uint256 cakeReward = multiplier.mul(cakePerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        cake.mint(devaddr, cakeReward.div(10));
+        //        cake.mint(devaddr, cakeReward.div(10));
         cake.mint(address(syrup), cakeReward);
         pool.accCakePerShare = pool.accCakePerShare.add(cakeReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
@@ -319,8 +327,8 @@ contract MasterChef is Ownable {
     }
 
     // Update dev address by the previous dev.
-    function dev(address _devaddr) public {
-        require(msg.sender == devaddr, "dev: wut?");
-        devaddr = _devaddr;
-    }
+    //    function dev(address _devaddr) public {
+    //        require(msg.sender == devaddr, "dev: wut?");
+    //        devaddr = _devaddr;
+    //    }
 }

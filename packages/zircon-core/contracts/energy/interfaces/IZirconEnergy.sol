@@ -5,4 +5,6 @@ interface IZirconEnergy {
     function breakPiggybank(uint _requestedLiquidity) external returns (uint returnedLiquidity);
     function syncPylonFee() external;
     function syncPairFee() external;
-}
+    function getFeeByGamma(uint gammaMulDecimals) external pure returns (uint amount);
+
+    }
