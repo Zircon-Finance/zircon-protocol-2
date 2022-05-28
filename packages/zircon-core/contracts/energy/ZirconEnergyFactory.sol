@@ -30,21 +30,21 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
-    function energyFor(address tokenA, address pair) internal returns (address energy) {
+    function energyFor(address tokenA, address pair) view internal returns (address energy) {
         energy = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 address(this),
                 keccak256(abi.encodePacked(tokenA, pair)),
-                hex'4b0b9780989769b5c726b722985a838ec4c331034a729c401d98512801a97975' // init code hash
+                hex'81043c0db8282f4e470aff61021f78b5a8a006d217071feb6f144233227db70a' // init code hash
             ))));
     }
 
-    function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) internal returns (address pylon) {
+    function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon) {
         pylon = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 pylonFactory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'3982cf64eca1171e8f652d35ab1f153200a36a721915e5bb5dfaeae6663c7a2f' // init code hash
+                hex'16221bd27376d197cc3a6659a0e36e1b1e138bb6ff311f389a071ca05d8a9623' // init code hash
             ))));
     }
 

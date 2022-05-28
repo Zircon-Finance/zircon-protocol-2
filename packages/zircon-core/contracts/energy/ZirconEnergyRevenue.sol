@@ -3,8 +3,9 @@ import "./interfaces/IUniswapV2ERC20.sol";
 import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
 import "hardhat/console.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract ZirconEnergyRevenue {
+contract ZirconEnergyRevenue is ReentrancyGuard  {
     using SafeMath for uint112;
     using SafeMath for uint256;
 
@@ -44,7 +45,7 @@ contract ZirconEnergyRevenue {
     function initialize(address _pair, address _tokenA, address _tokenB, address energy0, address energy1, address pylon0, address pylon1) external {
         require(energyfactory == msg.sender, "ZER: Not properly called");
         bool isFloatToken0 = IZirconPair(_pair).token0() == _tokenA;
-        (address tokenA, address tokenB) = true ? (_tokenA, _tokenB) : (_tokenA, _tokenB);
+        (address tokenA, address tokenB) = isFloatToken0 ? (_tokenA, _tokenB) : (_tokenA, _tokenB);
         zircon = Zircon(
         _pair,
         tokenA,
@@ -57,7 +58,7 @@ contract ZirconEnergyRevenue {
 
     }
 
-    function calculate() external _onlyPair {
+    function calculate() external _onlyPair nonReentrant {
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
         console.log("ZER: Balance", balance);
         require(balance > reserve, "ZER: Reverted");
@@ -70,10 +71,16 @@ contract ZirconEnergyRevenue {
         uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
         uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
 
+        console.log("zer::pylon0", pylon0Liq);
+        console.log("zer::pylon1", pylon1Liq);
+        console.log("zer::amount", amount);
+
         _safeTransfer(zircon.pairAddress, zircon.pylon0, pylon0Liq);
         _safeTransfer(zircon.pairAddress, zircon.pylon1, pylon1Liq);
 
         reserve = balance.sub(pylon0Liq.add(pylon1Liq));
+        console.log("zer::reserve", reserve);
+
     }
 
 }
