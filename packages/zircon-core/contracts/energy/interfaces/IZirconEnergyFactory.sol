@@ -2,9 +2,6 @@ pragma solidity =0.5.16;
 
 interface IZirconEnergyFactory {
 
-    // Events
-    event EnergyCreated(address indexed pylon, address pair, address energy, address tokenA, address tokenB, uint);
-
     // Variables
     function allEnergies(uint p) external view returns (address);
     function getEnergy(address _tokenA, address _tokenB) external view returns (address pair);

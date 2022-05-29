@@ -119,7 +119,6 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
                 uint liquidity = numerator / denominator;
                 if (liquidity > 0) {
                     _mint(energyRevenueAddress, liquidity);
-                    console.log("calculate");
                     IZirconEnergyRevenue(energyRevenueAddress).calculate();
                 }
             }

@@ -411,7 +411,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
         uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/100;
         address revAddress = IZirconPair(pairAddress).energyRevenueAddress();
         _safeTransfer(pairAddress, revAddress, amountIn.mul(gammaFee/2)/100);
-        console.log("calculate");
         IZirconEnergyRevenue(revAddress).calculate();
 
         _safeTransfer(pairAddress, pairAddress, fee);
@@ -601,7 +600,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
     // Burn Async send both tokens 50-50
     // Liquidity has to be sent before
     function sendSlashing(uint omegaMulDecimals, uint liquidity) private returns(uint remainingPercentage){
-        if (omegaMulDecimals < 1) {
+        if (omegaMulDecimals < 1000000000000000000) {
             uint amountToAdd = liquidity.mul(1e18-omegaMulDecimals)/1e18;
             //uint energyAnchorBalance = IERC20Uniswap(pylonToken.anchor).balanceOf(energyAddress);
             uint energyPTBalance = IERC20Uniswap(pairAddress).balanceOf(energyAddress);
@@ -612,19 +611,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
-                remainingPercentage = amountToAdd.sub(energyPTBalance)/(liquidity);
+                remainingPercentage = (amountToAdd.sub(energyPTBalance))/(liquidity);
             }
+            console.log("finish sending slashing...", amountToAdd, remainingPercentage, liquidity);
         }else{
             remainingPercentage = 0;
         }
-        console.log("finish sending slashing...");
 
     }
 
     /// @notice function that sends tokens to Pair to be burn after
     /// this function must be called only before a burn takes place, if not it'll give away tokens
     function sendSlashedTokensToUser(uint anchorAmount, uint floatAmount, uint percentage, address _to) private {
-        console.log("starting sending slashed tokens");
         if(percentage != 0) {
             uint totalAmount = anchorAmount;
             if ( floatAmount > 0 ) {
@@ -636,8 +634,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
             if(energyAnchorBalance > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
             }
+            console.log("Sending slashed Tokens", amountToTransfer);
+
         }
-        console.log("finish sending slashed tokens");
     }
 
 
@@ -728,7 +727,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
             reserveAnchor,
             gammaMulDecimals,
             virtualAnchorBalance);
-
+        console.log("omega slash", omegaMulDecimals);
         (extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
         retPtu = omegaMulDecimals.mul(ptu)/1e18;
     }
@@ -757,7 +756,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
 
             //In case the reserves weren't able to pay for everything
             if (reservePT < liquidity) {
-                console.log("inside the liquidity taking..." );
                 uint adjustedLiquidity = liquidity.sub(reservePT);
                 uint ptu = calculateLPTU(isAnchor, adjustedLiquidity, _totalSupply);
                 ptu = payBurnFees(ptu);

@@ -239,4 +239,64 @@ describe("Energy", () => {
         // Here the Fees for entering the pool
         expect(await token1.balanceOf(energyAddress)).to.eq("730166386739221")
     });
+
+    it('burning async with energy', async function () {
+        await init(expandTo18Decimals(10), expandTo18Decimals(10))
+        let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);
+        let initialPTS1 = await poolTokenInstance1.balanceOf(account.address);
+
+        const newAmount0 = ethers.BigNumber.from('5000000000000000')
+
+        // Let's get some float shares...
+        await token0.transfer(pylonInstance.address, newAmount0)
+        await pylonInstance.mintPoolTokens(account.address, false)
+        // Let's get some anchor shares...
+        await token1.transfer(pylonInstance.address, newAmount0);
+        await pylonInstance.mintPoolTokens(account.address, true);
+        // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
+        // Let's check that...
+        let energyRevenueAddress = await pair.energyRevenueAddress()
+        let energyAddress = await pylonInstance.energyAddress()
+
+        let ptb1 = await poolTokenInstance1.balanceOf(account.address);
+        await poolTokenInstance1.transfer(pylonInstance.address, ptb1.sub(initialPTS1))
+        await pylonInstance.burnAsync(account2.address, true) //Burns to an account2
+        console.log("Burning...", ptb1.sub(initialPTS1).toString());
+
+        // Here no fees for swapping
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("57530058192")
+
+        // Here the Fees for entering the pool
+        expect(await token1.balanceOf(energyAddress)).to.eq("730166386739221")
+    });
+
+    it('burning async with energy', async function () {
+        await init(expandTo18Decimals(10), expandTo18Decimals(10))
+        let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);
+        let initialPTS1 = await poolTokenInstance1.balanceOf(account.address);
+
+        const newAmount0 = ethers.BigNumber.from('5000000000000000')
+
+        // Let's get some float shares...
+        await token0.transfer(pylonInstance.address, newAmount0)
+        await pylonInstance.mintPoolTokens(account.address, false)
+        // Let's get some anchor shares...
+        await token1.transfer(pylonInstance.address, newAmount0);
+        await pylonInstance.mintPoolTokens(account.address, true);
+        // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
+        // Let's check that...
+        let energyRevenueAddress = await pair.energyRevenueAddress()
+        let energyAddress = await pylonInstance.energyAddress()
+
+        let ptb1 = await poolTokenInstance1.balanceOf(account.address);
+        await poolTokenInstance1.transfer(pylonInstance.address, ptb1.sub(initialPTS1))
+        await pylonInstance.burnAsync(account2.address, true) //Burns to an account2
+        console.log("Burning...", ptb1.sub(initialPTS1).toString());
+
+        // Here no fees for swapping
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("57530058192")
+
+        // Here the Fees for entering the pool
+        expect(await token1.balanceOf(energyAddress)).to.eq("730166386739221")
+    });
 })

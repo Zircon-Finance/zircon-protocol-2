@@ -17,7 +17,6 @@ contract ZirconFactory is IZirconFactory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
     constructor(address _energyFactory) public {
-        console.log(block.number);
         energyFactory = _energyFactory;
     }
 

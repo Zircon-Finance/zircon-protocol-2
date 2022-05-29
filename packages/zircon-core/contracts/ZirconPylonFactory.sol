@@ -63,12 +63,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESSES');
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PYLON_EXISTS');
-        console.log(block.number);
 
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
         address poolTokenA = createTokenAddress(_tokenA, pylonAddress); // Float
         address poolTokenB = createTokenAddress(_tokenB, pylonAddress); // Anchor
-        console.log(energyFactory);
 
         address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
 
