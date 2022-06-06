@@ -111,6 +111,9 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             uint rootK = Math.sqrt(uint(_reserve0).mul(_reserve1));
             uint rootKLast = Math.sqrt(_kLast);
             if (rootK > rootKLast) {
+
+                //TODO: Add dynamic percentage here
+
                 uint numerator = totalSupply.mul(rootK.sub(rootKLast));
                 uint denominator = rootK.mul(5).add(rootKLast);
                 uint liquidity = numerator / denominator;

@@ -199,8 +199,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
         // If pair contains reserves we have to use the ratio of the Pair so...
 
-        virtualFloatBalance = balance0.sub(balance0.mul(dynamicFeePercentage)/100);
-        virtualAnchorBalance = balance1.sub(balance1.mul(dynamicFeePercentage)/100);
+        virtualFloatBalance = balance0.sub(balance0.mul(dynamicFeePercentage)/10000);
+        virtualAnchorBalance = balance1.sub(balance1.mul(dynamicFeePercentage)/10000);
         if (_reservePair0 > 0 && _reservePair1 > 0) {
             uint denominator = (virtualAnchorBalance.mul(_reservePair0))/_reservePair1;
             gammaMulDecimals = (virtualFloatBalance*1e18) /  (virtualFloatBalance.add(denominator));
@@ -297,8 +297,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Updating Variables
     }
     // @notice This Function is called to update some variables needed for calculation
-    // TODO: This seems wrong, updating these variables without syncing would essentially skip a key state transition.
-    // TODO: Likely that we need to replace all uses of this with sync()
     function _updateVariables() private {
         (uint112 _pairReserve0, uint112 _pairReserve1) = getPairReservesNormalized();
         lastPoolTokens = IZirconPair(pairAddress).totalSupply();
@@ -381,8 +379,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice Private function that calculates anchor fees to send to energy
     /// @dev in case the user adds liquidity in float token it will swap the amount of tokens with the Pair
     /// @return amount minus fees payed
+
+    //Swapping every time is not ideal for gas, but it will be changed if we ever deploy to a chain like ETH
     function payFees(uint amountIn, bool isAnchor) private returns (uint amountOut){
-        uint fee = amountIn.mul(dynamicFeePercentage)/100;
+        uint fee = amountIn.mul(dynamicFeePercentage)/10000; //1basis point resolution
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
@@ -397,7 +397,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice private function that sends to pair the LP tokens
     /// Burns them sending it to the energy address
     function payBurnFees(uint amountIn) private returns (uint amountOut) {
-        uint fee =  amountIn.mul(dynamicFeePercentage)/100;
+        uint fee = amountIn.mul(dynamicFeePercentage)/10000;
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
         amountOut = amountIn.sub(fee);
@@ -408,9 +408,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// on unbalanced Gamma, fees are higher
     function payBurnAsyncFees(uint amountIn) private returns (uint amountOut) {
         uint gammaFee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
-        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/100;
+        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/10000;
         address revAddress = IZirconPair(pairAddress).energyRevenueAddress();
-        _safeTransfer(pairAddress, revAddress, amountIn.mul(gammaFee/2)/100);
+        _safeTransfer(pairAddress, revAddress, amountIn.mul(gammaFee/2)/10000);
         IZirconEnergyRevenue(revAddress).calculate();
 
         _safeTransfer(pairAddress, pairAddress, fee);

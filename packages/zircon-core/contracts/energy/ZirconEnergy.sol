@@ -53,6 +53,8 @@ contract ZirconEnergy is IZirconEnergy {
     uint insurancePerMille;
     uint insuranceUni;
     uint revenueUni;
+    uint minFee;
+    uint maxFee;
   }
   Pylon pylon;
   struct PairFields {
@@ -68,7 +70,7 @@ contract ZirconEnergy is IZirconEnergy {
     energyFactory = msg.sender;
   }
 
-  function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille) external {
+  function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille, uint _minFee, uint _maxFee) external {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
 
     bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
@@ -80,7 +82,9 @@ contract ZirconEnergy is IZirconEnergy {
       tokenB,
       _insurancePerMille,
       1,
-      1
+      1,
+      _minFee, //To be given in basis points (% multiplied by 10000)
+      _maxFee
     );
     // Approving pylon to use anchor tokens
     IUniswapV2ERC20(tokenB).approve(_pylon, 2^256 - 1);
@@ -138,18 +142,23 @@ contract ZirconEnergy is IZirconEnergy {
     syncFee();
   }
 
+
+  //Returns the fee in basis points (0.01% units, needs to be divided by 10000)
+  //Uses two piece-wise parabolas. Between 0.45 and 0.55 the fee is very low (minFee).
+  //After the cutoff it uses a steeper parabola defined by a max fee at the extremes (very high, up to 15% by default).
+  //This is only used for the burn/mint async 50/50, which is effectively a swap that can cause issues when gamma is imbalanced.
   function getFeeByGamma(uint gammaMulDecimals) external pure returns (uint amount) {
-    if (gammaMulDecimals <= 600000000000000000 && gammaMulDecimals >= 400000000000000000) {
-      amount = 1000000000000000;
-    }else if (gammaMulDecimals <= 750000000000000000 && gammaMulDecimals >= 250000000000000000) {
-      amount = 25000000000000000;
-    }else if (gammaMulDecimals <= 850000000000000000 && gammaMulDecimals >= 150000000000000000) {
-      amount = 50000000000000000;
-    }else if (gammaMulDecimals <= 950000000000000000 && gammaMulDecimals >= 50000000000000000) {
-      amount = 75000000000000000;
-    }else {
-      amount = 100000000000000000;
+
+    uint _minFee = pylon.minFee;
+    uint _maxFee = pylon.maxFee;
+    uint x = (gammaMulDecimals - 50000000000000000).mul(10);
+
+    if (gammaMulDecimals <= 450000000000000000 || gammaMulDecimals >= 550000000000000000) {
+      amount = (_maxFee.mul(x)/1e18).mul(x)/(1e18*25); //25 is a reduction factor based on the 0.45-0.55 range we're using.
+    } else {
+      amount = ((_minFee .mul(x)/1e18).mul(x)  .mul(36)/(1e18))  .add(_minFee); //Ensures minFee is the lowest value.
     }
+
   }
 
   //    uint float0Liquidity;
