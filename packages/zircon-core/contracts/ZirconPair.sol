@@ -106,10 +106,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private {
-        //        address feeTo = IUniswapV2Factory(factory).feeTo();
-        //        feeOn = feeTo != address(0);
         uint _kLast = kLast; // gas savings
-        //        if (feeOn) {
         if (_kLast != 0) {
             uint rootK = Math.sqrt(uint(_reserve0).mul(_reserve1));
             uint rootKLast = Math.sqrt(_kLast);
@@ -123,9 +120,6 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
                 }
             }
         }
-//                } else if (_kLast != 0) {
-//                    kLast = 0;
-//                }
     }
 
     // this low-level function should be called from a contract which performs important safety checks

@@ -15,7 +15,7 @@ import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract ZirconPylon is IZirconPylon, ReentrancyGuard{
+contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****
     using SafeMath for uint112;
     using SafeMath for uint256;
@@ -542,8 +542,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
             // Getting how much fee value has been created for pylon
             uint feeValueAnchor = totalPoolValueAnchorPrime.mul(d)/1e18;
             uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
-            console.log("sync::anchor::fee", feeValueAnchor);
-            console.log("sync::float::fee", feeValueFloat);
+//            console.log("sync::anchor::fee", feeValueAnchor);
+//            console.log("sync::float::fee", feeValueFloat);
 
             // Calculating gamma, variable used to calculate tokens to mint and withdrawals
 
@@ -600,9 +600,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
     // Burn Async send both tokens 50-50
     // Liquidity has to be sent before
     function sendSlashing(uint omegaMulDecimals, uint liquidity) private returns(uint remainingPercentage){
-        if (omegaMulDecimals < 1000000000000000000) {
+        if (omegaMulDecimals < 1e18) {
             uint amountToAdd = liquidity.mul(1e18-omegaMulDecimals)/1e18;
-            //uint energyAnchorBalance = IERC20Uniswap(pylonToken.anchor).balanceOf(energyAddress);
+            // uint energyAnchorBalance = IERC20Uniswap(pylonToken.anchor).balanceOf(energyAddress);
             uint energyPTBalance = IERC20Uniswap(pairAddress).balanceOf(energyAddress);
             if (amountToAdd < energyPTBalance) {
                 // Sending PT tokens to Pair because burn one side is going to be called after
@@ -610,14 +610,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
                 remainingPercentage = 0;
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
+                // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
                 remainingPercentage = (amountToAdd.sub(energyPTBalance))/(liquidity);
             }
-            console.log("finish sending slashing...", amountToAdd, remainingPercentage, liquidity);
         }else{
             remainingPercentage = 0;
         }
-
     }
 
     /// @notice function that sends tokens to Pair to be burn after
@@ -635,7 +634,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
             }
             console.log("Sending slashed Tokens", amountToTransfer);
-
         }
     }
 
@@ -760,9 +758,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard{
                 uint ptu = calculateLPTU(isAnchor, adjustedLiquidity, _totalSupply);
                 ptu = payBurnFees(ptu);
                 uint extraPercentage = 0;
-                if (isAnchor) {
-                    (ptu, extraPercentage) = handleOmegaSlashing(ptu);
-                }
+                if (isAnchor) { (ptu, extraPercentage) = handleOmegaSlashing(ptu); }
                 _safeTransfer(_pairAddress, _pairAddress, ptu);
                 bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
                 uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to, isReserve0);  // XOR

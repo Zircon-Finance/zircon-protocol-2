@@ -64,12 +64,10 @@ library ZirconLibrary {
         }
     }
 
-    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) pure internal returns (uint omegaMulDecimals) {
-
+    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) view internal returns (uint omegaMulDecimals) {
         //Omega is the "survival factor" i.e how much of the anchor balance survives slashing and can be withdrawn.
         //It's applied to the user's liquidity tokens to avoid changing other core functions.
         //This adjustment is only used for share calculations, the full amount of tokens is removed.
         omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
-
     }
 }

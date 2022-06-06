@@ -60,7 +60,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     function calculate() external _onlyPair nonReentrant {
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
-        console.log("ZER: Balance", balance);
+        console.log("zer: Balance", balance);
         require(balance > reserve, "ZER: Reverted");
 
         uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);
@@ -71,16 +71,21 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
         uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
 
-        console.log("zer::pylon0", pylon0Liq);
-        console.log("zer::pylon1", pylon1Liq);
+        console.log("zer::pylon0", pylon0Liq, zircon.pylon0);
+        console.log("zer::pylon1", pylon1Liq, zircon.pylon1);
         console.log("zer::amount", amount);
 
-        _safeTransfer(zircon.pairAddress, zircon.pylon0, pylon0Liq);
-        _safeTransfer(zircon.pairAddress, zircon.pylon1, pylon1Liq);
+        _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
+        _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
+//        uint balance2 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
+//        uint balance3 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.energy0);
+//        uint balance4 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.energy1);
+//        console.log("zer: Balance2", balance2);
+//        console.log("zer: Balance3", balance3);
+//        console.log("zer: Balance4", balance4);
 
         reserve = balance.sub(pylon0Liq.add(pylon1Liq));
         console.log("zer::reserve", reserve);
-
     }
 
 }

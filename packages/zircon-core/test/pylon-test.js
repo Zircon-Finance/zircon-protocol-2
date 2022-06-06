@@ -155,7 +155,7 @@
 //         await expect(pylonInstance.mintPoolTokens(account.address, true))
 //             .to.emit(pylonInstance, 'MintAT')
 //             .to.emit(pylonInstance, 'PylonUpdate')
-//             .withArgs(ethers.BigNumber.from('9940263307954421202'), ethers.BigNumber.from('22944243685162807844'))
+//             .withArgs(ethers.BigNumber.from('9940263109209640567'), ethers.BigNumber.from('22944243065680705866'))
 //         // Same pair tokens as before on pylon..
 //
 //         expect(await pair.balanceOf(pylonInstance.address)).to.eq(ethers.BigNumber.from("262036672509333290333"))
@@ -171,7 +171,7 @@
 //         await expect(pylonInstance.mintPoolTokens(account.address, false))
 //             .to.emit(pylonInstance, 'MintAT')
 //             .to.emit(pylonInstance, 'PylonUpdate')
-//             .withArgs(ethers.BigNumber.from("14690263307954421202"), ethers.BigNumber.from('22944243685162807844'))
+//             .withArgs(ethers.BigNumber.from("14690263307954421202"), ethers.BigNumber.from('22944243065680705866'))
 //         // Same pair tokens as before on pylon...
 //         expect(await pair.balanceOf(pylonInstance.address)).to.eq(ethers.BigNumber.from("262036672509333290333"))
 //
@@ -523,9 +523,8 @@
 //         //45454545454545454
 //         //45454545454545454
 //         //954545454545454544
-//
-//         expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("221393514592797990"))
-//         expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("43181818181818181"))
+//         expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("220352702949995915"))
+//         expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("41022727272727272"))
 //
 //         await token0.transfer(pylonInstance.address, token0Amount.div(220))
 //         await pylonInstance.mintPoolTokens(account.address, false);

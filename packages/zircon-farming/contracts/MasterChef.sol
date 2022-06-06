@@ -60,6 +60,7 @@ contract MasterChef is Ownable {
     // Info of each pool.
     struct PoolInfo {
         IERC20 lpToken; // Address of LP token contract.
+        IERC20 rewardToken;
         uint256 allocPoint; // How many allocation points assigned to this pool. CAKEs to distribute per block.
         uint256 lastRewardBlock; // Last block number that CAKEs distribution occurs.
         uint256 accCakePerShare; // Accumulated CAKEs per share, times 1e12. See below.
@@ -72,7 +73,7 @@ contract MasterChef is Ownable {
     // Dev address.
     // address public devaddr;
     // CAKE tokens created per block.
-    uint256 public cakePerBlock;
+    uint256 public tokenPerBlock;
     // Bonus muliplier for early cake makers.
     uint256 public BONUS_MULTIPLIER = 1;
     // The migrator contract. It has a lot of power. Can only be set through governance (owner).
@@ -93,19 +94,13 @@ contract MasterChef is Ownable {
     constructor(
         ZirconToken _cake,
         ZirconFarm _syrup,
-    //        address _devaddr,
-        uint256 _cakePerBlock,
+        uint256 _tokenPerBlock,
         uint256 _startBlock
     ) public {
         cake = _cake;
         syrup = _syrup;
-        //        devaddr = _devaddr;
-        cakePerBlock = _cakePerBlock;
+        tokenPerBlock = _tokenPerBlock;
         startBlock = _startBlock;
-
-        // staking pool
-        poolInfo.push(PoolInfo({lpToken: _cake, allocPoint: 1000, lastRewardBlock: startBlock, accCakePerShare: 0}));
-        totalAllocPoint = 1000;
     }
 
     function updateMultiplier(uint256 multiplierNumber) public onlyOwner {
@@ -125,6 +120,7 @@ contract MasterChef is Ownable {
     function add(
         uint256 _allocPoint,
         IERC20 _lpToken,
+        IERC20 _rewardToken,
         bool _withUpdate
     ) public onlyOwner {
         if (_withUpdate) {
@@ -133,7 +129,7 @@ contract MasterChef is Ownable {
         uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
         poolInfo.push(
-            PoolInfo({lpToken: _lpToken, allocPoint: _allocPoint, lastRewardBlock: lastRewardBlock, accCakePerShare: 0})
+            PoolInfo({lpToken: _lpToken, rewardToken: _rewardToken, allocPoint: _allocPoint, lastRewardBlock: lastRewardBlock, accCakePerShare: 0})
         );
         //        updateStakingPool();
     }
@@ -151,20 +147,8 @@ contract MasterChef is Ownable {
         poolInfo[_pid].allocPoint = _allocPoint;
         if (prevAllocPoint != _allocPoint) {
             totalAllocPoint = totalAllocPoint.sub(prevAllocPoint).add(_allocPoint);
-            //            updateStakingPool();
         }
     }
-
-    //    function updateStakingPool() internal {
-    //        uint256 length = poolInfo.length;
-    //        uint256 points = 0;
-    //        for (uint256 pid = 1; pid < length; ++pid) { points = points.add(poolInfo[pid].allocPoint); }
-    //        if (points != 0) {
-    //            points = points.div(3);
-    //            totalAllocPoint = totalAllocPoint.sub(poolInfo[0].allocPoint).add(points);
-    //            poolInfo[0].allocPoint = points;
-    //        }
-    //    }
 
     // Set the migrator contract. Can only be called by the owner.
     function setMigrator(IMigratorChef _migrator) public onlyOwner {
@@ -196,7 +180,7 @@ contract MasterChef is Ownable {
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 cakeReward = multiplier.mul(cakePerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+            uint256 cakeReward = multiplier.mul(tokenPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
             accCakePerShare = accCakePerShare.add(cakeReward.mul(1e12).div(lpSupply));
         }
         return user.amount.mul(accCakePerShare).div(1e12).sub(user.rewardDebt);
@@ -222,9 +206,10 @@ contract MasterChef is Ownable {
             return;
         }
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 cakeReward = multiplier.mul(cakePerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        //        cake.mint(devaddr, cakeReward.div(10));
-        cake.mint(address(syrup), cakeReward);
+        uint256 tokenReward = multiplier.mul(tokenPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+        //cake.mint(devaddr, cakeReward.div(10));
+        //cake.mint(address(syrup), tokenReward);
+        //pool.rewardToken.
         pool.accCakePerShare = pool.accCakePerShare.add(cakeReward.mul(1e12).div(lpSupply));
         pool.lastRewardBlock = block.number;
     }
@@ -270,46 +255,46 @@ contract MasterChef is Ownable {
         emit Withdraw(msg.sender, _pid, _amount);
     }
 
-    // Stake CAKE tokens to MasterChef
-    function enterStaking(uint256 _amount) public {
-        PoolInfo storage pool = poolInfo[0];
-        UserInfo storage user = userInfo[0][msg.sender];
-        updatePool(0);
-        if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accCakePerShare).div(1e12).sub(user.rewardDebt);
-            if (pending > 0) {
-                safeCakeTransfer(msg.sender, pending);
-            }
-        }
-        if (_amount > 0) {
-            pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-            user.amount = user.amount.add(_amount);
-        }
-        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
-
-        syrup.mint(msg.sender, _amount);
-        emit Deposit(msg.sender, 0, _amount);
-    }
-
-    // Withdraw CAKE tokens from STAKING.
-    function leaveStaking(uint256 _amount) public {
-        PoolInfo storage pool = poolInfo[0];
-        UserInfo storage user = userInfo[0][msg.sender];
-        require(user.amount >= _amount, "withdraw: not good");
-        updatePool(0);
-        uint256 pending = user.amount.mul(pool.accCakePerShare).div(1e12).sub(user.rewardDebt);
-        if (pending > 0) {
-            safeCakeTransfer(msg.sender, pending);
-        }
-        if (_amount > 0) {
-            user.amount = user.amount.sub(_amount);
-            pool.lpToken.safeTransfer(address(msg.sender), _amount);
-        }
-        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
-
-        syrup.burn(msg.sender, _amount);
-        emit Withdraw(msg.sender, 0, _amount);
-    }
+//    // Stake CAKE tokens to MasterChef
+//    function enterStaking(uint256 _amount) public {
+//        PoolInfo storage pool = poolInfo[0];
+//        UserInfo storage user = userInfo[0][msg.sender];
+//        updatePool(0);
+//        if (user.amount > 0) {
+//            uint256 pending = user.amount.mul(pool.accCakePerShare).div(1e12).sub(user.rewardDebt);
+//            if (pending > 0) {
+//                safeCakeTransfer(msg.sender, pending);
+//            }
+//        }
+//        if (_amount > 0) {
+//            pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+//            user.amount = user.amount.add(_amount);
+//        }
+//        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
+//
+//        syrup.mint(msg.sender, _amount);
+//        emit Deposit(msg.sender, 0, _amount);
+//    }
+//
+//    // Withdraw CAKE tokens from STAKING.
+//    function leaveStaking(uint256 _amount) public {
+//        PoolInfo storage pool = poolInfo[0];
+//        UserInfo storage user = userInfo[0][msg.sender];
+//        require(user.amount >= _amount, "withdraw: not good");
+//        updatePool(0);
+//        uint256 pending = user.amount.mul(pool.accCakePerShare).div(1e12).sub(user.rewardDebt);
+//        if (pending > 0) {
+//            safeCakeTransfer(msg.sender, pending);
+//        }
+//        if (_amount > 0) {
+//            user.amount = user.amount.sub(_amount);
+//            pool.lpToken.safeTransfer(address(msg.sender), _amount);
+//        }
+//        user.rewardDebt = user.amount.mul(pool.accCakePerShare).div(1e12);
+//
+//        syrup.burn(msg.sender, _amount);
+//        emit Withdraw(msg.sender, 0, _amount);
+//    }
 
     // Withdraw without caring about rewards. EMERGENCY ONLY.
     function emergencyWithdraw(uint256 _pid) public {
