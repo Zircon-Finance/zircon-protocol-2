@@ -49,7 +49,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public virtualAnchorBalance;
     uint public virtualFloatBalance;
     uint public maximumPercentageSync;
-    uint public dynamicFeePercentage;
+    uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
     uint public lastK;
     uint public lastPoolTokens;
@@ -406,9 +406,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice private function that calculates fees for Burn Async
     /// Fees here are increased depending on current Gamma
     /// on unbalanced Gamma, fees are higher
+
+    //TODO: The fee needs to be paid with  max((abs(current gamma - 0.5), (abs(future gamma - 0.5)), otherwise someone can just supply the entire pool at 50%
     function payBurnAsyncFees(uint amountIn) private returns (uint amountOut) {
         uint gammaFee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
-        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/10000;
+        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/10000; //TODO: Fix this up
         address revAddress = IZirconPair(pairAddress).energyRevenueAddress();
         _safeTransfer(pairAddress, revAddress, amountIn.mul(gammaFee/2)/10000);
         IZirconEnergyRevenue(revAddress).calculate();
@@ -564,7 +566,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 gammaMulDecimals = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
             } else {
                 //TODO: Check that this works and there are no gamma that assume gamma is ftv/atv+ftv
-                gammaMulDecimals = ((virtualFloatBalance.sub(pylonReserve0)) *1e18) /  totalPoolValueFloatPrime;
+                gammaMulDecimals = totalPoolValueAnchorPrime/((virtualAnchorBalance.sub(pylonReserve0)).mul(4));
             }
 
             // TODO: (see if make sense to insert a floor to for example 25/75)
