@@ -287,21 +287,21 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         emit NewStartAndEndBlocks(_startBlock, _bonusEndBlock);
     }
 
-    /**
-     * @notice It allows the admin to update profile and thresholdPoints' requirement.
-     * @dev This function is only callable by owner.
-     * @param _isRequested: the profile is requested
-     * @param _thresholdPoints: the threshold points
-     */
-    function updateProfileAndThresholdPointsRequirement(bool _isRequested, uint256 _thresholdPoints)
-    external
-    onlyOwner
-    {
-        require(_thresholdPoints >= 0, "Threshold points need to exceed 0");
-        pancakeProfileIsRequested = _isRequested;
-        pancakeProfileThresholdPoints = _thresholdPoints;
-        emit UpdateProfileAndThresholdPointsRequirement(_isRequested, _thresholdPoints);
-    }
+//    /**
+//     * @notice It allows the admin to update profile and thresholdPoints' requirement.
+//     * @dev This function is only callable by owner.
+//     * @param _isRequested: the profile is requested
+//     * @param _thresholdPoints: the threshold points
+//     */
+//    function updateProfileAndThresholdPointsRequirement(bool _isRequested, uint256 _thresholdPoints)
+//    external
+//    onlyOwner
+//    {
+//        require(_thresholdPoints >= 0, "Threshold points need to exceed 0");
+//        pancakeProfileIsRequested = _isRequested;
+//        pancakeProfileThresholdPoints = _thresholdPoints;
+//        emit UpdateProfileAndThresholdPointsRequirement(_isRequested, _thresholdPoints);
+//    }
 
     /*
      * @notice View function to see pending reward on frontend.
