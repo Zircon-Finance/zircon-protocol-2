@@ -82,7 +82,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
             energy := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
         require(energy != address(0), "Create2: Failed on deploy");
-        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100);
+        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100, 0, 0);
         getEnergy[_tokenA][_tokenB] = energy;
         allEnergies.push(energy);
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);

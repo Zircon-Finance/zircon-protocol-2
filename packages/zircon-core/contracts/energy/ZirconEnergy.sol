@@ -147,11 +147,12 @@ contract ZirconEnergy is IZirconEnergy {
   //Uses two piece-wise parabolas. Between 0.45 and 0.55 the fee is very low (minFee).
   //After the cutoff it uses a steeper parabola defined by a max fee at the extremes (very high, up to 15% by default).
   //This is only used for the burn/mint async 50/50, which is effectively a swap that can cause issues when gamma is imbalanced.
-  function getFeeByGamma(uint gammaMulDecimals) external pure returns (uint amount) {
+  function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount) {
 
     uint _minFee = pylon.minFee;
     uint _maxFee = pylon.maxFee;
-    uint x = (gammaMulDecimals - 50000000000000000).mul(10);
+    uint _gammaHalf = 50000000000000000;
+    uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
 
     if (gammaMulDecimals <= 450000000000000000 || gammaMulDecimals >= 550000000000000000) {
       amount = (_maxFee.mul(x)/1e18).mul(x)/(1e18*25); //25 is a reduction factor based on the 0.45-0.55 range we're using.
