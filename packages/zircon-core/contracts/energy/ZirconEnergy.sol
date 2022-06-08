@@ -151,7 +151,8 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint _minFee = pylon.minFee;
     uint _maxFee = pylon.maxFee;
-    uint x = (gammaMulDecimals - 50000000000000000).mul(10);
+    uint _gammaHalf = 50000000000000000;
+    uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
 
     if (gammaMulDecimals <= 450000000000000000 || gammaMulDecimals >= 550000000000000000) {
       amount = (_maxFee.mul(x)/1e18).mul(x)/(1e18*25); //25 is a reduction factor based on the 0.45-0.55 range we're using.
