@@ -50,6 +50,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
+    uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
+
+    uint public EMABlock; //Last block height of the EMA update
+    uint public lastFTV; //Old float total value, used to calculate percentage increase
+
+
     uint public lastK;
     uint public lastPoolTokens;
 
@@ -316,6 +322,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @notice Mint Pool Token
     // @_balance -> Balance OF PT
     // @_pylonReserve -> Reserves of PT on Pylon
+    //Internal helper function that calculates the amount of Pylon pool tokens to mint
     function _mintPoolToken(uint amountIn,
         uint _pylonReserve, uint _pairReserveTranslated,
         address _poolTokenAddress, address _to,  bool isAnchor) private returns (uint liquidity, uint amountOut) {
@@ -513,7 +520,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    /// @notice sync lets you enter with one liquidity getting or anchor or float shares
+    /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
     function sync() private {
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) { IZirconPair(pairAddress).tryLock(); }
@@ -524,6 +531,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // And then calculates Gamma so that the proportions are correct according to the formula
         (uint112 pairReserve0, uint112 pairReserve1) = getPairReservesNormalized();
         (uint112 pylonReserve0, uint112 pylonReserve1,) = getSyncReserves();
+
+        uint oldGamma = gammaMulDecimals;
 
         // If the current K is equal to the last K, means that we haven't had any updates on the pair level
         // So is useless to update any variable because fees on pair haven't changed
@@ -536,11 +545,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // uint poolTokenBalance = IZirconPair(pairAddress).balanceOf(address(this));
             // Let's get the amount of total pool value own by pylon
 
-            // TODO: Add system that accumulates fees to cover insolvent withdrawals (and thus changes ptb)
-            // TODO: Add impact of Anchor/Float pts
-
             uint totalPoolValueAnchorPrime = translateToPylon(pairReserve1.mul(2), 0);
             uint totalPoolValueFloatPrime = translateToPylon(pairReserve0.mul(2), 0);
+
+            //Fee value/total pool value ratio, modified implementation of Uniswap's mintFee formula
 
             uint one = 1e18;
             uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
@@ -563,14 +571,20 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // This means that anchors get more fees than they "should", which kinda works out because they're at high risk.
             // It works as an additional incentive to not withdraw.
 
-            //TODO: remove the concept of vfb, should no longer be necessary
+            //VFB is no longer relevant, so it's commented out for now
 
             virtualAnchorBalance += ((feeValueAnchor.mul(1e18-gammaMulDecimals))/1e18);
+            //Fees to floats are automatically assigned due to dTPV > dVAB
             //virtualFloatBalance += ((gammaMulDecimals).mul(feeValueFloat)/1e18);
 
             if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
+
+                //Here gamma is simply a variation of tpv - vab
+
                 gammaMulDecimals = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
             } else {
+
+                //Here gamma fixes the amount of float assets and lets anchors get slashed
 
                 //This is a heavily simplified expression of a "derived" virtual Float balance (quantity of float asset supplied)
                 //The formula assumes that the virtual anchor balance was once matched with an equal value of float assets
@@ -584,6 +598,19 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 gammaMulDecimals = totalPoolValueAnchorPrime/((virtualAnchorBalance.sub(pylonReserve0)).mul(4));
             }
+
+            //Calculates a "delta gamma" EMA which is used to "lock down" the pool.
+            //Above a threshold, fees get absurdly high and make it very difficult to complete price manipulation cycles (like in exploits).
+            //The initial "trigger" that pumps the EMA is not taxed, to allow for legitimate whales to come in.
+
+            //Using an EMA makes it more resilient, as otherwise an attacker could just wait out the sampling period to eliminate the outlier.
+
+//            if (block.number != EMABlock) {
+//                //Only updates if the block number has changed
+//
+//
+//            }
+
 
             // TODO: (see if make sense to insert a floor to for example 25/75)
             // Sync pool also gets a claim to these
