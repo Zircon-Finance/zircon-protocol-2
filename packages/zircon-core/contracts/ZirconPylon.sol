@@ -47,7 +47,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     // ***** Variables for calculations *****
     uint public virtualAnchorBalance;
-    uint public virtualFloatBalance;
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
@@ -199,11 +198,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
         // If pair contains reserves we have to use the ratio of the Pair so...
 
-        virtualFloatBalance = balance0.sub(balance0.mul(dynamicFeePercentage)/10000);
         virtualAnchorBalance = balance1.sub(balance1.mul(dynamicFeePercentage)/10000);
         if (_reservePair0 > 0 && _reservePair1 > 0) {
-            uint denominator = (virtualAnchorBalance.mul(_reservePair0))/_reservePair1;
-            gammaMulDecimals = (virtualFloatBalance*1e18) /  (virtualFloatBalance.add(denominator));
+            uint tpvAnchorPrime = (virtualAnchorBalance.add(balance0.mul(_reservePair1)/_reservePair0));
+            if (virtualAnchorBalance < tpvAnchorPrime/2) {
+                gammaMulDecimals = (tpvAnchorPrime.mul(1e18)/(virtualAnchorBalance.mul(4)));
+            } else {
+                gammaMulDecimals = (tpvAnchorPrime - virtualAnchorBalance)/tpvAnchorPrime; //Subflow already checked by if statement
+            }
+
+
             // This is gamma formula when FTV <= 50%
         } else {
             // When Pair is not initialized let's start gamma to 0.5
@@ -369,7 +373,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if(isAnchor) {
             virtualAnchorBalance += amountOut;
         }else{
-            virtualFloatBalance += amountOut;
+            //virtualFloatBalance += amountOut;
         }
         //Sends tokens into pool if there is a match
         _update();
@@ -452,7 +456,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if (isAnchor) {
                 virtualAnchorBalance += amount;
             }else{
-                virtualFloatBalance += amount;
+                //virtualFloatBalance += amount;
             }
 
             IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !isAnchor : isAnchor);
@@ -489,7 +493,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if (shouldMintAnchor) {
                 virtualAnchorBalance += amount;
             } else {
-                virtualFloatBalance += amount;
+                //virtualFloatBalance += amount;
             }
 
         }
@@ -559,13 +563,25 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // This means that anchors get more fees than they "should", which kinda works out because they're at high risk.
             // It works as an additional incentive to not withdraw.
 
+            //TODO: remove the concept of vfb, should no longer be necessary
+
             virtualAnchorBalance += ((feeValueAnchor.mul(1e18-gammaMulDecimals))/1e18);
-            virtualFloatBalance += ((gammaMulDecimals).mul(feeValueFloat)/1e18);
+            //virtualFloatBalance += ((gammaMulDecimals).mul(feeValueFloat)/1e18);
 
             if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
                 gammaMulDecimals = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
             } else {
-                //TODO: Check that this works and there are no gamma that assume gamma is ftv/atv+ftv
+
+                //This is a heavily simplified expression of a "derived" virtual Float balance (quantity of float asset supplied)
+                //The formula assumes that the virtual anchor balance was once matched with an equal value of float assets
+                //It then assumes that this point had the same k as now. Simplify a lot and suddenly there's no k in the formula :)
+                //The derived vfb shifts when new assets are supplied to ensure there are no gaps between the two gamma formulas
+
+                //This shift in the vfb means that the pool has a collective break even point that moves around.
+                //Supplying anchors moves the break even higher. This can massively reduce IL for very strong pumps.
+                //The flipside is that float LPs can lose more on a redump.
+                //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
+
                 gammaMulDecimals = totalPoolValueAnchorPrime/((virtualAnchorBalance.sub(pylonReserve0)).mul(4));
             }
 
@@ -693,7 +709,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if(_isAnchor) {
             virtualAnchorBalance -= virtualAnchorBalance.mul(_liquidity)/_totalSupply;
         }else{
-            virtualFloatBalance -= virtualFloatBalance.mul(_liquidity)/_totalSupply;
+            //virtualFloatBalance -= virtualFloatBalance.mul(_liquidity)/_totalSupply;
         }
     }
 
