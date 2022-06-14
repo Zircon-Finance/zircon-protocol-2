@@ -5,15 +5,11 @@ pragma abicoder v2;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import "./SmartChefInitializable.sol";
+import "./PsionicFarmInitializable.sol";
 
-contract SmartChefFactory is Ownable {
-    event NewSmartChefContract(address indexed smartChef);
-
-    constructor() {
-        //
-    }
-
+contract PsionicFarmFactory is Ownable {
+    event NewPsionicFarmContract(address indexed psionicFarm);
+    constructor() {}
     /*
      * @notice Deploy the pool
      * @param _stakedToken: staked token address
@@ -23,11 +19,8 @@ contract SmartChefFactory is Ownable {
      * @param _endBlock: end block
      * @param _poolLimitPerUser: pool limit per user in stakedToken (if any, else 0)
      * @param _numberBlocksForUserLimit: block numbers available for user limit (after start block)
-     * @param _pancakeProfile: Pancake Profile address
-     * @param _pancakeProfileIsRequested: Pancake Profile is requested
-     * @param _pancakeProfileThresholdPoints: Pancake Profile need threshold points
      * @param _admin: admin address with ownership
-     * @return address of new smart chef contract
+     * @return address of new psionicFarm contract
      */
     function deployPool(
         IERC20Metadata _stakedToken,
@@ -38,20 +31,19 @@ contract SmartChefFactory is Ownable {
         uint256 _poolLimitPerUser,
         uint256 _numberBlocksForUserLimit,
         address _admin
-    ) external onlyOwner {
+    ) external onlyOwner returns (address psionicFarmAddress){
         require(_stakedToken.totalSupply() >= 0);
         require(_rewardToken.totalSupply() >= 0);
         require(_stakedToken != _rewardToken, "Tokens must be be different");
 
-        bytes memory bytecode = type(SmartChefInitializable).creationCode;
+        bytes memory bytecode = type(PsionicFarmInitializable).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(_stakedToken, _rewardToken, _startBlock));
-        address smartChefAddress;
 
         assembly {
-            smartChefAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
+            psionicFarmAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
 
-        SmartChefInitializable(smartChefAddress).initialize(
+        PsionicFarmInitializable(psionicFarmAddress).initialize(
             _stakedToken,
             _rewardToken,
             _rewardPerBlock,
@@ -61,7 +53,6 @@ contract SmartChefFactory is Ownable {
             _numberBlocksForUserLimit,
             _admin
         );
-
-        emit NewSmartChefContract(smartChefAddress);
+        emit NewPsionicFarmContract(psionicFarmAddress);
     }
 }

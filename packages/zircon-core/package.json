@@ -22,6 +22,7 @@
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.1",
     "hardhat": "^2.6.8",
+    "hardhat-abi-exporter": "../../hardhat-abi-exporter",
     "hardhat-contract-sizer": "^2.3.0",
     "hardhat-dependency-compiler": "^1.1.2",
     "mocha": "*"
@@ -33,11 +34,10 @@
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "dotenv": "^10.0.0",
     "hardhat-watcher": "^2.1.1",
-    "solidity-docgen": "^0.6.0-beta.10",
-    "zircon-energy": "^1.0.0-alpha.6"
+    "solidity-docgen": "^0.6.0-beta.10"
   },
   "scripts": {
-    "deploy": "npx hardhat run --network moonbase scripts/deploy-script.js",
+    "deploy": "npx hardhat --network localhost deploy --export-all ../zircon-periphery/external_contracts/hardhat_contracts.json",
     "test": "mocha",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test"

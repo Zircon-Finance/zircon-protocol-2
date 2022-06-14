@@ -9,11 +9,11 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 
-contract SmartChefInitializable is Ownable, ReentrancyGuard {
+contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20Metadata;
 
-    // The address of the smart chef factory
-    address public immutable SMART_CHEF_FACTORY;
+    // The address of the psionic factory
+    address public immutable PSIONIC_FACTORY;
 
     // Whether a limit is set for users
     bool public userLimit;
@@ -38,12 +38,6 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
     // Block numbers available for user limit (after start block)
     uint256 public numberBlocksForUserLimit;
-
-    // Pancake Profile is requested
-    bool public pancakeProfileIsRequested;
-
-    // Pancake Profile points threshold
-    uint256 public pancakeProfileThresholdPoints;
 
     // CAKE tokens created per block.
     uint256 public rewardPerBlock;
@@ -78,7 +72,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
      * @notice Constructor
      */
     constructor() {
-        SMART_CHEF_FACTORY = msg.sender;
+        PSIONIC_FACTORY = msg.sender;
     }
 
     /*
@@ -103,7 +97,7 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
         address _admin
     ) external {
         require(!isInitialized, "Already initialized");
-        require(msg.sender == SMART_CHEF_FACTORY, "Not factory");
+        require(msg.sender == PSIONIC_FACTORY, "Not factory");
 
         // Make this contract initialized
         isInitialized = true;
@@ -286,22 +280,6 @@ contract SmartChefInitializable is Ownable, ReentrancyGuard {
 
         emit NewStartAndEndBlocks(_startBlock, _bonusEndBlock);
     }
-
-//    /**
-//     * @notice It allows the admin to update profile and thresholdPoints' requirement.
-//     * @dev This function is only callable by owner.
-//     * @param _isRequested: the profile is requested
-//     * @param _thresholdPoints: the threshold points
-//     */
-//    function updateProfileAndThresholdPointsRequirement(bool _isRequested, uint256 _thresholdPoints)
-//    external
-//    onlyOwner
-//    {
-//        require(_thresholdPoints >= 0, "Threshold points need to exceed 0");
-//        pancakeProfileIsRequested = _isRequested;
-//        pancakeProfileThresholdPoints = _thresholdPoints;
-//        emit UpdateProfileAndThresholdPointsRequirement(_isRequested, _thresholdPoints);
-//    }
 
     /*
      * @notice View function to see pending reward on frontend.

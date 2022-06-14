@@ -26,6 +26,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     function energyCodeHash() external pure returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
+
     function energyRevenueCodeHash() external pure returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }

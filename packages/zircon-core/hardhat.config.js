@@ -3,6 +3,9 @@ require("@nomiclabs/hardhat-waffle");
 require('hardhat-contract-sizer');
 require("hardhat-dependency-compiler");
 require('solidity-docgen');
+require('hardhat-deploy');
+require('hardhat-abi-exporter');
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -26,11 +29,24 @@ module.exports = {
       tasks: ["compile"],
     }
   },
+  namedAccounts: {
+    deployer: {
+      default: 0, // here this will by default take the first account as deployer
+    },
+  },
   dependencyCompiler: {
     paths: [
       '@zircon/periphery/contracts/Token.sol',
       '@zircon/periphery/contracts/WETH.sol',
     ],
+  },
+  abiExporter: {
+    path: '../zircon-periphery/core_contracts/abi',
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    spacing: 2,
+    pretty: true,
   },
   networks: {
     hardhat: {},

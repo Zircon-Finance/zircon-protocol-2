@@ -32,8 +32,7 @@
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "dotenv": "^10.0.0",
-    "hardhat-watcher": "^2.1.1",
-    "zircon-energy": "^1.0.0-alpha.6"
+    "hardhat-watcher": "^2.1.1"
   },
   "scripts": {
     "deploy": "npx hardhat run --network moonbase scripts/deploy-script.js",

@@ -1,6 +1,5 @@
 pragma solidity =0.6.6;
 
-import "./ZirconRouter.sol";
 import "./interfaces/IZirconPylonRouter.sol";
 import "@zircon/core/contracts/interfaces/IZirconPair.sol";
 import "@zircon/core/contracts/interfaces/IZirconPylonFactory.sol";
@@ -8,7 +7,8 @@ import "@zircon/core/contracts/interfaces/IZirconFactory.sol";
 import "@zircon/core/contracts/interfaces/IZirconPoolToken.sol";
 import "./libraries/ZirconPeripheralLibrary.sol";
 import "./libraries/UniswapV2Library.sol";
-//import "hardhat/console.sol";
+import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 
 contract ZirconPylonRouter is IZirconPylonRouter {
 
@@ -66,7 +66,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
 
     // Modifier to check that pylon & pair are initialized
     modifier _addLiquidityChecks(address tokenA, address tokenB) {
-        address pair = IUniswapV2Factory(factory).getPair(tokenA, tokenB);
+        address pair = IZirconFactory(factory).getPair(tokenA, tokenB);
         require(pair != address(0), "ZPR: Pair Not Created");
         require(IZirconPylonFactory(pylonFactory).getPylon(tokenA, tokenB) != address(0), "ZPR: Pylon not created");
         // Checking if pylon is initialized
@@ -79,18 +79,19 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     // **** INIT PYLON *****
     function _initializePylon(address tokenA, address tokenB) internal virtual returns (address pair, address pylon) {
         // If Pair is not initialized
-        pair = IUniswapV2Factory(factory).getPair(tokenA, tokenB);
+        pair = IZirconFactory(factory).getPair(tokenA, tokenB);
+        console.log("pair address",  pair);
+
         if (pair == address(0)) {
             // Let's create it...
-            pair = IUniswapV2Factory(factory).createPair(tokenA, tokenB);
+            pair = IZirconFactory(factory).createPair(tokenA, tokenB, pylonFactory);
         }
+
         //Let's see if pylon is initialized
-        if (IZirconPylonFactory(pylonFactory).getPylon(tokenA, tokenB) == address(0)) {
+        pylon = IZirconPylonFactory(pylonFactory).getPylon(tokenA, tokenB);
+        if (pylon == address(0)) {
             // adds pylon
             pylon = IZirconPylonFactory(pylonFactory).addPylon(pair, tokenA, tokenB);
-        }else{
-            // gets the pylon address
-            pylon = ZirconPeripheralLibrary.pylonFor(pylonFactory, tokenA, tokenB, pair);
         }
     }
 
@@ -105,6 +106,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB){
         // Initializes the pylon
         (, address pylon) = _initializePylon(tokenA, tokenB);
+        console.log("pylon address",  pylon);
         // Desired amounts
         amountA = amountDesiredA;
         amountB = amountDesiredB;

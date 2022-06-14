@@ -5,8 +5,6 @@ import './interfaces/IZirconPoolToken.sol';
 import "./libraries/SafeMath.sol";
 import "./libraries/UQ112x112.sol";
 import "./libraries/ZirconLibrary.sol";
-
-import "./interfaces/IERC20.sol";
 import "./interfaces/IZirconPylonFactory.sol";
 import "hardhat/console.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
@@ -14,6 +12,7 @@ import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 
 contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****
@@ -191,8 +190,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // Let's get the balances so we can see what the user send us
         // As we are initializing the reserves are going to be null
-        uint balance0 = IERC20Uniswap(pylonToken.float).balanceOf(address(this));
-        uint balance1 = IERC20Uniswap(pylonToken.anchor).balanceOf(address(this));
+        uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
+        uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
         require(balance0 > 0 && balance1 > 0, "ZP: Not enough liquidity");
 
         // Let's see if the pair contains some reserves
@@ -260,8 +259,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // Sends pylonReserves to pool if there is a match
     function _update() private {
         // Let's take the current balances
-        uint balance0 = IERC20Uniswap(pylonToken.float).balanceOf(address(this));
-        uint balance1 = IERC20Uniswap(pylonToken.anchor).balanceOf(address(this));
+        uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
+        uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
 
         // Intializing the variables, (Maybe gas consuming let's see how to sort out this
         // Getting pair reserves and updating variables before minting
@@ -356,12 +355,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountOut;
         // Minting Pool tokens
         if (isAnchor) {
-            uint balance1 = IERC20Uniswap(pylonToken.anchor).balanceOf(address(this));
+            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
             amountIn = balance1.sub(_reserve1);
 
             (liquidity, amountOut ) = _mintPoolToken(amountIn, _reserve1, _reservePairTranslated1, anchorPoolTokenAddress, _to, isAnchor);
         } else {
-            uint balance0 = IERC20Uniswap(pylonToken.float).balanceOf(address(this));
+            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
             amountIn = balance0.sub(_reserve0);
             (liquidity, amountOut) = _mintPoolToken(amountIn, _reserve0, _reservePairTranslated0, floatPoolTokenAddress, _to, isAnchor);
         }
@@ -428,10 +427,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
         uint amountIn;
         if (isAnchor) {
-            uint balance = IERC20Uniswap(pylonToken.anchor).balanceOf(address(this));
+            uint balance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
             amountIn = balance.sub(_reserve1);
         }else{
-            uint balance = IERC20Uniswap(pylonToken.float).balanceOf(address(this));
+            uint balance = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
             amountIn = balance.sub(_reserve0);
         }
 
@@ -473,8 +472,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountIn0;
         uint amountIn1;
         {
-            uint balance0 = IERC20Uniswap(pylonToken.float).balanceOf(address(this));
-            uint balance1 = IERC20Uniswap(pylonToken.anchor).balanceOf(address(this));
+            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
+            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
 
             amountIn0 = balance0.sub(_reserve0);
             amountIn1 = balance1.sub(_reserve1);
@@ -602,8 +601,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function sendSlashing(uint omegaMulDecimals, uint liquidity) private returns(uint remainingPercentage){
         if (omegaMulDecimals < 1e18) {
             uint amountToAdd = liquidity.mul(1e18-omegaMulDecimals)/1e18;
-            // uint energyAnchorBalance = IERC20Uniswap(pylonToken.anchor).balanceOf(energyAddress);
-            uint energyPTBalance = IERC20Uniswap(pairAddress).balanceOf(energyAddress);
+            // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
+            uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
             if (amountToAdd < energyPTBalance) {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, amountToAdd);
@@ -628,7 +627,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 (uint res0, uint res1) = getPairReservesNormalized();
                 totalAmount += ZirconLibrary.getAmountOut(floatAmount, res0, res1);
             }
-            uint energyAnchorBalance = IERC20Uniswap(pylonToken.anchor).balanceOf(energyAddress);
+            uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
             uint amountToTransfer = totalAmount.mul(percentage);
             if(energyAnchorBalance > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
