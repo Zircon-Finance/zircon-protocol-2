@@ -83,5 +83,8 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         pair,
         routerInstance,
         WETHInstance,
+        pairContract,
+        poolTokenContract,
+        pylonContract
     }
 }

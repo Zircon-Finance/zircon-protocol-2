@@ -9,10 +9,15 @@
         '0x1000000000000000000000000000000000000000',
         '0x2000000000000000000000000000000000000000'
     ]
-    let factoryPylonInstance,  token0, token1,
-        pylonInstance, poolTokenInstance0, poolTokenInstance1,
-        factoryInstance, deployerAddress, account2, account,
-        pair, router, WETH;
+    let factoryPylonInstance, pylonInstance,
+        token0, token1,
+        poolTokenInstance0, poolTokenInstance1,
+        factoryInstance,
+        deployerAddress, account2, account,
+        pair, router, WETH,
+        pairContract,
+        poolTokenContract,
+        pylonContract
 
     const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
     const overrides = {
@@ -41,6 +46,9 @@
             poolTokenInstance1 = fixtures.poolTokenInstance1
             pylonInstance = fixtures.pylonInstance
             factoryPylonInstance = fixtures.factoryPylonInstance
+            pairContract = fixtures.pairContract
+                poolTokenContract = fixtures.poolTokenContract
+                pylonContract = fixtures.pylonContract
 
         });
 
@@ -70,18 +78,14 @@
 
             //Let's get the instances of the new created Pylon and pair....
             let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
-            let pair = await ethers.getContractFactory('ZirconPair');
-            let newPair = pair.attach(pairAddress);
+            let newPair = pairContract.attach(pairAddress);
 
             let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
-            let zPylon = await ethers.getContractFactory('ZirconPylon');
-            let pylon = zPylon.attach(pylonAddress);
-            let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-            let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+            let pylon = pylonContract.attach(pylonAddress);
             let poolAddress0 = await pylon.floatPoolTokenAddress();
             let poolAddress1 = await pylon.anchorPoolTokenAddress();
-            let ptInstance0 = poolToken1.attach(poolAddress0);
-            let ptInstance1 = poolToken2.attach(poolAddress1);
+            let ptInstance0 = poolTokenContract.attach(poolAddress0);
+            let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
             // Let''s check that everything was correctly minted....
             expect(await ptInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('999999999999999000'))
@@ -97,6 +101,8 @@
                 expandTo18Decimals(2),
                 true,
                 account.address,
+                false,
+                ethers.constants.AddressZero,
                 ethers.constants.MaxUint256)).to.be.revertedWith(
                 'ZPR: Pylon Not Initialized'
             )
@@ -118,6 +124,8 @@
                 ethers.BigNumber.from('44999999999999929'),
                 true,
                 account.address,
+                false,
+                ethers.constants.AddressZero,
                 ethers.constants.MaxUint256);
             expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('2044999999999998929'))
         });
@@ -139,18 +147,14 @@
             //expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('1022004889975550110'))
             //Let's get the instances of the new created Pylon and pair....
             let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
-            let pair = await ethers.getContractFactory('ZirconPair');
-            let newPair = pair.attach(pairAddress);
+            let newPair = pairContract.attach(pairAddress);
 
             let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
-            let zPylon = await ethers.getContractFactory('ZirconPylon');
-            let pylon = zPylon.attach(pylonAddress);
-            let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-            let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+            let pylon = pylonContract.attach(pylonAddress);
             let poolAddress0 = await pylon.floatPoolTokenAddress();
             let poolAddress1 = await pylon.anchorPoolTokenAddress();
-            let ptInstance0 = poolToken1.attach(poolAddress0);
-            let ptInstance1 = poolToken2.attach(poolAddress1);
+            let ptInstance0 = poolTokenContract.attach(poolAddress0);
+            let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
             // Let''s check that everything was correctly minted....
             expect(await ptInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('999999999999999000'))
@@ -196,18 +200,14 @@
             //expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('1022004889975550110'))
             //Let's get the instances of the new created Pylon and pair....
             let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
-            let pair = await ethers.getContractFactory('ZirconPair');
-            let newPair = pair.attach(pairAddress);
+            let newPair = pairContract.attach(pairAddress);
 
             let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
-            let zPylon = await ethers.getContractFactory('ZirconPylon');
-            let pylon = zPylon.attach(pylonAddress);
-            let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-            let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+            let pylon = pylonContract.attach(pylonAddress);
             let poolAddress0 = await pylon.floatPoolTokenAddress();
             let poolAddress1 = await pylon.anchorPoolTokenAddress();
-            let ptInstance0 = poolToken1.attach(poolAddress0);
-            let ptInstance1 = poolToken2.attach(poolAddress1);
+            let ptInstance0 = poolTokenContract.attach(poolAddress0);
+            let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
             // Let's check that everything was correctly minted....
             expect(await ptInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('999999999999999000'))
@@ -260,18 +260,14 @@
                 ethers.constants.MaxUint256, {value: expandTo18Decimals(2)});
 
             let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
-            let pair = await ethers.getContractFactory('ZirconPair');
-            let newPair = pair.attach(pairAddress);
+            let newPair = pairContract.attach(pairAddress);
 
             let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
-            let zPylon = await ethers.getContractFactory('ZirconPylon');
-            let pylon = zPylon.attach(pylonAddress);
-            let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-            let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+            let pylon = pylonContract.attach(pylonAddress);
             let poolAddress0 = await pylon.floatPoolTokenAddress();
             let poolAddress1 = await pylon.anchorPoolTokenAddress();
-            let ptInstance0 = poolToken1.attach(poolAddress0);
-            let ptInstance1 = poolToken2.attach(poolAddress1);
+            let ptInstance0 = poolTokenContract.attach(poolAddress0);
+            let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
             // Let''s check that everything was correctly minted....
             expect(await ptInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('2997899550645188741'))
@@ -339,19 +335,15 @@
                 ethers.constants.MaxUint256, {value: expandTo18Decimals(2)});
 
             let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
-            let pair = await ethers.getContractFactory('ZirconPair');
-            let newPair = pair.attach(pairAddress);
+            let newPair = pairContract.attach(pairAddress);
 
             let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
-            let zPylon = await ethers.getContractFactory('ZirconPylon');
-            let pylon = zPylon.attach(pylonAddress);
-            let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-            let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+            let pylon = pylonContract.attach(pylonAddress);
             let poolAddress0 = await pylon.floatPoolTokenAddress();
             let poolAddress1 = await pylon.anchorPoolTokenAddress();
 
-            let ptInstance0 = poolToken1.attach(poolAddress0);
-            let ptInstance1 = poolToken2.attach(poolAddress1);
+            let ptInstance0 = poolTokenContract.attach(poolAddress0);
+            let ptInstance1 = poolTokenContract.attach(poolAddress1);
             await ptInstance1.approve(router.address, ethers.constants.MaxUint256)
             await ptInstance0.approve(router.address, ethers.constants.MaxUint256)
 
@@ -434,19 +426,15 @@
                 ethers.constants.MaxUint256, {value: expandTo18Decimals(2)});
 
             let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
-            let pair = await ethers.getContractFactory('ZirconPair');
-            let newPair = pair.attach(pairAddress);
+            let newPair = pairContract.attach(pairAddress);
 
             let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
-            let zPylon = await ethers.getContractFactory('ZirconPylon');
-            let pylon = zPylon.attach(pylonAddress);
-            let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-            let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+            let pylon = pylonContract.attach(pylonAddress);
             let poolAddress0 = await pylon.floatPoolTokenAddress();
             let poolAddress1 = await pylon.anchorPoolTokenAddress();
 
-            let ptInstance0 = poolToken1.attach(poolAddress0);
-            let ptInstance1 = poolToken2.attach(poolAddress1);
+            let ptInstance0 = poolTokenContract.attach(poolAddress0);
+            let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
             await ptInstance1.approve(router.address, ethers.constants.MaxUint256)
             await ptInstance0.approve(router.address, ethers.constants.MaxUint256)

@@ -28,6 +28,8 @@ interface IZirconPylonRouter {
         uint amountDesired,
         bool isAnchor,
         address to,
+        bool shouldStake,
+        address pool,
         uint deadline
     ) external returns (uint amount, uint liquidity);
 

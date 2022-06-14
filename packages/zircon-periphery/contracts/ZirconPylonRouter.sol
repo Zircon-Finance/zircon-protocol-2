@@ -15,6 +15,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     address public immutable override factory;
     address public immutable override pylonFactory;
     address public immutable override WETH;
+    bytes4 private constant DEPOSIT = bytes4(keccak256(bytes('deposit(uint256)')));
 
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'UniswapV2Router: EXPIRED');
@@ -164,7 +165,9 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         // Adding liquidity
         if (shouldStake) {
             liquidity = IZirconPylon(pylon).mintPoolTokens(pool, isAnchor);
-            IPsionicFarm(pool).deposit(liquidity);
+
+            (bool success, bytes memory data) = pool.call(abi.encodeWithSelector(DEPOSIT, liquidity));
+            require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: FARM_FAILED');
         }else{
             liquidity = IZirconPylon(pylon).mintPoolTokens(to, isAnchor);
         }

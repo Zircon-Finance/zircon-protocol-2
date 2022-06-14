@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
 
 interface IPsionicFarm {
 
@@ -16,8 +14,8 @@ interface IPsionicFarm {
     function numberBlocksForUserLimit() external view returns (uint256);
     function rewardPerBlock() external view returns (uint256);
     function PRECISION_FACTOR() external view returns (uint256);
-    function rewardToken() external view returns (IERC20Metadata);
-    function stakedToken() external view returns (IERC20Metadata);
+    function rewardToken() external view returns (address);
+    function stakedToken() external view returns (address);
 
     /*
      * @notice Initialize the contract
