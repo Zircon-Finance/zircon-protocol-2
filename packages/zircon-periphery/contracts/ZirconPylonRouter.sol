@@ -149,6 +149,8 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         uint amountDesired,
         bool isAnchor,
         address to,
+        bool shouldStake,
+        address pool,
         uint deadline
     ) virtual override ensure(deadline)  external returns (uint amount, uint liquidity) {
         // Checking Pylon and pair are initialized
@@ -158,8 +160,14 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         address pylon = _getPylon(tokenA, tokenB);
         // Transferring tokens
         TransferHelper.safeTransferFrom(isAnchor ? tokenB : tokenA, msg.sender, pylon, amount);
+
         // Adding liquidity
-        liquidity = IZirconPylon(pylon).mintPoolTokens(to, isAnchor);
+        if (shouldStake) {
+            liquidity = IZirconPylon(pylon).mintPoolTokens(pool, isAnchor);
+            IPsionicFarm(pool).deposit(liquidity);
+        }else{
+            liquidity = IZirconPylon(pylon).mintPoolTokens(to, isAnchor);
+        }
     }
 
     // @isAnchor indicates if the token should be the anchor or float

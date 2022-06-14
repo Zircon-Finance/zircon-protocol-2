@@ -7,57 +7,57 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IPsionicFarm} from "./interfaces/IPsionicFarm.sol";
 
-
-contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
+contract PsionicFarmInitializable is IPsionicFarm, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20Metadata;
-
-    // The address of the psionic factory
-    address public immutable PSIONIC_FACTORY;
-
-    // Whether a limit is set for users
-    bool public userLimit;
-
-    // Whether it is initialized
-    bool public isInitialized;
-
-    // Accrued token per share
-    uint256 public accTokenPerShare;
-
-    // The block number when CAKE mining ends.
-    uint256 public bonusEndBlock;
-
-    // The block number when CAKE mining starts.
-    uint256 public startBlock;
-
-    // The block number of the last pool update
-    uint256 public lastRewardBlock;
-
-    // The pool limit (0 if none)
-    uint256 public poolLimitPerUser;
-
-    // Block numbers available for user limit (after start block)
-    uint256 public numberBlocksForUserLimit;
-
-    // CAKE tokens created per block.
-    uint256 public rewardPerBlock;
-
-    // The precision factor
-    uint256 public PRECISION_FACTOR;
-
-    // The reward token
-    IERC20Metadata public rewardToken;
-
-    // The staked token
-    IERC20Metadata public stakedToken;
-
-    // Info of each user that stakes tokens (stakedToken)
-    mapping(address => UserInfo) public userInfo;
-
     struct UserInfo {
         uint256 amount; // How many staked tokens the user has provided
         uint256 rewardDebt; // Reward debt
     }
+
+
+    // The address of the psionic factory
+    address public override immutable PSIONIC_FACTORY;
+
+    // Whether a limit is set for users
+    bool public override userLimit;
+
+    // Whether it is initialized
+    bool public override isInitialized;
+
+    // Accrued token per share
+    uint256 public  override accTokenPerShare;
+
+    // The block number when CAKE mining ends.
+    uint256 public override bonusEndBlock;
+
+    // The block number when CAKE mining starts.
+    uint256 public override startBlock;
+
+    // The block number of the last pool update
+    uint256 public override lastRewardBlock;
+
+    // The pool limit (0 if none)
+    uint256 public override poolLimitPerUser;
+
+    // Block numbers available for user limit (after start block)
+    uint256 public override numberBlocksForUserLimit;
+
+    // CAKE tokens created per block.
+    uint256 public override rewardPerBlock;
+
+    // The precision factor
+    uint256 public override PRECISION_FACTOR;
+
+    // The reward token
+    IERC20Metadata public override rewardToken;
+
+    // The staked token
+    IERC20Metadata public override stakedToken;
+
+    // Info of each user that stakes tokens (stakedToken)
+    mapping(address => UserInfo) public userInfo;
 
     event Deposit(address indexed user, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 amount);
@@ -95,7 +95,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         uint256 _poolLimitPerUser,
         uint256 _numberBlocksForUserLimit,
         address _admin
-    ) external {
+    ) override external  {
         require(!isInitialized, "Already initialized");
         require(msg.sender == PSIONIC_FACTORY, "Not factory");
 
@@ -130,7 +130,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Deposit staked tokens and collect reward tokens (if any)
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function deposit(uint256 _amount) external nonReentrant {
+    function deposit(uint256 _amount) external override nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
 
         userLimit = hasUserLimit();
@@ -160,7 +160,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Withdraw staked tokens and collect reward tokens
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function withdraw(uint256 _amount) external nonReentrant {
+    function withdraw(uint256 _amount) external override nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
         require(user.amount >= _amount, "Amount to withdraw too high");
 
@@ -186,7 +186,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Withdraw staked tokens without caring about rewards rewards
      * @dev Needs to be for emergency.
      */
-    function emergencyWithdraw() external nonReentrant {
+    function emergencyWithdraw() external override nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
         uint256 amountToTransfer = user.amount;
         user.amount = 0;
@@ -203,7 +203,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Stop rewards
      * @dev Only callable by owner. Needs to be for emergency.
      */
-    function emergencyRewardWithdraw(uint256 _amount) external onlyOwner {
+    function emergencyRewardWithdraw(uint256 _amount) external override onlyOwner {
         rewardToken.safeTransfer(address(msg.sender), _amount);
     }
 
@@ -212,7 +212,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _token: token address
      * @dev Callable by owner
      */
-    function recoverToken(address _token) external onlyOwner {
+    function recoverToken(address _token) external override onlyOwner {
         require(_token != address(stakedToken), "Operations: Cannot recover staked token");
         require(_token != address(rewardToken), "Operations: Cannot recover reward token");
 
@@ -228,7 +228,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Stop rewards
      * @dev Only callable by owner
      */
-    function stopReward() external onlyOwner {
+    function stopReward() external override onlyOwner {
         bonusEndBlock = block.number;
     }
 
@@ -238,7 +238,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _userLimit: whether the limit remains forced
      * @param _poolLimitPerUser: new pool limit per user
      */
-    function updatePoolLimitPerUser(bool _userLimit, uint256 _poolLimitPerUser) external onlyOwner {
+    function updatePoolLimitPerUser(bool _userLimit, uint256 _poolLimitPerUser) override external onlyOwner {
         require(userLimit, "Must be set");
         if (_userLimit) {
             require(_poolLimitPerUser > poolLimitPerUser, "New limit must be higher");
@@ -255,7 +255,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @dev Only callable by owner.
      * @param _rewardPerBlock: the reward per block
      */
-    function updateRewardPerBlock(uint256 _rewardPerBlock) external onlyOwner {
+    function updateRewardPerBlock(uint256 _rewardPerBlock) external override onlyOwner {
         require(block.number < startBlock, "Pool has started");
         rewardPerBlock = _rewardPerBlock;
         emit NewRewardPerBlock(_rewardPerBlock);
@@ -267,7 +267,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _startBlock: the new start block
      * @param _bonusEndBlock: the new end block
      */
-    function updateStartAndEndBlocks(uint256 _startBlock, uint256 _bonusEndBlock) external onlyOwner {
+    function updateStartAndEndBlocks(uint256 _startBlock, uint256 _bonusEndBlock) external override onlyOwner {
         require(block.number < startBlock, "Pool has started");
         require(_startBlock < _bonusEndBlock, "New startBlock must be lower than new endBlock");
         require(block.number < _startBlock, "New startBlock must be higher than current block");
@@ -286,7 +286,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _user: user address
      * @return Pending reward for a given user
      */
-    function pendingReward(address _user) external view returns (uint256) {
+    function pendingReward(address _user) external view override returns (uint256) {
         UserInfo storage user = userInfo[_user];
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
         if (block.number > lastRewardBlock && stakedTokenSupply != 0) {
@@ -338,7 +338,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     /*
      * @notice Return user limit is set or zero.
      */
-    function hasUserLimit() public view returns (bool) {
+    function hasUserLimit() public view override returns (bool) {
         if (!userLimit || (block.number >= (startBlock + numberBlocksForUserLimit))) {
             return false;
         }
