@@ -23,7 +23,7 @@
 
   },
   "scripts": {
-    "deploy": "npx hardhat run --network moonbase scripts/deploy-script.js",
+    "deploy": "npx hardhat --network moonbase deploy",
     "test": "mocha",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test"

@@ -22,6 +22,7 @@
   "scripts": {
     "test": "yarn workspaces run test",
     "ctest": "yarn workspaces run ctest",
-    "compile": "yarn workspaces run compile"
+    "compile": "yarn workspaces run compile",
+    "deploy": "yarn workspaces run deploy"
   }
 }

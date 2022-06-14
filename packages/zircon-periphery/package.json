@@ -35,7 +35,7 @@
     "hardhat-watcher": "^2.1.1"
   },
   "scripts": {
-    "deploy": "npx hardhat run --network moonbase scripts/deploy-script.js",
+    "deploy": "npx hardhat --network moonbase deploy",
     "test": "mocha",
     "compile": "npx hardhat compile",
     "ctest": "npx hardhat compile && npm test"
