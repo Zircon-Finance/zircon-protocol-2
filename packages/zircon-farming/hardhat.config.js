@@ -28,6 +28,12 @@ module.exports = {
       tasks: ["compile"],
     }
   },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts",
+  },
   namedAccounts: {
     deployer: {
       default: 0, // here this will by default take the first account as deployer

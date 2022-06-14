@@ -1,12 +1,13 @@
 import { parseEther } from "ethers/lib/utils";
 import { artifacts, contract } from "hardhat";
-
 import { assert } from "chai";
-import { BN, expectEvent, expectRevert, time } from "@openzeppelin/test-helpers";
+import { BN, expectEvent, expectRevert, time, constants } from "@openzeppelin/test-helpers";
 
-const MockBEP20 = artifacts.require("./libs/MockBEP20.sol");
-const SmartChefInitializable = artifacts.require("./SmartChefInitializable.sol");
-const SmartChefFactory = artifacts.require("./SmartChefFactory.sol");
+const SmartChefFactory = artifacts.require("./SmartChefFactory");
+const SmartChefInitializable = artifacts.require("./SmartChefInitializable");
+const MockERC20 = artifacts.require("./libs/MockERC20");
+const MockERC721 = artifacts.require("./test/MockERC721");
+const PancakeProfile = artifacts.require("./test/MockPancakeProfile");
 
 contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) => {
   let blockNumber;
@@ -17,7 +18,7 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
   let rewardPerBlock = parseEther("10");
 
   // Contracts
-  let mockCAKE, mockPT, smartChef, smartChefFactory;
+  let fakeCake, mockCAKE, mockPT, smartChef, smartChefFactory, mockPancakeBunnies, pancakeProfile;
 
   // Generic result variable
   let result: any;
@@ -27,15 +28,27 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
     startBlock = new BN(blockNumber).add(new BN(100));
     endBlock = new BN(blockNumber).add(new BN(500));
 
-    mockCAKE = await MockBEP20.new("Mock CAKE", "CAKE", parseEther("1000000"), {
+    mockCAKE = await MockERC20.new("Mock CAKE", "CAKE", parseEther("1000000"), {
       from: alice,
     });
 
-    mockPT = await MockBEP20.new("Mock Pool Token 1", "PT1", parseEther("4000"), {
+    mockPT = await MockERC20.new("Mock Pool Token 1", "PT1", parseEther("4000"), {
       from: alice,
     });
+
+    // Fake $Cake Token
+    fakeCake = await MockERC20.new("FakeSwap", "Fake", parseEther("100"), { from: alice });
 
     smartChefFactory = await SmartChefFactory.new({ from: alice });
+
+    // Pancake Bunnies / Profile setup
+    mockPancakeBunnies = await MockERC721.new("Pancake Bunnies", "PB", { from: alice });
+    pancakeProfile = await PancakeProfile.new(mockCAKE.address, parseEther("2"), parseEther("1"), parseEther("2"), {
+      from: alice,
+    });
+
+    await pancakeProfile.addTeam("1st Team", "Be a Chef!", { from: alice });
+    await pancakeProfile.addNftAddress(mockPancakeBunnies.address, { from: alice });
   });
 
   describe("SMART CHEF #1 - NO POOL LIMIT", async () => {
@@ -47,6 +60,10 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
         startBlock,
         endBlock,
         poolLimitPerUser,
+        0,
+        pancakeProfile.address,
+        true,
+        0,
         alice
       );
 
@@ -72,14 +89,20 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
     });
 
     it("Users deposit", async () => {
+      let i = 0;
       for (let thisUser of [bob, carol, david, erin]) {
         await mockCAKE.mintTokens(parseEther("1000"), { from: thisUser });
         await mockCAKE.approve(smartChef.address, parseEther("1000"), {
           from: thisUser,
         });
+        await mockPancakeBunnies.mint({ from: thisUser });
+        await mockPancakeBunnies.setApprovalForAll(pancakeProfile.address, true, { from: thisUser });
+        await mockCAKE.approve(pancakeProfile.address, constants.MAX_UINT256, { from: thisUser });
+        await pancakeProfile.createProfile("1", mockPancakeBunnies.address, i.toString(), { from: thisUser });
         result = await smartChef.deposit(parseEther("100"), { from: thisUser });
         expectEvent(result, "Deposit", { user: thisUser, amount: String(parseEther("100")) });
         assert.equal(String(await smartChef.pendingReward(thisUser)), "0");
+        i++;
       }
     });
 
@@ -152,6 +175,10 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
           startBlock,
           endBlock,
           poolLimitPerUser,
+          0,
+          pancakeProfile.address,
+          true,
+          0,
           bob,
           { from: bob }
         ),
@@ -168,6 +195,10 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
           startBlock,
           endBlock,
           poolLimitPerUser,
+          0,
+          pancakeProfile.address,
+          true,
+          0,
           alice,
           { from: alice }
         ),
@@ -182,6 +213,10 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
           startBlock,
           endBlock,
           poolLimitPerUser,
+          0,
+          pancakeProfile.address,
+          true,
+          0,
           alice,
           { from: alice }
         ),
@@ -196,10 +231,56 @@ contract("Smart Chef Factory", ([alice, bob, carol, david, erin, ...accounts]) =
           startBlock,
           endBlock,
           poolLimitPerUser,
+          0,
+          pancakeProfile.address,
+          true,
+          0,
           alice,
           { from: alice }
         ),
         "function call to a non-contract account"
+      );
+    });
+  });
+
+  describe("Owner can use recoverToken", async () => {
+    let amount = parseEther("100").toString();
+
+    it("Owner can recover token", async () => {
+      await fakeCake.transfer(smartChef.address, amount, { from: alice });
+
+      result = await smartChef.recoverToken(fakeCake.address, { from: alice });
+
+      expectEvent(result, "TokenRecovery", {
+        token: fakeCake.address,
+        amount: amount,
+      });
+
+      expectEvent.inTransaction(result.receipt.transactionHash, fakeCake, "Transfer", {
+        from: smartChef.address,
+        to: alice,
+        value: amount,
+      });
+    });
+
+    it("Owner cannot recover token if balance is zero", async () => {
+      await expectRevert(
+        smartChef.recoverToken(fakeCake.address, { from: alice }),
+        "Operations: Cannot recover zero balance"
+      );
+    });
+
+    it("Owner cannot recover staked token", async () => {
+      await expectRevert(
+        smartChef.recoverToken(mockCAKE.address, { from: alice }),
+        "Operations: Cannot recover staked token"
+      );
+    });
+
+    it("Owner cannot recover reward token", async () => {
+      await expectRevert(
+        smartChef.recoverToken(mockPT.address, { from: alice }),
+        "Operations: Cannot recover reward token"
       );
     });
   });
