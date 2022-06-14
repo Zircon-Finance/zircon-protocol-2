@@ -35,7 +35,6 @@ library ZirconLibrary {
         }
     }
 
-
     // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
     // @_amount is the quantity to convert
     // @_totalSupply is the supply of the pt's tranch
@@ -70,4 +69,18 @@ library ZirconLibrary {
         //This adjustment is only used for share calculations, the full amount of tokens is removed.
         omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
     }
+
+    function calculateDeltaGamma(uint oldGamma, uint newGamma, uint average, uint sampling) pure internal returns (uint average) {
+
+    }
+
+    function absoluteDiff(uint value1, uint value2) pure internal returns (uint abs) {
+        if (value1 >= value2) {
+            abs = value1 - value2;
+        } else {
+            abs = value2 - value1;
+        }
+    }
+
+
 }
