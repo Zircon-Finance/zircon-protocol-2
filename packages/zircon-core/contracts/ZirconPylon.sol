@@ -49,9 +49,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
-    uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
 
-    uint public EMABlock; //Last block height of the EMA update
+    uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
+    uint public thisBlockEMA; //A storage var for this block's changes.
+    uint public EMASamples;
+
+    uint public EMABlockNumber; //Last block height of the EMA update
     uint public lastFTV; //Old float total value, used to calculate percentage increase
 
 
@@ -598,17 +601,35 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 gammaMulDecimals = totalPoolValueAnchorPrime/((virtualAnchorBalance.sub(pylonReserve0)).mul(4));
             }
 
+
+
+            //updateDelta()
+
             //Calculates a "delta gamma" EMA which is used to "lock down" the pool.
             //Above a threshold, fees get absurdly high and make it very difficult to complete price manipulation cycles (like in exploits).
             //The initial "trigger" that pumps the EMA is not taxed, to allow for legitimate whales to come in.
 
             //Using an EMA makes it more resilient, as otherwise an attacker could just wait out the sampling period to eliminate the outlier.
 
-//            if (block.number != EMABlock) {
-//                //Only updates if the block number has changed
-//
-//
-//            }
+            //Block numbers are overall harder to manipulate and more relevant for our purposes.
+            //There is some variability due to block time, it would make sense to tune the number of samples for each chain.
+
+        uint blockDiff = block.number.sub(EMABlockNumber);
+            if (blockDiff != 0) {
+
+                //Using past average means that delta spikes stay embedded in it for a while
+
+                gammaEMA = (gammaEMA.mul(EMASamples).add(thisBlockEMA))/(EMASamples.add(blockDiff));
+
+                //Resets thisBlock values
+
+                thisBlockEMA = ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma);
+                EMABlockNumber = block.number;
+            } else {
+
+                //Adds any delta change if it's in the same block.
+                thisBlockEMA = thisBlockEMA.add(ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma));
+            }
 
 
             // TODO: (see if make sense to insert a floor to for example 25/75)
