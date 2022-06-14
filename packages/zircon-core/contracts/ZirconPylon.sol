@@ -55,8 +55,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public EMASamples;
 
     uint public EMABlockNumber; //Last block height of the EMA update
-    uint public lastFTV; //Old float total value, used to calculate percentage increase
 
+    uint deltaGammaThreshold; //Shouldn't be unreasonably low. A 3-4% change in a single block should be large enough to detect manipulation attempts.
+    uint deltaGammaMaxFee;
 
     uint public lastK;
     uint public lastPoolTokens;
@@ -433,6 +434,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         amountOut = amountIn.sub(fee);
     }
 
+    //Anti-exploit measure applying extra fees for any mint/burn operation that occurs after a massive gamma change.
+    //In principle classic "oracle" exploits merely speed up/force natural outcomes.
+    //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
+    //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
+    function applyDeltaTax(uint amountIn) private returns (uint amountOut) {
+
+        
+
+    }
+
 
     // @notice Mint Async 100 lets you invest in one liquidity
     // The difference with Sync Liquidity is that it goes directly to the Pool
@@ -632,7 +643,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
 
 
-            // TODO: (see if make sense to insert a floor to for example 25/75)
+            // TODO: permanence factor for fees
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
         }
