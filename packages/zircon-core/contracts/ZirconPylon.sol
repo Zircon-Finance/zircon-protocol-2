@@ -373,7 +373,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
             amountIn = balance1.sub(_reserve1);
 
-            (liquidity, amountOut ) = _mintPoolToken(amountIn, _reserve1, _reservePairTranslated1, anchorPoolTokenAddress, _to, isAnchor);
+            (liquidity, amountOut) = _mintPoolToken(amountIn, _reserve1, _reservePairTranslated1, anchorPoolTokenAddress, _to, isAnchor);
         } else {
             uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
             amountIn = balance0.sub(_reserve0);

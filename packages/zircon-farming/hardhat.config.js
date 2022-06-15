@@ -4,6 +4,7 @@ require('hardhat-contract-sizer');
 require("hardhat-dependency-compiler");
 require('solidity-docgen');
 require('hardhat-deploy');
+require('hardhat-abi-exporter');
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -27,6 +28,14 @@ module.exports = {
     compilation: {
       tasks: ["compile"],
     }
+  },
+  abiExporter: {
+    path: '../zircon-periphery/core_contracts/abi',
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    spacing: 2,
+    pretty: true,
   },
   paths: {
     sources: "./contracts",
