@@ -90,7 +90,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     // **** EVENTS ****
     event PylonUpdate(uint _reserve0, uint _reserve1);
-    event PylonSync(uint _vab, uint _vfb, uint _gamma);
+    event PylonSync(uint _vab, uint _gamma);
 
     // Transform in just one event
     event MintSync(address sender, uint aIn0, bool isAnchor);
@@ -456,17 +456,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
             if(feeBps >= 10000) {
                 fee = amountIn;
-                return;
             }
 
             fee = amountIn.mul(feeBps)/10000;
-            return;
         }
 
         //Base case where the threshold isn't passed
+        else {
+            applied = false;
+            fee = 0;
+        }
 
-        applied = false;
-        fee = 0;
+
     }
 
 
@@ -670,7 +671,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             // TODO: permanence factor for fees
             // Sync pool also gets a claim to these
-            emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
+            /// @notice event no longer has vfb
+            emit PylonSync(virtualAnchorBalance, gammaMulDecimals);
         }
     }
 
