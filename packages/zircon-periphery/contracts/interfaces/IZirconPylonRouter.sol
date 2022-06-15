@@ -28,7 +28,6 @@ interface IZirconPylonRouter {
         uint amountDesired,
         bool isAnchor,
         address to,
-        bool shouldStake,
         address pool,
         uint deadline
     ) external returns (uint amount, uint liquidity);
@@ -37,6 +36,7 @@ interface IZirconPylonRouter {
         address token,
         bool isAnchor,
         address to,
+        address farm,
         uint deadline
     ) external payable returns (uint liquidity);
 
@@ -46,6 +46,7 @@ interface IZirconPylonRouter {
         uint amountDesired,
         bool isAnchor,
         address to,
+        address farm,
         uint deadline
     ) external returns (uint liquidity);
 
@@ -53,6 +54,7 @@ interface IZirconPylonRouter {
         address token,
         bool isAnchor,
         address to,
+        address farm,
         uint deadline
     ) external payable returns (uint liquidity);
 
@@ -65,6 +67,7 @@ interface IZirconPylonRouter {
         uint amountBMin,
         bool shouldReceiveAnchor,
         address to,
+        address farm,
         uint deadline
     ) external returns (uint amountA, uint amountB, uint liquidity);
 
@@ -76,6 +79,7 @@ interface IZirconPylonRouter {
         bool isAnchor,
         bool shouldReceiveAnchor,
         address to,
+        address farm,
         uint deadline
     )  external payable returns (uint amountA, uint amountB, uint liquidity);
 

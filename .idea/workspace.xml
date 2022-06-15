@@ -184,16 +184,15 @@
       <change beforePath="$PROJECT_DIR$/../zircon-landing/static/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/static/robots.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zircon-landing/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/yarn.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/contracts/PsionicFarmInitializable.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-farming/contracts/PsionicFarmInitializable.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-farming/contracts/interfaces/IPsionicFarm.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-farming/contracts/interfaces/IPsionicFarm.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-farming/hardhat.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-farming/hardhat.config.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/test/SmartChef.test.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/test/SmartChefFactory.test.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/test/legacy/BnbStaking.test.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/test/legacy/MasterChef.test.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/test/legacy/SyrupBar.test.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/test/legacy/Timelock.test.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/contracts/ZirconPylonRouter.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/contracts/ZirconPylonRouter.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/contracts/interfaces/IZirconPylonRouter.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/contracts/interfaces/IZirconPylonRouter.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ERC20.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ERC20.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/hardhat.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/hardhat.config.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/test/arouter-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/test/arouter-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/test/shared/fixtures.js" afterDir="false" />
     </list>
@@ -303,7 +302,7 @@
       <workItem from="1654703134785" duration="3132000" />
       <workItem from="1654752268171" duration="2950000" />
       <workItem from="1655013758509" duration="1200000" />
-      <workItem from="1655018309481" duration="39815000" />
+      <workItem from="1655018309481" duration="60685000" />
     </task>
     <servers />
   </component>
