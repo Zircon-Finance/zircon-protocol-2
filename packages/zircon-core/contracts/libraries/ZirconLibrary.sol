@@ -70,7 +70,7 @@ library ZirconLibrary {
         omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
     }
 
-    function calculateDeltaGamma(uint oldGamma, uint newGamma, uint average, uint sampling) pure internal returns (uint average) {
+    function calculateDeltaGamma(uint oldGamma, uint newGamma) pure internal returns (uint average) {
 
     }
 

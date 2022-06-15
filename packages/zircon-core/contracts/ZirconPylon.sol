@@ -49,11 +49,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
+
     uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
+    uint public thisBlockEMA; //A storage var for this block's changes.
+    uint public EMASamples;
 
-    uint public EMABlock; //Last block height of the EMA update
-    uint public lastFTV; //Old float total value, used to calculate percentage increase
+    uint public EMABlockNumber; //Last block height of the EMA update
 
+    uint public deltaGammaThreshold; //Shouldn't be unreasonably low. A 3-4% change in a single block should be large enough to detect manipulation attempts.
+    uint public deltaGammaMinFee;
 
     uint public lastK;
     uint public lastPoolTokens;
@@ -391,8 +395,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @return amount minus fees payed
 
     //Swapping every time is not ideal for gas, but it will be changed if we ever deploy to a chain like ETH
+    //We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, bool isAnchor) private returns (uint amountOut){
-        uint fee = amountIn.mul(dynamicFeePercentage)/10000; //1basis point resolution
+        (uint fee, ) = applyDeltaTax(amountIn);
+
+        fee = fee.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals)); //1basis point resolution
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
@@ -407,7 +414,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice private function that sends to pair the LP tokens
     /// Burns them sending it to the energy address
     function payBurnFees(uint amountIn) private returns (uint amountOut) {
-        uint fee = amountIn.mul(dynamicFeePercentage)/10000;
+        (uint fee, ) = applyDeltaTax(amountIn);
+
+        fee = fee.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
+
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
         amountOut = amountIn.sub(fee);
@@ -417,17 +427,46 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// Fees here are increased depending on current Gamma
     /// on unbalanced Gamma, fees are higher
 
-    //TODO: The fee needs to be paid with  max((abs(current gamma - 0.5), (abs(future gamma - 0.5)), otherwise someone can just supply the entire pool at 50%
-    function payBurnAsyncFees(uint amountIn) private returns (uint amountOut) {
-        uint gammaFee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
-        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/10000; //TODO: Fix this up
-        address revAddress = IZirconPair(pairAddress).energyRevenueAddress();
-        _safeTransfer(pairAddress, revAddress, amountIn.mul(gammaFee/2)/10000);
-        IZirconEnergyRevenue(revAddress).calculate();
 
-        _safeTransfer(pairAddress, pairAddress, fee);
-        IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
-        amountOut = amountIn.sub(fee);
+    //Unnecessary with Delta Tax.
+//    function payBurnAsyncFees(uint amountIn) private returns (uint amountOut) {
+//        (uint fee, ) = applyDeltaTax(amountIn);
+//
+//        uint gammaFee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
+//        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/10000; //TODO: Fix this up
+//        address revAddress = IZirconPair(pairAddress).energyRevenueAddress();
+//        _safeTransfer(pairAddress, revAddress, amountIn.mul(gammaFee/2)/10000);
+//        IZirconEnergyRevenue(revAddress).calculate();
+//
+//        _safeTransfer(pairAddress, pairAddress, fee);
+//        IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
+//        amountOut = amountIn.sub(fee);
+//    }
+
+    //Anti-exploit measure applying extra fees for any mint/burn operation that occurs after a massive gamma change.
+    //In principle classic "oracle" exploits merely speed up/force natural outcomes.
+    //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
+    //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
+    function applyDeltaTax(uint amountIn) private returns (uint fee, bool applied) {
+
+        uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
+
+        if (maxDerivative >= deltaGammaThreshold) {
+            applied = true;
+            uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
+            if(feeBps >= 10000) {
+                fee = amountIn;
+                return;
+            }
+
+            fee = amountIn.mul(feeBps)/10000;
+            return;
+        }
+
+        //Base case where the threshold isn't passed
+
+        applied = false;
+        fee = 0;
     }
 
 
@@ -598,20 +637,38 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 gammaMulDecimals = totalPoolValueAnchorPrime/((virtualAnchorBalance.sub(pylonReserve0)).mul(4));
             }
 
+
+
+            //updateDelta()
+
             //Calculates a "delta gamma" EMA which is used to "lock down" the pool.
             //Above a threshold, fees get absurdly high and make it very difficult to complete price manipulation cycles (like in exploits).
             //The initial "trigger" that pumps the EMA is not taxed, to allow for legitimate whales to come in.
 
             //Using an EMA makes it more resilient, as otherwise an attacker could just wait out the sampling period to eliminate the outlier.
 
-//            if (block.number != EMABlock) {
-//                //Only updates if the block number has changed
-//
-//
-//            }
+            //Block numbers are overall harder to manipulate and more relevant for our purposes.
+            //There is some variability due to block time, it would make sense to tune the number of samples for each chain.
+
+        uint blockDiff = block.number.sub(EMABlockNumber);
+            if (blockDiff != 0) {
+
+                //Using past average means that delta spikes stay embedded in it for a while
+
+                gammaEMA = (gammaEMA.mul(EMASamples).add(thisBlockEMA))/(EMASamples.add(blockDiff));
+
+                //Resets thisBlock values
+
+                thisBlockEMA = ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma);
+                EMABlockNumber = block.number;
+            } else {
+
+                //Adds any delta change if it's in the same block.
+                thisBlockEMA = thisBlockEMA.add(ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma));
+            }
 
 
-            // TODO: (see if make sense to insert a floor to for example 25/75)
+            // TODO: permanence factor for fees
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
         }
@@ -708,7 +765,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             ptu = payBurnFees(ptu);
             // Anchor slashing logic
             if (_isAnchor) {
-                (ptu, extraPercentage) = handleOmegaSlashing(ptu);
+                (ptu, extraPercentage) = handleOmegaSlashing(ptu); //This one retrieves tokens from ZirconEnergy if available
             }
             _safeTransfer(pairAddress, pairAddress, ptu);
         }
