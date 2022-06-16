@@ -98,6 +98,8 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         pairContract,
         poolTokenContract,
         pylonContract,
-        farm
+        farm,
+        psionicFactoryInstance,
+        psionicFarmInit
     }
 }

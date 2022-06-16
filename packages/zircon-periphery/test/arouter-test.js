@@ -18,7 +18,7 @@ let factoryPylonInstance, pylonInstance,
     pairContract,
     poolTokenContract,
     pylonContract,
-    farm;
+    farm, psionicFactoryInstance, psionicFarmInit;
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const overrides = {
@@ -51,6 +51,8 @@ describe("Pylon Router", () => {
         poolTokenContract = fixtures.poolTokenContract
         pylonContract = fixtures.pylonContract
         farm = fixtures.farm
+        psionicFactoryInstance = fixtures.psionicFactoryInstance
+        psionicFarmInit = fixtures.psionicFarmInit
 
     });
 
@@ -150,8 +152,8 @@ describe("Pylon Router", () => {
             farm.address,
             ethers.constants.MaxUint256);
         let user = await farm.userInfo(account.address);
-        expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('0'))
-        expect(user[0]).to.eq(ethers.BigNumber.from('2044999999999998929'))
+        expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('1999999999999999000'))
+        expect(user[0]).to.eq(ethers.BigNumber.from('44999999999999929'))
     });
 
 
@@ -172,6 +174,9 @@ describe("Pylon Router", () => {
             ethers.constants.MaxUint256, {value: expandTo18Decimals(2)});
         //expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('1022004889975550110'))
         //Let's get the instances of the new created Pylon and pair....
+
+
+
         let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
         let newPair = pairContract.attach(pairAddress);
 
@@ -182,11 +187,52 @@ describe("Pylon Router", () => {
         let ptInstance0 = poolTokenContract.attach(poolAddress0);
         let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
+
         // Let''s check that everything was correctly minted....
         expect(await ptInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('999999999999999000'))
         expect(await ptInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from('3998000999500251700'))
         expect(await token0.balanceOf(pylon.address)).to.eq(ethers.BigNumber.from('47475088072206285'))
         expect(await newPair.balanceOf(pylon.address)).to.eq(ethers.BigNumber.from('1794854894223302307'))
+    });
+
+    it('should add & stake sync liquidity ETH', async function () {
+        await token0.approve(router.address, ethers.constants.MaxUint256)
+        await token1.approve(router.address, ethers.constants.MaxUint256)
+        await router.initETH(
+            token0.address,
+            expandTo18Decimals(1),
+            true,
+            account.address,
+            ethers.constants.MaxUint256, {value: expandTo18Decimals(2)})
+        //Let's get the instances of the new created Pylon and pair....
+        let pairAddress = await factoryInstance.getPair(WETH.address, token0.address);
+        let newPair = pairContract.attach(pairAddress);
+
+        let pylonAddress = await factoryPylonInstance.getPylon(WETH.address, token0.address);
+        let pylon = pylonContract.attach(pylonAddress);
+        let poolAddress0 = await pylon.floatPoolTokenAddress();
+        let poolAddress1 = await pylon.anchorPoolTokenAddress();
+        let ptInstance0 = poolTokenContract.attach(poolAddress0);
+        let ptInstance1 = poolTokenContract.attach(poolAddress1);
+
+        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
+        await psionicFactoryInstance.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
+        let farm = psionicFarmInit.attach(farmAddress);
+
+        await ptInstance0.approve(farm.address, ethers.constants.MaxUint256)
+        await router.addSyncLiquidityETH(
+            token0.address,
+            true,
+            account.address,
+            farm.address,
+            ethers.constants.MaxUint256, {value: expandTo18Decimals(2)});
+
+
+        // Let''s check that everything was correctly minted....
+        let user = await farm.userInfo(account.address);
+        expect(user[0]).to.eq(ethers.BigNumber.from('1998000999500252700'))
+
+        expect(await ptInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from('1999999999999999000'))
     });
 
     it('should add async-100 liquidity', async function () {
@@ -207,6 +253,30 @@ describe("Pylon Router", () => {
             account.address,
             ethers.constants.AddressZero,
             ethers.constants.MaxUint256);
+        expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('2044341737537214747'))
+    });
+
+    it('should add & stake async-100 liquidity', async function () {
+        await token0.approve(router.address, ethers.constants.MaxUint256)
+        await token1.approve(router.address, ethers.constants.MaxUint256)
+        await router.init(
+            token0.address,
+            token1.address,
+            expandTo18Decimals(1),
+            expandTo18Decimals(2),
+            account.address,
+            ethers.constants.MaxUint256)
+        await router.addAsyncLiquidity100(
+            token0.address,
+            token1.address,
+            ethers.BigNumber.from('44999999999999929'),
+            true,
+            account.address,
+            farm.address,
+            ethers.constants.MaxUint256);
+        let user = await farm.userInfo(account.address);
+        expect(user[0]).to.eq(ethers.BigNumber.from('1998000999500252700'))
+
         expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('2044341737537214747'))
     });
 
