@@ -1,6 +1,3 @@
-{
-  "abi": [
-    "constructor()"
-  ],
-  "bytecode": "0x"
-}
+[
+  "constructor()"
+]
