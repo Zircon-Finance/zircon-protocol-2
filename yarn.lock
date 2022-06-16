@@ -5935,8 +5935,9 @@ hard-rejection@^2.1.0:
   resolved "https://registry.npmjs.org/hard-rejection/-/hard-rejection-2.1.0.tgz"
   integrity sha512-VIZB+ibDhx7ObhAe7OVtoEbuP4h/MuOTHJ+J8h/eBXotJYl0fBgR72xDFCKgIh22OJZIOVNxBMWuhAr10r8HdA==
 
-hardhat-abi-exporter@../../hardhat-abi-exporter:
+"hardhat-abi-exporter@https://github.com/VittoriDavide/hardhat-abi-exporter":
   version "2.9.0"
+  resolved "https://github.com/VittoriDavide/hardhat-abi-exporter#b64a71eae8d9b4b194ed8d4606d337e6a1c72bb0"
   dependencies:
     "@ethersproject/abi" "^5.5.0"
     delete-empty "^3.0.0"

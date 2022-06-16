@@ -64,13 +64,17 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
     let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress1, token0.address, 100, 0, 1000, 100000, 100000, address)
     await psionicFactoryInstance.deployPool(poolAddress1, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", address)
     const psionicFarmInit = await ethers.getContractFactory(psionicFarm['abi'], psionicFarm['bytecode'])
-    let farm = psionicFarmInit.attach(farmAddress);
+    let anchorFarm = psionicFarmInit.attach(farmAddress);
+
+    let floatFarmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, token0.address, 100, 0, 1000, 100000, 100000, address)
+    await psionicFactoryInstance.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", address)
+    let floatFarm = psionicFarmInit.attach(floatFarmAddress);
 
     // Creating Wrapped Ethereum
     let WETH = await ethers.getContractFactory('WETH');
     const WETHInstance = await WETH.deploy()
 
-    // Deployinf Peripheral Lib and Pylon Router
+    // Deploying Peripheral Lib and Pylon Router
     let peripheralLibrary = await (await ethers.getContractFactory('ZirconPeripheralLibrary')).deploy();
     let pylonRouterContract = await ethers.getContractFactory('ZirconPylonRouter', {
         libraries: {
@@ -98,7 +102,8 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         pairContract,
         poolTokenContract,
         pylonContract,
-        farm,
+        anchorFarm,
+        floatFarm,
         psionicFactoryInstance,
         psionicFarmInit
     }
