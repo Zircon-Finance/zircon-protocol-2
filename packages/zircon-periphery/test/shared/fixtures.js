@@ -14,10 +14,9 @@ const OVERRIDES = {
 exports.coreFixtures = async function coreFixtures(address, signer) {
 
     // Creating Random ERC20
-    let tok0 = await ethers.getContractFactory('Token');
-    let tk0 = await tok0.deploy('Token1', 'TOK1');
-    let tok1 = await ethers.getContractFactory('Token');
-    let tk1 = await tok1.deploy('Token2', 'TOK2');
+    let tok = await ethers.getContractFactory('Token');
+    let tk0 = await tok.deploy('Token1', 'TOK1');
+    let tk1 = await tok.deploy('Token2', 'TOK2');
 
     // Creating Energy
     let factoryEnergy = await ethers.getContractFactory(zirconEnergyFactory['abi'], zirconEnergyFactory['bytecode'])
