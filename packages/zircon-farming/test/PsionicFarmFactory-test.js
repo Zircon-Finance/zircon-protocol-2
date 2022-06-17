@@ -4,32 +4,6 @@ const assert = require("assert");
 const {BigNumber} = require("ethers");
 const {expandTo18Decimals} = require("./shared/utils");
 const {coreFixtures} = require("./shared/fixtures");
-const TEST_ADDRESSES = [
-    '0x1000000000000000000000000000000000000000',
-    '0x2000000000000000000000000000000000000000'
-]
-let factoryPylonInstance,  token0, token1,
-    pylonInstance, poolTokenInstance0, poolTokenInstance1,
-    factoryInstance, deployerAddress, account2, account,
-    pair;
-
-const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
-const overrides = {
-    gasLimit: 9999999
-}
-
-async function addLiquidity(token0Amount, token1Amount) {
-    await token0.transfer(pair.address, token0Amount)
-    await token1.transfer(pair.address, token1Amount)
-    await pair.mint(account.address)
-}
-
-async function getOutputAmount(input, inputReserves, outputReserves) {
-    let amountWithFees = input.mul(ethers.BigNumber.from("977"))
-    let numerator = amountWithFees.mul(outputReserves)
-    let denominator = amountWithFees.add(inputReserves.mul(ethers.BigNumber.from("1000")))
-    return numerator.div(denominator)
-}
 
 describe("Simulation", () => {
     // For this simulation test, it'll mantain the same ratio

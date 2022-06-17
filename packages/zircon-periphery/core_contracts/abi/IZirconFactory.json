@@ -1,9 +1,12 @@
-[
-  "function allPairs(uint256) view returns (address)",
-  "function allPairsLength() view returns (uint256)",
-  "function createPair(address,address,address) returns (address)",
-  "function energyFactory() view returns (address)",
-  "function getPair(address,address) view returns (address)",
-  "function migrator() view returns (address)",
-  "function pairCodeHash() pure returns (bytes32)"
-]
+{
+  "abi": [
+    "function allPairs(uint256) view returns (address)",
+    "function allPairsLength() view returns (uint256)",
+    "function createPair(address,address,address) returns (address)",
+    "function energyFactory() view returns (address)",
+    "function getPair(address,address) view returns (address)",
+    "function migrator() view returns (address)",
+    "function pairCodeHash() pure returns (bytes32)"
+  ],
+  "bytecode": "0x"
+}

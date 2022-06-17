@@ -6,6 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import "./PsionicFarmInitializable.sol";
+import "./PsionicFarmVault.sol";
 
 contract PsionicFarmFactory is Ownable {
     event NewPsionicFarmContract(address indexed psionicFarm);
@@ -24,8 +25,7 @@ contract PsionicFarmFactory is Ownable {
      */
     function deployPool(
         IERC20Metadata _stakedToken,
-        IERC20Metadata _rewardToken,
-        uint256 _rewardPerBlock,
+        address[] memory rewardTokens,
         uint256 _startBlock,
         uint256 _bonusEndBlock,
         uint256 _poolLimitPerUser,
@@ -33,26 +33,39 @@ contract PsionicFarmFactory is Ownable {
         address _admin
     ) external onlyOwner returns (address psionicFarmAddress){
         require(_stakedToken.totalSupply() >= 0);
-        require(_rewardToken.totalSupply() >= 0);
-        require(_stakedToken != _rewardToken, "Tokens must be be different");
+        require(_bonusEndBlock > _startBlock);
+
+        address psionicVault;
+        bytes memory bytecodeVault = type(PsionicFarmVault).creationCode;
+        bytes32 saltVault = keccak256(abi.encodePacked(_stakedToken, _startBlock));
+
+        assembly {
+            psionicVault := create2(0, add(bytecodeVault, 32), mload(bytecodeVault), saltVault)
+        }
 
         bytes memory bytecode = type(PsionicFarmInitializable).creationCode;
-        bytes32 salt = keccak256(abi.encodePacked(_stakedToken, _rewardToken, _startBlock));
+        bytes32 salt = keccak256(abi.encodePacked(_stakedToken, psionicVault, _startBlock));
 
         assembly {
             psionicFarmAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
 
+        PsionicFarmVault(psionicVault).initialize(
+            rewardTokens,
+            _bonusEndBlock-_startBlock,
+            psionicFarmAddress
+        );
+
         PsionicFarmInitializable(psionicFarmAddress).initialize(
             _stakedToken,
-            _rewardToken,
-            _rewardPerBlock,
+            IERC20Metadata(psionicVault),
             _startBlock,
             _bonusEndBlock,
             _poolLimitPerUser,
             _numberBlocksForUserLimit,
             _admin
         );
+
         emit NewPsionicFarmContract(psionicFarmAddress);
     }
 }
