@@ -2,7 +2,22 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylonFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylonFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/interfaces/IZirconPylonFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/interfaces/IZirconPylonFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/Context.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/Context.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ERC20.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ERC20.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ERC20Detailed.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ERC20Detailed.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ERC20Mintable.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ERC20Mintable.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/IERC20.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/IERC20.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/IZirconPylonFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/IZirconPylonFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/MinterRole.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/MinterRole.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/Token.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/Token.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ZirconEnergyFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ZirconEnergyFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ZirconPylonFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/core_contracts/abi/ZirconPylonFactory.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,6 +47,38 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
   </component>
+  <component name="RunManager">
+    <configuration default="true" type="SolidityConfigurationType" factoryName="Solidity" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="VMParameters" value="" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="alternativeJrePath" />
+      <option name="alternativeJrePathEnabled" value="false" />
+      <option name="envs">
+        <map />
+      </option>
+      <option name="passParentEnvs" value="true" />
+      <option name="programParameters" value="" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="workingDirectory" value="" />
+      <option name="contractName" value="" />
+      <option name="contractFile" />
+      <option name="functionName" value="" />
+      <option name="vmParameters" value="" />
+      <option name="programParameters" value="" />
+      <option name="workingDirectory" value="" />
+      <option name="envs">
+        <map />
+      </option>
+      <option name="ajreEnabled" value="false" />
+      <option name="ajre" />
+      <module name="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -46,7 +93,11 @@
       <workItem from="1654888176151" duration="1193000" />
       <workItem from="1655114443282" duration="6380000" />
       <workItem from="1655157304840" duration="6858000" />
-      <workItem from="1655300453064" duration="8442000" />
+      <workItem from="1655300453064" duration="9451000" />
+      <workItem from="1655471642742" duration="3183000" />
+      <workItem from="1655477726351" duration="1606000" />
+      <workItem from="1655485695805" duration="2586000" />
+      <workItem from="1655640174149" duration="300000" />
     </task>
     <servers />
   </component>

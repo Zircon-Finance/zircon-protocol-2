@@ -10,5 +10,7 @@
   "function energyCodeHash() pure returns (bytes32)",
   "function energyRevenueCodeHash() pure returns (bytes32)",
   "function getEnergy(address,address) view returns (address)",
-  "function getEnergyRevenue(address,address) view returns (address)"
+  "function getEnergyRevenue(address,address) view returns (address)",
+  "function maxPylonFee() view returns (uint256)",
+  "function minPylonFee() view returns (uint256)"
 ]

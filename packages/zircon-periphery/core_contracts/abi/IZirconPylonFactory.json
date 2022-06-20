@@ -3,6 +3,8 @@
   "function addPylon(address,address,address) returns (address)",
   "function allPylons(uint256) view returns (address)",
   "function allPylonsLength() view returns (uint256)",
+  "function deltaGammaMinFee() view returns (uint256)",
+  "function deltaGammaThreshold() view returns (uint256)",
   "function dynamicFeePercentage() view returns (uint256)",
   "function energyFactory() view returns (address)",
   "function factory() view returns (address)",
