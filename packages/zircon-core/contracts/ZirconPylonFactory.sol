@@ -14,15 +14,13 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage;
-<<<<<<< HEAD
 
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
 
 
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
-=======
->>>>>>> a4b682322d12c771e4a35a063b5d8bd6d998d160
+
 
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
 
