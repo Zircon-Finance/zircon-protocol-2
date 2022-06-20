@@ -30,12 +30,11 @@ contract PsionicFarmFactory is Ownable {
         uint256 _bonusEndBlock,
         uint256 _poolLimitPerUser,
         uint256 _numberBlocksForUserLimit,
-        address _admin
-    ) external onlyOwner returns (address psionicFarmAddress){
+        address _admin)
+    external onlyOwner returns (address psionicFarmAddress, address psionicVault) {
         require(_stakedToken.totalSupply() >= 0);
         require(_bonusEndBlock > _startBlock);
 
-        address psionicVault;
         bytes memory bytecodeVault = type(PsionicFarmVault).creationCode;
         bytes32 saltVault = keccak256(abi.encodePacked(_stakedToken, _startBlock));
 
@@ -52,8 +51,9 @@ contract PsionicFarmFactory is Ownable {
 
         PsionicFarmVault(psionicVault).initialize(
             rewardTokens,
-            _bonusEndBlock-_startBlock,
-            psionicFarmAddress
+            (_bonusEndBlock-_startBlock)*1e18,
+            psionicFarmAddress,
+            _admin
         );
 
         PsionicFarmInitializable(psionicFarmAddress).initialize(

@@ -1,15 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 pragma abicoder v2;
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "hardhat/console.sol";
+
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
 
-    // Array that contains the reward tokens
+    // Mapping that contains the reward tokens
+    mapping (address => bool) tokens;
     address[] public rewardTokens;
 
+    address public farm;
     // Whether it is initialized
     bool public isInitialized;
 
@@ -19,13 +26,13 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
     // transfering tokens
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
+    // Only farming modifier
+    modifier onlyFarm() {
+        require(msg.sender == farm, "Only Farm is allowed");
+        _;
+    }
     constructor() ERC20("Psionic", "PT") {
         PSIONIC_FACTORY = msg.sender;
-    }
-
-    function _safeTransfer(address token, address to, uint value) private {
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
     }
 
     /*
@@ -35,31 +42,49 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
      *   @param _farm: Farm Address
     */
     function initialize(
-        address[] memory _tokens,
+        address[] memory _rewardTokens,
         uint _initialSupply,
-        address _farm
+        address _farm,
+        address _admin
     )  external  {
         require(!isInitialized, "Already initialized");
         require(msg.sender == PSIONIC_FACTORY, "Not factory");
+        require(_rewardTokens.length > 0, "Empty reward tokens");
 
         // Make this contract initialized
         isInitialized = true;
 
         // Saving tokens
-        rewardTokens = _tokens;
+        rewardTokens = _rewardTokens;
 
+        uint tokenLength = _rewardTokens.length;
+
+        for (uint256 i = 0; i < tokenLength; i++) {
+            address token = _rewardTokens[i];
+            bool isToken = tokens[token];
+            if (isToken) {
+                revert("Tokens must be unique");
+            }else{
+                tokens[token] = true;
+            }
+        }
         // Minting initial Supply to Psionic Farm
         _mint(_farm, _initialSupply);
 
         // Transfer ownership to the admin address who becomes owner of the contract
-        transferOwnership(_farm);
+        transferOwnership(_admin);
+        farm = _farm;
     }
+
+//    function updateTokens(mapping (address => bool) memory _tokens) external onlyOwner {
+//        rewardTokens = rewardTokens;
+//    }
 
     /*
     *   @notice Mints amount of tokens to the owner
     *   @param _amount: of tokens to mint
     */
-    function adjust(uint _amount, bool shouldMint) external onlyOwner nonReentrant {
+    function adjust(uint _amount, bool shouldMint) external onlyFarm nonReentrant {
         if (shouldMint) {
             _mint(address(owner()), _amount);
         } else {
@@ -71,21 +96,22 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
     *   @notice Burn Function to withdraw tokens
     *   @param _to: the address to send the rewards token
     */
-    function burn(address _to, uint _liquidity) external onlyOwner nonReentrant {
+    function burn(address _to, uint _liquidity) external onlyFarm nonReentrant {
         require(_liquidity > 0, "PFV: Not enough");
-
         address[] memory tokensToWithdraw = rewardTokens;
         uint tokenLength = tokensToWithdraw.length;
         uint ts = totalSupply();
 
         for (uint256 i = 0; i < tokenLength; i++) {
-            address token = tokensToWithdraw[i];
-            uint balance = ERC20(token).balanceOf(address(this));
-            uint amount = balance * (_liquidity)/ts;
-            _safeTransfer(token, _to, amount);
+            IERC20 token = IERC20(tokensToWithdraw[i]);
+            uint balance = token.balanceOf(address(this));
+            uint amount = (balance * (_liquidity))/ts;
+            if (balance > amount) {
+                token.safeTransfer(_to, amount);
+            }
         }
 
-        _burn(owner(), _liquidity);
+        _burn(farm, _liquidity);
     }
 
 }

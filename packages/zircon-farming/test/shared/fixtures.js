@@ -1,7 +1,7 @@
 const { ethers } = require('hardhat');
 const {expandTo18Decimals} = require("./utils");
 
-exports.coreFixtures = async function coreFixtures(address) {
+exports.coreFixtures = async function coreFixtures(address, startBlock, endBlock, limits) {
 
     // Deploying Factory
     let psionicFactoryContract = await ethers.getContractFactory('PsionicFarmFactory');
@@ -14,29 +14,41 @@ exports.coreFixtures = async function coreFixtures(address) {
     let tk2 = await tok.deploy('LP Token', 'LPT');
 
     // Deploying Pool
-    let farmAddress = await psionicFactory.callStatic.deployPool(
+    let addresses = await psionicFactory.callStatic.deployPool(
         tk2.address,
         [tk0.address, tk1.address],
-        0,
-        100,
-        0,
-        0,
+        startBlock,
+        endBlock,
+        limits[0],
+        limits[1],
         address
     )
+
     await psionicFactory.deployPool(
         tk2.address,
         [tk0.address, tk1.address],
-        0,
-        100,
-        0,
-        0,
+        startBlock,
+        endBlock,
+        limits[0],
+        limits[1],
         address
     )
 
-    let psionicFarm = await ethers.getContractFactory("PsionicFarmInitializable");
-    psionicFarm.attach(farmAddress);
+    let psionicFarmContract = await ethers.getContractFactory("PsionicFarmInitializable");
+    let psionicFarm = psionicFarmContract.attach(addresses[0]);
+
+    let psionicVaultContract = await ethers.getContractFactory("PsionicFarmVault");
+    let psionicVault = psionicVaultContract.attach(addresses[1]);
+
+    await tk0.transfer(addresses[1], expandTo18Decimals(10))
+    await tk1.transfer(addresses[1], expandTo18Decimals(20))
 
     return {
-        psionicFarm
+        psionicFarm,
+        tk0,
+        tk1,
+        tk2,
+        psionicFactory,
+        psionicVault
     }
 }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 
 interface IPsionicFarmVault {
+
     function rewardTokens(uint) external view returns (address);
     function isInitialized() external view returns (bool);
     function PSIONIC_FACTORY() external view returns (address);
@@ -24,6 +25,12 @@ interface IPsionicFarmVault {
     *   @param: _amount of tokens to mint
     */
     function adjust(uint _amount, bool shouldMint) external;
+
+    /*
+*   @notice: Allows owner to change tokens
+    *   @param: new tokens mapping
+    */
+//    function updateTokens(address[] memory _tokens) external;
 
     /*
     *   @notice Burn Function to withdraw tokens
