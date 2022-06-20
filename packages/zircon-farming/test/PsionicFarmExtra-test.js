@@ -1,0 +1,54 @@
+const { expect } = require("chai");
+const { ethers } = require('hardhat');
+const assert = require("assert");
+const {BigNumber} = require("ethers");
+const {expandTo18Decimals} = require("./shared/utils");
+const {coreFixtures} = require("./shared/fixtures");
+
+describe("Psionic Farm Factory", () => {
+    // For this simulation test, it'll mantain the same ratio
+
+    let TOKEN0_AMOUNT = expandTo18Decimals(1)
+    let TOKEN1_AMOUNT = expandTo18Decimals(2)
+
+
+    beforeEach(async () => {
+        [account, account2] = await ethers.getSigners();
+        deployerAddress = account.address;
+        blockNumber = await ethers.provider.getBlockNumber()
+        startBlock = blockNumber + 100
+        endBlock =  blockNumber + 500
+
+        let fixtures = await coreFixtures(deployerAddress, startBlock, endBlock, [expandTo18Decimals("100").toString(), 25]);
+        psionicFarm = fixtures.psionicFarm
+        psionicFactory = fixtures.psionicFactory
+        psionicVault = fixtures.psionicVault
+
+        tk0 = fixtures.tk0
+        tk1 = fixtures.tk1
+        tk2 = fixtures.tk2
+    });
+
+
+    it('should not allow more investment by the user', async function () {
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
+        await psionicFarm.deposit(expandTo18Decimals("100"))
+        await expect(psionicFarm.deposit(expandTo18Decimals(1))).to.be.
+        revertedWith("Deposit: Amount above limit")
+    });
+
+    it('should allow investment after number of blocks ', async function () {
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
+
+        await expect(psionicFarm.deposit(
+            expandTo18Decimals(100)
+        )).to.emit(psionicFarm, 'Deposit')
+            .withArgs(account.address, expandTo18Decimals(100));
+        let blockNumber = await ethers.provider.getBlockNumber()
+        let newBlock = startBlock + 30 - blockNumber
+        await ethers.provider.send("hardhat_mine", ['0x' + newBlock.toString(16)]);
+        await psionicFarm.deposit(expandTo18Decimals(1))
+    });
+
+
+})

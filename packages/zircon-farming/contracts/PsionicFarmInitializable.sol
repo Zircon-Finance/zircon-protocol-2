@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 pragma abicoder v2;
+import "hardhat/console.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IPsionicFarm} from "./interfaces/IPsionicFarm.sol";
+import {IPsionicFarmVault} from "./interfaces/IPsionicFarmVault.sol";
 
 contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20Metadata;
@@ -15,7 +15,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         uint256 amount; // How many staked tokens the user has provided
         uint256 rewardDebt; // Reward debt
     }
-
 
     // The address of the psionic factory
     address public  immutable PSIONIC_FACTORY;
@@ -44,17 +43,16 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     // Block numbers available for user limit (after start block)
     uint256 public  numberBlocksForUserLimit;
 
-    // CAKE tokens created per block.
-    uint256 public  rewardPerBlock;
+
 
     // The precision factor
     uint256 public  PRECISION_FACTOR;
 
     // The reward token
-    IERC20Metadata public  rewardToken;
+    IERC20Metadata public psionicVault;
 
     // The staked token
-    IERC20Metadata public  stakedToken;
+    IERC20Metadata public stakedToken;
 
     // Info of each user that stakes tokens (stakedToken)
     mapping(address => UserInfo) public userInfo;
@@ -62,7 +60,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     event Deposit(address indexed user, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 amount);
     event NewStartAndEndBlocks(uint256 startBlock, uint256 endBlock);
-    event NewRewardPerBlock(uint256 rewardPerBlock);
     event NewPoolLimit(uint256 poolLimitPerUser);
     event RewardsStop(uint256 blockNumber);
     event TokenRecovery(address indexed token, uint256 amount);
@@ -78,8 +75,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     /*
      * @notice Initialize the contract
      * @param _stakedToken: staked token address
-     * @param _rewardToken: reward token address
-     * @param _rewardPerBlock: reward per block (in rewardToken)
+     * @param _psionicVault: vault containing reward tokens
      * @param _startBlock: start block
      * @param _bonusEndBlock: end block
      * @param _poolLimitPerUser: pool limit per user in stakedToken (if any, else 0)
@@ -88,8 +84,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      */
     function initialize(
         IERC20Metadata _stakedToken,
-        IERC20Metadata _rewardToken,
-        uint256 _rewardPerBlock,
+        IERC20Metadata _psionicVault,
         uint256 _startBlock,
         uint256 _bonusEndBlock,
         uint256 _poolLimitPerUser,
@@ -103,8 +98,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         isInitialized = true;
 
         stakedToken = _stakedToken;
-        rewardToken = _rewardToken;
-        rewardPerBlock = _rewardPerBlock;
+        psionicVault = _psionicVault;
         startBlock = _startBlock;
         bonusEndBlock = _bonusEndBlock;
 
@@ -114,10 +108,10 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
             numberBlocksForUserLimit = _numberBlocksForUserLimit;
         }
 
-        uint256 decimalsRewardToken = uint256(rewardToken.decimals());
-        require(decimalsRewardToken < 30, "Must be inferior to 30");
+//        uint256 decimalsRewardToken = uint256(rewardToken.decimals());
+//        require(decimalsRewardToken < 30, "Must be inferior to 30");
 
-        PRECISION_FACTOR = uint256(10**(uint256(30) - decimalsRewardToken));
+        PRECISION_FACTOR = uint256(10**12);
 
         // Set the lastRewardBlock as the startBlock
         lastRewardBlock = startBlock;
@@ -126,15 +120,13 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         transferOwnership(_admin);
     }
 
-    /*
-     * @notice Deposit staked tokens and collect reward tokens (if any)
-     * @param _amount: amount to withdraw (in rewardToken)
-     */
-    function deposit(uint256 _amount) external  nonReentrant {
-        UserInfo storage user = userInfo[msg.sender];
+    function _sendTokens(uint _amount, address _to) internal {
+        IPsionicFarmVault(address(psionicVault)).burn(_to, _amount);
+    }
 
+    function deposit(uint256 _amount, address sender) internal {
+        UserInfo storage user = userInfo[sender];
         userLimit = hasUserLimit();
-
         require(!userLimit || ((_amount + user.amount) <= poolLimitPerUser), "Deposit: Amount above limit");
 
         _updatePool();
@@ -142,13 +134,13 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         if (user.amount > 0) {
             uint256 pending = (user.amount * accTokenPerShare) / PRECISION_FACTOR - user.rewardDebt;
             if (pending > 0) {
-                rewardToken.safeTransfer(address(msg.sender), pending);
+                _sendTokens(pending, address(sender));
             }
         }
 
         if (_amount > 0) {
             user.amount = user.amount + _amount;
-            stakedToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+            stakedToken.safeTransferFrom(address(sender), address(this), _amount);
         }
 
         user.rewardDebt = (user.amount * accTokenPerShare) / PRECISION_FACTOR;
@@ -160,30 +152,16 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Deposit staked tokens and collect reward tokens (if any)
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function routerDeposit(uint256 _amount) external  nonReentrant {
-        UserInfo storage user = userInfo[tx.origin];
+    function deposit(uint256 _amount) external nonReentrant {
+        deposit(_amount, msg.sender);
+    }
 
-        userLimit = hasUserLimit();
-
-        require(!userLimit || ((_amount + user.amount) <= poolLimitPerUser), "Deposit: Amount above limit");
-
-        _updatePool();
-
-        if (user.amount > 0) {
-            uint256 pending = (user.amount * accTokenPerShare) / PRECISION_FACTOR - user.rewardDebt;
-            if (pending > 0) {
-                rewardToken.safeTransfer(address(tx.origin), pending);
-            }
-        }
-
-        if (_amount > 0) {
-            user.amount = user.amount + _amount;
-            stakedToken.safeTransferFrom(address(tx.origin), address(this), _amount);
-        }
-
-        user.rewardDebt = (user.amount * accTokenPerShare) / PRECISION_FACTOR;
-
-        emit Deposit(msg.sender, _amount);
+    /*
+     * @notice Deposit staked tokens and collect reward tokens (if any)
+     * @param _amount: amount to withdraw (in rewardToken)
+     */
+    function routerDeposit(uint256 _amount) external nonReentrant {
+        deposit(_amount, tx.origin);
     }
 
     /*
@@ -192,6 +170,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      */
     function withdraw(uint256 _amount) external  nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
+
         require(user.amount >= _amount, "Amount to withdraw too high");
 
         _updatePool();
@@ -204,7 +183,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         }
 
         if (pending > 0) {
-            rewardToken.safeTransfer(address(msg.sender), pending);
+            _sendTokens(pending, address(msg.sender));
         }
 
         user.rewardDebt = (user.amount * accTokenPerShare) / PRECISION_FACTOR;
@@ -234,7 +213,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @dev Only callable by owner. Needs to be for emergency.
      */
     function emergencyRewardWithdraw(uint256 _amount) external  onlyOwner {
-        rewardToken.safeTransfer(address(msg.sender), _amount);
+        _sendTokens(_amount, address(msg.sender));
     }
 
     /**
@@ -242,9 +221,9 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _token: token address
      * @dev Callable by owner
      */
-    function recoverToken(address _token) external  onlyOwner {
+    function recoverToken(address _token) external onlyOwner {
         require(_token != address(stakedToken), "Operations: Cannot recover staked token");
-        require(_token != address(rewardToken), "Operations: Cannot recover reward token");
+        require(_token != address(psionicVault), "Operations: Cannot recover Psionic Vault token");
 
         uint256 balance = IERC20Metadata(_token).balanceOf(address(this));
         require(balance != 0, "Operations: Cannot recover zero balance");
@@ -280,16 +259,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         emit NewPoolLimit(poolLimitPerUser);
     }
 
-    /*
-     * @notice Update reward per block
-     * @dev Only callable by owner.
-     * @param _rewardPerBlock: the reward per block
-     */
-    function updateRewardPerBlock(uint256 _rewardPerBlock) external  onlyOwner {
-        require(block.number < startBlock, "Pool has started");
-        rewardPerBlock = _rewardPerBlock;
-        emit NewRewardPerBlock(_rewardPerBlock);
-    }
 
     /**
      * @notice It allows the admin to update start and end blocks
@@ -301,6 +270,19 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         require(block.number < startBlock, "Pool has started");
         require(_startBlock < _bonusEndBlock, "New startBlock must be lower than new endBlock");
         require(block.number < _startBlock, "New startBlock must be higher than current block");
+
+
+        // balance corresponds 1 to 1 -> to blocks
+        uint currentBalance = psionicVault.balanceOf(address(this));
+        uint newMultiplier = (_bonusEndBlock - _startBlock) * (1e18);
+
+        if (newMultiplier != currentBalance) {
+            if (newMultiplier > currentBalance) {
+                IPsionicFarmVault(address(psionicVault)).adjust(newMultiplier-currentBalance, true);
+            }else{
+                IPsionicFarmVault(address(psionicVault)).adjust(currentBalance-newMultiplier, false);
+            }
+        }
 
         startBlock = _startBlock;
         bonusEndBlock = _bonusEndBlock;
@@ -320,9 +302,8 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         UserInfo storage user = userInfo[_user];
         uint256 stakedTokenSupply = stakedToken.balanceOf(address(this));
         if (block.number > lastRewardBlock && stakedTokenSupply != 0) {
-            uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
-            uint256 cakeReward = multiplier * rewardPerBlock;
-            uint256 adjustedTokenPerShare = accTokenPerShare + (cakeReward * PRECISION_FACTOR) / stakedTokenSupply;
+            uint256 multiplier = _getMultiplier(lastRewardBlock, block.number) * 1e18;
+            uint256 adjustedTokenPerShare = accTokenPerShare + (multiplier * PRECISION_FACTOR) / stakedTokenSupply;
             return (user.amount * adjustedTokenPerShare) / PRECISION_FACTOR - user.rewardDebt;
         } else {
             return (user.amount * accTokenPerShare) / PRECISION_FACTOR - user.rewardDebt;
@@ -344,9 +325,8 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
             return;
         }
 
-        uint256 multiplier = _getMultiplier(lastRewardBlock, block.number);
-        uint256 cakeReward = multiplier * rewardPerBlock;
-        accTokenPerShare = accTokenPerShare + (cakeReward * PRECISION_FACTOR) / stakedTokenSupply;
+        uint256 multiplier = _getMultiplier(lastRewardBlock, block.number) * 1e18;
+        accTokenPerShare = accTokenPerShare + (multiplier * PRECISION_FACTOR) / stakedTokenSupply;
         lastRewardBlock = block.number;
     }
 
@@ -372,7 +352,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         if (!userLimit || (block.number >= (startBlock + numberBlocksForUserLimit))) {
             return false;
         }
-
         return true;
     }
 }

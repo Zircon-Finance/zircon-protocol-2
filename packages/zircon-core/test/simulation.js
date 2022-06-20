@@ -1,4 +1,3 @@
-// TODO: clean this...
 const { expect } = require("chai");
 const { ethers } = require('hardhat');
 const assert = require("assert");

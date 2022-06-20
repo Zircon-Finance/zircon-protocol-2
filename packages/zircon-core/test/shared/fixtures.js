@@ -7,10 +7,9 @@ exports.coreFixtures = async function coreFixtures(address) {
     let factoryEnergyInstance = await factoryEnergy.deploy();
     // console.log(factoryEnergy);
     // Deploy Tokens
-    let tok0 = await ethers.getContractFactory('Token');
-    let tk0 = await tok0.deploy('Token1', 'TOK1');
-    let tok1 = await ethers.getContractFactory('Token');
-    let tk1 = await tok1.deploy('Token2', 'TOK2');
+    let tok = await ethers.getContractFactory('Token');
+    let tk0 = await tok.deploy('Token1', 'TOK1');
+    let tk1 = await tok.deploy('Token2', 'TOK2');
 
     let factory = await ethers.getContractFactory('ZirconFactory');
     let factoryInstance = await factory.deploy(factoryEnergyInstance.address);
