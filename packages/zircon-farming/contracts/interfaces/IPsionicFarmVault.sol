@@ -37,4 +37,7 @@ interface IPsionicFarmVault {
     *   @param _to: the address to send the rewards token
     */
     function burn(address _to, uint _liquidity) external;
+
+    function add(address token) external;
+    function remove(address token) external;
 }

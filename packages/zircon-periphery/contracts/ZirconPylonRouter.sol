@@ -144,7 +144,6 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     }
 
     // **** ADD SYNC LIQUIDITY ****
-
     function stake(address farm, uint liquidity) internal {
         (bool success, bytes memory data) = farm.call(abi.encodeWithSelector(DEPOSIT, uint256(liquidity)));
         if (!success) {

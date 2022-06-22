@@ -60,13 +60,13 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
     // Creating Psionic Farm
     const psionicFactory = await ethers.getContractFactory(psionicFarmFactory['abi'], psionicFarmFactory['bytecode'])
     let psionicFactoryInstance = await psionicFactory.deploy()
-    let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress1, token0.address, 100, 0, 1000, 100000, 100000, address)
-    await psionicFactoryInstance.deployPool(poolAddress1, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", address)
+    let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress1, [token0.address], 0, 1000, 0, 0, address)
+    await psionicFactoryInstance.deployPool(poolAddress1, [token0.address], 0, 1000, 0, 0, address)
     const psionicFarmInit = await ethers.getContractFactory(psionicFarm['abi'], psionicFarm['bytecode'])
     let anchorFarm = psionicFarmInit.attach(farmAddress);
 
-    let floatFarmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, token0.address, 100, 0, 1000, 100000, 100000, address)
-    await psionicFactoryInstance.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", address)
+    let floatFarmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, address)
+    await psionicFactoryInstance.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, address)
     let floatFarm = psionicFarmInit.attach(floatFarmAddress);
 
     // Creating Wrapped Ethereum

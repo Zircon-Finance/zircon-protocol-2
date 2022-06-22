@@ -76,9 +76,39 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
         farm = _farm;
     }
 
-//    function updateTokens(mapping (address => bool) memory _tokens) external onlyOwner {
-//        rewardTokens = rewardTokens;
+    // @notice Admin method to add reward token
+    function add(address token) external onlyOwner {
+        require(!tokens[token], "Vault: Token already added");
+        tokens[token] = true;
+        rewardTokens.push(token);
+    }
+
+//    function remove(uint index) internal {
+//        if (index >= rewardTokens.length) return;
+//
+//        for (uint i = index; i<rewardTokens.length-1; i++){
+//            rewardTokens[i] = rewardTokens[i+1];
+//        }
+//        delete rewardTokens[rewardTokens.length-1];
+//        rewardTokens.length--;
 //    }
+
+    // @notice Admin method to remove reward token
+    function remove(address token) external onlyOwner {
+        require(tokens[token], "Vault: Token not added");
+        require(rewardTokens.length > 1, "At least 1 token is required");
+        address[] memory _tokens = rewardTokens;
+        uint tokenLength = _tokens.length;
+        for (uint256 i = 0; i < tokenLength; i++) {
+            address rewardToken = _tokens[i];
+            if (token == rewardToken) {
+                tokens[token] = false;
+                rewardTokens[i] = rewardTokens[rewardTokens.length-1];
+                rewardTokens.pop();
+                break;
+            }
+        }
+    }
 
     /*
     *   @notice Mints amount of tokens to the owner
@@ -106,11 +136,8 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
             IERC20 token = IERC20(tokensToWithdraw[i]);
             uint balance = token.balanceOf(address(this));
             uint amount = (balance * (_liquidity))/ts;
-            if (balance > amount) {
-                token.safeTransfer(_to, amount);
-            }
+            token.safeTransfer(_to, amount);
         }
-
         _burn(farm, _liquidity);
     }
 

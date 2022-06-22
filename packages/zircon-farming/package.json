@@ -1,6 +1,6 @@
 {
   "name": "@zircon/farming",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha.0",
   "main": "index.js",
   "author": "David Vittori",
   "license": "MIT",
@@ -26,7 +26,8 @@
     "deploy": "npx hardhat --network moonbase deploy",
     "test": "mocha",
     "compile": "npx hardhat compile --show-stack-traces",
-    "ctest": "npx hardhat compile && npm test"
+    "ctest": "npx hardhat compile && npm test",
+    "testScript": "npx hardhat run --network moonbase scripts/deploy-script.js"
   },
   "files": [
     "artifacts",

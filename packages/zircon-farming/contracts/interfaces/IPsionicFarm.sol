@@ -111,4 +111,5 @@ interface IPsionicFarm {
      * @notice Return user limit is set or zero.
      */
     function hasUserLimit() external view returns (bool);
+
 }

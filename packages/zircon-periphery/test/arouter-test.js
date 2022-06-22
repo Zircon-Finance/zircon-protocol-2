@@ -217,8 +217,8 @@ describe("Pylon Router", () => {
         let ptInstance0 = poolTokenContract.attach(poolAddress0);
         let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
-        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
-        await psionicFactoryInstance.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
+        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, account.address)
+        await psionicFactoryInstance.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, account.address)
         let farm = psionicFarmInit.attach(farmAddress);
 
         await ptInstance0.approve(farm.address, ethers.constants.MaxUint256)
@@ -336,8 +336,8 @@ describe("Pylon Router", () => {
         let ptInstance0 = poolTokenContract.attach(poolAddress0);
         let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
-        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
-        await psionicFactoryInstance.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
+        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, [token0.address], 0, 100, 0, 0, account.address)
+        await psionicFactoryInstance.deployPool(poolAddress0, [token0.address], 0, 100, 0, 0, account.address)
         let farm = psionicFarmInit.attach(farmAddress);
 
         await ptInstance0.approve(farm.address, ethers.constants.MaxUint256)
@@ -470,8 +470,8 @@ describe("Pylon Router", () => {
         let ptInstance0 = poolTokenContract.attach(poolAddress0);
         let ptInstance1 = poolTokenContract.attach(poolAddress1);
 
-        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
-        await psionicFactoryInstance.deployPool(poolAddress0, token0.address, 100, 0, 1000, "100000000000000000000", "100000000000000000000", account.address)
+        let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, account.address)
+        await psionicFactoryInstance.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, account.address)
         let farm = psionicFarmInit.attach(farmAddress);
 
         await ptInstance0.approve(farm.address, ethers.constants.MaxUint256)

@@ -50,5 +50,34 @@ describe("Psionic Farm Factory", () => {
         await psionicFarm.deposit(expandTo18Decimals(1))
     });
 
+    it('should revert if token is already added', async function () {
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
 
+        await expect(psionicVault.add(tk0.address)).to.be.
+        revertedWith("Vault: Token already added");
+    });
+
+    it('should add token', async function () {
+        let tok = await ethers.getContractFactory('Token');
+        let tk0 = await tok.deploy('Tok', 'TOK');
+
+        await psionicVault.add(tk0.address)
+
+        await expect(psionicVault.add(tk0.address)).to.be.
+        revertedWith("Vault: Token already added");
+    });
+
+    it('should remove token', async function () {
+        await psionicVault.remove(tk0.address)
+
+        await psionicVault.add(tk0.address)
+
+        await expect(psionicVault.add(tk0.address)).to.be.
+        revertedWith("Vault: Token already added");
+    });
+
+    it('should not remove all token', async function () {
+        await psionicVault.remove(tk0.address)
+        await expect(psionicVault.remove(tk1.address)).to.be.revertedWith("At least 1 token is required");
+    });
 })

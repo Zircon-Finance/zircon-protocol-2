@@ -11,7 +11,6 @@ describe("Psionic Farm Factory", () => {
     let TOKEN0_AMOUNT = expandTo18Decimals(1)
     let TOKEN1_AMOUNT = expandTo18Decimals(2)
 
-
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
@@ -27,10 +26,7 @@ describe("Psionic Farm Factory", () => {
         tk0 = fixtures.tk0
         tk1 = fixtures.tk1
         tk2 = fixtures.tk2
-
-
     });
-
 
     it('shopuld deploy pool', async function () {
         let adresses = await psionicFactory.callStatic.deployPool(
@@ -317,7 +313,5 @@ describe("Psionic Farm Factory", () => {
         await expect(psionicFarm.recoverToken(psionicVault.address)).to.be.
             revertedWith( "Operations: Cannot recover Psionic Vault token")
     });
-
-
 
 })

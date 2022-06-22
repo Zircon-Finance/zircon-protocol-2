@@ -1,10 +1,12 @@
 {
   "abi": [
     "function PSIONIC_FACTORY() view returns (address)",
+    "function add(address)",
     "function adjust(uint256,bool)",
     "function burn(address,uint256)",
     "function initialize(address[],uint256,address)",
     "function isInitialized() view returns (bool)",
+    "function remove(address)",
     "function rewardTokens(uint256) view returns (address)"
   ],
   "bytecode": "0x"
