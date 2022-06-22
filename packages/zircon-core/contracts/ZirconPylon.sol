@@ -189,6 +189,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         dynamicFeePercentage = IZirconPylonFactory(factoryAddress).dynamicFeePercentage();
 
+        deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+        deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
+
     }
 
     // @notice On init pylon we have to handle two cases
@@ -207,6 +210,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
         // If pair contains reserves we have to use the ratio of the Pair so...
 
+
+        //TODO: Does this make sense?
         virtualAnchorBalance = balance1.sub(balance1.mul(dynamicFeePercentage)/10000);
         if (_reservePair0 > 0 && _reservePair1 > 0) {
             uint tpvAnchorPrime = (virtualAnchorBalance.add(balance0.mul(_reservePair1)/_reservePair0));
@@ -364,16 +369,23 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function mintPoolTokens(address _to, bool isAnchor) isInitialized nonReentrant external returns (uint liquidity) {
         sync();
 
+//        console.log("Solidity: Sync Complete");
+
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
+        //console.log("Solidity: got sync reserves");
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
+
         uint amountIn;
         uint amountOut;
         // Minting Pool tokens
         if (isAnchor) {
+            //console.log("Solidity: before balance");
             uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+            //console.log("Solidity: before .sub");
             amountIn = balance1.sub(_reserve1);
-
+            //console.log("Solidity: after .sub");
             (liquidity, amountOut) = _mintPoolToken(amountIn, _reserve1, _reservePairTranslated1, anchorPoolTokenAddress, _to, isAnchor);
+
         } else {
             uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
             amountIn = balance0.sub(_reserve0);
@@ -452,13 +464,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
 
         if (maxDerivative >= deltaGammaThreshold) {
+            //console.log("Solidity: inside gamma threshold");
             applied = true;
             uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
             if(feeBps >= 10000) {
                 fee = amountIn;
+            } else {
+                fee = amountIn.mul(feeBps)/10000;
             }
 
-            fee = amountIn.mul(feeBps)/10000;
         }
 
         //Base case where the threshold isn't passed
@@ -828,7 +842,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             reserveAnchor,
             gammaMulDecimals,
             virtualAnchorBalance);
-        console.log("omega slash", omegaMulDecimals);
+        //console.log("omega slash", omegaMulDecimals);
         (extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
         retPtu = omegaMulDecimals.mul(ptu)/1e18;
     }

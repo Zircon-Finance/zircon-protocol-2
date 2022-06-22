@@ -15,6 +15,13 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage;
 
+    uint public deltaGammaThreshold;
+    uint public deltaGammaMinFee;
+
+
+    //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
+
+
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
 
     constructor(address _factory, address _energyFactory) public {
@@ -22,6 +29,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         energyFactory = _energyFactory;
         maximumPercentageSync = 10;
         dynamicFeePercentage = 5;
+        deltaGammaThreshold = 4 * 1e16; //4%
+        deltaGammaMinFee = 1500; //15%
+
     }
 
     function allPylonsLength() external view returns (uint) {

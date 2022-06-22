@@ -13,7 +13,15 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
     event EnergyCreated(address indexed pair, address indexed energy, address tokenA, address tokenB, uint);
 
-    constructor() public {}
+    uint public minPylonFee;
+    uint public maxPylonFee;
+
+    constructor() public {
+
+        //TODO: Change this to be a deployment parameter
+        minPylonFee = 1;
+        maxPylonFee = 100;
+    }
 
     function allEnergiesLength() external view returns (uint) {
         return allEnergies.length;
@@ -83,7 +91,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
             energy := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
         require(energy != address(0), "Create2: Failed on deploy");
-        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100, 0, 0);
+        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100, minPylonFee, maxPylonFee);
         getEnergy[_tokenA][_tokenB] = energy;
         allEnergies.push(energy);
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);

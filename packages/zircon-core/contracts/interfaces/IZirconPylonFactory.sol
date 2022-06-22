@@ -4,6 +4,9 @@ interface IZirconPylonFactory {
     function maximumPercentageSync() external view returns (uint);
     function dynamicFeePercentage() external view returns (uint);
 
+    function deltaGammaThreshold() external view returns (uint);
+    function deltaGammaMinFee() external view returns (uint);
+
     function allPylons(uint p) external view returns (address);
     function getPylon(address tokenA, address tokenB) external view returns (address pair);
     function factory() external view returns (address);

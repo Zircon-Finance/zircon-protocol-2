@@ -71,6 +71,7 @@ describe("Pylon", () => {
             await addLiquidity(token0Amount, token1Amount)
             // Transferring some tokens
             let maxSync = await pylonInstance.maximumPercentageSync()
+            console.log("maxSync: ", maxSync);
             await token0.transfer(pylonInstance.address, token0Amount.div(100))
             await token1.transfer(pylonInstance.address, token1Amount.div(100))
             console.log("Mint test token0Amount: ", token0Amount);
@@ -89,11 +90,19 @@ describe("Pylon", () => {
             }
 
             // Minting some float/anchor tokens
+
+
+
             await expect(pylonInstance.mintPoolTokens(account.address, isAnchor))
                 .to.emit(pylonInstance, 'PylonUpdate')
                 .withArgs(expectedRes0, expectedRes1);
             // Let's check the balances, float
             // expect(await pylonInstance.gammaMulDecimals()).to.eq(ethers.BigNumber.from('1000000000000000000'));
+            console.log("balanceOfInstance1: ", await poolTokenInstance1.balanceOf(account.address));
+            console.log("expectedOutput1: ", expectedOutputAmount1);
+
+            console.log("balanceOfInstance0: ", await poolTokenInstance0.balanceOf(account.address));
+            console.log("expectedOutput0: ", expectedOutputAmount0);
             expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(expectedOutputAmount1);
             expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(expectedOutputAmount0);
             // Anchor
