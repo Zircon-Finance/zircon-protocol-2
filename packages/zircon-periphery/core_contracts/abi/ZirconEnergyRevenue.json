@@ -1,7 +1,0 @@
-[
-  "constructor()",
-  "function calculate()",
-  "function energyfactory() view returns (address)",
-  "function initialize(address,address,address,address,address,address,address)",
-  "function reserve() view returns (uint256)"
-]

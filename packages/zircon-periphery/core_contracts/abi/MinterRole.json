@@ -1,8 +1,0 @@
-[
-  "constructor()",
-  "event MinterAdded(address indexed)",
-  "event MinterRemoved(address indexed)",
-  "function addMinter(address)",
-  "function isMinter(address) view returns (bool)",
-  "function renounceMinter()"
-]

@@ -1,8 +1,0 @@
-[
-  "function allEnergies(uint256) view returns (address)",
-  "function allEnergiesLength() view returns (uint256)",
-  "function createEnergy(address,address,address,address) returns (address)",
-  "function createEnergyRev(address,address,address,address) returns (address)",
-  "function energyCodeHash() pure returns (bytes32)",
-  "function getEnergy(address,address) view returns (address)"
-]
