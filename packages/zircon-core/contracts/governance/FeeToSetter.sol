@@ -43,18 +43,18 @@ contract FeeToSetter {
 
     function setDeltaGammaThreshold(uint _deltaGammaThreshold) external {
         require(msg.sender == owner, 'ZF: FORBIDDEN');
-        IZirconPylonFactory(factory).setDeltaGammaThreshold(deltaGammaThreshold);
+        IZirconPylonFactory(factory).setDeltaGammaThreshold(_deltaGammaThreshold);
     }
     function setDeltaGammaMinFee(uint _deltaGammaMinFee) external {
         require(msg.sender == owner, 'ZF: FORBIDDEN');
-        IZirconPylonFactory(factory).setDeltaGammaMinFee(deltaGammaMinFee);
+        IZirconPylonFactory(factory).setDeltaGammaMinFee(_deltaGammaMinFee);
     }
 }
 
 interface IZirconPylonFactory {
     function setFeeToSetter(address) external;
-    function setMaximumPercentageSync(uint _maximumPercentageSync);
-    function setDynamicFeePercentage(uint _dynamicFeePercentage);
-    function setDeltaGammaThreshold(uint _deltaGammaThreshold);
-    function setDeltaGammaMinFee(uint _deltaGammaMinFee);
+    function setMaximumPercentageSync(uint _maximumPercentageSync) external;
+    function setDynamicFeePercentage(uint _dynamicFeePercentage) external;
+    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
+    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external;
 }

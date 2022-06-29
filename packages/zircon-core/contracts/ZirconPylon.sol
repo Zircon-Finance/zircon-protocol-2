@@ -237,7 +237,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (anchorLiquidity,) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, _to, true);
         (floatLiquidity,) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, _to, false);
 
-        muMulDecimals = 1e18; //Actually means 0, we store it as +1 to avoid having to switch from uints
+        muMulDecimals = gammaMulDecimals; //Starts as gamma, diversifies over time. Used to calculate fee distribution
 
         //Here it updates the state and throws liquidity into the pool if possible
         _update();
@@ -358,23 +358,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint _oldGamma = muOldGamma; //y1
 
 
-            byte deltaGammaIsPositive = 0x0;
-            if (_newGamma > _oldGamma) {
-                deltaGammaIsPositive = 0x1;
-            }
+            bool deltaGammaIsPositive = _newGamma >= _oldGamma;
 
-            byte gammaIsOver50 = 0x1;
-            if (_newGamma < 5e17) {
-                gammaIsOver50 = 0x0;
-            }
+            bool gammaIsOver50 = _newGamma < 5e17;
 
-            //This the part that measures if gamma is going outside (to the extremes) or to the inside
+            //This the part that measures if gamma is going outside (to the extremes) or to the inside (0.5 midpoint)
             //It uses an XOR between current gamma and its delta
             //If delta is positive when above 50%, means it's moving to the outside
             //If delta is negative when below 50%, that also means it's going to the outside
 
             //In other scenarios it's going to the inside, which is why we use the XOR
-            if(deltaGammaIsPositive ^ gammaIsOver50) { //^ is the XOR operator
+            if(deltaGammaIsPositive != gammaIsOver50) { //!= with booleans is an XOR
                 uint absoluteGammaDeviation;
 
                 if(gammaIsOver50) {
