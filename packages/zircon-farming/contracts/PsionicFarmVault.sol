@@ -82,6 +82,7 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
         tokens[token] = true;
         rewardTokens.push(token);
     }
+
     // @notice Admin method to remove reward token
     function remove(address token) external onlyOwner {
         require(tokens[token], "Vault: Token not added");
