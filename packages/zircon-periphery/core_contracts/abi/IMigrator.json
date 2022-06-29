@@ -1,0 +1,6 @@
+{
+  "abi": [
+    "function desiredLiquidity() view returns (uint256)"
+  ],
+  "bytecode": "0x"
+}

@@ -1,0 +1,16 @@
+{
+  "abi": [
+    "function balanceOf(address) view returns (uint256)",
+    "function burn(address,uint256)",
+    "function factory() view returns (address)",
+    "function initialize(address,address,address,bool)",
+    "function isAnchor() view returns (bool)",
+    "function mint(address,uint256)",
+    "function pair() view returns (address)",
+    "function pylon() view returns (address)",
+    "function token() view returns (address)",
+    "function totalSupply() view returns (uint256)",
+    "function transferFrom(address,address,uint256) returns (bool)"
+  ],
+  "bytecode": "0x"
+}

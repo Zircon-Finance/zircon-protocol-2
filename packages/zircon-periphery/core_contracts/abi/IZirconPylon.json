@@ -1,0 +1,16 @@
+{
+  "abi": [
+    "function anchorPoolTokenAddress() view returns (address)",
+    "function burn(address,bool) returns (uint256)",
+    "function burnAsync(address,bool) returns (uint256, uint256)",
+    "function floatPoolTokenAddress() view returns (address)",
+    "function getSyncReserves() view returns (uint112, uint112, uint32)",
+    "function initPylon(address) returns (uint256, uint256)",
+    "function initialize(address,address,address,address,address,address,address)",
+    "function initialized() view returns (uint256)",
+    "function mintAsync(address,bool) returns (uint256)",
+    "function mintAsync100(address,bool) returns (uint256)",
+    "function mintPoolTokens(address,bool) returns (uint256)"
+  ],
+  "bytecode": "0x"
+}

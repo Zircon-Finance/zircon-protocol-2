@@ -18,4 +18,10 @@ interface IZirconPylonFactory {
     // Adding Pylon
     // First Token is always the Float and the second one is the Anchor
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress);
+
+    function setFeeToSetter(address) external;
+    function setMaximumPercentageSync(uint _maximumPercentageSync) external;
+    function setDynamicFeePercentage(uint _dynamicFeePercentage) external;
+    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
+    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external;
 }

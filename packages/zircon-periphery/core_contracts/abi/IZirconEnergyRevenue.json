@@ -1,0 +1,7 @@
+{
+  "abi": [
+    "function calculate()",
+    "function initialize(address,address,address,address,address,address,address)"
+  ],
+  "bytecode": "0x"
+}

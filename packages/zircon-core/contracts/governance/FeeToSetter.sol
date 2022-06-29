@@ -1,5 +1,5 @@
 pragma solidity ^0.5.16;
-
+import '../interfaces/IZirconPylonFactory.sol';
 // this contract serves as feeToSetter, allowing owner to manage fees in the context of a specific feeTo implementation
 contract FeeToSetter {
     // immutables
@@ -49,12 +49,4 @@ contract FeeToSetter {
         require(msg.sender == owner, 'ZF: FORBIDDEN');
         IZirconPylonFactory(factory).setDeltaGammaMinFee(_deltaGammaMinFee);
     }
-}
-
-interface IZirconPylonFactory {
-    function setFeeToSetter(address) external;
-    function setMaximumPercentageSync(uint _maximumPercentageSync) external;
-    function setDynamicFeePercentage(uint _dynamicFeePercentage) external;
-    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
-    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external;
 }
