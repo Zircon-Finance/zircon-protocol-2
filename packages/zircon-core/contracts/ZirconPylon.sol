@@ -48,13 +48,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public virtualAnchorBalance;
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
-    uint public gammaMulDecimals; // Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
+    uint public gammaMulDecimals; // Percentage of float over total pool value. Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
+    uint public muMulDecimals; // A "permanence" factor that is used to adjust fee redistribution. Stored as mu + 1 because unsigned math
 
     uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
     uint public thisBlockEMA; //A storage var for this block's changes.
     uint public EMASamples;
 
     uint public EMABlockNumber; //Last block height of the EMA update
+    uint public muBlockNumber; //block height of last mu update
+    uint public muOldGamma; //gamma value at last mu update
+    uint public muUpdatePeriod; //parameter to set frequency of mu snapshots. We don't want to capture too much noise
 
     uint public deltaGammaThreshold; //Shouldn't be unreasonably low. A 3-4% change in a single block should be large enough to detect manipulation attempts.
     uint public deltaGammaMinFee;
@@ -192,6 +196,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
         deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
 
+        muUpdatePeriod = IZirconPylonFactory(factoryAddress).muUpdatePeriod();
+
     }
 
     // @notice On init pylon we have to handle two cases
@@ -227,10 +233,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // When Pair is not initialized let's start gamma to 0.5
             gammaMulDecimals = 500000000000000000;
         }
-        // TODO: Old definition of gamma, necessary because pool may not be initialized but check for weird interactions
         // Time to mint some tokens
         (anchorLiquidity,) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, _to, true);
         (floatLiquidity,) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, _to, false);
+
+        muMulDecimals = 1e18; //Actually means 0, we store it as +1 to avoid having to switch from uints
 
         //Here it updates the state and throws liquidity into the pool if possible
         _update();
@@ -324,6 +331,103 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //uint32 timeElapsed = blockTimestamp - blockTimestampLast;
         blockTimestampLast = blockTimestamp;
     }
+
+
+
+    //Mu is the fee factor that is used to distribute the pot between anchors and floats.
+    //It is largely based off gamma fluctuations (the losing side will get more fees)
+    //but there is a dampenening factor that allows the fee equilibrium point to be different than a 50/50 split
+    //The rationale for this is that there will be many pools, such as coin <> stablecoin, where a
+    //50/50 distribution is achieved by an imbalanced fee redistribution (e.g. 80-20).
+    //This because you accept much less yield on your stablecoins, so it's fair that stablecoins consistently get a lower share of the yield
+
+    //The way this is achieved in practice is by defining when gamma is moving "outside" of the halfway point
+    //and when it's moving "towards" the halfway point (0.5)
+    //When moving outside it grows/reduces at a rate equal to deltagamma
+    //When moving inside the change rate is reduced by its closeness to the halfway point (changes very little if gamma is 50%)
+
+    function _updateMu() private {
+        uint _newBlockHeight = block.number; //t2
+        uint _lastBlockHeight = muBlockNumber; //t1
+
+
+        //We only go ahead with this if a sufficient amount of time passes
+        //This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
+        if((_lastBlockHeight - _newBlockHeight) > muUpdatePeriod) { //reasonable to assume it won't subflow
+            uint _newGamma = gammaMulDecimals; //y2
+            uint _oldGamma = muOldGamma; //y1
+
+
+            byte deltaGammaIsPositive = 0x0;
+            if (_newGamma > _oldGamma) {
+                deltaGammaIsPositive = 0x1;
+            }
+
+            byte gammaIsOver50 = 0x1;
+            if (_newGamma < 5e17) {
+                gammaIsOver50 = 0x0;
+            }
+
+            //This the part that measures if gamma is going outside (to the extremes) or to the inside
+            //It uses an XOR between current gamma and its delta
+            //If delta is positive when above 50%, means it's moving to the outside
+            //If delta is negative when below 50%, that also means it's going to the outside
+
+            //In other scenarios it's going to the inside, which is why we use the XOR
+            if(deltaGammaIsPositive ^ gammaIsOver50) { //^ is the XOR operator
+                uint absoluteGammaDeviation;
+
+                if(gammaIsOver50) {
+                    absoluteGammaDeviation = gammaMulDecimals - 5e17;
+                } else {
+                    absoluteGammaDeviation = 5e17 - gammaMulDecimals;
+                }
+
+                //This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
+                //Due to uint math we can't do this in one line
+                if (deltaGammaIsPositive) {
+                    uint deltaMu = (_newGamma - _oldGamma).mul(absoluteGammaDeviation);
+                    if (deltaMu + muMulDecimals <= 1e18) {
+                        //Only updates if the result doesn't go above 1.
+                        muMulDecimals += deltaMu;
+                    }
+
+                } else {
+                    uint deltaMu = (_oldGamma - _newGamma).mul(absoluteGammaDeviation);
+                    //subflow check
+                    if(deltaMu <= muMulDecimals) {
+                        muMulDecimals -= deltaMu;
+                    }
+                }
+
+            } else {
+                //Here, gamma is moving to the extremes
+
+                //We simply assign the change in gamma 1:1 to mu. Again uint math so we need an if else block
+                if (deltaGammaIsPositive) {
+                    uint deltaMu = (_newGamma - _oldGamma);
+                    if (deltaMu + muMulDecimals <= 1e18) {
+                        //Only updates if the result doesn't go above 1.
+                        muMulDecimals += deltaMu;
+                    }
+
+                } else {
+                    uint deltaMu = (_oldGamma - _newGamma);
+
+                    if(deltaMu <= muMulDecimals) {
+                        muMulDecimals -= deltaMu;
+                    }
+                }
+            }
+
+            //update variables for next step
+            muOldGamma = _newGamma;
+            muBlockNumber = _newBlockHeight;
+        }
+
+
+    }
+
 
     // ***** MINTING *****
 
@@ -602,11 +706,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint totalPoolValueFloatPrime = translateToPylon(pairReserve0.mul(2), 0);
 
             //Fee value/total pool value ratio, modified implementation of Uniswap's mintFee formula
-
             uint one = 1e18;
             uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
 
-            // Getting how much fee value has been created for pylon
+            // Multiply by total pool value to get fee value in native units
             uint feeValueAnchor = totalPoolValueAnchorPrime.mul(d)/1e18;
             uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 //            console.log("sync::anchor::fee", feeValueAnchor);
@@ -615,18 +718,23 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Calculating gamma, variable used to calculate tokens to mint and withdrawals
 
             // gamma is supposed to always be an accurate reflection of the float share as a percentage of the totalPoolValue
-            // however vfb also includes the syncPool reserve portion, which is completely outside of the pools.
-            // Nonetheless, the syncPool is still considered part of the user base/float share.
-            // This is relevant primarily for fee calculations, but that's already a given: you just use the same proportions.
-            // In all other places we (should) already account for the sync pool separately.
+            // however the virtual anchor balance also includes the syncPool reserve portion, which is completely outside of the pools.
 
-            // When operating on fractional, gamma is higher than it should be compared to ftv + atv.
+            // When operating on fractional (anchor withdrawals get slashed if there is no money in energy),
+            //gamma is higher than it should be compared to ftv + atv.
             // This means that anchors get more fees than they "should", which kinda works out because they're at high risk.
             // It works as an additional incentive to not withdraw.
 
             //VFB is no longer relevant, so it's commented out for now
 
-            virtualAnchorBalance += ((feeValueAnchor.mul(1e18-gammaMulDecimals))/1e18);
+
+
+            //Mu mostly follows gamma but it's designed to find an equilibrium point different from 50/50
+            //More on this in the function itself;
+
+            _updateMu();
+
+            virtualAnchorBalance += ((feeValueAnchor.mul(1e18-muMulDecimals))/1e18);
             //Fees to floats are automatically assigned due to dTPV > dVAB
             //virtualFloatBalance += ((gammaMulDecimals).mul(feeValueFloat)/1e18);
 

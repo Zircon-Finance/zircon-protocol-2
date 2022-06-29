@@ -83,9 +83,11 @@ describe("Pylon", () => {
 
             if (isAnchor) {
                 let t = token0Amount.div(100)
+                console.log("Mint test token0Amount for second mint: ", t);
                 await token1.transfer(pylonInstance.address, t)
             }else{
                 let t = token1Amount.div(100)
+                console.log("Mint test token1Amount for second mint: ", t);
                 await token0.transfer(pylonInstance.address, t)
             }
 

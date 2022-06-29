@@ -6,6 +6,7 @@ interface IZirconPylonFactory {
 
     function deltaGammaThreshold() external view returns (uint);
     function deltaGammaMinFee() external view returns (uint);
+    function muUpdatePeriod() external view returns (uint);
 
     function allPylons(uint p) external view returns (address);
     function getPylon(address tokenA, address tokenB) external view returns (address pair);

@@ -18,6 +18,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
 
+    uint public muUpdatePeriod;
+
 
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
 
@@ -31,6 +33,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         dynamicFeePercentage = 5;
         deltaGammaThreshold = 4 * 1e16; //4%
         deltaGammaMinFee = 1500; //15%
+        muUpdatePeriod = 240; //number of blocks; 1 hour on Ethereum and Moonbeam/river
 
     }
 
