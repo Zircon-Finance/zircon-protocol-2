@@ -26,7 +26,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     bool public  isInitialized;
 
     // Accrued token per share
-    uint256 public   accTokenPerShare;
+    uint256 public  accTokenPerShare;
 
     // The block number when CAKE mining ends.
     uint256 public  bonusEndBlock;

@@ -11,6 +11,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     address[] public allPylons;
     address public factory;
     address public energyFactory;
+    address public feeToSetter;
 
     uint public maximumPercentageSync;
     uint public dynamicFeePercentage;
@@ -27,6 +28,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     constructor(address _factory, address _energyFactory) public {
         factory = _factory;
         energyFactory = _energyFactory;
+
+        // Starting Variables
         maximumPercentageSync = 10;
         dynamicFeePercentage = 5;
         deltaGammaThreshold = 4 * 1e16; //4%
@@ -64,7 +67,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         //energyRev = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, address(this));
 
         //        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
-//        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
+        //        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
     }
 
     // Adding Pylon
@@ -89,4 +92,33 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         getPylon[_tokenA][_tokenB] = pylonAddress;
         allPylons.push(pylonAddress);
     }
+
+    function setMaximumPercentageSync(uint _maximumPercentageSync) external {
+        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+        maximumPercentageSync = _maximumPercentageSync;
+    }
+
+    function setDynamicFeePercentage(uint _dynamicFeePercentage) external {
+        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+        dynamicFeePercentage = _dynamicFeePercentage;
+    }
+
+    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external {
+        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+        deltaGammaThreshold = _deltaGammaThreshold;
+    }
+    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external {
+        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+        deltaGammaMinFee = _deltaGammaMinFee;
+    }
+
+    function setFeeToSetter(address _feeToSetter) external  {
+        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+        feeToSetter = _feeToSetter;
+    }
+
+    //    function setMigrator(address _migrator) external {
+    //        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+    //        migrator = _migrator;
+    //    }
 }
