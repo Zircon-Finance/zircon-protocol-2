@@ -26,7 +26,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         address anchor;
     }
     PylonToken public pylonToken;
-
     // ***** GLOBAL VARIABLES ******
 
     // ***** The address of the other components ******
@@ -46,8 +45,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     // ***** Variables for calculations *****
     uint public virtualAnchorBalance;
-    uint public maximumPercentageSync;
-    uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
+    //uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Percentage of float over total pool value. Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
     uint public muMulDecimals; // A "permanence" factor that is used to adjust fee redistribution. Stored as mu + 1 because unsigned math
 
@@ -58,16 +56,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public EMABlockNumber; //Last block height of the EMA update
     uint public muBlockNumber; //block height of last mu update
     uint public muOldGamma; //gamma value at last mu update
-    uint public muUpdatePeriod; //parameter to set frequency of mu snapshots. We don't want to capture too much noise
+    //uint public muUpdatePeriod; //parameter to set frequency of mu snapshots. We don't want to capture too much noise
 
-    uint public deltaGammaThreshold; //Shouldn't be unreasonably low. A 3-4% change in a single block should be large enough to detect manipulation attempts.
-    uint public deltaGammaMinFee;
+    //uint public deltaGammaThreshold; //Shouldn't be unreasonably low. A 3-4% change in a single block should be large enough to detect manipulation attempts.
+    //uint public deltaGammaMinFee;
 
     uint public lastK;
     uint public lastPoolTokens;
 
-    uint112 private reserve0;           // uses single storage slot, accessible via getReserves (always anchor)
-    uint112 private reserve1;           // us es single storage slot, accessible via getReserves (always float)
+    uint112 private reserve0;// uses single storage slot, accessible via getReserves (always anchor)
+    uint112 private reserve1;// us es single storage slot, accessible via getReserves (always float)
     uint32 private blockTimestampLast; // uses single storage slot, accessible via getReserves
 
     // global variable used for testing
@@ -189,15 +187,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         pylonToken = PylonToken(_floatToken, _anchorToken);
         pairFactoryAddress = _pairFactoryAddress;
         energyAddress = _energy;
-
-        maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
-        dynamicFeePercentage = IZirconPylonFactory(factoryAddress).dynamicFeePercentage();
-
-        deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
-        deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
-
-        muUpdatePeriod = IZirconPylonFactory(factoryAddress).muUpdatePeriod();
-
     }
 
     // @notice On init pylon we have to handle two cases
@@ -218,6 +207,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
         //TODO: Does this make sense?
+        uint dynamicFeePercentage = IZirconPylonFactory(factoryAddress).dynamicFeePercentage();
         virtualAnchorBalance = balance1.sub(balance1.mul(dynamicFeePercentage)/10000);
         if (_reservePair0 > 0 && _reservePair1 > 0) {
             uint tpvAnchorPrime = (virtualAnchorBalance.add(balance0.mul(_reservePair1)/_reservePair0));
@@ -226,8 +216,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 gammaMulDecimals = (tpvAnchorPrime - virtualAnchorBalance)/tpvAnchorPrime; //Subflow already checked by if statement
             }
-
-
             // This is gamma formula when FTV <= 50%
         } else {
             // When Pair is not initialized let's start gamma to 0.5
@@ -294,6 +282,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Min0/2 & Min1/2 remain as reserves on the pylon
         // In the case the pair hasn't been initialized pair reserves will be 0 so we take our current balance as the maximum
         (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
+        uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
 
         uint112 max0 = uint112(reservesTranslated0.mul(maximumPercentageSync)/100);
         uint112 max1 = uint112(reservesTranslated1.mul(maximumPercentageSync)/100);
@@ -334,21 +323,22 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
 
-    //Mu is the fee factor that is used to distribute the pot between anchors and floats.
-    //It is largely based off gamma fluctuations (the losing side will get more fees)
-    //but there is a dampenening factor that allows the fee equilibrium point to be different than a 50/50 split
-    //The rationale for this is that there will be many pools, such as coin <> stablecoin, where a
-    //50/50 distribution is achieved by an imbalanced fee redistribution (e.g. 80-20).
-    //This because you accept much less yield on your stablecoins, so it's fair that stablecoins consistently get a lower share of the yield
+    /// @dev Mu is the fee factor that is used to distribute the pot between anchors and floats.
+    /// It is largely based off gamma fluctuations (the losing side will get more fees)
+    /// but there is a dampenening factor that allows the fee equilibrium point to be different than a 50/50 split
+    /// The rationale for this is that there will be many pools, such as coin <> stablecoin, where a
+    /// 50/50 distribution is achieved by an imbalanced fee redistribution (e.g. 80-20).
+    /// This because you accept much less yield on your stablecoins, so it's fair that stablecoins consistently get a lower share of the yield
 
-    //The way this is achieved in practice is by defining when gamma is moving "outside" of the halfway point
-    //and when it's moving "towards" the halfway point (0.5)
-    //When moving outside it grows/reduces at a rate equal to deltagamma
-    //When moving inside the change rate is reduced by its closeness to the halfway point (changes very little if gamma is 50%)
+    /// @dev The way this is achieved in practice is by defining when gamma is moving "outside" of the halfway point
+    /// and when it's moving "towards" the halfway point (0.5)
+    /// When moving outside it grows/reduces at a rate equal to deltagamma
+    /// When moving inside the change rate is reduced by its closeness to the halfway point (changes very little if gamma is 50%)
 
     function _updateMu() private {
-        uint _newBlockHeight = block.number; //t2
-        uint _lastBlockHeight = muBlockNumber; //t1
+        uint _newBlockHeight = block.number; // t2
+        uint _lastBlockHeight = muBlockNumber; // t1
+        uint muUpdatePeriod = IZirconPylonFactory(factoryAddress).muUpdatePeriod();
 
 
         //We only go ahead with this if a sufficient amount of time passes
@@ -492,8 +482,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Updating VAB & VFB
         if(isAnchor) {
             virtualAnchorBalance += amountOut;
-        }else{
-            //virtualFloatBalance += amountOut;
         }
         //Sends tokens into pool if there is a match
         _update();
@@ -560,6 +548,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function applyDeltaTax(uint amountIn) private returns (uint fee, bool applied) {
 
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
+        uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+        uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
 
         if (maxDerivative >= deltaGammaThreshold) {
             //console.log("Solidity: inside gamma threshold");
@@ -898,20 +888,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         pt.burn(address(this), liquidity);
 
         // Updating
-        updateVirtualBalancesBurn(liquidity, ptTotalSupply, _isAnchor);
+        if(_isAnchor) {
+            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/ptTotalSupply;
+        }
         _update();
 
         // Emiting event on burned async
         emit BurnAsync(msg.sender, amount0, amount1);
-    }
-
-    /// @notice function that simples updates both VAB and VFB
-    function updateVirtualBalancesBurn(uint _liquidity, uint _totalSupply, bool _isAnchor) private {
-        if(_isAnchor) {
-            virtualAnchorBalance -= virtualAnchorBalance.mul(_liquidity)/_totalSupply;
-        }else{
-            //virtualFloatBalance -= virtualFloatBalance.mul(_liquidity)/_totalSupply;
-        }
     }
 
     /// @notice Function That handles the amount of reserves in Float Anchor Shares
@@ -988,7 +971,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             pt.burn(address(this), liquidity); //Should burn unadjusted amount ofc
         }
 
-        updateVirtualBalancesBurn(liquidity, _totalSupply, _isAnchor);
+        if(_isAnchor) {
+            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_totalSupply;
+        }
         _update();
         emit Burn(msg.sender, amount, _isAnchor);
     }

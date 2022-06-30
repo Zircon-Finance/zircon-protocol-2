@@ -20,24 +20,17 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public deltaGammaMinFee;
 
     uint public muUpdatePeriod;
-
-
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
-
-
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
-
     constructor(address _factory, address _energyFactory) public {
         factory = _factory;
         energyFactory = _energyFactory;
-
         // Starting Variables
         maximumPercentageSync = 10;
         dynamicFeePercentage = 5;
         deltaGammaThreshold = 4 * 1e16; //4%
         deltaGammaMinFee = 1500; //15%
         muUpdatePeriod = 240; //number of blocks; 1 hour on Ethereum and Moonbeam/river
-
     }
 
     function allPylonsLength() external view returns (uint) {
