@@ -70,7 +70,7 @@ describe("Pylon", () => {
             // Add some liquidity to the Pair...
             await addLiquidity(token0Amount, token1Amount)
             // Transferring some tokens
-            let maxSync = await pylonInstance.maximumPercentageSync()
+            let maxSync = await factoryPylonInstance.maximumPercentageSync()
             console.log("maxSync: ", maxSync);
             await token0.transfer(pylonInstance.address, token0Amount.div(100))
             await token1.transfer(pylonInstance.address, token1Amount.div(100))
@@ -290,7 +290,7 @@ describe("Pylon", () => {
             // Add some liquidity to the Pair...
             await addLiquidity(token0Amount, token1Amount)
             // Transferring some tokens
-            let maxSync = await pylonInstance.maximumPercentageSync()
+            let maxSync = await factoryPylonInstance.maximumPercentageSync()
 
             await token0.transfer(pylonInstance.address, token0Amount.div(maxSync.toNumber()+1))
             await token1.transfer(pylonInstance.address, token1Amount.div(maxSync.toNumber()+1))
@@ -329,7 +329,7 @@ describe("Pylon", () => {
         const token1Amount = expandTo18Decimals(8)
 
         // Let's transfer some tokens to the Pylon
-        let maxSync = await pylonInstance.maximumPercentageSync()
+        let maxSync = await factoryPylonInstance.maximumPercentageSync()
         await token0.transfer(pylonInstance.address, token0Amount.div(maxSync.toNumber()+1))
         await token1.transfer(pylonInstance.address, token1Amount.div(maxSync.toNumber()+1))
         //Let's initialize the Pylon, this should call two sync

@@ -11,7 +11,7 @@ import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-
+import "hardhat/console.sol";
 contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****
     using SafeMath for uint112;
@@ -653,6 +653,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
     function sync() private {
+
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) { IZirconPair(pairAddress).tryLock(); }
 
