@@ -9,33 +9,27 @@ contract ZirconPoolToken is ZirconERC20 {
     address public factory;
     address public pylon;
 
-    uint private unlocked = 1;
-    modifier lock() {
-        require(unlocked == 1, 'UniswapV2: LOCKED');
-        unlocked = 0;
-        _;
-        unlocked = 1;
-    }
-
-    function mint(address account, uint256 amount) lock external {
-        require(msg.sender == pylon, 'ZirconPoolToken: FORBIDDEN');
-        // sufficient check
-        _mint(account, amount);
-    }
-
-    function burn(address account, uint256 amount) lock external {
-        require(msg.sender == pylon, 'ZirconPoolToken: FORBIDDEN');
-        // sufficient check
-        _burn(account, amount);
-    }
-
     constructor() public {
         factory = msg.sender;
     }
 
+    function mint(address account, uint256 amount) external {
+        require(msg.sender == pylon, 'ZPT: FORBIDDEN');
+        // sufficient check
+        _mint(account, amount);
+    }
+
+    function burn(address account, uint256 amount) external {
+        require(msg.sender == pylon, 'ZPT: FORBIDDEN');
+        // sufficient check
+        _burn(account, amount);
+    }
+
+
+
     // called once by the factory at time of deployment
     function initialize(address _token0, address _pair, address _pylon, bool _isAnchor) external {
-        require(msg.sender == factory, 'ZirconPoolToken: FORBIDDEN');
+        require(msg.sender == factory, 'ZPT: FORBIDDEN');
         // sufficient check
         token = _token0;
         pair = _pair;

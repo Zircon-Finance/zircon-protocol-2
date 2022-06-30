@@ -6,8 +6,6 @@ import "./libraries/SafeMath.sol";
 import "./libraries/UQ112x112.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./interfaces/IZirconPylonFactory.sol";
-import "hardhat/console.sol";
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
@@ -79,16 +77,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
     // Calls dummy function with lock modifier
-    modifier pairUnlocked() {
-        IZirconPair(pairAddress).tryLock();
-        _;
-    }
+//    modifier pairUnlocked() {
+//        IZirconPair(pairAddress).tryLock();
+//        _;
+//    }
 
-    modifier blockRecursion() {
-        // TODO: Should do some kind of block height check to ensure this user hasn't
-        // already called any of these functions
-        _;
-    }
+//    modifier blockRecursion() {
+//        // TODO: Should do some kind of block height check to ensure this user hasn't
+//        // already called any of these functions
+//        _;
+//    }
 
     // **** EVENTS ****
     event PylonUpdate(uint _reserve0, uint _reserve1);
@@ -110,12 +108,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // ****** HELPER FUNCTIONS *****
     function _safeTransfer(address token, address to, uint value) private {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FAILED');
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: TRANSFER_FAILED');
     }
 
     function _safeTransferFrom(address token, address from, address to, uint value) private {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR_FROM, from, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FROM_FAILED');
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: TRANSFER_FROM_FAILED');
     }
 
     function getSyncReserves()  public view returns  (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) {
@@ -179,7 +177,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @floatToken -> Float token
     // @anchorToken -> Anchor token
     function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy) external nonReentrant {
-        require(msg.sender == factoryAddress, 'Zircon: FORBIDDEN'); // sufficient check
+        require(msg.sender == factoryAddress, 'ZP: FORBIDDEN'); // sufficient check
         floatPoolTokenAddress = _floatPoolTokenAddress;
         anchorPoolTokenAddress = _anchorPoolTokenAddress;
         pairAddress = _pairAddress;
@@ -193,13 +191,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // The first case is when we initialize the pair through the pylon
     // And the second one is when initialize the pylon with a pair already existing
     function initPylon(address _to) external nonReentrant returns (uint floatLiquidity, uint anchorLiquidity) {
-        require(initialized == 0, "Already Initialized");
+        require(initialized == 0, "Already initialized");
 
         // Let's get the balances so we can see what the user send us
         // As we are initializing the reserves are going to be null
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
-        require(balance0 > 0 && balance1 > 0, "ZP: Not enough liquidity");
+        require(balance0 > 0 && balance1 > 0, "ZP: NOT_ENOUGH");
 
         // Let's see if the pair contains some reserves
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
@@ -352,13 +350,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             bool gammaIsOver50 = _newGamma < 5e17;
 
-            //This the part that measures if gamma is going outside (to the extremes) or to the inside (0.5 midpoint)
-            //It uses an XOR between current gamma and its delta
-            //If delta is positive when above 50%, means it's moving to the outside
-            //If delta is negative when below 50%, that also means it's going to the outside
+            // This the part that measures if gamma is going outside (to the extremes) or to the inside (0.5 midpoint)
+            // It uses an XOR between current gamma and its delta
+            // If delta is positive when above 50%, means it's moving to the outside
+            // If delta is negative when below 50%, that also means it's going to the outside
 
-            //In other scenarios it's going to the inside, which is why we use the XOR
-            if(deltaGammaIsPositive != gammaIsOver50) { //!= with booleans is an XOR
+            // In other scenarios it's going to the inside, which is why we use the XOR
+            if(deltaGammaIsPositive != gammaIsOver50) { // != with booleans is an XOR
                 uint absoluteGammaDeviation;
 
                 if(gammaIsOver50) {
@@ -367,18 +365,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                     absoluteGammaDeviation = 5e17 - gammaMulDecimals;
                 }
 
-                //This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
-                //Due to uint math we can't do this in one line
+                // This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
+                // Due to uint math we can't do this in one line
                 if (deltaGammaIsPositive) {
                     uint deltaMu = (_newGamma - _oldGamma).mul(absoluteGammaDeviation);
                     if (deltaMu + muMulDecimals <= 1e18) {
-                        //Only updates if the result doesn't go above 1.
+                        // Only updates if the result doesn't go above 1.
                         muMulDecimals += deltaMu;
                     }
 
                 } else {
                     uint deltaMu = (_oldGamma - _newGamma).mul(absoluteGammaDeviation);
-                    //subflow check
+                    // Sublow check
                     if(deltaMu <= muMulDecimals) {
                         muMulDecimals -= deltaMu;
                     }
@@ -422,7 +420,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function _mintPoolToken(uint amountIn,
         uint _pylonReserve, uint _pairReserveTranslated,
         address _poolTokenAddress, address _to,  bool isAnchor) private returns (uint liquidity, uint amountOut) {
-        require(amountIn > 0, "ZP: Not Enough Liquidity");
+        require(amountIn > 0, "ZP: NOT_ENOUGH");
         // Taking the fee out in tokens
 
         uint pts = IZirconPoolToken(_poolTokenAddress).totalSupply();
@@ -552,7 +550,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
 
         if (maxDerivative >= deltaGammaThreshold) {
-            //console.log("Solidity: inside gamma threshold");
             applied = true;
             uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
             if(feeBps >= 10000) {
@@ -560,9 +557,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 fee = amountIn.mul(feeBps)/10000;
             }
-
         }
-
         //Base case where the threshold isn't passed
         else {
             applied = false;
@@ -603,10 +598,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             liquidity = _liquidity;
             if (isAnchor) {
                 virtualAnchorBalance += amount;
-            }else{
-                //virtualFloatBalance += amount;
             }
-
             IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !isAnchor : isAnchor);
             IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(to, liquidity);
         }
@@ -640,13 +632,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             liquidity = _liquidity;
             if (shouldMintAnchor) {
                 virtualAnchorBalance += amount;
-            } else {
-                //virtualFloatBalance += amount;
             }
 
         }
 
-        require(amountIn1 > 0 && amountIn0 > 0, "ZirconPylon: Not Enough Liquidity");
+        require(amountIn1 > 0 && amountIn0 > 0, "ZP: NOT_ENOUGH");
         _safeTransfer(pylonToken.float, pairAddress, amountIn0);
         _safeTransfer(pylonToken.anchor, pairAddress, amountIn1);
         IZirconPair(pairAddress).mint(address(this));
@@ -710,8 +700,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // It works as an additional incentive to not withdraw.
 
             //VFB is no longer relevant, so it's commented out for now
-
-
 
             //Mu mostly follows gamma but it's designed to find an equilibrium point different from 50/50
             //More on this in the function itself;
@@ -823,7 +811,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
                 remainingPercentage = (amountToAdd.sub(energyPTBalance))/(liquidity);
             }
-        }else{
+        } else {
             remainingPercentage = 0;
         }
     }
@@ -842,7 +830,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if(energyAnchorBalance > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
             }
-            console.log("Sending slashed Tokens", amountToTransfer);
+//            console.log("Sending slashed Tokens", amountToTransfer);
         }
     }
 
@@ -855,7 +843,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
         uint liquidity = pt.balanceOf(address(this));
-        require(liquidity > 0, "ZP: Not enough liquidity inserted");
+        require(liquidity > 0, "ZP: NOT_ENOUGH");
         uint ptTotalSupply = pt.totalSupply();
         uint extraPercentage = 0;
 
@@ -867,7 +855,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 uint maxPoolTokens = _isAnchor ?
                 ptTotalSupply - ptTotalSupply.mul(reserveAnchor) / virtualAnchorBalance :
                 ptTotalSupply - ptTotalSupply.mul(reserveFloat) / (pairReserves0.mul(2).mul(gammaMulDecimals) / 1e18).add(reserveFloat);
-                require(liquidity < maxPoolTokens, "ZP: Exceeded Burn Async limit");
+                require(liquidity < maxPoolTokens, "ZP: EXCEED");
             }
             uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
             ptu = payBurnFees(ptu);

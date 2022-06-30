@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity =0.5.16;
-//import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
+// import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 import './ZirconPoolToken.sol';
 import './ZirconPylon.sol';
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
@@ -25,12 +25,13 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     constructor(address _factory, address _energyFactory) public {
         factory = _factory;
         energyFactory = _energyFactory;
+
         // Starting Variables
         maximumPercentageSync = 10;
         dynamicFeePercentage = 5;
-        deltaGammaThreshold = 4 * 1e16; //4%
-        deltaGammaMinFee = 1500; //15%
-        muUpdatePeriod = 240; //number of blocks; 1 hour on Ethereum and Moonbeam/river
+        deltaGammaThreshold = 4 * 1e16; // 4%
+        deltaGammaMinFee = 1500; // 15%
+        muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
     }
 
     function allPylonsLength() external view returns (uint) {
@@ -62,19 +63,19 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         energy = IZirconEnergyFactory(energyFactory).createEnergy( _pylonAddress, _pairAddress, _tokenA, _tokenB);
         //energyRev = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, address(this));
 
-        //        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
-        //        require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
+        //(bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
+        //require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
     }
 
-    // Adding Pylon
+    // Adding PYLON
     // First Token is always the Float and the second one is the Anchor
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESSES');
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PYLON_EXISTS');
 
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
-        address poolTokenA = createTokenAddress(_tokenA, pylonAddress); // Float
-        address poolTokenB = createTokenAddress(_tokenB, pylonAddress); // Anchor
+        address poolTokenA = createTokenAddress(_tokenA, pylonAddress); // FLOAT
+        address poolTokenB = createTokenAddress(_tokenB, pylonAddress); // ANCHOR
 
         address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
 

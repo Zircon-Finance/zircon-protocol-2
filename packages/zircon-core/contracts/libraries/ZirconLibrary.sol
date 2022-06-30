@@ -1,7 +1,7 @@
 pragma solidity ^0.5.16;
 
 import "./SafeMath.sol";
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 library ZirconLibrary {
     using SafeMath for uint256;
