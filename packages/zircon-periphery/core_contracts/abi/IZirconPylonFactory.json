@@ -1,23 +1,20 @@
-{
-  "abi": [
-    "event PylonCreated(address indexed,address indexed,address,address,address,address)",
-    "function addPylon(address,address,address) returns (address)",
-    "function allPylons(uint256) view returns (address)",
-    "function allPylonsLength() view returns (uint256)",
-    "function deltaGammaMinFee() view returns (uint256)",
-    "function deltaGammaThreshold() view returns (uint256)",
-    "function dynamicFeePercentage() view returns (uint256)",
-    "function energyFactory() view returns (address)",
-    "function factory() view returns (address)",
-    "function getPylon(address,address) view returns (address)",
-    "function maximumPercentageSync() view returns (uint256)",
-    "function muUpdatePeriod() view returns (uint256)",
-    "function pylonCodeHash() pure returns (bytes32)",
-    "function setDeltaGammaMinFee(uint256)",
-    "function setDeltaGammaThreshold(uint256)",
-    "function setDynamicFeePercentage(uint256)",
-    "function setFeeToSetter(address)",
-    "function setMaximumPercentageSync(uint256)"
-  ],
-  "bytecode": "0x"
-}
+[
+  "event PylonCreated(address indexed,address indexed,address,address,address,address)",
+  "function addPylon(address,address,address) returns (address)",
+  "function allPylons(uint256) view returns (address)",
+  "function allPylonsLength() view returns (uint256)",
+  "function deltaGammaMinFee() view returns (uint256)",
+  "function deltaGammaThreshold() view returns (uint256)",
+  "function dynamicFeePercentage() view returns (uint256)",
+  "function energyFactory() view returns (address)",
+  "function factory() view returns (address)",
+  "function getPylon(address,address) view returns (address)",
+  "function maximumPercentageSync() view returns (uint256)",
+  "function muUpdatePeriod() view returns (uint256)",
+  "function pylonCodeHash() pure returns (bytes32)",
+  "function setDeltaGammaMinFee(uint256)",
+  "function setDeltaGammaThreshold(uint256)",
+  "function setDynamicFeePercentage(uint256)",
+  "function setFeeToSetter(address)",
+  "function setMaximumPercentageSync(uint256)"
+]

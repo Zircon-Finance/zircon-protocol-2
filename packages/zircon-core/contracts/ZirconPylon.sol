@@ -348,7 +348,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             bool deltaGammaIsPositive = _newGamma >= _oldGamma;
 
-            bool gammaIsOver50 = _newGamma < 5e17;
+            bool gammaIsOver50 = _newGamma >= 5e17;
 
             // This the part that measures if gamma is going outside (to the extremes) or to the inside (0.5 midpoint)
             // It uses an XOR between current gamma and its delta
@@ -927,6 +927,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // Fees here are
     function burn(address _to, bool _isAnchor) external nonReentrant isInitialized returns (uint amount){
         sync();
+        console.log("Finished sync in burn");
         // Selecting the Pool Token class on basis of the requested tranch to burn
         IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
         // Let's get how much liquidity was sent to burn
