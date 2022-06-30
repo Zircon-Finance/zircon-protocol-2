@@ -1,9 +1,0 @@
-{
-  "abi": [
-    "event OwnershipTransferred(address indexed,address indexed)",
-    "function owner() view returns (address)",
-    "function renounceOwnership()",
-    "function transferOwnership(address)"
-  ],
-  "bytecode": "0x"
-}

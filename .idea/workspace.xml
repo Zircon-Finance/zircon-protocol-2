@@ -183,10 +183,11 @@
       <change beforePath="$PROJECT_DIR$/../zircon-landing/static/litepaper.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/static/litepaper.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zircon-landing/static/robots.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/static/robots.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../zircon-landing/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/yarn.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/simulation.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/simulation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylon.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylon.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylonFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylonFactory.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -305,7 +306,7 @@
       <workItem from="1656241686165" duration="1697000" />
       <workItem from="1656367065165" duration="1092000" />
       <workItem from="1656488461809" duration="5733000" />
-      <workItem from="1656574131788" duration="11291000" />
+      <workItem from="1656574131788" duration="11967000" />
     </task>
     <servers />
   </component>

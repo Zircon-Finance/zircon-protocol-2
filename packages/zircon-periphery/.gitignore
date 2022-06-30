@@ -1,4 +1,7 @@
 node_modules
+#core_contracts
+
+core_contracts/
 
 #Hardhat files
 cache
