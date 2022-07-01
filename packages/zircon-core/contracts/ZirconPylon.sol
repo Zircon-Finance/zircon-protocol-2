@@ -543,7 +543,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //In principle classic "oracle" exploits merely speed up/force natural outcomes.
     //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
     //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
-    function applyDeltaTax(uint amountIn) private returns (uint fee, bool applied) {
+    function applyDeltaTax(uint amountIn) private view returns (uint fee, bool applied) {
 
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
         uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
@@ -678,7 +678,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Let's get the amount of total pool value own by pylon
 
             uint totalPoolValueAnchorPrime = translateToPylon(pairReserve1.mul(2), 0);
-            uint totalPoolValueFloatPrime = translateToPylon(pairReserve0.mul(2), 0);
+            //uint totalPoolValueFloatPrime = translateToPylon(pairReserve0.mul(2), 0);
 
             //Fee value/total pool value ratio, modified implementation of Uniswap's mintFee formula
             uint one = 1e18;
@@ -686,7 +686,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             // Multiply by total pool value to get fee value in native units
             uint feeValueAnchor = totalPoolValueAnchorPrime.mul(d)/1e18;
-            uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
+            //uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 //            console.log("sync::anchor::fee", feeValueAnchor);
 //            console.log("sync::float::fee", feeValueFloat);
 
