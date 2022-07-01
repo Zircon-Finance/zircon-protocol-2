@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity =0.5.16;
 
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import "./libraries/SafeMath.sol";
@@ -151,13 +151,13 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint _minFee = pylon.minFee;
     uint _maxFee = pylon.maxFee;
-    uint _gammaHalf = 50000000000000000;
+    uint _gammaHalf = 5e16;
     uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
-
-    if (gammaMulDecimals <= 450000000000000000 || gammaMulDecimals >= 550000000000000000) {
-      amount = (_maxFee.mul(x)/1e18).mul(x)/(1e18*25); //25 is a reduction factor based on the 0.45-0.55 range we're using.
+    console.log(x);
+    if (gammaMulDecimals <= 45e15 || gammaMulDecimals >= 55e15) {
+      amount = (_maxFee.mul(x)/1e18).mul(x)/(25e18); //25 is a reduction factor based on the 0.45-0.55 range we're using.
     } else {
-      amount = ((_minFee .mul(x)/1e18).mul(x)  .mul(36)/(1e18))  .add(_minFee); //Ensures minFee is the lowest value.
+      amount = ((_minFee.mul(x)/1e18).mul(x).mul(36)/(1e18))  .add(_minFee); //Ensures minFee is the lowest value.
     }
 
   }

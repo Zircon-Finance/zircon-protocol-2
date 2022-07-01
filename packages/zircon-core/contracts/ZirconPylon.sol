@@ -503,6 +503,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (uint fee, ) = applyDeltaTax(amountIn);
 
         fee = fee.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals)); //1basis point resolution
+
+       // TODO: This should never go above the balcance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
@@ -946,9 +948,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             address _pairAddress = pairAddress;
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
+
+//            console.log("ba", ba, "amount", _amount);
+
             amount = payFees(_amount, isAnchor);
             _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, amount);
-
             //In case the reserves weren't able to pay for everything
             if (reservePT < liquidity) {
                 uint adjustedLiquidity = liquidity.sub(reservePT);
