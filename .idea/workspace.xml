@@ -185,12 +185,10 @@
       <change beforePath="$PROJECT_DIR$/../zircon-landing/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/yarn.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/libraries/ZirconLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/libraries/ZirconLibrary.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconFactory.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconLibrary.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconLibrary.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPair.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPair.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylon.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylon.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylonFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/core_contracts/abi/ZirconPylonFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylonFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylonFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/governance/FeeToSetter.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/governance/FeeToSetter.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/interfaces/IZirconPylonFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/interfaces/IZirconPylonFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -309,7 +307,8 @@
       <workItem from="1656241686165" duration="1697000" />
       <workItem from="1656367065165" duration="1092000" />
       <workItem from="1656488461809" duration="5733000" />
-      <workItem from="1656574131788" duration="12591000" />
+      <workItem from="1656574131788" duration="12940000" />
+      <workItem from="1656679026931" duration="10581000" />
     </task>
     <servers />
   </component>

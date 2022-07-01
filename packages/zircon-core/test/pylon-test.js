@@ -114,21 +114,21 @@ describe("Pylon", () => {
     it('Test Creating Pylon With Unbalanced Quantities', async function () {
         let token0Amount = expandTo18Decimals(1700)
         let token1Amount = expandTo18Decimals(5300)
-
         await addLiquidity(token0Amount, token1Amount)
         // Let's transfer some tokens to the Pylon
         await token0.transfer(pylonInstance.address, token0Amount.div(100))
         await token1.transfer(pylonInstance.address, token1Amount.div(11))
         //Let's initialize the Pylon, this should call two sync
+        console.log("token0Amount: ", token0Amount);
         await pylonInstance.initPylon(account.address)
         let gamma = await pylonInstance.gammaMulDecimals()
-
+        console.log("gamma: ", gamma);
         await expect(gamma).to.eq(ethers.BigNumber.from("99099099099099099")) // 473684210526315789
         await token0.transfer(pylonInstance.address, expandTo18Decimals(4))
         await token1.transfer(pylonInstance.address, expandTo18Decimals(4))
         await expect(pylonInstance.mintPoolTokens(account.address, false))
         gamma = await pylonInstance.gammaMulDecimals()
-
+        console.log("gamma: ", gamma);
         await expect(gamma).to.eq(ethers.BigNumber.from("473684210526315789")) // TODO: is normal to have gamma belw 0.5 her ?
 
         await expect(pylonInstance.mintPoolTokens(account.address, true))

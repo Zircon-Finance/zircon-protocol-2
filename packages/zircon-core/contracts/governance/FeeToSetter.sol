@@ -36,11 +36,6 @@ contract FeeToSetter {
         IZirconPylonFactory(factory).setMaximumPercentageSync(_maximumPercentageSync);
     }
 
-    function setDynamicFeePercentage(uint _dynamicFeePercentage) external {
-        require(msg.sender == owner, 'ZF: FORBIDDEN');
-        IZirconPylonFactory(factory).setDynamicFeePercentage(_dynamicFeePercentage);
-    }
-
     function setDeltaGammaThreshold(uint _deltaGammaThreshold) external {
         require(msg.sender == owner, 'ZF: FORBIDDEN');
         IZirconPylonFactory(factory).setDeltaGammaThreshold(_deltaGammaThreshold);

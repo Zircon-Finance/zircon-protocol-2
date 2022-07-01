@@ -14,7 +14,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     address public feeToSetter;
 
     uint public maximumPercentageSync;
-    uint public dynamicFeePercentage;
 
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
@@ -28,7 +27,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
         // Starting Variables
         maximumPercentageSync = 10;
-        dynamicFeePercentage = 5;
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 1500; // 15%
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
@@ -93,11 +91,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     function setMaximumPercentageSync(uint _maximumPercentageSync) external {
         require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
         maximumPercentageSync = _maximumPercentageSync;
-    }
-
-    function setDynamicFeePercentage(uint _dynamicFeePercentage) external {
-        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
-        dynamicFeePercentage = _dynamicFeePercentage;
     }
 
     function setDeltaGammaThreshold(uint _deltaGammaThreshold) external {

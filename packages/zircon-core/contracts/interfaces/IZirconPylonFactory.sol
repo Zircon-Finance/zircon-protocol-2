@@ -2,7 +2,6 @@ pragma solidity >=0.5.16;
 
 interface IZirconPylonFactory {
     function maximumPercentageSync() external view returns (uint);
-    function dynamicFeePercentage() external view returns (uint);
 
     function deltaGammaThreshold() external view returns (uint);
     function deltaGammaMinFee() external view returns (uint);
@@ -21,7 +20,6 @@ interface IZirconPylonFactory {
 
     function setFeeToSetter(address) external;
     function setMaximumPercentageSync(uint _maximumPercentageSync) external;
-    function setDynamicFeePercentage(uint _dynamicFeePercentage) external;
     function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
     function setDeltaGammaMinFee(uint _deltaGammaMinFee) external;
 }
