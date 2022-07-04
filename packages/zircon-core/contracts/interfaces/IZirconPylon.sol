@@ -1,6 +1,5 @@
 pragma solidity >=0.5.16;
 interface IZirconPylon {
-
     function initialized() external view returns (uint);
     function anchorPoolTokenAddress() external view returns (address);
     function floatPoolTokenAddress() external view returns (address);

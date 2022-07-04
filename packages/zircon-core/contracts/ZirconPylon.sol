@@ -306,7 +306,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Let's remove the tokens that are above max0 and max1, and donate them to the pool
         // This is for cases where somebody just donates tokens to pylon; tx reverts if this done via core functions
         //Todo: This is likely also invoked if the price dumps and the sync pool is suddenly above max, not ideal behavior...
-
+        _updateVariables();
         updateReservesRemovingExcess(balance0, balance1, max0, max1);
     }
     // @notice This Function is called to update some variables needed for calculation
@@ -489,7 +489,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         }
         //Sends tokens into pool if there is a match
         _update();
-        _updateVariables();
     }
 
 
@@ -501,10 +500,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, bool isAnchor) private returns (uint amountOut){
         (uint fee, ) = applyDeltaTax(amountIn);
-
-        fee = fee.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals)); //1basis point resolution
-
-       // TODO: This should never go above the balcance
+        console.log("Solidity: fee: ", fee);
+        // TODO: This should never go above the balcance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
@@ -521,7 +518,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function payBurnFees(uint amountIn) private returns (uint amountOut) {
         (uint fee, ) = applyDeltaTax(amountIn);
 
-        fee = fee.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
 
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
@@ -553,6 +549,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
     //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
     function applyDeltaTax(uint amountIn) private view returns (uint fee, bool applied) {
+
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
         uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
         uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
@@ -560,19 +557,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if (maxDerivative >= deltaGammaThreshold) {
             applied = true;
             uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
-            if(feeBps >= 10000) {
-                fee = amountIn;
-            } else {
-                fee = amountIn.mul(feeBps)/10000;
-            }
+            feeBps = feeBps.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
+
+            require(feeBps < 10000, "ZP: Fee too high");
+            fee = amountIn.mul(feeBps)/10000;
         }
         //Base case where the threshold isn't passed
         else {
             applied = false;
-            fee = 0;
+            fee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
         }
-
-
+        console.log("Solidity: applyDeltaTax");
     }
 
 
@@ -581,7 +576,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     function mintAsync100(address to, bool isAnchor) nonReentrant isInitialized external returns (uint liquidity) {
         sync();
-
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
         uint amountIn;
         if (isAnchor) {
@@ -591,11 +585,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint balance = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
             amountIn = balance.sub(_reserve0);
         }
-
         amountIn = payFees(amountIn, isAnchor);
+
         require(amountIn > 0, "ZP: INSUFFICIENT_AMOUNT");
+
         _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountIn);
+
         {
+
             (uint a0, uint a1) = _disincorporateAmount(amountIn, isAnchor);
 
             (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(
@@ -610,7 +607,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !isAnchor : isAnchor);
             IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(to, liquidity);
         }
-
         _updateVariables();
         emit MintAsync100(msg.sender, amountIn, isAnchor);
     }
@@ -888,7 +884,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/ptTotalSupply;
         }
         _update();
-        _updateVariables();
         // Emiting event on burned async
         emit BurnAsync(msg.sender, amount0, amount1);
     }
@@ -949,7 +944,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
 
-//            console.log("ba", ba, "amount", _amount);
 
             amount = payFees(_amount, isAnchor);
             _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, amount);
@@ -974,7 +968,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_totalSupply;
         }
         _update();
-        _updateVariables();
         emit Burn(msg.sender, amount, _isAnchor);
     }
 }

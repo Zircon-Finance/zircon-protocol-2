@@ -6,6 +6,9 @@ import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
+import "../interfaces/IZirconPylonFactory.sol";
+import "../interfaces/IZirconPylon.sol";
+import '../libraries/Math.sol';
 
 contract ZirconEnergy is IZirconEnergy {
 
@@ -161,6 +164,31 @@ contract ZirconEnergy is IZirconEnergy {
     }
 
   }
+
+  //Anti-exploit measure applying extra fees for any mint/burn operation that occurs after a massive gamma change.
+  //In principle classic "oracle" exploits merely speed up/force natural outcomes.
+  //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
+  //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
+//  function applyDeltaTax(uint amountIn, uint gammaMulDecimals) private view returns (uint fee, bool applied) {
+//
+//    uint maxDerivative = Math.max(IZirconPylon(pylon.pylonAddress).gammaEMA, IZirconPylon(pylon.pylonAddress).thisBlockEMA);
+//    uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+//    uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
+//
+//    if (maxDerivative >= deltaGammaThreshold) {
+//      applied = true;
+//      uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
+//      feeBps = feeBps.add(getFeeByGamma(gammaMulDecimals));
+//      require(feeBps < 10000, "ZP: Fee too high");
+//      fee = amountIn.mul(feeBps)/10000;
+//    }
+//    //Base case where the threshold isn't passed
+//    else {
+//      applied = false;
+//      fee = getFeeByGamma(gammaMulDecimals);
+//    }
+//    console.log("Solidity: applyDeltaTax");
+//  }
 
   //    uint float0Liquidity;
 //    uint float1Liquidity;
