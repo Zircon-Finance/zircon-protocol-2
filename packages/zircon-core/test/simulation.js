@@ -287,8 +287,8 @@ describe("Simulation", () => {
         let pylonReserve1 = pylonReserves[1].toString()
 
         let virtualAnchorBalance = (await pylonInstance.virtualAnchorBalance()).toString();
-        // let virtualFloatBalance = (await pylonInstance.virtualFloatBalance()).toString();
-        let gammaMulDecimals = (await pylonInstance.gammaMulDecimals()).toString();
+        let virtualFloatBalance = (await pylonInstance.virtualFloatBalance()).toString();
+        let muMulDecimals = (await pylonInstance.muMulDecimals()).toString();
 
         return {
             pairReserve0: pairReserve0/1e18,
@@ -296,7 +296,7 @@ describe("Simulation", () => {
             pylonReserve0: pylonReserve0/1e18,
             pylonReserve1: pylonReserve1/1e18,
             virtualAnchorBalance: virtualAnchorBalance/1e18,
-            // virtualFloatBalance: virtualFloatBalance/1e18,
+            muMulDecimals: muMulDecimals/1e18,
             gammaMulDecimals: gammaMulDecimals/1e18,
             price: pairReserve0/pairReserve1
         }
