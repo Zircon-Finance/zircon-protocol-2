@@ -99,6 +99,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     event Burn(address sender, uint aIn0, bool isAnchor);
     event BurnAsync(address sender, uint aIn0, uint aIn1);
     event Excess(uint aIn0, bool isAnchor);
+    event DeltaTax(uint aIn0, bool applied);
 
     // ****** CONSTRUCTOR ******
     constructor() public {
@@ -567,6 +568,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             applied = false;
             fee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
         }
+        emit DeltaTax(fee, applied);
         console.log("Solidity: applyDeltaTax");
     }
 
