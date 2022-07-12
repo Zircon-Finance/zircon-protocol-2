@@ -33,10 +33,10 @@ async function getOutputAmount(input, inputReserves, outputReserves) {
 
 // TODO: See case where we have a big dump
 describe("Pylon", () => {
-    before(function(done) {
-        this.timeout(3000); // A very long environment setup.
-        setTimeout(done, 2500);
-    });
+    // before(function(done) {
+//         this.timeout(10000); // A very long environment setup.
+//         setTimeout(done, 10000);
+//     });
 
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
@@ -75,41 +75,61 @@ describe("Pylon", () => {
             // Add some liquidity to the Pair...
             await addLiquidity(token0Amount, token1Amount)
             // Transferring some tokens
-            let maxSync = await factoryPylonInstance.maximumPercentageSync()
+            let maxSync = await factoryPylonInstance.maximumPercentageSync();
             console.log("maxSync: ", maxSync);
             await token0.transfer(pylonInstance.address, token0Amount.div(100))
             await token1.transfer(pylonInstance.address, token1Amount.div(100))
-            console.log("Mint test token0Amount: ", token0Amount);
+            console.log("Mint test token0Amount: ", ethers.utils.formatEther(token0Amount.div(100)));
+            console.log("Mint test token1Amount: ", ethers.utils.formatEther(token1Amount.div(100)));
             // Let's start the pylon
             await pylonInstance.initPylon(account.address)
             // Transferring some liquidity to pylon
-            // let pylonRes = await pylonInstance.getSyncReserves()
-            // let pairRes = await pair.getReserves()
+            let pylonRes = await pylonInstance.getSyncReserves();
+            console.log("Pylon Sync Reserve0: ", ethers.utils.formatEther(pylonRes[0]));
+            console.log("Pylon Sync Reserve1: ", ethers.utils.formatEther(pylonRes[1]));
+            let pairRes = await pair.getReserves()
+            console.log("Pylon Pair Reserve0: ", ethers.utils.formatEther(pairRes[0]))
+            console.log("Pylon Pair Reserve1: ", ethers.utils.formatEther(pairRes[1]))
+            
+            console.log("Creation gamma: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()))
+            
+            console.log("balanceOfPooltoken1 premint: ", ethers.utils.formatEther(await poolTokenInstance1.balanceOf(account.address)));
+            console.log("balanceOfPooltoken0 premint: ", ethers.utils.formatEther(await poolTokenInstance0.balanceOf(account.address)));
 
             if (isAnchor) {
                 let t = token0Amount.div(100)
-                console.log("Mint test token0Amount for second mint: ", t);
+                console.log("Mint test token0Amount for second mint: ", ethers.utils.formatEther(t));
                 await token1.transfer(pylonInstance.address, t)
             }else{
                 let t = token1Amount.div(100)
-                console.log("Mint test token1Amount for second mint: ", t);
+                console.log("Mint test token1Amount for second mint: ", ethers.utils.formatEther(t));
                 await token0.transfer(pylonInstance.address, t)
             }
+            
 
             // Minting some float/anchor tokens
-
-
 
             await expect(pylonInstance.mintPoolTokens(account.address, isAnchor))
                 .to.emit(pylonInstance, 'PylonUpdate')
                 .withArgs(expectedRes0, expectedRes1);
+                
+                
+            			let pylonRes2 = await pylonInstance.getSyncReserves();
+            console.log("Pylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes2[0]));
+            console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes2[1]));
+            let pairRes2 = await pair.getReserves()
+            console.log("Pylon Pair Reserve0 after mint: ", ethers.utils.formatEther(pairRes2[0]))
+            console.log("Pylon Pair Reserve1 after mint: ", ethers.utils.formatEther(pairRes2[1]))
+
+                
+            console.log("Post mint gamma: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()))
             // Let's check the balances, float
             // expect(await pylonInstance.gammaMulDecimals()).to.eq(ethers.BigNumber.from('1000000000000000000'));
-            console.log("balanceOfInstance1: ", await poolTokenInstance1.balanceOf(account.address));
-            console.log("expectedOutput1: ", expectedOutputAmount1);
+            console.log("balanceOfInstance1: ", ethers.utils.formatEther(await poolTokenInstance1.balanceOf(account.address)));
+            console.log("expectedOutput1: ", ethers.utils.formatEther(expectedOutputAmount1));
 
-            console.log("balanceOfInstance0: ", await poolTokenInstance0.balanceOf(account.address));
-            console.log("expectedOutput0: ", expectedOutputAmount0);
+            console.log("balanceOfInstance0: ", ethers.utils.formatEther(await poolTokenInstance0.balanceOf(account.address)));
+            console.log("expectedOutput0: ", ethers.utils.formatEther(expectedOutputAmount0));
             expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(expectedOutputAmount1);
             expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(expectedOutputAmount0);
             // Anchor
