@@ -63,9 +63,9 @@ describe("Pylon", () => {
     // Let's try to calculate some cases for pylon
     //TODO: recheck the values, they are way to similar
     const mintTestCases = [
-        [5, 10, '4750000000000000', '4749999999999999','152496714848881975','99999999999999000', false],
-        [10, 5, '4749999999999999', '4749999999999999','99999999999999000', '149999999999998909', true],
-        [5, 10, '2374999999999999', '9499999999999999','49999999999999000', '149999999999998924', true],
+        [5, 10, '4750000000000000', '4749999999999999','149999999999998923','99999999999999000', false],
+        [10, 5, '4749999999999999', '4749999999999999','99999999999999000', '149999999999998920', true],
+        [5, 10, '2374999999999999', '9499999999999999','49999999999999000', '149999999999998920', true],
         [10, 10, '9500000000000000', '4749999999999999','199999999999998919', '99999999999999000', false],
         [1000, 1000, '475000000000000000', '950000000000000000','9999999999999999000', '19999999999999998919', true],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : expandTo18Decimals(n))))
@@ -114,7 +114,7 @@ describe("Pylon", () => {
                 .withArgs(expectedRes0, expectedRes1);
                 
                 
-            			let pylonRes2 = await pylonInstance.getSyncReserves();
+        	let pylonRes2 = await pylonInstance.getSyncReserves();
             console.log("Pylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes2[0]));
             console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes2[1]));
             let pairRes2 = await pair.getReserves()
@@ -140,20 +140,41 @@ describe("Pylon", () => {
         let token0Amount = expandTo18Decimals(1700)
         let token1Amount = expandTo18Decimals(5300)
         await addLiquidity(token0Amount, token1Amount)
+
+        let pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 initial: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 initial: ", ethers.utils.formatEther(pairRes[1]))
+
         // Let's transfer some tokens to the Pylon
         await token0.transfer(pylonInstance.address, token0Amount.div(100))
         await token1.transfer(pylonInstance.address, token1Amount.div(11))
         //Let's initialize the Pylon, this should call two sync
-        console.log("token0Amount: ", token0Amount);
+        console.log("token0Amount init: ", ethers.utils.formatEther(token0Amount.div(100)));
+        console.log("token1Amount init: ", ethers.utils.formatEther(token1Amount.div(11)));
         await pylonInstance.initPylon(account.address)
+
+        let pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after initPylon: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after initPylon: ", ethers.utils.formatEther(pairRes[1]))
+
         let gamma = await pylonInstance.gammaMulDecimals()
-        console.log("gamma: ", gamma);
+        console.log("gamma: ", ethers.utils.formatEther(gamma));
         await expect(gamma).to.eq(ethers.BigNumber.from("277500000000000000")) // 473684210526315789
         await token0.transfer(pylonInstance.address, expandTo18Decimals(4))
         await token1.transfer(pylonInstance.address, expandTo18Decimals(4))
         await expect(pylonInstance.mintPoolTokens(account.address, false))
         gamma = await pylonInstance.gammaMulDecimals()
-        console.log("gamma: ", gamma);
+        console.log("gamma after mint: ", ethers.utils.formatEther(gamma));
+
+
+        let pylonRes2 = await pylonInstance.getSyncReserves();
+        console.log("Pylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes2[0]));
+        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes2[1]));
+
 
         //TODO: 473684210526315789 before, now is really low
         await expect(gamma).to.eq(ethers.BigNumber.from("277500000000000000")) // 473684210526315789
@@ -187,7 +208,7 @@ describe("Pylon", () => {
         await expect(pylonInstance.mintPoolTokens(account.address, false))
             .to.emit(pylonInstance, 'MintAT')
             .to.emit(pylonInstance, 'PylonUpdate')
-            .withArgs(ethers.BigNumber.from('11340909090909090835'), ethers.BigNumber.from('22886363636363636362'));
+            .withArgs(ethers.BigNumber.from('11340909090909090829'), ethers.BigNumber.from('22886363636363636362'));
         // Then Anchor...
         await token1.transfer(pylonInstance.address, token0Amount)
         await expect(pylonInstance.mintPoolTokens(account.address, true))
