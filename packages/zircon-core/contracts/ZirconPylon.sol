@@ -728,9 +728,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //The flipside is that float LPs can lose more on a redump.
                 //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
                 
-                console.log("sync::anchor::tpva", totalPoolValueAnchorPrime);
-
-                gammaMulDecimals = totalPoolValueAnchorPrime.mul(1e18)/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
+                console.log("sync::anchor::tpvamult18", totalPoolValueAnchorPrime.mul(1e18));
+				
+                gammaMulDecimals = (totalPoolValueAnchorPrime.mul(1e18))/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
+                
+                console.log("sync::anchor::gamma", gammaMulDecimals);
             }
 
 
