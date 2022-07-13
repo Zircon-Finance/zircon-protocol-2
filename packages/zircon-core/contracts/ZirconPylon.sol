@@ -214,6 +214,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 gammaMulDecimals = tpvAnchorPrime.mul(1e18)/(virtualAnchorBalance.mul(4)); // Subflow already checked by if statement
             }
+            console.log("ZP: GAMMA_MUL_DECIMALS", gammaMulDecimals);
             // This is gamma formula when FTV <= 50%
         } else {
             // When Pair is not initialized let's start gamma to 0.5
@@ -469,21 +470,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountOut;
         // Minting Pool tokens
         if (isAnchor) {
-            //console.log("Solidity: before balance");
             uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
-            //console.log("Solidity: before .sub");
             amountIn = balance1.sub(_reserve1);
-            //console.log("Solidity: after .sub");
             (liquidity, amountOut) = _mintPoolToken(amountIn, _reserve1, _reservePairTranslated1, anchorPoolTokenAddress, _to, isAnchor);
 
+            // Updating VAB
+            virtualAnchorBalance += amountOut;
         } else {
             uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
             amountIn = balance0.sub(_reserve0);
             (liquidity, amountOut) = _mintPoolToken(amountIn, _reserve0, _reservePairTranslated0, floatPoolTokenAddress, _to, isAnchor);
-        }
-        // Updating VAB & VFB
-        if(isAnchor) {
-            virtualAnchorBalance += amountOut;
         }
         //Sends tokens into pool if there is a match
         _update();
@@ -545,7 +541,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //Anti-exploit measure applying extra fees for any mint/burn operation that occurs after a massive gamma change.
     //In principle classic "oracle" exploits merely speed up/force natural outcomes.
     //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
-    //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
+    //Same (sometimes)f applies here if you move prices very fast. This fee is designed to make this unprofitable
     function applyDeltaTax(uint amountIn) private returns (uint fee, bool applied) {
 
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);

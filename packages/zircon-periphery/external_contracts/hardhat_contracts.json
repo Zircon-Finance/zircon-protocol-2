@@ -294,7 +294,7 @@
           ]
         },
         "ZirconEnergyFactory": {
-          "address": "0xE2B6b71DBB0E7eAF2a28C489aB7407048aa3Cb7b",
+          "address": "0xF0e104ad900a52D90e7e737AC6B27a1c201A7640",
           "abi": [
             {
               "inputs": [],
@@ -564,11 +564,41 @@
               "payable": false,
               "stateMutability": "view",
               "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "maxPylonFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "minPylonFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
             }
           ]
         },
         "ZirconFactory": {
-          "address": "0xF78a75304f405B7d84B00Ce990E62113c77582d1",
+          "address": "0xC1113597F0841708518b92b5704C99eAA816Edd9",
           "abi": [
             {
               "inputs": [
@@ -754,7 +784,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0x19Da0E8b44374770Ce289F0117BD4e951250d025",
+          "address": "0xe36f5fABDA5c5aF8e9aaD6b1371DfddE037aABE5",
           "abi": [
             {
               "inputs": [
@@ -886,7 +916,22 @@
             {
               "constant": true,
               "inputs": [],
-              "name": "dynamicFeePercentage",
+              "name": "deltaGammaMinFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "deltaGammaThreshold",
               "outputs": [
                 {
                   "internalType": "uint256",
@@ -917,6 +962,21 @@
               "constant": true,
               "inputs": [],
               "name": "factory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "feeToSetter",
               "outputs": [
                 {
                   "internalType": "address",
@@ -972,6 +1032,21 @@
             {
               "constant": true,
               "inputs": [],
+              "name": "muUpdatePeriod",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
               "name": "pylonCodeHash",
               "outputs": [
                 {
@@ -982,6 +1057,66 @@
               ],
               "payable": false,
               "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaMinFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setDeltaGammaMinFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaThreshold",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setDeltaGammaThreshold",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_maximumPercentageSync",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setMaximumPercentageSync",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
               "type": "function"
             }
           ]
@@ -994,192 +1129,6 @@
       "name": "localhost",
       "chainId": "31337",
       "contracts": {
-        "ZirconFactory": {
-          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-          "abi": [
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "_energyFactory",
-                  "type": "address"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "nonpayable",
-              "type": "constructor"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "token0",
-                  "type": "address"
-                },
-                {
-                  "indexed": true,
-                  "internalType": "address",
-                  "name": "token1",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "pair",
-                  "type": "address"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "PairCreated",
-              "type": "event"
-            },
-            {
-              "constant": true,
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "name": "allPairs",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [],
-              "name": "allPairsLength",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": false,
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "tokenA",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "tokenB",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_pylonFactory",
-                  "type": "address"
-                }
-              ],
-              "name": "createPair",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "pair",
-                  "type": "address"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [],
-              "name": "energyFactory",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "name": "getPair",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [],
-              "name": "migrator",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [],
-              "name": "pairCodeHash",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "",
-                  "type": "bytes32"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "pure",
-              "type": "function"
-            }
-          ]
-        },
         "ZirconEnergyFactory": {
           "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
           "abi": [
@@ -1450,6 +1399,192 @@
               ],
               "payable": false,
               "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
+        "ZirconFactory": {
+          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_energyFactory",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token0",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "PairCreated",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allPairs",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allPairsLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "createPair",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getPair",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "migrator",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pairCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
               "type": "function"
             }
           ]

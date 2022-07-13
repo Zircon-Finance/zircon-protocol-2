@@ -185,13 +185,19 @@
       <change beforePath="$PROJECT_DIR$/../zircon-landing/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../zircon-landing/yarn.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergy.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergy.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/contracts/interfaces/IZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/contracts/interfaces/IZirconPylon.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/deployments/moonbase/ZirconEnergyFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/deployments/moonbase/ZirconEnergyFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/deployments/moonbase/ZirconFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/deployments/moonbase/ZirconFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/deployments/moonbase/ZirconPylonFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/deployments/moonbase/ZirconPylonFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packages/zircon-core/test.txt" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/energy-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/energy-test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/pylon-test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/zircon-core/test/simulation.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-core/test/simulation.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-farming/deployments/moonbase/PsionicFarmFactory.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-farming/deployments/moonbase/PsionicFarmFactory.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/contracts/libraries/UniswapV2Library.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/contracts/libraries/UniswapV2Library.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/deploy/00_deploy_my_contract.js" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/deploy/00_deploy_my_contract.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/deployments/moonbase/ZirconPeripheralLibrary.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/deployments/moonbase/ZirconPeripheralLibrary.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/deployments/moonbase/ZirconPylonRouter.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/deployments/moonbase/ZirconPylonRouter.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/deployments/moonbase/ZirconRouter.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/deployments/moonbase/ZirconRouter.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/packages/zircon-periphery/external_contracts/hardhat_contracts.json" beforeDir="false" afterPath="$PROJECT_DIR$/packages/zircon-periphery/external_contracts/hardhat_contracts.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -314,7 +320,12 @@
       <workItem from="1656679026931" duration="13779000" />
       <workItem from="1656760717764" duration="4565000" />
       <workItem from="1656925309344" duration="879000" />
-      <workItem from="1656938854056" duration="11976000" />
+      <workItem from="1656938854056" duration="12343000" />
+      <workItem from="1657022173594" duration="948000" />
+      <workItem from="1657032064827" duration="3232000" />
+      <workItem from="1657207600837" duration="2518000" />
+      <workItem from="1657555793480" duration="8566000" />
+      <workItem from="1657719139897" duration="80000" />
     </task>
     <servers />
   </component>
