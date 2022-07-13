@@ -683,7 +683,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Multiply by total pool value to get fee value in native units
             uint feeValueAnchor = totalPoolValueAnchorPrime.mul(d)/1e18;
             // uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
-            // console.log("sync::anchor::fee", feeValueAnchor);
+            //console.log("sync::anchor::fee", feeValueAnchor);
             // console.log("sync::float::fee", feeValueFloat);
 
             // Calculating gamma, variable used to calculate tokens to mint and withdrawals
@@ -703,6 +703,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             _updateMu();
 
+			
             virtualAnchorBalance += ((feeValueAnchor.mul(1e18-muMulDecimals))/1e18);
             //Fees to floats are automatically assigned due to dTPV > dVAB
             //virtualFloatBalance += ((gammaMulDecimals).mul(feeValueFloat)/1e18);
@@ -711,7 +712,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
 
                 //Here gamma is simply a variation of tpv - vab
-
+					
                 gammaMulDecimals = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
             } else {
 
@@ -726,8 +727,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //Supplying anchors moves the break even higher. This can massively reduce IL for very strong pumps.
                 //The flipside is that float LPs can lose more on a redump.
                 //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
+                
+                console.log("sync::anchor::tpva", totalPoolValueAnchorPrime);
 
-                gammaMulDecimals = totalPoolValueAnchorPrime.mul(1e18)/((virtualAnchorBalance.sub(pylonReserve0)).mul(4));
+                gammaMulDecimals = totalPoolValueAnchorPrime.mul(1e18)/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
             }
 
 
