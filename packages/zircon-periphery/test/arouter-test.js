@@ -19,7 +19,7 @@ let factoryPylonInstance, pylonInstance,
     poolTokenContract,
     pylonContract,
     anchorFarm, floatFarm,
-    psionicFactoryInstance, psionicFarmInit;
+    psionicFactoryInstance, psionicFarmInit, classicRouter;
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const overrides = {
@@ -42,6 +42,7 @@ describe("Pylon Router", () => {
         token1 = fixtures.token1
         pair = fixtures.pair
         router = fixtures.routerInstance;
+        classicRouter = fixtures.normalRouterInstance;
         WETH = fixtures.WETHInstance;
         factoryInstance = fixtures.factoryInstance
         poolTokenInstance0 = fixtures.poolTokenInstance0
@@ -58,9 +59,38 @@ describe("Pylon Router", () => {
 
     });
 
+    it('should initialize Pair and then Pylon', async function () {
+        await token0.approve(classicRouter.address, ethers.constants.MaxUint256)
+        await token1.approve(classicRouter.address, ethers.constants.MaxUint256)
+
+        await token0.approve(router.address, ethers.constants.MaxUint256)
+        await token1.approve(router.address, ethers.constants.MaxUint256)
+        await classicRouter.addLiquidity(
+            token0.address,
+            token1.address,
+            expandTo18Decimals(1),
+            expandTo18Decimals(2),
+            expandTo18Decimals(1),
+            expandTo18Decimals(2),
+            account.address,
+            ethers.constants.MaxUint256
+        )
+        await router.init(
+            token0.address,
+            token1.address,
+            expandTo18Decimals(1),
+            expandTo18Decimals(2),
+            account.address,
+            ethers.constants.MaxUint256)
+
+        expect(await pair.balanceOf(pylonInstance.address)).to.eq(ethers.BigNumber.from('1343502884254440295'))
+    });
+
     it('should initialize Pylon', async function () {
         await token0.approve(router.address, ethers.constants.MaxUint256)
         await token1.approve(router.address, ethers.constants.MaxUint256)
+
+
         await router.init(
             token0.address,
             token1.address,

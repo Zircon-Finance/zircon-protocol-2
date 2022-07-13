@@ -31,7 +31,7 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
     let factoryPylonInstance = await pylonFactory.deploy(factoryInstance.address, factoryEnergyInstance.address)
 
     // Creating a Pair
-   let pairT =  await factoryInstance.callStatic.createPair(tk0.address, tk1.address, factoryPylonInstance.address, OVERRIDES);
+    let pairT =  await factoryInstance.callStatic.createPair(tk0.address, tk1.address, factoryPylonInstance.address, OVERRIDES);
     await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address, OVERRIDES);
 
     let pairAddress = await factoryInstance.getPair(tk0.address, tk1.address)
@@ -81,6 +81,9 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         },
     });
     let routerInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, WETHInstance.address)
+    // Deploying router
+    let routerContract = await ethers.getContractFactory('ZirconRouter');
+    let normalRouterInstance = await routerContract.deploy(factoryInstance.address, WETHInstance.address)
 
     // Some console for the hashs
     console.log("REMEMBER TO UPDATE THE KECCAK IN THE PERIPHERAL LIB AND IN THE UNISWAP LIB")
@@ -97,6 +100,7 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         token1,
         pair,
         routerInstance,
+        normalRouterInstance,
         WETHInstance,
         pairContract,
         poolTokenContract,
