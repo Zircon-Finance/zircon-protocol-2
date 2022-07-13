@@ -156,10 +156,19 @@ describe("Pylon", () => {
         let pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
+        
+        let ptb = await pair.balanceOf(pylonInstance.address);
+        let ptt = await pair.totalSupply();
+        console.log("ptb: ", ethers.utils.formatEther(ptb));
+        console.log("ptt: ", ethers.utils.formatEther(ptt));
 
         pairRes = await pair.getReserves();
         console.log("Pylon Pair Reserve0 after initPylon: ", ethers.utils.formatEther(pairRes[0]))
         console.log("Pylon Pair Reserve1 after initPylon: ", ethers.utils.formatEther(pairRes[1]))
+        
+        let tpvAnchorPrime = pairRes[1].mul(2).mul(ptb).div(ptt);
+        
+        console.log("Derived tpv: ", ethers.utils.formatEther(tpvAnchorPrime));
 
         let gamma = await pylonInstance.gammaMulDecimals()
         console.log("gamma: ", ethers.utils.formatEther(gamma));
@@ -175,6 +184,11 @@ describe("Pylon", () => {
         console.log("Pylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes2[0]));
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes2[1]));
 
+
+		ptb = await pair.balanceOf(pylonInstance.address);
+        ptt = await pair.totalSupply();
+        console.log("ptb post sync: ", ethers.utils.formatEther(ptb));
+        console.log("ptt post sync: ", ethers.utils.formatEther(ptt));
 
         //TODO: 473684210526315789 before, now is really low
         await expect(gamma).to.eq(ethers.BigNumber.from("277500000000000000")) // 473684210526315789
