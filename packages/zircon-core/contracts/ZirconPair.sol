@@ -11,7 +11,7 @@ import "./ZirconERC20.sol";
 import "./interfaces/IZirconFactory.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 
-//import "./libraries/////console.sol";
+import "./libraries/////console.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 
@@ -190,6 +190,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
         }
         require(liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED');
+        console.log("Uni: liquidity: ", liquidity);
         _mint(to, liquidity);
 
         _update(balance0, balance1, _reserve0, _reserve1);

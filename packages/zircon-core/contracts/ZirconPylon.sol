@@ -214,7 +214,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 gammaMulDecimals = tpvAnchorPrime.mul(1e18)/(virtualAnchorBalance.mul(4)); // Subflow already checked by if statement
             }
-            console.log("ZP: GAMMA_MUL_DECIMALS", gammaMulDecimals);
+            //console.log("ZP: GAMMA_MUL_DECIMALS", gammaMulDecimals);
             // This is gamma formula when FTV <= 50%
         } else {
             // When Pair is not initialized let's start gamma to 0.5
@@ -249,6 +249,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if (max0 < newReserve0) {
             _safeTransfer(pylonToken.float, pairAddress, newReserve0.sub(max0));
             (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
+            //console.log("ZP: ptl0", ptl);
             reserve0 = max0;
         } else {
             reserve0 = uint112(newReserve0);
@@ -257,6 +258,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             _safeTransfer(pylonToken.anchor, pairAddress, newReserve1.sub(max1));
             (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
+            //console.log("ZP: ptl1", ptl);
             reserve1 = max1;
         }else{
             reserve1 = uint112(newReserve1);
@@ -290,11 +292,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Pylon Update Minting
         if (balance0 > max0/2 && balance1 > max1/2) {
 
+			(uint reserves0, uint reserves1) = getPairReservesNormalized();
+			
             // Get Maximum simple gets the maximum quantity of token that we can mint
             (uint px, uint py) = ZirconLibrary._getMaximum(
-                reservesTranslated0,
-                reservesTranslated1,
+                reserves0,
+                reserves1,
                 balance0.sub(max0/2), balance1.sub(max1/2));
+                
+                console.log("ZPpx", px);
+		        console.log("ZPpy", py);
 
             // Transferring tokens to pair and minting
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
@@ -313,6 +320,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         lastPoolTokens = IZirconPair(pairAddress).totalSupply();
         lastK = uint(_pairReserve0).mul(_pairReserve1);
 
+		//TODO: Seems like uniswap dead weight
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         //uint32 timeElapsed = blockTimestamp - blockTimestampLast;
         blockTimestampLast = blockTimestamp;
@@ -428,7 +436,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountIn,
         uint _pylonReserve,
         uint _pairReserveTranslated,
-        address _poolTokenAddress,
+        address _poolTokenAddress, 
         address _to,
         bool isAnchor) private returns (uint liquidity, uint amountOut) {
         require(amountIn > 0, "ZP: NOT_ENOUGH");
@@ -534,7 +542,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, bool isAnchor) private returns (uint amountOut){
         (uint fee, ) = applyDeltaTax(amountIn);
-        console.log("Solidity: fee: ", fee);
+        //console.log("Solidity: fee: ", fee);
         // TODO: This should never go above the balcance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
@@ -757,7 +765,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 //Here gamma fixes the amount of float assets and lets anchors get slashed
 
-                //This is a heavily simplified expression of a "derived" virtual Float balance (quantity of float asset supplied)
+                //This is a heavily simplified expression of a "derived" virtual Float balance (qu fantity of float asset supplied)
                 //The formula assumes that the virtual anchor balance was once matched with an equal value of float assets
                 //It then assumes that this point had the same k as now. Simplify a lot and suddenly there's no k in the formula :)
                 //The derived vfb shifts when new assets are supplied to ensure there are no gaps between the two gamma formulas
