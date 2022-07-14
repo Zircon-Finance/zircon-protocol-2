@@ -11,7 +11,7 @@ import "./ZirconERC20.sol";
 import "./interfaces/IZirconFactory.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 
-import "./libraries/////console.sol";
+//import "./libraries/////console.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 

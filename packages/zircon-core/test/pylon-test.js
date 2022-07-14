@@ -63,7 +63,7 @@ describe("Pylon", () => {
     // Let's try to calculate some cases for pylon
     //TODO: recheck the values, they are way to similar
     const mintTestCases = [
-        [5, 10, '4750000000000000', '4749999999999999','149999999999998923','99999999999999000', false],
+        [5, 10, '4749999999999999', '4749999999999999','149999999999998923','99999999999999000', false],
         [10, 5, '4749999999999999', '4749999999999999','99999999999999000', '149999999999998920', true],
         [5, 10, '2374999999999999', '9499999999999999','49999999999999000', '149999999999998920', true],
         [10, 10, '9500000000000000', '4749999999999999','199999999999998919', '99999999999999000', false],
@@ -74,6 +74,9 @@ describe("Pylon", () => {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor] = mintCase
             // Add some liquidity to the Pair...
             await addLiquidity(token0Amount, token1Amount)
+            let pairRes1 = await pair.getReserves()
+            console.log("Pylon Pair Reserve0: ", ethers.utils.formatEther(pairRes1[0]))
+            console.log("Pylon Pair Reserve1: ", ethers.utils.formatEther(pairRes1[1]))
             // Transferring some tokens
             let maxSync = await factoryPylonInstance.maximumPercentageSync();
             console.log("maxSync: ", maxSync);
@@ -156,7 +159,7 @@ describe("Pylon", () => {
         let pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
-        
+
         let ptb = await pair.balanceOf(pylonInstance.address);
         let ptt = await pair.totalSupply();
         console.log("ptb: ", ethers.utils.formatEther(ptb));
@@ -165,9 +168,9 @@ describe("Pylon", () => {
         pairRes = await pair.getReserves();
         console.log("Pylon Pair Reserve0 after initPylon: ", ethers.utils.formatEther(pairRes[0]))
         console.log("Pylon Pair Reserve1 after initPylon: ", ethers.utils.formatEther(pairRes[1]))
-        
+
         let tpvAnchorPrime = pairRes[1].mul(2).mul(ptb).div(ptt);
-        
+
         console.log("Derived tpv: ", ethers.utils.formatEther(tpvAnchorPrime));
 
         let gamma = await pylonInstance.gammaMulDecimals()

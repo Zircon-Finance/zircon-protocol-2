@@ -9,8 +9,8 @@ contract ZirconPoolToken is ZirconERC20 {
     address public factory;
     address public pylon;
 
-    constructor() public {
-        factory = msg.sender;
+    constructor(address pylonFactory) public {
+        factory = pylonFactory;
     }
 
     function mint(address account, uint256 amount) external {

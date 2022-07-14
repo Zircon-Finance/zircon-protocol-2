@@ -14,8 +14,11 @@ exports.coreFixtures = async function coreFixtures(address) {
     let factory = await ethers.getContractFactory('ZirconFactory');
     let factoryInstance = await factory.deploy(factoryEnergyInstance.address);
 
+    let ptFactory = await ethers.getContractFactory('ZirconPTFactory');
+    let ptFactoryInstance = await ptFactory.deploy();
+
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
-    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address);
+    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address);
 
     await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
