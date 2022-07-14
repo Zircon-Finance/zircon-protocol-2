@@ -283,7 +283,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Intializing the variables, (Maybe gas consuming let's see how to sort out this
         // Getting pair reserves and updating variables before minting
         // Max0 and Max1 are two variables representing the maximum that can be minted on sync
-        // Min0/2 & Min1/2 remain as reserves on the pylon
+        // Max0/2 & Max1/2 remain as reserves on the pylon for withdrawals
         // In the case the pair hasn't been initialized pair reserves will be 0 so we take our current balance as the maximum
         (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
@@ -549,7 +549,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //Anti-exploit measure applying extra fees for any mint/burn operation that occurs after a massive gamma change.
     //In principle classic "oracle" exploits merely speed up/force natural outcomes.
     //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
-    //Same (sometimes)f applies here if you move prices very fast. This fee is designed to make this unprofitable
+    //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable/temporarily lock the protocol.
+    //It is also combined with the regular Pylon fee
     function applyDeltaTax(uint amountIn) private returns (uint fee, bool applied) {
 
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
@@ -567,7 +568,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Base case where the threshold isn't passed
         else {
             applied = false;
-            fee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
+            fee = amountIn.mul(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals))/10000;
         }
         emit DeltaTax(fee, applied);
     }
