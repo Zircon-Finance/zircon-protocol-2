@@ -81,7 +81,6 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     function _initializePylon(address tokenA, address tokenB) internal virtual returns (address pair, address pylon) {
         // If Pair is not initialized
         pair = IZirconFactory(factory).getPair(tokenA, tokenB);
-        console.log("pair address",  pair);
 
         if (pair == address(0)) {
             // Let's create it...
@@ -107,7 +106,6 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB){
         // Initializes the pylon
         (, address pylon) = _initializePylon(tokenA, tokenB);
-        console.log("pylon address",  pylon);
         // Desired amounts
         amountA = amountDesiredA;
         amountB = amountDesiredB;

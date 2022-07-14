@@ -76,7 +76,7 @@ fabric.properties
 #core_contracts
 
 **/core_contracts/
-
+**/deployments/
 # Editor-based Rest Client
 .idea/httpRequests
 
