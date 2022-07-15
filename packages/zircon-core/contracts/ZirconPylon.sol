@@ -226,8 +226,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
         //        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
 
-        (anchorLiquidity) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
-        (floatLiquidity) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
+        (anchorLiquidity) = _calculateSyncLiquidity(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
+        (floatLiquidity) = _calculateSyncLiquidity(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
         _syncMinting();
 
         IZirconPoolToken(anchorPoolTokenAddress).mint(_to, anchorLiquidity);
@@ -449,7 +449,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @_balance -> Balance OF PT
     // @_pylonReserve -> Reserves of PT on Pylon
     //Internal helper function that calculates the amount of Pylon pool tokens to mint
-    function _mintPoolToken(
+    function _calculateSyncLiquidity(
         uint amountIn,
         uint _pylonReserve,
         uint _pairReserveTranslated,
@@ -489,7 +489,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if (_amountIn <= freeSpace) {
                 console.log("Only Sync Minting-> amountIn:", _amountIn);
 
-                (liquidity) = _mintPoolToken(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+                (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 _syncMinting();
                 return (liquidity, _amountIn);
             }
@@ -506,7 +506,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
             console.log("Sync Minting, liquidity:", freeSpace);
-            (uint extraLiq) = _mintPoolToken(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+            (uint extraLiq) = _calculateSyncLiquidity(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
             _syncMinting();
             console.log("Sync Minting, extraLiq:", extraLiq);
             liquidity += extraLiq;
