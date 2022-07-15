@@ -129,8 +129,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @return _reserve1 -> Anchor
     function getPairReservesNormalized()  private view returns (uint112 _reserve0, uint112 _reserve1) {
         (uint112 _reservePair0, uint112 _reservePair1,) = IZirconPair(pairAddress).getReserves();
-        console.log("rp0", _reservePair0);
-        console.log("rp1", _reservePair1);
         _reserve0 = isFloatReserve0 ? _reservePair0 : _reservePair1;
         _reserve1 = isFloatReserve0 ? _reservePair1 : _reservePair0;
     }
@@ -303,17 +301,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         console.log("mintAndSync balance:", balance0/1e14, balance1/1e14);
         // Pylon Update Minting
         if (balance0 > max0 && balance1 > max1) {
-            (uint112 pairReserves0, uint112 pairReserves1) = getPairReservesNormalized();
+            (uint pairReserves0, uint pairReserves1) = getPairReservesNormalized();
 
-            console.log("mintAndSync toCalculate:", balance0.sub(max0)/1e14, balance1.sub(max1)/1e14);
+            console.log("mintAndSync toCalculate:", pairReserves0/1e14, pairReserves1/1e14);
 
             // Get Maximum simple gets the maximum quantity of token that we can mint
             uint px;
             uint py;
-            if (reserve0 == 0 && reserve1 == 0) {
+            if (pairReserves0 == 0 && pairReserves1 == 0) {
                 (px, py) = ZirconLibrary._getMaximum(
-                    pairReserves0,
-                    pairReserves1,
+                    balance0,
+                    balance1,
                     balance0.sub(max0), balance1.sub(max1));
             }else{
                 (px, py) = ZirconLibrary._getMaximum(
@@ -323,6 +321,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
 
 
+            console.log("mintAndSync px, py:", px/1e14, py/1e14);
             // Transferring tokens to pair and minting
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
             if(py != 0) _safeTransfer(pylonToken.anchor, pairAddress, py);
