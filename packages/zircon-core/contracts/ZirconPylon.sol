@@ -127,8 +127,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice Private function to get pair reserves normalized on float and anchor
     // @return _reserve0 -> float
     // @return _reserve1 -> Anchor
-    function getPairReservesNormalized()  private view returns  (uint112 _reserve0, uint112 _reserve1) {
+    function getPairReservesNormalized()  private view returns (uint112 _reserve0, uint112 _reserve1) {
         (uint112 _reservePair0, uint112 _reservePair1,) = IZirconPair(pairAddress).getReserves();
+        console.log("rp0", _reservePair0);
+        console.log("rp1", _reservePair1);
         _reserve0 = isFloatReserve0 ? _reservePair0 : _reservePair1;
         _reserve1 = isFloatReserve0 ? _reservePair1 : _reservePair0;
     }
@@ -223,8 +225,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // Time to mint some tokens
 
-//        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
-//        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
+        //        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
+        //        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
 
         (anchorLiquidity,) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
         (floatLiquidity,) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
@@ -301,7 +303,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         console.log("mintAndSync balance:", balance0/1e14, balance1/1e14);
         // Pylon Update Minting
         if (balance0 > max0 && balance1 > max1) {
-            (uint reserves0, uint reserves1) = getPairReservesNormalized();
+            (uint112 pairReserves0, uint112 pairReserves1) = getPairReservesNormalized();
+
             console.log("mintAndSync toCalculate:", balance0.sub(max0)/1e14, balance1.sub(max1)/1e14);
 
             // Get Maximum simple gets the maximum quantity of token that we can mint
@@ -309,13 +312,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint py;
             if (reserve0 == 0 && reserve1 == 0) {
                 (px, py) = ZirconLibrary._getMaximum(
-                    balance0,
-                    balance1,
+                    pairReserves0,
+                    pairReserves1,
                     balance0.sub(max0), balance1.sub(max1));
             }else{
                 (px, py) = ZirconLibrary._getMaximum(
-                    reserves0,
-                    reserves1,
+                    pairReserves0,
+                    pairReserves1,
                     balance0.sub(max0), balance1.sub(max1));
             }
 
@@ -345,7 +348,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
         (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
-        console.log("reservesTranslated0, reservesTranslated1", reservesTranslated0/1e14, reservesTranslated1/1e14);
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         uint112 max0 = uint112(reservesTranslated0.mul(maximumPercentageSync)/100);
         uint112 max1 = uint112(reservesTranslated1.mul(maximumPercentageSync)/100);
