@@ -19,8 +19,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     constructor() public {
 
         //TODO: Change this to be a deployment parameter
-        minPylonFee = 1;
-        maxPylonFee = 100;
+        minPylonFee = 1; //0.01%
+        maxPylonFee = 50; //0.5%
     }
 
     function allEnergiesLength() external view returns (uint) {
