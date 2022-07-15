@@ -226,8 +226,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
         //        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
 
-        (anchorLiquidity,) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
-        (floatLiquidity,) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
+        (anchorLiquidity) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
+        (floatLiquidity) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
         _syncMinting();
 
         IZirconPoolToken(anchorPoolTokenAddress).mint(_to, anchorLiquidity);
@@ -456,10 +456,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint _pylonReserve,
         uint _pairReserveTranslated,
         address _poolTokenAddress,
-        bool isAnchor) private returns (uint liquidity, uint amountOut) {
+        bool isAnchor) private returns (uint liquidity) {
         require(amountIn > 0, "ZP: NOT_ENOUGH");
         // Taking the fee out in tokens
-
         uint pts = IZirconPoolToken(_poolTokenAddress).totalSupply();
         {
             uint _gamma = gammaMulDecimals;
@@ -473,12 +472,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 }
             } else {
                 // Paying fees only on not init call
-                liquidity = ZirconLibrary.calculatePTU(isAnchor, amountOut, pts, _pairReserveTranslated, _pylonReserve, _gamma, _vab);
+                liquidity = ZirconLibrary.calculatePTU(isAnchor, amountIn, pts, _pairReserveTranslated, _pylonReserve, _gamma, _vab);
             }
-
-
         }
-        emit MintSync(msg.sender, amountOut, isAnchor);
+        emit MintSync(msg.sender, amountIn, isAnchor);
     }
     // @notice Helper function to see if we can do a mint sync or async
     // @amountSync -> Amount of tokens to mint sync
@@ -494,9 +491,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if (_amountIn <= freeSpace) {
                 console.log("Only Sync Minting-> amountIn:", _amountIn);
 
-                (liquidity, amountOut) = _mintPoolToken(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+                (liquidity) = _mintPoolToken(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 _syncMinting();
-                return (liquidity, amountOut);
+                return (liquidity, _amountIn);
             }
         }
         console.log("Async Minting-> amountIn: freeSpace::", _amountIn, freeSpace);
@@ -507,10 +504,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
             console.log("Sync Minting, liquidity:", freeSpace);
-            (uint extraLiq, uint extraAmount) = _mintPoolToken(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+            (uint extraLiq) = _mintPoolToken(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
             _syncMinting();
             liquidity += extraLiq;
-            amountOut += extraAmount;
+            amountOut += freeSpace;
         }
         console.log("Sync+Async Minting, liquidity:", liquidity);
 

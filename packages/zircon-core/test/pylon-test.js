@@ -252,7 +252,7 @@ describe("Pylon", () => {
         await expect(pylonInstance.mintPoolTokens(account.address, false))
             .to.emit(pylonInstance, 'MintAT')
             .to.emit(pylonInstance, 'PylonUpdate')
-            .withArgs(ethers.BigNumber.from('11340909090909090829'), ethers.BigNumber.from('22886363636363636362'));
+            .withArgs(ethers.BigNumber.from('11340507338607474275'), ethers.BigNumber.from('22886358694307110634'));
 
         pylonRes2 = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after first mint: ", ethers.utils.formatEther(pylonRes2[0]));
@@ -269,7 +269,7 @@ describe("Pylon", () => {
         await expect(pylonInstance.mintPoolTokens(account.address, true))
             .to.emit(pylonInstance, 'MintAT')
             .to.emit(pylonInstance, 'PylonUpdate')
-            .withArgs(ethers.BigNumber.from('10077208404802744371'), ethers.BigNumber.from('22946590909090909089'))
+            .withArgs(ethers.BigNumber.from('10076934486719759896'), ethers.BigNumber.from('22946586212897978089'))
 
         pylonRes2 = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after second mint: ", ethers.utils.formatEther(pylonRes2[0]));
