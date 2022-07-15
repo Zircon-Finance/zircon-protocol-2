@@ -222,11 +222,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
         // Time to mint some tokens
-        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
-        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
 
-//        (anchorLiquidity,) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
-//        (floatLiquidity,) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
+//        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
+//        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
+
+        (anchorLiquidity,) = _mintPoolToken(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
+        (floatLiquidity,) = _mintPoolToken(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
+        _syncMinting();
 
         IZirconPoolToken(anchorPoolTokenAddress).mint(_to, anchorLiquidity);
         IZirconPoolToken(floatPoolTokenAddress).mint(_to, floatLiquidity);
@@ -251,19 +253,20 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //TODO:- But we need to check how we use it.
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private {
         uint ptl = 0;
+        console.log("max0 max1", max0/1e16, max1/1e16);
+        console.log("currentB0, currentB1", newReserve0/1e16, newReserve1/1e16);
         if (max0 < newReserve0) {
             _safeTransfer(pylonToken.float, pairAddress, newReserve0.sub(max0));
             (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
-            //console.log("ZP: ptl0", ptl);
+            console.log("ZP: ptl0", ptl/1e16);
             reserve0 = max0;
         } else {
             reserve0 = uint112(newReserve0);
         }
         if (max1 < newReserve1) {
-
             _safeTransfer(pylonToken.anchor, pairAddress, newReserve1.sub(max1));
             (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
-            //console.log("ZP: ptl1", ptl);
+            console.log("ZP: ptl1", ptl/1e16);
             reserve1 = max1;
         }else{
             reserve1 = uint112(newReserve1);
@@ -279,7 +282,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // So... here we get the maximum off both tokens and we mint Pool Tokens
 
     // Sends pylonReserves to pool if there is a match
-    function _mintAndSync() private {
+    function _syncMinting() private {
         // Let's take the current balances
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
@@ -299,6 +302,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Pylon Update Minting
         if (balance0 > max0 && balance1 > max1) {
             (uint reserves0, uint reserves1) = getPairReservesNormalized();
+            console.log("mintAndSync toCalculate:", balance0.sub(max0)/1e14, balance1.sub(max1)/1e14);
 
             // Get Maximum simple gets the maximum quantity of token that we can mint
             (uint px, uint py) = ZirconLibrary._getMaximum(
@@ -331,6 +335,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
         (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
+        console.log("reservesTranslated0, reservesTranslated1", reservesTranslated0/1e14, reservesTranslated1/1e14);
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         uint112 max0 = uint112(reservesTranslated0.mul(maximumPercentageSync)/100);
         uint112 max1 = uint112(reservesTranslated1.mul(maximumPercentageSync)/100);
@@ -472,30 +477,34 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         uint max = _pairReserveTranslated.mul(maximumPercentageSync) / 100; // half of maximum value
         uint freeSpace = 0;
-        console.log("max: ", max, _reserve);
         if (max > _reserve) {
             freeSpace = max.sub(_reserve);
-            console.log("Balance Within Maximum", freeSpace/1e16);
             // when we have enough soace we can mint sync, if not we do it partially
             if (_amountIn <= freeSpace) {
+                console.log("Only Sync Minting-> amountIn:", _amountIn);
+
                 (liquidity, amountOut) = _mintPoolToken(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+                _syncMinting();
                 return (liquidity, amountOut);
             }
         }
-        console.log("Async Minting-> amount: freeSpace::", _amountIn, freeSpace);
-        uint amountToMint = _amountIn.sub(freeSpace);
-
-        (amountOut, liquidity) = calculateLiquidity(amountToMint, _isAnchor);
+        console.log("Async Minting-> amountIn: freeSpace::", _amountIn, freeSpace);
+        uint amountAsyncToMint = _amountIn.sub(freeSpace);
+        (amountOut, liquidity) = calculateLiquidity(amountAsyncToMint, _isAnchor);
         console.log("Async Minting liquidity:", liquidity);
+
+        // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
             console.log("Sync Minting, liquidity:", freeSpace);
             (uint extraLiq, uint extraAmount) = _mintPoolToken(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
-            _mintAndSync();
-            liquidity = liquidity.add(extraLiq);
-            amountOut = amountOut.add(extraAmount);
+            _syncMinting();
+            liquidity += extraLiq;
+            amountOut += extraAmount;
         }
-        console.log("Both Minting, liquidity:", liquidity);
-        _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountToMint);
+        console.log("Sync+Async Minting, liquidity:", liquidity);
+
+        // sending the async minting part to the pair
+        _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !_isAnchor : _isAnchor);
     }
     // @notice External Function called to mint pool Token
@@ -512,7 +521,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint balance = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this));
         uint amountIn = payFees(balance.sub(isAnchor ? _reserve1 : reserve0), isAnchor);
         uint amountOut;
-        console.log("Amount In With Fees", amountIn);
+        console.log("AmountIn-Fees: ", amountIn);
         (liquidity, amountOut) = syncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
             isAnchor ? reserve1 : reserve0, balance, isAnchor);
         console.log("Liquidity", liquidity);
@@ -532,7 +541,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //Swapping every time is not ideal for gas, but it will be changed if we ever deploy to a chain like ETH
     //We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, bool isAnchor) private returns (uint amountOut){
-        (uint fee, ) = applyDeltaTax(amountIn);
+        (uint fee, ) = _applyDeltaAndGammaTax(amountIn);
         //console.log("Solidity: fee: ", fee);
         // TODO: This should never go above the balcance
         if (isAnchor) {
@@ -549,7 +558,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice private function that sends to pair the LP tokens
     /// Burns them sending it to the energy address
     function payBurnFees(uint amountIn) private returns (uint amountOut) {
-        (uint fee, ) = applyDeltaTax(amountIn);
+        (uint fee, ) = _applyDeltaAndGammaTax(amountIn);
 
 
         _safeTransfer(pairAddress, pairAddress, fee);
@@ -564,7 +573,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     //Unnecessary with Delta Tax.
     //    function payBurnAsyncFees(uint amountIn) private returns (uint amountOut) {
-    //        (uint fee, ) = applyDeltaTax(amountIn);
+    //        (uint fee, ) = _applyDeltaAndGammaTax(amountIn);
     //
     //        uint gammaFee = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
     //        uint fee = amountIn.mul(dynamicFeePercentage + gammaFee/2)/10000; //TODO: Fix this up
@@ -582,8 +591,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
     //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable/temporarily lock the protocol.
     //It is also combined with the regular Pylon fee
-    function applyDeltaTax(uint amountIn) private returns (uint fee, bool applied) {
-
+    function _applyDeltaAndGammaTax(uint _amountIn) private returns (uint fee, bool applied) {
+        console.log("Apply Delta And Gamma Tax");
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
         uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
         uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
@@ -594,12 +603,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             feeBps = feeBps.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
 
             require(feeBps < 10000, "ZP: Fee too high");
-            fee = amountIn.mul(feeBps)/10000;
+            fee = _amountIn.mul(feeBps)/10000;
+            console.log("Delta+Gamma Tax Applied", fee);
+
         }
         //Base case where the threshold isn't passed
         else {
             applied = false;
-            fee = amountIn.mul(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals))/10000;
+            fee = _amountIn.mul(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals))/10000;
+            console.log("Gamma Tax Applied", fee);
         }
         emit DeltaTax(fee, applied);
     }
