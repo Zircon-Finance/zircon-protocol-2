@@ -249,8 +249,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @balance0 & @balance1 -> The New Balances After A Sync Update
     // @max0 & @max1 -> The maximum that we can save on the reserves
     // If we have any excess reserves we donate them to the pool
-    //TODO:- Function should be fine although the mintOneSide usage could be dangerous
-    //TODO:- But we need to check how we use it.
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private {
         uint ptl = 0;
         console.log("max0 max1", max0/1e16, max1/1e16);
@@ -501,11 +499,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (amountOut, liquidity) = calculateLiquidity(amountAsyncToMint, _isAnchor);
         console.log("Async Minting liquidity:", liquidity);
 
+        console.log("Async amountOut:", amountOut);
+        console.log("Async amountin:", amountAsyncToMint);
+
+
         // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
             console.log("Sync Minting, liquidity:", freeSpace);
             (uint extraLiq) = _mintPoolToken(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
             _syncMinting();
+            console.log("Sync Minting, extraLiq:", extraLiq);
             liquidity += extraLiq;
             amountOut += freeSpace;
         }
@@ -825,8 +828,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 thisBlockEMA = thisBlockEMA.add(ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma));
             }
 
-
-            // TODO: permanence factor for fees
             // Sync pool also gets a claim to these
             /// @notice event no longer has vfb
             emit PylonSync(virtualAnchorBalance, gammaMulDecimals);
