@@ -198,7 +198,7 @@ describe("Pylon", () => {
 
         await expect(pylonInstance.mintPoolTokens(account.address, true))
         gamma = await pylonInstance.gammaMulDecimals()
-        await expect(gamma).to.eq(ethers.BigNumber.from("277500000000000000"))
+        await expect(gamma).to.eq(ethers.BigNumber.from("277701949724902299"))
 
         expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from("30630630630630629630"))
         expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from("481818181818181817181"))
@@ -465,7 +465,7 @@ describe("Pylon", () => {
         expect(await token0.balanceOf(pair.address)).to.eq(ethers.BigNumber.from('346363636363636399'))
         expect(await token1.balanceOf(pair.address)).to.eq(ethers.BigNumber.from('692727272727272799'))
         expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from('363636363636362636'))
-        expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('747272727272726196'))
+        expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from('727272727272726272'))
         expect(await pair.balanceOf(pylonInstance.address)).to.eq(ethers.BigNumber.from('489832152058316516'))
 
         let atb = await poolTokenInstance1.balanceOf(account.address);

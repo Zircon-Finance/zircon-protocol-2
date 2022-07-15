@@ -305,10 +305,20 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             console.log("mintAndSync toCalculate:", balance0.sub(max0)/1e14, balance1.sub(max1)/1e14);
 
             // Get Maximum simple gets the maximum quantity of token that we can mint
-            (uint px, uint py) = ZirconLibrary._getMaximum(
-                reserves0,
-                reserves1,
-                balance0.sub(max0), balance1.sub(max1));
+            uint px;
+            uint py;
+            if (reserve0 == 0 && reserve1 == 0) {
+                (px, py) = ZirconLibrary._getMaximum(
+                    balance0,
+                    balance1,
+                    balance0.sub(max0), balance1.sub(max1));
+            }else{
+                (px, py) = ZirconLibrary._getMaximum(
+                    reserves0,
+                    reserves1,
+                    balance0.sub(max0), balance1.sub(max1));
+            }
+
 
             // Transferring tokens to pair and minting
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
