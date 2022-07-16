@@ -11,11 +11,13 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     address[] public allEnergies;
     address[] public allEnergiesRevenue;
     address public feeToSetter;
+    struct Fee {
+        uint112 minPylonFee;
+        uint112 maxPylonFee;
+    }
+    Fee private fee;
 
     event EnergyCreated(address indexed pair, address indexed energy, address tokenA, address tokenB, uint);
-
-    uint public minPylonFee;
-    uint public maxPylonFee;
 
     modifier onlyFeeToSetter {
         require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
@@ -23,14 +25,19 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     constructor(address _feeToSetter) public {
-        minPylonFee = 1; //0.01%
-        maxPylonFee = 50; //0.5%
+        fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         feeToSetter = _feeToSetter;
     }
 
-    function setFee(uint _minPylonFee, uint _maxPylonFee) public onlyFeeToSetter {
-        minPylonFee = _minPylonFee;
-        maxPylonFee = _maxPylonFee;
+    function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee) {
+        uint112 minFee = fee.minPylonFee;
+        uint112 maxFee = fee.maxPylonFee;
+        return (minFee, maxFee);
+    }
+
+    function setFee(uint112 _minPylonFee, uint112 _maxPylonFee) external onlyFeeToSetter {
+        fee.minPylonFee = _minPylonFee;
+        fee.maxPylonFee = _maxPylonFee;
     }
 
     function allEnergiesLength() external view returns (uint) {

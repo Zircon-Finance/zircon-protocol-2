@@ -3,7 +3,7 @@ pragma solidity >=0.5.0;
 interface IZirconFactory {
 //    function feeTo() external view returns (address);
 //    function feeToSetter() external view returns (address);
-    function migrator() external view returns (address);
+//    function migrator() external view returns (address);
     function energyFactory() external view returns (address);
 
     function getPair(address, address) external view returns (address pair);

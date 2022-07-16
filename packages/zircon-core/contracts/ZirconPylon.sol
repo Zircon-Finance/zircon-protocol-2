@@ -566,8 +566,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// Burns them sending it to the energy address
     function payBurnFees(uint amountIn) private returns (uint amountOut) {
         (uint fee, ) = _applyDeltaAndGammaTax(amountIn);
-
-
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
         amountOut = amountIn.sub(fee);

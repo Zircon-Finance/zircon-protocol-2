@@ -33,11 +33,6 @@ async function getOutputAmount(input, inputReserves, outputReserves) {
 
 // TODO: See case where we have a big dump
 describe("Pylon", () => {
-    // before(function(done) {
-//         this.timeout(10000); // A very long environment setup.
-//         setTimeout(done, 10000);
-//     });
-
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
@@ -50,6 +45,7 @@ describe("Pylon", () => {
         pair = fixtures.pair
         pylonInstance = fixtures.pylonInstance
         factoryPylonInstance = fixtures.factoryPylonInstance
+        
     });
     const init = async (token0Amount, token1Amount) => {
         // Let's initialize the Pool, inserting some liquidity in it
