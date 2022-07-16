@@ -2,10 +2,16 @@ const { ethers } = require('hardhat');
 const {expandTo18Decimals} = require("./utils");
 
 exports.coreFixtures = async function coreFixtures(address) {
-    // deploy tokens
+
+    // Deploy feeToSetter contract
+
+    let feeToSetter = await ethers.getContractFactory('FeeToSetter');
+    let feeToSetterInstance = await feeToSetter.deploy();
+
+    // ZirconEnergyFactory
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
-    let factoryEnergyInstance = await factoryEnergy.deploy();
-    // console.log(factoryEnergy);
+    let factoryEnergyInstance = await factoryEnergy.deploy(feeToSetterInstance.address);
+
     // Deploy Tokens
     let tok = await ethers.getContractFactory('Token');
     let tk0 = await tok.deploy('Token1', 'TOK1');
@@ -18,12 +24,15 @@ exports.coreFixtures = async function coreFixtures(address) {
     let ptFactoryInstance = await ptFactory.deploy();
 
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
-    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address);
+    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address, feeToSetterInstance.address);
 
     await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
     let pairContract = await ethers.getContractFactory("ZirconPair");
     let pair = await pairContract.attach(lpAddress);
+    
+    //initializing fee to setter
+    await feeToSetterInstance.initialize(factoryInstance.address, factoryEnergyInstance.address, "1657994775");
 
     const token0Address = await pair.token0();
     let token0 = tk0.address === token0Address ? tk0 : tk1

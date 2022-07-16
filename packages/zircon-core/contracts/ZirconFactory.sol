@@ -5,9 +5,6 @@ import './energy/interfaces/IZirconEnergyFactory.sol';
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 
 contract ZirconFactory is IZirconFactory {
-//    address public feeTo;
-//    address public feeToSetter;
-    address public migrator;
     address public energyFactory;
     bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergyRev(address,address,address,address)')));
 
@@ -30,9 +27,6 @@ contract ZirconFactory is IZirconFactory {
 
     function createEnergy( address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) private returns (address energy){
         energy = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, _pylonFactory);
-//        (bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pairAddress, _tokenA, _tokenB, _pylonFactory));
-//        require(success, 'ZP: ENERGYREV_FAILED_CREATION');
-//        energy = abi.decode(data, (address));
     }
 
     function createPair(address tokenA, address tokenB, address _pylonFactory) external returns (address pair) {
@@ -52,18 +46,5 @@ contract ZirconFactory is IZirconFactory {
         allPairs.push(pair);
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
-
-//    function setFeeTo(address _feeTo) external  {
-//        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
-//        feeTo = _feeTo;
-//    }
-//    function setMigrator(address _migrator) external {
-//        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
-//        migrator = _migrator;
-//    }
-//    function setFeeToSetter(address _feeToSetter) external  {
-//        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
-//        feeToSetter = _feeToSetter;
-//    }
 
 }

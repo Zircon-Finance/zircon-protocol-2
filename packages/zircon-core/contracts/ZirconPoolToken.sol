@@ -25,8 +25,6 @@ contract ZirconPoolToken is ZirconERC20 {
         _burn(account, amount);
     }
 
-
-
     // called once by the factory at time of deployment
     function initialize(address _token0, address _pair, address _pylon, bool _isAnchor) external {
         require(msg.sender == factory, 'ZPT: FORBIDDEN');
@@ -36,4 +34,10 @@ contract ZirconPoolToken is ZirconERC20 {
         isAnchor = _isAnchor;
         pylon = _pylon;
     }
+//
+//    function migratePylon() external {
+//        require(msg.sender == factory, 'ZPT: FORBIDDEN');
+//        // sufficient check
+//        IZirconPoolToken(token).migratePylon();
+//    }
 }

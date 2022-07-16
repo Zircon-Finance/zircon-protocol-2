@@ -3,7 +3,7 @@ const { expect } = require("chai");
 const { ethers } = require('hardhat');
 const assert = require("assert");
 const {BigNumber} = require("ethers");
-const {expandTo18Decimals} = require("./shared/utils");
+const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
 const {coreFixtures} = require("./shared/fixtures");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
@@ -24,20 +24,10 @@ async function addLiquidity(token0Amount, token1Amount) {
     await token1.transfer(pair.address, token1Amount)
     await pair.mint(account.address)
 }
-async function getOutputAmount(input, inputReserves, outputReserves) {
-    let amountWithFees = input.mul(ethers.BigNumber.from("977"))
-    let numerator = amountWithFees.mul(outputReserves)
-    let denominator = amountWithFees.add(inputReserves.mul(ethers.BigNumber.from("1000")))
-    return numerator.div(denominator)
-}
+
 
 // TODO: See case where we have a big dump
 describe("Pylon", () => {
-    // before(function(done) {
-//         this.timeout(10000); // A very long environment setup.
-//         setTimeout(done, 10000);
-//     });
-
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
@@ -50,6 +40,7 @@ describe("Pylon", () => {
         pair = fixtures.pair
         pylonInstance = fixtures.pylonInstance
         factoryPylonInstance = fixtures.factoryPylonInstance
+
     });
     const init = async (token0Amount, token1Amount) => {
         // Let's initialize the Pool, inserting some liquidity in it
@@ -757,7 +748,7 @@ describe("Pylon", () => {
         let reserves = await pair.getReserves()
         console.log("hey", reserves[0])
         //let outcome = (input.mul(reserves[1]).div(reserves[0])).sub(ethers.BigNumber.from('1000000000000000000'))
-        let outcome = getOutputAmount(input, reserves[0],reserves[1])
+        let outcome = getAmountOut(input, reserves[0],reserves[1])
         console.log("out", outcome)
         await token0.transfer(pair.address, input)
         await pair.swap(0, outcome, account.address, '0x', overrides)

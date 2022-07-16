@@ -5,8 +5,8 @@ import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import "./libraries/SafeMath.sol";
+import "./interfaces/IZirconEnergyFactory.sol";
 import "../interfaces/IZirconPair.sol";
-import "../interfaces/IZirconPylonFactory.sol";
 import "../interfaces/IZirconPylon.sol";
 import '../libraries/Math.sol';
 
@@ -56,8 +56,6 @@ contract ZirconEnergy is IZirconEnergy {
     uint insurancePerMille;
     uint insuranceUni;
     uint revenueUni;
-    uint minFee;
-    uint maxFee;
   }
   Pylon pylon;
   struct PairFields {
@@ -73,7 +71,11 @@ contract ZirconEnergy is IZirconEnergy {
     energyFactory = msg.sender;
   }
 
-  function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille, uint _minFee, uint _maxFee) external {
+  function getFee() internal view returns (uint112 minFee, uint112 maxFee) {
+    (minFee, maxFee) = IZirconEnergyFactory(energyFactory).getMinMaxFee();
+  }
+
+  function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille) external {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
 
     bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
@@ -85,9 +87,7 @@ contract ZirconEnergy is IZirconEnergy {
       tokenB,
       _insurancePerMille,
       1,
-      1,
-      _minFee, //To be given in basis points (% multiplied by 10000)
-      _maxFee
+      1
     );
     // Approving pylon to use anchor tokens
     IUniswapV2ERC20(tokenB).approve(_pylon, 2^256 - 1);
@@ -151,73 +151,18 @@ contract ZirconEnergy is IZirconEnergy {
   //After the cutoff it uses a steeper parabola defined by a max fee at the extremes (very high, up to 15% by default).
   //This is only used for the burn/mint async 50/50, which is effectively a swap that can cause issues when gamma is imbalanced.
   function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount) {
-
-    uint _minFee = pylon.minFee;
-    uint _maxFee = pylon.maxFee;
+    (uint _minFee, uint _maxFee) = getFee();
     uint _gammaHalf = 5e17;
     uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
     if (gammaMulDecimals <= 45e16 || gammaMulDecimals >= 55e16) {
       amount = (_maxFee.mul(x)/1e18).mul(x)/(25e18); //25 is a reduction factor based on the 0.45-0.55 range we're using.
       console.log("feeAmount: ", amount);
     } else {
-      amount = ((_minFee.mul(x)/1e18).mul(x).mul(36)/(1e18))  .add(_minFee); //Ensures minFee is the lowest value.
+      amount = ((_minFee.mul(x)/1e18).mul(x).mul(36)/(1e18)).add(_minFee); //Ensures minFee is the lowest value.
       console.log("feeAmount2: ", amount);
     }
 
   }
-
-  //Anti-exploit measure applying extra fees for any mint/burn operation that occurs after a massive gamma change.
-  //In principle classic "oracle" exploits merely speed up/force natural outcomes.
-  //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
-  //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable
-//  function applyDeltaTax(uint amountIn, uint gammaMulDecimals) private view returns (uint fee, bool applied) {
-//
-//    uint maxDerivative = Math.max(IZirconPylon(pylon.pylonAddress).gammaEMA, IZirconPylon(pylon.pylonAddress).thisBlockEMA);
-//    uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
-//    uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
-//
-//    if (maxDerivative >= deltaGammaThreshold) {
-//      applied = true;
-//      uint feeBps = (maxDerivative - deltaGammaThreshold).mul(10000)/deltaGammaThreshold + deltaGammaMinFee;
-//      feeBps = feeBps.add(getFeeByGamma(gammaMulDecimals));
-//      require(feeBps < 10000, "ZP: Fee too high");
-//      fee = amountIn.mul(feeBps)/10000;
-//    }
-//    //Base case where the threshold isn't passed
-//    else {
-//      applied = false;
-//      fee = getFeeByGamma(gammaMulDecimals);
-//    }
-//    console.log("Solidity: applyDeltaTax");
-//  }
-
-  //    uint float0Liquidity;
-//    uint float1Liquidity;
-//
-//    if(_pylonFloat0 != address(0)) {
-//      float0Liquidity = IUniswapV2ERC20(_pairAddress).balanceOf(_pylonFloat0);
-//      uint float0Fee = float0Liquidity.mul(_feeLiquidity)/ptTotalSupply;
-//      Pylon storage pylonRef = pylonAccounts[_pylonFloat0]; //Storage makes this a mutable reference vs. copying with Memory
-//      uint _insurancePerMille = pylonRef.insurancePerMille;
-//
-//      pylonRef.insuranceUni += float0Fee.mul(_insurancePerMille)/1000;
-//      pylonRef.revenueUni += float0Fee.mul(1000 - _insurancePerMille)/1000;
-//      _returnExcess(_pylonFloat0);
-//    }
-//
-//    if (_pylonFloat1 != address(0)) {
-//      float1Liquidity = IUniswapV2ERC20(_pairAddress).balanceOf(_pylonFloat1);
-//
-//      uint float1Fee = float1Liquidity.mul(_feeLiquidity)/ptTotalSupply;
-//      Pylon storage pylonRef = pylonAccounts[_pylonFloat1]; //Storage makes this a mutable reference vs. copying with Memory
-//      uint _insurancePerMille = pylonRef.insurancePerMille;
-//
-//      pylonRef.insuranceUni += float1Fee.mul(_insurancePerMille)/1000;
-//      pylonRef.revenueUni += float1Fee.mul(1000 - _insurancePerMille)/1000;
-//      _returnExcess(_pylonFloat1);
-//    }
-
-
 
   //Function called periodically to check if the reserves are too large, returns them back to pylon if they are
   function _returnExcess() private {

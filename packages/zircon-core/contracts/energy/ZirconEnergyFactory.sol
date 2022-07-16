@@ -10,20 +10,38 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     mapping(address => mapping(address => address)) public getEnergyRevenue;
     address[] public allEnergies;
     address[] public allEnergiesRevenue;
+    address public feeToSetter;
+    struct Fee {
+        uint112 minPylonFee;
+        uint112 maxPylonFee;
+    }
+    Fee private fee;
 
     event EnergyCreated(address indexed pair, address indexed energy, address tokenA, address tokenB, uint);
 
-    uint public minPylonFee;
-    uint public maxPylonFee;
+    modifier onlyFeeToSetter {
+        require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
+        _;
+    }
 
-    constructor() public {
+    constructor(address _feeToSetter) public {
+        fee = Fee({minPylonFee: 1, maxPylonFee: 50});
+        feeToSetter = _feeToSetter;
+    }
 
-        //TODO: Change this to be a deployment parameter
-        minPylonFee = 1; //0.01%
-        maxPylonFee = 50; //0.5%
+    function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee) {
+        uint112 minFee = fee.minPylonFee;
+        uint112 maxFee = fee.maxPylonFee;
+        return (minFee, maxFee);
+    }
+
+    function setFee(uint112 _minPylonFee, uint112 _maxPylonFee) external onlyFeeToSetter {
+        fee.minPylonFee = _minPylonFee;
+        fee.maxPylonFee = _maxPylonFee;
     }
 
     function allEnergiesLength() external view returns (uint) {
+        return allEnergies.length;
         return allEnergies.length;
     }
 
@@ -91,7 +109,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
             energy := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
         require(energy != address(0), "Create2: Failed on deploy");
-        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100, minPylonFee, maxPylonFee);
+        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100);
         getEnergy[_tokenA][_tokenB] = energy;
         allEnergies.push(energy);
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
