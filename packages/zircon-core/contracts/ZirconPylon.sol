@@ -223,9 +223,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // Time to mint some tokens
 
-        //        (anchorLiquidity,) = syncAndAsync(balance1,  _reservePair1, 0, balance1, true);
-        //        (floatLiquidity,) = syncAndAsync(balance0,  _reservePair0, 0, balance0, false);
-
         (anchorLiquidity) = _calculateSyncLiquidity(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
         (floatLiquidity) = _calculateSyncLiquidity(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
         _syncMinting();
@@ -325,7 +322,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if(py != 0) _safeTransfer(pylonToken.anchor, pairAddress, py);
             console.log("minting", px/1e14, py/1e14);
             IZirconPair(pairAddress).mint(address(this));
-
         }
         // Let's remove the tokens that are above max0 and max1, and donate them to the pool
         // This is for cases where somebody just donates tokens to pylon; tx reverts if this done via core functions
@@ -479,7 +475,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @amountSync -> Amount of tokens to mint sync
     // @liquidity -> In case async minting is done is returned the PT Liquidity to mint for the users on the async call, if not 0
     // @amount -> Amount on async if not 0
-    function syncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, uint _balance, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
+    function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, uint _balance, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         uint max = _pairReserveTranslated.mul(maximumPercentageSync) / 100; // half of maximum value
         uint freeSpace = 0;
@@ -533,7 +529,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountIn = payFees(balance.sub(isAnchor ? _reserve1 : reserve0), isAnchor);
         uint amountOut;
         console.log("AmountIn-Fees: ", amountIn);
-        (liquidity, amountOut) = syncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
+        (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
             isAnchor ? reserve1 : reserve0, balance, isAnchor);
         console.log("Liquidity", liquidity);
         if(isAnchor) virtualAnchorBalance += amountOut;

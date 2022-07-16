@@ -10,20 +10,31 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     mapping(address => mapping(address => address)) public getEnergyRevenue;
     address[] public allEnergies;
     address[] public allEnergiesRevenue;
+    address public feeToSetter;
 
     event EnergyCreated(address indexed pair, address indexed energy, address tokenA, address tokenB, uint);
 
     uint public minPylonFee;
     uint public maxPylonFee;
 
-    constructor() public {
+    modifier onlyFeeToSetter {
+        require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
+        _;
+    }
 
-        //TODO: Change this to be a deployment parameter
+    constructor(address _feeToSetter) public {
         minPylonFee = 1; //0.01%
         maxPylonFee = 50; //0.5%
+        feeToSetter = _feeToSetter;
+    }
+
+    function setFee(uint _minPylonFee, uint _maxPylonFee) public onlyFeeToSetter {
+        minPylonFee = _minPylonFee;
+        maxPylonFee = _maxPylonFee;
     }
 
     function allEnergiesLength() external view returns (uint) {
+        return allEnergies.length;
         return allEnergies.length;
     }
 
@@ -91,7 +102,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
             energy := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
         require(energy != address(0), "Create2: Failed on deploy");
-        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100, minPylonFee, maxPylonFee);
+        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100);
         getEnergy[_tokenA][_tokenB] = energy;
         allEnergies.push(energy);
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);

@@ -21,12 +21,18 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public deltaGammaMinFee;
 
     uint public muUpdatePeriod;
+
+    modifier onlyFeeToSetter {
+        require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
+        _;
+    }
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
-    constructor(address _factory, address _energyFactory, address _ptFactory) public {
+    constructor(address _factory, address _energyFactory, address _ptFactory, address _feeToSetter) public {
         factory = _factory;
         energyFactory = _energyFactory;
         ptFactory = _ptFactory;
+        feeToSetter = _feeToSetter;
         // Starting Variables
         maximumPercentageSync = 10;
         deltaGammaThreshold = 4 * 1e16; // 4%
@@ -90,22 +96,18 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         allPylons.push(pylonAddress);
     }
 
-    function setMaximumPercentageSync(uint _maximumPercentageSync) external {
-        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+    function setMaximumPercentageSync(uint _maximumPercentageSync) external onlyFeeToSetter{
         maximumPercentageSync = _maximumPercentageSync;
     }
 
-    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external {
-        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external onlyFeeToSetter{
         deltaGammaThreshold = _deltaGammaThreshold;
     }
-    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external {
-        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external onlyFeeToSetter{
         deltaGammaMinFee = _deltaGammaMinFee;
     }
 
-    function setFeeToSetter(address _feeToSetter) external  {
-        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
+    function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {
         feeToSetter = _feeToSetter;
     }
 
