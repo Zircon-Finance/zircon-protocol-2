@@ -5,6 +5,17 @@ import './interfaces/IZirconPTFactory.sol';
 
 contract ZirconPTFactory is IZirconPTFactory {
 
+    address public migrator;
+
+    constructor(address migrator_) public {
+        migrator = migrator_;
+    }
+
+    modifier onlyMigrator {
+        require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        _;
+    }
+
     function getInitHash(address _pylonFactory) public pure returns(bytes32){
         bytes memory bytecode = getCreationBytecode(_pylonFactory);
         return keccak256(abi.encodePacked(bytecode));
@@ -25,7 +36,7 @@ contract ZirconPTFactory is IZirconPTFactory {
         }
     }
 
-    function changePylonAddress(address oldPylon, address tokenA, address tokenB, address newPylon, address pylonFactory) external {
+    function changePylonAddress(address oldPylon, address tokenA, address tokenB, address newPylon, address pylonFactory) external  onlyMigrator {
 
         address poolTokenA = address(uint(keccak256(abi.encodePacked(
                 hex'ff',

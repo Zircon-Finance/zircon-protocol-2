@@ -248,12 +248,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // If we have any excess reserves we donate them to the pool
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private {
         uint ptl = 0;
-        console.log("max0 max1", max0/1e16, max1/1e16);
-        console.log("currentB0, currentB1", newReserve0/1e16, newReserve1/1e16);
         if (max0 < newReserve0) {
             _safeTransfer(pylonToken.float, pairAddress, newReserve0.sub(max0));
             (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
-            console.log("ZP: ptl0", ptl/1e16);
             reserve0 = max0;
         } else {
             reserve0 = uint112(newReserve0);
@@ -261,7 +258,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if (max1 < newReserve1) {
             _safeTransfer(pylonToken.anchor, pairAddress, newReserve1.sub(max1));
             (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
-            console.log("ZP: ptl1", ptl/1e16);
             reserve1 = max1;
         }else{
             reserve1 = uint112(newReserve1);
@@ -292,13 +288,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         uint112 max0 = uint112(reservesTranslated0.mul(maximumPercentageSync)/200);
         uint112 max1 = uint112(reservesTranslated1.mul(maximumPercentageSync)/200);
-        console.log("mintAndSync max:", max0/1e14, max1/1e14);
-        console.log("mintAndSync balance:", balance0/1e14, balance1/1e14);
         // Pylon Update Minting
         if (balance0 > max0 && balance1 > max1) {
             (uint pairReserves0, uint pairReserves1) = getPairReservesNormalized();
 
-            console.log("mintAndSync toCalculate:", pairReserves0/1e14, pairReserves1/1e14);
 
             // Get Maximum simple gets the maximum quantity of token that we can mint
             uint px;
@@ -1023,5 +1016,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         }
         _update();
         emit Burn(msg.sender, amount, _isAnchor);
+    }
+
+    function migrateLiquidity(address newPylon) external{
+        require(msg.sender == factoryAddress, 'ZP: FORBIDDEN'); // sufficient check
+
+        uint balance = IZirconPair(pairAddress).balanceOf(address(this));
+        uint balanceAnchor = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+        uint balanceFloat = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
+
+        _safeTransfer(newPylon, pairAddress, balance);
+        _safeTransfer(newPylon, pylonToken.anchor, balanceAnchor);
+        _safeTransfer(newPylon, pylonToken.float, balanceFloat);
     }
 }

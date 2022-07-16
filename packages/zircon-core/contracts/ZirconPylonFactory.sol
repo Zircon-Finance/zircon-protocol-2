@@ -14,6 +14,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     address public ptFactory;
     address public energyFactory;
     address public feeToSetter;
+    address public migrator;
 
     uint public maximumPercentageSync;
 
@@ -26,13 +27,20 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
         _;
     }
+    modifier onlyMigrator {
+        require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        _;
+    }
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
-    constructor(address _factory, address _energyFactory, address _ptFactory, address _feeToSetter) public {
+
+    constructor(address _factory, address _energyFactory, address _ptFactory, address _feeToSetter, address _migrator) public {
         factory = _factory;
         energyFactory = _energyFactory;
         ptFactory = _ptFactory;
         feeToSetter = _feeToSetter;
+        migrator = _migrator;
+
         // Starting Variables
         maximumPercentageSync = 10;
         deltaGammaThreshold = 4 * 1e16; // 4%
@@ -48,14 +56,14 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         return keccak256(type(ZirconPylon).creationCode);
     }
 
-//    function createTokenAddress(address _token, address pylonAddress) private returns (address poolToken) {
-//        // Creating Token
-//        bytes memory bytecode = type(ZirconPoolToken).creationCode;
-//        bytes32 salt = keccak256(abi.encodePacked(_token, pylonAddress));
-//        assembly {
-//            poolToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
-//        }
-//    }
+    //    function createTokenAddress(address _token, address pylonAddress) private returns (address poolToken) {
+    //        // Creating Token
+    //        bytes memory bytecode = type(ZirconPoolToken).creationCode;
+    //        bytes32 salt = keccak256(abi.encodePacked(_token, pylonAddress));
+    //        assembly {
+    //            poolToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
+    //        }
+    //    }
 
     function createPylon( address _tokenA, address _tokenB, address _pair) private returns (address pylon) {
         // Creating Token
@@ -111,8 +119,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         feeToSetter = _feeToSetter;
     }
 
-    //    function setMigrator(address _migrator) external {
-    //        require(msg.sender == feeToSetter, 'ZF: FORBIDDEN');
-    //        migrator = _migrator;
-    //    }
+    function migrateLiquidity(address _oldPylon, address _newPylon) external onlyMigrator {
+        ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
+    }
 }

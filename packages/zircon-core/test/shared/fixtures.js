@@ -4,13 +4,16 @@ const {expandTo18Decimals} = require("./utils");
 exports.coreFixtures = async function coreFixtures(address) {
 
     // Deploy feeToSetter contract
-
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
     let feeToSetterInstance = await feeToSetter.deploy();
 
+    // Deploy Migrator contract
+    let migrator = await ethers.getContractFactory('Migrator');
+    let migratorInstance = await migrator.deploy();
+
     // ZirconEnergyFactory
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
-    let factoryEnergyInstance = await factoryEnergy.deploy(feeToSetterInstance.address);
+    let factoryEnergyInstance = await factoryEnergy.deploy(feeToSetterInstance.address, migratorInstance.address);
 
     // Deploy Tokens
     let tok = await ethers.getContractFactory('Token');
@@ -21,18 +24,19 @@ exports.coreFixtures = async function coreFixtures(address) {
     let factoryInstance = await factory.deploy(factoryEnergyInstance.address);
 
     let ptFactory = await ethers.getContractFactory('ZirconPTFactory');
-    let ptFactoryInstance = await ptFactory.deploy();
+    let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address);
 
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
-    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address, feeToSetterInstance.address);
+    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address, feeToSetterInstance.address, migratorInstance.address);
 
     await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
     let pairContract = await ethers.getContractFactory("ZirconPair");
     let pair = await pairContract.attach(lpAddress);
-    
+
     //initializing fee to setter
-    await feeToSetterInstance.initialize(factoryInstance.address, factoryEnergyInstance.address, "1657994775");
+    await feeToSetterInstance.initialize(factoryInstance.address, factoryEnergyInstance.address, (+ new Date()) + 100000);
+    await migratorInstance.initialize(factoryEnergyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address);
 
     const token0Address = await pair.token0();
     let token0 = tk0.address === token0Address ? tk0 : tk1

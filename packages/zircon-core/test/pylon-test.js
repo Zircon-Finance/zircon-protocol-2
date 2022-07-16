@@ -810,4 +810,7 @@ describe("Pylon", () => {
     //TODO: Create Exponential fees on burn async
     // Exponential Fees has to be 0.01 on 50 Gamma, and 0.75 on 100 or 0 gamma
     // Exponential fees has to be half to revenue, half to insurance
+    it('should change fees from FeeToSetter', function () {
+        assert(false, "TODO")
+    });
 })

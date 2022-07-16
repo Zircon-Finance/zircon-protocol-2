@@ -11,6 +11,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     address[] public allEnergies;
     address[] public allEnergiesRevenue;
     address public feeToSetter;
+    address public migrator;
+
     struct Fee {
         uint112 minPylonFee;
         uint112 maxPylonFee;
@@ -23,10 +25,15 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
         _;
     }
+    modifier onlyMigrator {
+        require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        _;
+    }
 
-    constructor(address _feeToSetter) public {
+    constructor(address _feeToSetter, address _migrator) public {
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         feeToSetter = _feeToSetter;
+        migrator = _migrator;
     }
 
     function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee) {
@@ -115,7 +122,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
     }
 
-    function changePylonAddress(address oldPylonA, address newPylonA, address oldPylonB, address newPylonB, address pair, address tokenA, address tokenB) external {
+    function changePylonAddress(address oldPylonA, address newPylonA, address oldPylonB, address newPylonB, address pair, address tokenA, address tokenB) external onlyMigrator{
 
         address energyA = address(uint(keccak256(abi.encodePacked(
                 hex'ff',

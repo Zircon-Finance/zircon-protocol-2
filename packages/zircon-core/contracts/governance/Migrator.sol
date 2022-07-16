@@ -5,20 +5,24 @@ import '../energy/interfaces/IZirconEnergyFactory.sol';
 // this contract serves as feeToSetter, allowing owner to manage fees in the context of a specific feeTo implementation
 
 contract Migrator {
-
     // immutables
-
     address public owner;
     address public energyFactory;
     address public ptFactory;
+    address public pylonFactory;
     modifier onlyOwner {
         require(msg.sender == owner, 'ZPT: FORBIDDEN');
         _;
     }
 
-    constructor(address factory_, address ptFactory_) public {
-        energyFactory = factory_;
+    constructor() public {
+        owner = msg.sender;
+    }
+
+    function initialize(address energyFactory_, address ptFactory_, address pylonFactory_) public onlyOwner {
+        energyFactory = energyFactory_;
         ptFactory = ptFactory_;
+        pylonFactory = pylonFactory_;
     }
 
     // allows owner to change itself at any time
