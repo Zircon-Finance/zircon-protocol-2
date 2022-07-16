@@ -182,6 +182,18 @@ contract ZirconEnergy is IZirconEnergy {
 
   }
 
+  function changePylonAddress(address _pylonAddress) external {
+    require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
+
+    IUniswapV2ERC20(pylon.anchorToken).approve(pylon.pylonAddress, 0);
+    IUniswapV2ERC20(pylon.pairAddress).approve(pylon.pylonAddress, 0);
+
+    pylon.pylonAddress = _pylonAddress;
+
+    IUniswapV2ERC20(pylon.anchorToken).approve(_pylonAddress, 2^256 - 1);
+    IUniswapV2ERC20(pylon.pairAddress).approve(_pylonAddress, 2^256 - 1);
+  }
+
 
 //  //TODO: Add extensive checks and limits system to the extractToken flow
 //

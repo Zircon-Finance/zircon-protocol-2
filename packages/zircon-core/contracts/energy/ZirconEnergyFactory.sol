@@ -49,11 +49,11 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         return allEnergiesRevenue.length;
     }
 
-    function energyCodeHash() external pure returns (bytes32) {
+    function energyCodeHash() public pure returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
-    function energyRevenueCodeHash() external pure returns (bytes32) {
+    function energyRevenueCodeHash() public pure returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
@@ -115,4 +115,31 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
     }
 
+    function changePylonAddress(address oldPylonA, address newPylonA, address oldPylonB, address newPylonB, address pair, address tokenA, address tokenB) external {
+
+        address energyA = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                address(this),
+                keccak256(abi.encodePacked(pair, tokenA)),
+                    energyCodeHash() // init code hash
+            ))));
+
+        address energyB = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                address(this),
+                keccak256(abi.encodePacked(pair, tokenB)),
+                    energyCodeHash() // init code hash
+            ))));
+
+        address energyRev = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                address(this),
+                keccak256(abi.encodePacked(pair, tokenA, tokenB)),
+                energyRevenueCodeHash() // init code hash
+            ))));
+
+        ZirconEnergy(energyA).changePylonAddress(newPylonA);
+        ZirconEnergy(energyB).changePylonAddress(newPylonB);
+        ZirconEnergyRevenue(energyRev).changePylonAddresses(newPylonA, newPylonB);
+    }
 }

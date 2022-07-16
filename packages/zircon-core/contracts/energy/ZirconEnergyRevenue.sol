@@ -71,14 +71,13 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
         _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
         _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
-//        uint balance2 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
-//        uint balance3 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.energy0);
-//        uint balance4 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.energy1);
-//        console.log("zer: Balance2", balance2);
-//        console.log("zer: Balance3", balance3);
-//        console.log("zer: Balance4", balance4);
-
         reserve = balance.sub(pylon0Liq.add(pylon1Liq));
+    }
+
+    function changePylonAddresses(address _pylonAddressA, address _pylonAddressB) external {
+        require(msg.sender == energyfactory, 'Zircon: FORBIDDEN'); // sufficient check
+        zircon.pylon0 = _pylonAddressA;
+        zircon.pylon1 = _pylonAddressB;
     }
 
 }
