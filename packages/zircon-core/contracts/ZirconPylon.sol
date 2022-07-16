@@ -923,9 +923,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
             uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
             ptu = payBurnFees(ptu);
+            console.log("ZPBa, ptu before:", ptu);
             // Anchor slashing logic
             if (_isAnchor) {
                 (ptu, extraPercentage) = handleOmegaSlashing(ptu); //This one retrieves tokens from ZirconEnergy if available
+                console.log("ZPBa, ptu after omega:", ptu);
             }
             _safeTransfer(pairAddress, pairAddress, ptu);
         }
@@ -995,6 +997,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Let's get how much liquidity was sent to burn
         // Outside of scope to be used for vab/vfb adjustment later
         uint liquidity = pt.balanceOf(address(this));
+
+        console.log("ZPBurn liquidity: ", liquidity);
         require(liquidity > 0, "INSUFFICIENT_LIQUIDITY");
         uint _totalSupply = pt.totalSupply();
         {
@@ -1004,6 +1008,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
 
+            console.log("ZPBurn amountsync: ", _amount);
 
             amount = payFees(_amount, isAnchor);
             _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, amount);
@@ -1018,6 +1023,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
                 uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to, isReserve0);  // XOR
                 amount += sentAmount;
+
+                console.log("ZPBurn amountasync: ", sentAmount);
+                console.log("ZPBurn ptu: ", ptu);
                 sendSlashedTokensToUser(isReserve0 ? sentAmount : 0, isReserve0 ? 0 : sentAmount, extraPercentage, to);
                 //Bool combines choice of anchor or float with which token is which in the pool
             }
