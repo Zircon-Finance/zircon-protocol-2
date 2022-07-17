@@ -40,7 +40,7 @@ exports.coreFixtures = async function coreFixtures(address) {
 
     //initializing fee to setter
     await feeToSetterInstance.initialize(factoryInstance.address, factoryEnergyInstance.address, (+ new Date()) + 100000);
-    await migratorInstance.initialize(factoryEnergyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address);
+    await migratorInstance.initialize(factoryEnergyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
 
     // Sorting Tokens
     const token0Address = await pair.token0();
@@ -73,7 +73,9 @@ exports.coreFixtures = async function coreFixtures(address) {
         token0,
         token1,
         pair,
-        migratorInstance
-
+        migratorInstance,
+        factoryEnergyInstance,
+        ptFactoryInstance,
+        feeToSetterInstance
     }
 }

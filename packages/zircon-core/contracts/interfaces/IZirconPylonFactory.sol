@@ -17,7 +17,7 @@ interface IZirconPylonFactory {
     // Adding Pylon
     // First Token is always the Float and the second one is the Anchor
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress);
-
+    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external returns (address pylonAddress);
     function setFeeToSetter(address) external;
     function setMaximumPercentageSync(uint _maximumPercentageSync) external;
     function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
@@ -25,5 +25,5 @@ interface IZirconPylonFactory {
 
     function changeEnergyAddress(address _newEnergy, address _pylonAddress) external;
     function migrateLiquidity(address _oldPylon, address _newPylon) external;
-
+    function startPylon(address _pylon, uint _gamma, uint _vab) external;
 }

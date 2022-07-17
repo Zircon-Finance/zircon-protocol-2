@@ -75,10 +75,28 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     }
     function createEnergy(address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) private returns (address energy){
         energy = IZirconEnergyFactory(energyFactory).createEnergy( _pylonAddress, _pairAddress, _tokenA, _tokenB);
-        //energyRev = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, address(this));
+   }
 
-        //(bool success, bytes memory data) = energyFactory.call(abi.encodeWithSelector(CREATE, _pylonAddress, _pairAddress, _tokenA, _tokenB));
-        //require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: ENERGY_FAILED_CREATION');
+    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external onlyMigrator returns (address pylonAddress)  {
+        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESSES');
+        require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PYLON_EXISTS');
+        pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
+
+        configurePylon(_tokenA, _tokenB, floatPTAddress, anchorPTAddress, _pairAddress, pylonAddress);
+    }
+
+    function configurePylon(address _tokenA, address _tokenB, address poolTokenA, address poolTokenB, address _pairAddress, address pylonAddress) private {
+        console.log('ZF: CONFIGURING_PYLON');
+        address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
+        console.log("energy: ", pylonAddress);
+
+        IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy);
+
+        emit PylonCreated(_tokenA, _tokenB, poolTokenA, poolTokenB, pylonAddress, _pairAddress);
+
+        getPylon[_tokenA][_tokenB] = pylonAddress;
+        allPylons.push(pylonAddress);
+
     }
 
     // Adding PYLON
@@ -91,17 +109,11 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         address poolTokenA = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, pylonAddress); // FLOAT
         address poolTokenB = IZirconPTFactory(ptFactory).createPTAddress(_tokenB, pylonAddress); // ANCHOR
 
-        address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
-
-        IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy);
+        configurePylon(_tokenA, _tokenB, poolTokenA, poolTokenB, _pairAddress, pylonAddress);
 
         IZirconPoolToken(poolTokenA).initialize(_tokenA, _pairAddress, pylonAddress, false);
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
 
-        emit PylonCreated(_tokenA, _tokenB, poolTokenA, poolTokenB, pylonAddress, _pairAddress);
-
-        getPylon[_tokenA][_tokenB] = pylonAddress;
-        allPylons.push(pylonAddress);
     }
 
     function setMaximumPercentageSync(uint _maximumPercentageSync) external onlyFeeToSetter{
@@ -121,6 +133,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
     function migrateLiquidity(address _oldPylon, address _newPylon) external onlyMigrator {
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
+    }
+
+    function startPylon(address _pylon, uint _gamma, uint _vab) external onlyMigrator {
+        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab);
     }
 
     function changeEnergyAddress(address _newEnergy, address _pylonAddress) external onlyMigrator {

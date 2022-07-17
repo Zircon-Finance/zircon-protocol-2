@@ -77,7 +77,6 @@ contract ZirconEnergy is IZirconEnergy {
 
   function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille) external {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
-
     bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
     (address tokenA, address tokenB) = isFloatToken0 ? (_token0, _token1) : (_token1, _token0);
     pylon = Pylon(
@@ -92,6 +91,7 @@ contract ZirconEnergy is IZirconEnergy {
     // Approving pylon to use anchor tokens
     IUniswapV2ERC20(tokenB).approve(_pylon, 2^256 - 1);
     IUniswapV2ERC20(_pair).approve(_pylon, 2^256 - 1);
+
   }
 
   // ****** HELPER FUNCTIONS *****
@@ -181,27 +181,14 @@ contract ZirconEnergy is IZirconEnergy {
     }
 
   }
-
-  function changePylonAddress(address _pylonAddress) external {
-    require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
-
-    IUniswapV2ERC20(pylon.anchorToken).approve(pylon.pylonAddress, 0);
-    IUniswapV2ERC20(pylon.pairAddress).approve(pylon.pylonAddress, 0);
-
-    pylon.pylonAddress = _pylonAddress;
-
-    IUniswapV2ERC20(pylon.anchorToken).approve(_pylonAddress, 2^256 - 1);
-    IUniswapV2ERC20(pylon.pairAddress).approve(_pylonAddress, 2^256 - 1);
-  }
-
   function migrateLiquidity(address newEnergy) external{
     require(msg.sender == energyFactory, 'ZP: FORBIDDEN'); // sufficient check
 
     uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
     uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
 
-    _safeTransfer(newEnergy, pylon.pairAddress, balance);
-    _safeTransfer(newEnergy, pylon.anchorToken, balanceAnchor);
+    _safeTransfer(pylon.pairAddress, newEnergy, balance);
+    _safeTransfer(pylon.anchorToken, newEnergy, balanceAnchor);
   }
 
 

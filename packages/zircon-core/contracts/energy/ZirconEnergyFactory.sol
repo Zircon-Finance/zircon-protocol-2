@@ -122,43 +122,18 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
     }
 
-    function changePylonAddress(address oldPylonA, address newPylonA, address oldPylonB, address newPylonB, address pair, address tokenA, address tokenB) external onlyMigrator{
-
-        address energyA = address(uint(keccak256(abi.encodePacked(
-                hex'ff',
-                address(this),
-                keccak256(abi.encodePacked(pair, tokenA)),
-                    energyCodeHash() // init code hash
-            ))));
-
-        address energyB = address(uint(keccak256(abi.encodePacked(
-                hex'ff',
-                address(this),
-                keccak256(abi.encodePacked(pair, tokenB)),
-                    energyCodeHash() // init code hash
-            ))));
-
-        address energyRev = address(uint(keccak256(abi.encodePacked(
-                hex'ff',
-                address(this),
-                keccak256(abi.encodePacked(pair, tokenA, tokenB)),
-                energyRevenueCodeHash() // init code hash
-            ))));
-
-        ZirconEnergy(energyA).changePylonAddress(newPylonA);
-        ZirconEnergy(energyB).changePylonAddress(newPylonB);
-        ZirconEnergyRevenue(energyRev).changePylonAddresses(newPylonA, newPylonB);
-    }
-
-    function migrateEnergyLiquidity(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(oldEnergy != newEnergy, 'ZE: IDENTICAL_ADDRESS');
+    function migrateEnergyLiquidity(address pair, address token, address newEnergy) external onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
-
-        IZirconEnergy(oldEnergy).migrateLiquidity(newEnergy);
+        address energy = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                address(this),
+                keccak256(abi.encodePacked(pair, token)),
+                energyCodeHash() // init code hash
+            ))));
+        IZirconEnergy(energy).migrateLiquidity(newEnergy);
     }
 
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(oldEnergy != newEnergy, 'ZE: IDENTICAL_ADDRESS');
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
 
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);

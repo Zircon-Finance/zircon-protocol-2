@@ -83,7 +83,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     function migrateLiquidity(address newEnergy) external{
         require(msg.sender == energyfactory, 'ZP: FORBIDDEN'); // sufficient check
         uint balance = IZirconPair(zircon.pairAddress).balanceOf(address(this));
-        _safeTransfer(newEnergy, zircon.pairAddress, balance);
+        _safeTransfer(zircon.pairAddress, newEnergy, balance);
     }
 
 }

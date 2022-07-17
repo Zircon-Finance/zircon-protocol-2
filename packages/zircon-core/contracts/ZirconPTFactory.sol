@@ -48,7 +48,7 @@ contract ZirconPTFactory is IZirconPTFactory {
         address poolTokenB = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 address(this),
-                keccak256(abi.encodePacked(tokenA, oldPylon)),
+                keccak256(abi.encodePacked(tokenB, oldPylon)),
                 getInitHash(pylonFactory) // init code hash
             ))));
 

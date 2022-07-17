@@ -187,6 +187,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         energyAddress = _energy;
     }
 
+    function initMigratedPylon(uint _gamma, uint _vab) external {
+        require(msg.sender == factoryAddress, 'ZP: FORBIDDEN'); // sufficient check
+        gammaMulDecimals = _gamma;
+        virtualAnchorBalance = _vab;
+//        console.log(_gamma, _vab);
+        _update();
+        initialized = 1;
+    }
+
     // @notice On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon
     // And the second one is when initialize the pylon with a pair already existing
@@ -198,8 +207,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // Let's get the balances so we can see what the user send us
         // As we are initializing the reserves are going to be null
-
-
         // Let's see if the pair contains some reserves
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
         // If pair contains reserves we have to use the ratio of the Pair so...
@@ -331,6 +338,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Removing excess reserves from the pool
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+//        console.log("Z", balance0);
+//        console.log("ZP: balance1", balance1);
         (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         uint112 max0 = uint112(reservesTranslated0.mul(maximumPercentageSync)/100);
@@ -577,7 +586,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable/temporarily lock the protocol.
     //It is also combined with the regular Pylon fee
     function _applyDeltaAndGammaTax(uint _amountIn) private returns (uint fee, bool applied) {
-        console.log("Apply Delta And Gamma Tax");
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
         uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
         uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
@@ -589,27 +597,23 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             require(feeBps < 10000, "ZP: Fee too high");
             fee = _amountIn.mul(feeBps)/10000;
-            console.log("Delta+Gamma Tax Applied", fee);
 
         }
         //Base case where the threshold isn't passed
         else {
             applied = false;
             fee = _amountIn.mul(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals))/10000;
-            console.log("Gamma Tax Applied", fee);
         }
         emit DeltaTax(fee, applied);
     }
 
     function calculateLiquidity(uint amountIn, bool isAnchor) private returns (uint amount, uint liquidity) {
         (uint a0, uint a1) = _disincorporateAmount(amountIn, isAnchor);
-        console.log("Calculating Liquidity, amount1,2: ", a0/1e16, a1/1e16);
 
         (liquidity, amount) = getLiquidityFromPoolTokens(
             a0, a1,
             isAnchor,
             IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress));
-        console.log("Liquidity", liquidity);
     }
 
 
@@ -897,11 +901,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
             uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
             ptu = payBurnFees(ptu);
-            console.log("ZPBa, ptu before:", ptu);
             // Anchor slashing logic
             if (_isAnchor) {
                 (ptu, extraPercentage) = handleOmegaSlashing(ptu); //This one retrieves tokens from ZirconEnergy if available
-                console.log("ZPBa, ptu after omega:", ptu);
             }
             _safeTransfer(pairAddress, pairAddress, ptu);
         }
@@ -972,7 +974,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Outside of scope to be used for vab/vfb adjustment later
         uint liquidity = pt.balanceOf(address(this));
 
-        console.log("ZPBurn liquidity: ", liquidity);
+//        console.log("ZPBurn liquidity: ", liquidity);
         require(liquidity > 0, "INSUFFICIENT_LIQUIDITY");
         uint _totalSupply = pt.totalSupply();
         {
@@ -982,7 +984,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
 
-            console.log("ZPBurn amountsync: ", _amount);
+//            console.log("ZPBurn amountsync: ", _amount);
 
             amount = payFees(_amount, isAnchor);
             _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, amount);
@@ -998,8 +1000,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to, isReserve0);  // XOR
                 amount += sentAmount;
 
-                console.log("ZPBurn amountasync: ", sentAmount);
-                console.log("ZPBurn ptu: ", ptu);
+//                console.log("ZPBurn amountasync: ", sentAmount);
+//                console.log("ZPBurn ptu: ", ptu);
                 sendSlashedTokensToUser(isReserve0 ? sentAmount : 0, isReserve0 ? 0 : sentAmount, extraPercentage, to);
                 //Bool combines choice of anchor or float with which token is which in the pool
             }
@@ -1020,9 +1022,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint balanceAnchor = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
         uint balanceFloat = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
 
-        _safeTransfer(newPylon, pairAddress, balance);
-        _safeTransfer(newPylon, pylonToken.anchor, balanceAnchor);
-        _safeTransfer(newPylon, pylonToken.float, balanceFloat);
+        _safeTransfer(pairAddress, newPylon , balance);
+        _safeTransfer(pylonToken.anchor, newPylon, balanceAnchor);
+        _safeTransfer(pylonToken.float, newPylon, balanceFloat);
     }
 
     function changeEnergyAddress(address _energyAddress) external {

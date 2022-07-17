@@ -13,9 +13,7 @@ interface IZirconEnergyFactory {
     function createEnergyRev(address, address, address, address) external returns (address energy);
     function setFee(uint112 _minPylonFee, uint112 _maxPylonFee) external;
     function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee);
-    function changePylonAddress(address oldPylonA, address newPylonA, address oldPylonB, address newPylonB, address pair, address tokenA, address tokenB) external;
 
-    function migrateEnergyLiquidity(address oldEnergy, address newEnergy) external;
-
+    function migrateEnergyLiquidity(address pair, address token, address newEnergy) external;
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external;
 }
