@@ -20,6 +20,7 @@ contract ZirconFactory is IZirconFactory {
 
     constructor(address _energyFactory, address _migrator) public {
         energyFactory = _energyFactory;
+        migrator = _migrator;
     }
 
     function allPairsLength() external view returns (uint) {
@@ -52,8 +53,13 @@ contract ZirconFactory is IZirconFactory {
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
 
-    function changeEnergyRevAddress(address _newEnergy, address _pairAddress) external _onlyMigrator {
-        ZirconPair(_pairAddress).changeEnergyRevAddress(_newEnergy);
+    function changeEnergyRevAddress(address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) external _onlyMigrator returns (address newEnergy){
+        newEnergy = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, _pylonFactory);
+
+        ZirconPair(_pairAddress).changeEnergyRevAddress(newEnergy);
+    }
+    function changeEnergyFactoryAddress(address _newEnergyFactory) external _onlyMigrator {
+        energyFactory = _newEnergyFactory;
     }
 
 }

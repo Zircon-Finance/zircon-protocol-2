@@ -80,12 +80,11 @@ contract Migrator {
 
     }
 
-    function migrateEnergyRevenue(address pair, address oldEnergyRev, address newEnergy) external onlyOwner{
-        require(oldEnergyRev != newEnergy, 'ZE: IDENTICAL_ADDRESS');
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
-
+    function migrateEnergyRevenue(address pair, address oldEnergyRev, address _tokenA, address _tokenB, address _pylonFactory, address newEnergyFactory) external onlyOwner{
+        IZirconFactory(pairFactory).changeEnergyFactoryAddress(newEnergyFactory);
+        address newEnergy = IZirconFactory(pairFactory).changeEnergyRevAddress(pair, _tokenA, _tokenB, _pylonFactory);
         IZirconEnergyFactory(energyFactory).migrateEnergyRevenue(oldEnergyRev, newEnergy);
-        IZirconFactory(pairFactory).changeEnergyRevAddress(newEnergy, pair);
+
     }
 
     function updateFactories(address newEnergyFactory, address newPTFactory, address newPylonFactory, address newPairFactory) external onlyOwner{

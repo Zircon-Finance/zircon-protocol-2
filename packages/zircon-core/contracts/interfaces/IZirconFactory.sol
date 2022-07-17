@@ -15,5 +15,8 @@ interface IZirconFactory {
     //    function setFeeTo(address _feeTo) external;
     //    function setMigrator(address _migrator) external;
     //    function setFeeToSetter(address _feeToSetter) external;
-    function changeEnergyRevAddress(address _newEnergy, address _pairAddress) external;
+    function changeEnergyRevAddress(address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) external returns (address newEnergy);
+
+    function changeEnergyFactoryAddress(address _newEnergyFactory) external;
+
 }

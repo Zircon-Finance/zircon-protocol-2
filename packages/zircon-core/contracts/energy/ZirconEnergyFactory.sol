@@ -83,7 +83,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
-        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
+
+    require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
         require(_pair != address(0), 'ZE: ZERO_ADDRESS');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
         require(getEnergyRevenue[token0][token1] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient

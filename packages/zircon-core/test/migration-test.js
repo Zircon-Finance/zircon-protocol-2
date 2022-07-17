@@ -12,7 +12,7 @@ const TEST_ADDRESSES = [
 let factoryPylonInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
-    pair, migrator, factoryEnergyInstance, ptFactoryInstance, feeToSetterInstance;
+    pair, migrator, factoryEnergyInstance, ptFactoryInstance, feeToSetterInstance, newFactoryPylonInstance, factoryEnergyInstance2;
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const overrides = {
@@ -27,7 +27,7 @@ async function addLiquidity(token0Amount, token1Amount) {
 
 
 // TODO: See case where we have a big dump
-describe("Pylon", () => {
+describe("Migrations", () => {
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
@@ -48,7 +48,7 @@ describe("Pylon", () => {
     });
     const migratePylon = async () => {
         let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
-        let factoryEnergyInstance2 = await factoryEnergy.deploy(feeToSetterInstance.address, migrator.address);
+        factoryEnergyInstance2 = await factoryEnergy.deploy(feeToSetterInstance.address, migrator.address);
         let zPylon = await ethers.getContractFactory('ZirconPylon');
 
         await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
@@ -56,7 +56,7 @@ describe("Pylon", () => {
         let pylonInstance2 = zPylon.attach(pAddress)
         let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
 
-        let newFactoryPylonInstance = await factoryPylon.deploy(
+        newFactoryPylonInstance = await factoryPylon.deploy(
             factoryInstance.address,
             factoryEnergyInstance2.address,
             ptFactoryInstance.address,
@@ -198,15 +198,17 @@ describe("Pylon", () => {
         await pylonInstance.mintPoolTokens(account.address, false)
         //expect(await pair.balanceOf(energyAddress)).to.eq("2728835295394547")
         let newPylon = (await migratePylon())[0]
+        await migrator.migrateEnergyRevenue(pair.address, energyRevenueAddress, token0.address, token1.address, newFactoryPylonInstance.address, factoryEnergyInstance2.address)
+        energyRevenueAddress = await pair.energyRevenueAddress()
+
         let newEnergyAddress = await newPylon.energyAddress()
         expect(await token1.balanceOf(energyAddress)).to.eq("0")
         expect(await token1.balanceOf(newEnergyAddress)).to.eq("494160702744")
+
         // Let's get some anchor shares...
         await token1.transfer(newPylon.address, newAmount0);
         await newPylon.mintPoolTokens(account.address, true);
-        expect(await token1.balanceOf(newEnergyAddress)).to.eq("159")
-        // console.log("newEnergyAddress: ", newEnergyAddress)
-
+        expect(await token1.balanceOf(newEnergyAddress)).to.eq("994160702744")
 
         // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
         // Let's check that...
@@ -214,9 +216,9 @@ describe("Pylon", () => {
         await poolTokenInstance1.transfer(newPylon.address, ptb1.sub(initialPTS1))
         await newPylon.burnAsync(account2.address, true)
         //Burns to an account2
-        expect(await token1.balanceOf(account2.address)).to.eq("2440604150336633")
+        expect(await token1.balanceOf(account2.address)).to.eq("2440059483769185")
         // Here no fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("7985796330232221")
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("7985796454641249")
         // Here the Fees for entering the pool
         expect(await token1.balanceOf(newEnergyAddress)).to.eq("317")
     });
@@ -232,5 +234,6 @@ describe("Pylon", () => {
         await expect(newPylonInstance.initPylon(account.address, overrides)).to.be.revertedWith("Already initialized");
         // TODO: make sonme checks here, think if there is some way of concurrency between pylons
     });
+
 });
 

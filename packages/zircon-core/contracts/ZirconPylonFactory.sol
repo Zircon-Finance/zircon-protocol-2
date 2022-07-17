@@ -86,9 +86,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     }
 
     function configurePylon(address _tokenA, address _tokenB, address poolTokenA, address poolTokenB, address _pairAddress, address pylonAddress) private {
-        console.log('ZF: CONFIGURING_PYLON');
         address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
-        console.log("energy: ", pylonAddress);
 
         IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy);
 

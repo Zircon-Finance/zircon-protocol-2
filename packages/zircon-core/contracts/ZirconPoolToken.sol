@@ -41,7 +41,6 @@ contract ZirconPoolToken is ZirconERC20 {
 
     function changePylonAddress(address _pylon) external {
         require(msg.sender == factory, 'ZPT: FORBIDDEN');
-        console.log("ZPT: changing pylon address", _pylon);
         pylon = _pylon;
     }
 }
