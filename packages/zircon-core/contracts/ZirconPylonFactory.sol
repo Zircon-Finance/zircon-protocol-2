@@ -15,6 +15,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     address public energyFactory;
     address public feeToSetter;
     address public migrator;
+    bool public paused;
 
     uint public maximumPercentageSync;
 
@@ -24,13 +25,14 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public muUpdatePeriod;
 
     modifier onlyFeeToSetter {
-        require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
+        require(msg.sender == feeToSetter, 'ZPT: F');
         _;
     }
     modifier onlyMigrator {
-        require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        require(msg.sender == migrator, 'ZPT: F');
         _;
     }
+
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
 
@@ -46,24 +48,13 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 1500; // 15%
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
+        paused = false;
     }
 
     function allPylonsLength() external view returns (uint) {
         return allPylons.length;
     }
 
-    function pylonCodeHash() external pure returns (bytes32) {
-        return keccak256(type(ZirconPylon).creationCode);
-    }
-
-    //    function createTokenAddress(address _token, address pylonAddress) private returns (address poolToken) {
-    //        // Creating Token
-    //        bytes memory bytecode = type(ZirconPoolToken).creationCode;
-    //        bytes32 salt = keccak256(abi.encodePacked(_token, pylonAddress));
-    //        assembly {
-    //            poolToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
-    //        }
-    //    }
 
     function createPylon( address _tokenA, address _tokenB, address _pair) private returns (address pylon) {
         // Creating Token
@@ -78,8 +69,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
    }
 
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external onlyMigrator returns (address pylonAddress)  {
-        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESSES');
-        require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PYLON_EXISTS');
+        require(_tokenA != _tokenB, 'ZF: IA');
+        require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
 
         configurePylon(_tokenA, _tokenB, floatPTAddress, anchorPTAddress, _pairAddress, pylonAddress);
@@ -100,8 +91,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     // Adding PYLON
     // First Token is always the Float and the second one is the Anchor
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress) {
-        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESSES');
-        require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PYLON_EXISTS');
+        require(_tokenA != _tokenB, 'ZF: IA');
+        require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
 
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
         address poolTokenA = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, pylonAddress); // FLOAT
@@ -111,17 +102,11 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
         IZirconPoolToken(poolTokenA).initialize(_tokenA, _pairAddress, pylonAddress, false);
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
-
     }
 
-    function setMaximumPercentageSync(uint _maximumPercentageSync) external onlyFeeToSetter{
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee) external onlyFeeToSetter{
         maximumPercentageSync = _maximumPercentageSync;
-    }
-
-    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external onlyFeeToSetter{
         deltaGammaThreshold = _deltaGammaThreshold;
-    }
-    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external onlyFeeToSetter{
         deltaGammaMinFee = _deltaGammaMinFee;
     }
 
@@ -139,5 +124,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
     function changeEnergyAddress(address _newEnergy, address _pylonAddress) external onlyMigrator {
         ZirconPylon(_pylonAddress).changeEnergyAddress(_newEnergy);
+    }
+
+    function pausePylon(bool _paused) external onlyFeeToSetter{
+        paused = _paused;
     }
 }
