@@ -56,4 +56,6 @@ interface IZirconPair {
     function tryLock() external;
 
     function initialize(address, address, address) external;
+    function changeEnergyRevAddress(address _revAddress) external;
+
 }

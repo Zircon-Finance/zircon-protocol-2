@@ -194,6 +194,16 @@ contract ZirconEnergy is IZirconEnergy {
     IUniswapV2ERC20(pylon.pairAddress).approve(_pylonAddress, 2^256 - 1);
   }
 
+  function migrateLiquidity(address newEnergy) external{
+    require(msg.sender == energyFactory, 'ZP: FORBIDDEN'); // sufficient check
+
+    uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
+    uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+
+    _safeTransfer(newEnergy, pylon.pairAddress, balance);
+    _safeTransfer(newEnergy, pylon.anchorToken, balanceAnchor);
+  }
+
 
 //  //TODO: Add extensive checks and limits system to the extractToken flow
 //

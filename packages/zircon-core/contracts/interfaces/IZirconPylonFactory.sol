@@ -22,4 +22,8 @@ interface IZirconPylonFactory {
     function setMaximumPercentageSync(uint _maximumPercentageSync) external;
     function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
     function setDeltaGammaMinFee(uint _deltaGammaMinFee) external;
+
+    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external;
+    function migrateLiquidity(address _oldPylon, address _newPylon) external;
+
 }

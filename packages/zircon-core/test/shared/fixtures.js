@@ -21,7 +21,7 @@ exports.coreFixtures = async function coreFixtures(address) {
     let tk1 = await tok.deploy('Token2', 'TOK2');
 
     let factory = await ethers.getContractFactory('ZirconFactory');
-    let factoryInstance = await factory.deploy(factoryEnergyInstance.address);
+    let factoryInstance = await factory.deploy(factoryEnergyInstance.address, migratorInstance.address);
 
     let ptFactory = await ethers.getContractFactory('ZirconPTFactory');
     let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address);

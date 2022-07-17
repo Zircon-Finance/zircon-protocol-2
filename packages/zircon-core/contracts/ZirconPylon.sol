@@ -476,21 +476,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             freeSpace = max.sub(_reserve);
             // when we have enough soace we can mint sync, if not we do it partially
             if (_amountIn <= freeSpace) {
-                console.log("Only Sync Minting-> amountIn:", _amountIn);
 
                 (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 _syncMinting();
                 return (liquidity, _amountIn);
             }
         }
-        console.log("Async Minting-> amountIn: freeSpace::", _amountIn, freeSpace);
         uint amountAsyncToMint = _amountIn.sub(freeSpace);
         (amountOut, liquidity) = calculateLiquidity(amountAsyncToMint, _isAnchor);
-        console.log("Async Minting liquidity:", liquidity);
-
-        console.log("Async amountOut:", amountOut);
-        console.log("Async amountin:", amountAsyncToMint);
-
 
         // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
@@ -1029,4 +1022,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         _safeTransfer(newPylon, pylonToken.anchor, balanceAnchor);
         _safeTransfer(newPylon, pylonToken.float, balanceFloat);
     }
+
+    function changeEnergyAddress(address _energyAddress) external {
+        require(msg.sender == factoryAddress, 'ZP: FORBIDDEN'); // sufficient check
+        energyAddress = _energyAddress;
+    }
+
 }

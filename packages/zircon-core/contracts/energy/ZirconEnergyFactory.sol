@@ -149,4 +149,18 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         ZirconEnergy(energyB).changePylonAddress(newPylonB);
         ZirconEnergyRevenue(energyRev).changePylonAddresses(newPylonA, newPylonB);
     }
+
+    function migrateEnergyLiquidity(address oldEnergy, address newEnergy) external onlyMigrator{
+        require(oldEnergy != newEnergy, 'ZE: IDENTICAL_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+
+        IZirconEnergy(oldEnergy).migrateLiquidity(newEnergy);
+    }
+
+    function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
+        require(oldEnergy != newEnergy, 'ZE: IDENTICAL_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+
+        IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
+    }
 }

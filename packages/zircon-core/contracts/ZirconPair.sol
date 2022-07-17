@@ -294,4 +294,9 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     function sync() external lock {
         _update(IUniswapV2ERC20(token0).balanceOf(address(this)), IUniswapV2ERC20(token1).balanceOf(address(this)), reserve0, reserve1);
     }
+
+    function changeEnergyRevAddress(address _revAddress) external {
+        require(msg.sender == factory, 'UniswapV2: NOT_ALLOWED');
+        energyRevenueAddress = _revAddress;
+    }
 }

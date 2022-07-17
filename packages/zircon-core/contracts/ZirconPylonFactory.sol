@@ -122,4 +122,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     function migrateLiquidity(address _oldPylon, address _newPylon) external onlyMigrator {
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
     }
+
+    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external onlyMigrator {
+        ZirconPylon(_pylonAddress).changeEnergyAddress(_newEnergy);
+    }
 }
