@@ -309,11 +309,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
 
 
-            console.log("mintAndSync px, py:", px/1e14, py/1e14);
             // Transferring tokens to pair and minting
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
             if(py != 0) _safeTransfer(pylonToken.anchor, pairAddress, py);
-            console.log("minting", px/1e14, py/1e14);
             IZirconPair(pairAddress).mint(address(this));
         }
         // Let's remove the tokens that are above max0 and max1, and donate them to the pool
@@ -464,6 +462,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         }
         emit MintSync(msg.sender, amountIn, isAnchor);
     }
+
     // @notice Helper function to see if we can do a mint sync or async
     // @amountSync -> Amount of tokens to mint sync
     // @liquidity -> In case async minting is done is returned the PT Liquidity to mint for the users on the async call, if not 0
@@ -487,25 +486,22 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
-            console.log("Sync Minting, liquidity:", freeSpace);
             (uint extraLiq) = _calculateSyncLiquidity(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
             _syncMinting();
-            console.log("Sync Minting, extraLiq:", extraLiq);
             liquidity += extraLiq;
             amountOut += freeSpace;
         }
-        console.log("Sync+Async Minting, liquidity:", liquidity);
 
         // sending the async minting part to the pair
         _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !_isAnchor : _isAnchor);
     }
+
     // @notice External Function called to mint pool Token
     // @dev Liquidity have to be sent before
     // TODO: recheck in dump scenario if sync pool can be blocked
     // aka syncMint
     function mintPoolTokens(address _to, bool isAnchor) isInitialized nonReentrant external returns (uint liquidity) {
-        console.log("Minting Pool Tokens");
         sync();
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
@@ -514,10 +510,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint balance = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this));
         uint amountIn = payFees(balance.sub(isAnchor ? _reserve1 : reserve0), isAnchor);
         uint amountOut;
-        console.log("AmountIn-Fees: ", amountIn);
         (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
             isAnchor ? reserve1 : reserve0, balance, isAnchor);
-        console.log("Liquidity", liquidity);
         if(isAnchor) virtualAnchorBalance += amountOut;
 
         IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(_to, liquidity);
