@@ -36,7 +36,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         // Starting Variables
         maximumPercentageSync = 10;
         deltaGammaThreshold = 4 * 1e16; // 4%
-        deltaGammaMinFee = 1500; // 15%
+        deltaGammaMinFee = 100; // 1%
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
     }
 

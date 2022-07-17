@@ -3,8 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPair.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPair.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylonFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylonFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/governance/FeeToSetter.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/governance/FeeToSetter.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -94,7 +95,8 @@
       <workItem from="1655739210413" duration="8522000" />
       <workItem from="1656341461061" duration="17775000" />
       <workItem from="1657721601941" duration="1309000" />
-      <workItem from="1657891918509" duration="10988000" />
+      <workItem from="1657891918509" duration="16647000" />
+      <workItem from="1658060263085" duration="18545000" />
     </task>
     <servers />
   </component>
