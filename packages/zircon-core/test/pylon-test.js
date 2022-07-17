@@ -571,6 +571,10 @@ describe("Pylon", () => {
         //Burns half of the floats now
         let ftb = await poolTokenInstance0.balanceOf(account.address)
         await poolTokenInstance0.transfer(pylonInstance.address, ftb.div(2))
+
+        console.log("Floats to be burned: ", ethers.utils.formatEther(floatSum.div(2)));
+        ptt = await pair.totalSupply();
+        console.log("PTT:", ptt);
         //
         await pylonInstance.burn(account2.address, false)
         console.log("Burn tests complete\ninitialFloat", ethers.utils.formatEther(floatSum))
@@ -601,16 +605,26 @@ describe("Pylon", () => {
 
         expect(ptb).to.eq(ethers.BigNumber.from("909090909090908090"))
 
+        console.log("Anchor ptb after init", ethers.utils.formatEther(ptb))
         await token1.transfer(pylonInstance.address, tokenAmount.div(220))
         await pylonInstance.mintPoolTokens(account.address, true);
         ptb = await poolTokenInstance1.balanceOf(account.address)
 
-        expect(ptb).to.eq(ethers.BigNumber.from("954545454545453468"))
+        console.log("Anchor ptb after additional mint", ethers.utils.formatEther(ptb))
+        console.log("Anchors added", ethers.utils.formatEther(tokenAmount.div(220)))
+        expect(ptb).to.eq(ethers.BigNumber.from("954526343214802519"))
         await poolTokenInstance1.transfer(pylonInstance.address, ptb.div(2))
+        console.log("Anchor ptb sent for burn", ethers.utils.formatEther(ptb.div(2)))
         await pylonInstance.burnAsync(account2.address, true)
+
+        let balance0 = await token0.balanceOf(account2.address);
+        let balance1 = await token1.balanceOf(account2.address);
+
+        console.log("balance0", ethers.utils.formatEther(balance0));
+        console.log("balance1", ethers.utils.formatEther(balance1));
         //TODO: After using energy this value dropped
-        expect(await token0.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("121791911673285170"))
-        expect(await token1.balanceOf(account2.address)).to.eq(ethers.BigNumber.from("243634771646789237"))
+        expect(balance0).to.eq(ethers.BigNumber.from("121791911673285170"))
+        expect(balance1).to.eq(ethers.BigNumber.from("243634771646789237"))
 
         //Anchor burn is a bit sussy but mostly right (amounts are a weird percentage but close to what you'd expect. Maybe it's the fee?)
 

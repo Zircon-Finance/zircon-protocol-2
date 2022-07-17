@@ -157,9 +157,11 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         if (isReserve0) {
             amount1 = ZirconLibrary.getAmountOut(amount0/2,reserve0,reserve1);
             amount0 = amount0/2;
+            console.log("ZPPair1 amount1, amount0", amount1, amount0);
         }else {
             amount0 = ZirconLibrary.getAmountOut(amount1/2, reserve1, reserve0);
             amount1 = amount1/2;
+
         }
 
         _mintFee(_reserve0, _reserve1);
@@ -198,15 +200,15 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
         if (isReserve0) {
-            //console.log("amount0", amount0);
+            console.log("ZPPairB1 amount0", amount0);
             amount0 += ZirconLibrary.getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0);
-            //console.log("amount0", amount0);
+            console.log("amount0 after add", amount0);
             amount = amount0;
             require(amount < balance0, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
         }else{
-            //console.log("amount1", amount1);
+            console.log("ZPPairB1 amount1", amount1);
             amount1 += ZirconLibrary.getAmountOut(amount0, _reserve0 - amount0, _reserve1 - amount1);
-            //console.log("amount1", amount1);
+            console.log("amount1", amount1);
             amount = amount1;
             require(amount < balance1, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
         }
