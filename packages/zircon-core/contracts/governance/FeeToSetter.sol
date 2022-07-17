@@ -32,6 +32,11 @@ contract FeeToSetter {
         owner = owner_;
     }
 
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaTreshold, uint _deltaGammaMinFee ) external onlyOwner {
+        IZirconPylonFactory(factory).setFees(_maximumPercentageSync, _deltaGammaTreshold, _deltaGammaMinFee);
+
+    }
+
 
     // allows owner to change feeToSetter after vesting
     function setFeeToSetter(address feeToSetter_) public  onlyOwner{
@@ -39,18 +44,6 @@ contract FeeToSetter {
         IZirconPylonFactory(factory).setFeeToSetter(feeToSetter_);
     }
 
-
-    function setMaximumPercentageSync(uint _maximumPercentageSync) external onlyOwner {
-        IZirconPylonFactory(factory).setMaximumPercentageSync(_maximumPercentageSync);
-    }
-
-    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external onlyOwner {
-        IZirconPylonFactory(factory).setDeltaGammaThreshold(_deltaGammaThreshold);
-    }
-
-    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external onlyOwner {
-        IZirconPylonFactory(factory).setDeltaGammaMinFee(_deltaGammaMinFee);
-    }
 
     function setMinMaxFee(uint112 minFee, uint112 maxFee) external onlyOwner {
         IZirconEnergyFactory(energyFactory).setFee(minFee, maxFee);

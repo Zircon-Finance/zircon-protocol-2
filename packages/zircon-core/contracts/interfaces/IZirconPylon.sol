@@ -3,12 +3,16 @@ interface IZirconPylon {
     function initialized() external view returns (uint);
     function anchorPoolTokenAddress() external view returns (address);
     function floatPoolTokenAddress() external view returns (address);
+    function energyAddress() external view returns (address);
+    function gammaMulDecimals() external view returns (uint);
+    function virtualAnchorBalance() external view returns (uint);
     function getSyncReserves() external view returns  (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast);
     // Called once by the factory at time of deployment
     // @_floatPoolToken -> Contains Address Of Float PT
     // @_anchorPoolToken -> Contains Address Of Anchor PT
     // @token0 -> Float token
     // @token1 -> Anchor token
+    function initMigratedPylon(uint _gamma, uint _vab) external;
     function initialize(address, address, address, address, address, address, address) external;
     // On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon
@@ -26,4 +30,6 @@ interface IZirconPylon {
     // The function first uses the reserves of the Pylon
     // If not enough reserves it burns The Pool Tokens of the pylon
     function burn(address _to, bool _isAnchor) external returns (uint amount);
+    function changeEnergyAddress(address _energyAddress) external;
+
 }

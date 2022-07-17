@@ -3,13 +3,13 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
+import "hardhat/console.sol";
 contract ZirconEnergyRevenue is ReentrancyGuard  {
     using SafeMath for uint112;
     using SafeMath for uint256;
 
     uint public reserve;
-    address public energyfactory;
+    address public energyFactory;
     struct Zircon {
         address pairAddress;
         address floatToken;
@@ -38,21 +38,22 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
 
     constructor() public {
-        energyfactory = msg.sender;
+        energyFactory = msg.sender;
     }
 
     function initialize(address _pair, address _tokenA, address _tokenB, address energy0, address energy1, address pylon0, address pylon1) external {
-        require(energyfactory == msg.sender, "ZER: Not properly called");
+        require(energyFactory == msg.sender, "ZER: Not properly called");
+
         bool isFloatToken0 = IZirconPair(_pair).token0() == _tokenA;
         (address tokenA, address tokenB) = isFloatToken0 ? (_tokenA, _tokenB) : (_tokenA, _tokenB);
         zircon = Zircon(
-        _pair,
-        tokenA,
-        tokenB,
-        energy0,
-        energy1,
-        pylon0,
-        pylon1
+            _pair,
+            tokenA,
+            tokenB,
+            energy0,
+            energy1,
+            pylon0,
+            pylon1
         );
 
     }
@@ -71,14 +72,19 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
         _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
         _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
-//        uint balance2 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
-//        uint balance3 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.energy0);
-//        uint balance4 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.energy1);
-//        console.log("zer: Balance2", balance2);
-//        console.log("zer: Balance3", balance3);
-//        console.log("zer: Balance4", balance4);
-
         reserve = balance.sub(pylon0Liq.add(pylon1Liq));
+    }
+
+    function changePylonAddresses(address _pylonAddressA, address _pylonAddressB) external {
+        require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
+        zircon.pylon0 = _pylonAddressA;
+        zircon.pylon1 = _pylonAddressB;
+    }
+
+    function migrateLiquidity(address newEnergy) external{
+        require(msg.sender == energyFactory, 'ZP: FORBIDDEN'); // sufficient check
+        uint balance = IZirconPair(zircon.pairAddress).balanceOf(address(this));
+        _safeTransfer(zircon.pairAddress, newEnergy, balance);
     }
 
 }

@@ -11,6 +11,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     address[] public allEnergies;
     address[] public allEnergiesRevenue;
     address public feeToSetter;
+    address public migrator;
+
     struct Fee {
         uint112 minPylonFee;
         uint112 maxPylonFee;
@@ -23,10 +25,15 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
         _;
     }
+    modifier onlyMigrator {
+        require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        _;
+    }
 
-    constructor(address _feeToSetter) public {
+    constructor(address _feeToSetter, address _migrator) public {
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         feeToSetter = _feeToSetter;
+        migrator = _migrator;
     }
 
     function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee) {
@@ -49,11 +56,11 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         return allEnergiesRevenue.length;
     }
 
-    function energyCodeHash() external pure returns (bytes32) {
+    function energyCodeHash() public pure returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
-    function energyRevenueCodeHash() external pure returns (bytes32) {
+    function energyRevenueCodeHash() public pure returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
@@ -76,7 +83,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
-        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
+
+    require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
         require(_pair != address(0), 'ZE: ZERO_ADDRESS');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
         require(getEnergyRevenue[token0][token1] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
@@ -115,4 +123,20 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
     }
 
+    function migrateEnergyLiquidity(address pair, address token, address newEnergy) external onlyMigrator{
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        address energy = address(uint(keccak256(abi.encodePacked(
+                hex'ff',
+                address(this),
+                keccak256(abi.encodePacked(pair, token)),
+                energyCodeHash() // init code hash
+            ))));
+        IZirconEnergy(energy).migrateLiquidity(newEnergy);
+    }
+
+    function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+
+        IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
+    }
 }

@@ -41,6 +41,7 @@
     "deploy": "npx hardhat --network moonbase deploy --export-all ../zircon-periphery/external_contracts/hardhat_contracts.json",
     "test": "mocha",
     "compile": "npx hardhat compile --show-stack-traces",
-    "ctest": "npx hardhat compile && npm test"
+    "ctest": "npx hardhat compile && npm test",
+    "bytecode": "npx hardhat run scripts/get-bytecodes.js"
   }
 }

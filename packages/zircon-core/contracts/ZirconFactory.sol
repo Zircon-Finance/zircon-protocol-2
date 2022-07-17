@@ -7,14 +7,20 @@ import "./energy/interfaces/IZirconEnergyRevenue.sol";
 contract ZirconFactory is IZirconFactory {
     address public energyFactory;
     bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergyRev(address,address,address,address)')));
-
+    address public migrator;
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _energyFactory) public {
+    modifier _onlyMigrator {
+        require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        _;
+    }
+
+    constructor(address _energyFactory, address _migrator) public {
         energyFactory = _energyFactory;
+        migrator = _migrator;
     }
 
     function allPairsLength() external view returns (uint) {
@@ -45,6 +51,15 @@ contract ZirconFactory is IZirconFactory {
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
         emit PairCreated(token0, token1, pair, allPairs.length);
+    }
+
+    function changeEnergyRevAddress(address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) external _onlyMigrator returns (address newEnergy){
+        newEnergy = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, _pylonFactory);
+
+        ZirconPair(_pairAddress).changeEnergyRevAddress(newEnergy);
+    }
+    function changeEnergyFactoryAddress(address _newEnergyFactory) external _onlyMigrator {
+        energyFactory = _newEnergyFactory;
     }
 
 }

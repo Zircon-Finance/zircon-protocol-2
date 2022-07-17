@@ -13,13 +13,15 @@ interface IZirconPylonFactory {
     function energyFactory() external view returns (address);
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
     function allPylonsLength() external view returns (uint);
-    function pylonCodeHash() external pure returns (bytes32);
+    function paused() external view returns (bool);
     // Adding Pylon
     // First Token is always the Float and the second one is the Anchor
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress);
-
+    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external returns (address pylonAddress);
     function setFeeToSetter(address) external;
-    function setMaximumPercentageSync(uint _maximumPercentageSync) external;
-    function setDeltaGammaThreshold(uint _deltaGammaThreshold) external;
-    function setDeltaGammaMinFee(uint _deltaGammaMinFee) external;
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee) external;
+
+    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external;
+    function migrateLiquidity(address _oldPylon, address _newPylon) external;
+    function startPylon(address _pylon, uint _gamma, uint _vab) external;
 }

@@ -1,43 +1,46 @@
 pragma solidity ^0.5.16;
 import "./ZirconERC20.sol";
 import "./interfaces/IZirconPoolToken.sol";
+import "hardhat/console.sol";
 
 contract ZirconPoolToken is ZirconERC20 {
     address public token;
     address public pair;
     bool public isAnchor;
-    address public factory;
     address public pylon;
+    address public pylonFactory;
+    address public factory;
 
-    constructor(address pylonFactory) public {
-        factory = pylonFactory;
+    constructor(address _pylonFactory) public {
+        pylonFactory = _pylonFactory;
+        factory = msg.sender;
     }
 
-    function mint(address account, uint256 amount) external {
+    modifier onlyPylon {
         require(msg.sender == pylon, 'ZPT: FORBIDDEN');
-        // sufficient check
+        _;
+    }
+
+    function mint(address account, uint256 amount) external onlyPylon{
         _mint(account, amount);
     }
 
-    function burn(address account, uint256 amount) external {
-        require(msg.sender == pylon, 'ZPT: FORBIDDEN');
-        // sufficient check
+    function burn(address account, uint256 amount) external onlyPylon{
         _burn(account, amount);
     }
 
     // called once by the factory at time of deployment
     function initialize(address _token0, address _pair, address _pylon, bool _isAnchor) external {
-        require(msg.sender == factory, 'ZPT: FORBIDDEN');
+        require(msg.sender == pylonFactory, 'ZPT: FORBIDDEN');
         // sufficient check
         token = _token0;
         pair = _pair;
         isAnchor = _isAnchor;
         pylon = _pylon;
     }
-//
-//    function migratePylon() external {
-//        require(msg.sender == factory, 'ZPT: FORBIDDEN');
-//        // sufficient check
-//        IZirconPoolToken(token).migratePylon();
-//    }
+
+    function changePylonAddress(address _pylon) external {
+        require(msg.sender == factory, 'ZPT: FORBIDDEN');
+        pylon = _pylon;
+    }
 }
