@@ -41,7 +41,6 @@ contract FeeToSetter {
     }
 
     function setFees(uint _maximumPercentageSync, uint _deltaGammaTreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod) external onlyOwner {
-        console.log("Setting fees");
         IZirconPylonFactory(pylonFactory).setFees(_maximumPercentageSync, _deltaGammaTreshold, _deltaGammaMinFee, _muUpdatePeriod);
     }
 
