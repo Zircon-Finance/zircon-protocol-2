@@ -18,20 +18,19 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     bool public paused;
 
     uint public maximumPercentageSync;
-
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
-
     uint public muUpdatePeriod;
 
-    modifier onlyFeeToSetter {
-        require(msg.sender == feeToSetter, 'ZPT: F');
-        _;
-    }
-    modifier onlyMigrator {
-        require(msg.sender == migrator, 'ZPT: F');
-        _;
-    }
+//    modifier onlyFeeToSetter {
+//        require(msg.sender == feeToSetter, 'ZPT: F');
+//        _;
+//    }
+//
+//    modifier onlyMigrator {
+//        require(msg.sender == migrator, 'ZPT: F');
+//        _;
+//    }
 
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
@@ -51,6 +50,13 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         paused = false;
     }
 
+    function onlyFeeToSetter() internal {
+        require(msg.sender == feeToSetter, 'ZPT: F');
+    }
+    function onlyMigrator() internal {
+        require(msg.sender == migrator, 'ZPT: F');
+    }
+
     function allPylonsLength() external view returns (uint) {
         return allPylons.length;
     }
@@ -68,7 +74,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         energy = IZirconEnergyFactory(energyFactory).createEnergy( _pylonAddress, _pairAddress, _tokenA, _tokenB);
    }
 
-    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external onlyMigrator returns (address pylonAddress)  {
+    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external  returns (address pylonAddress)  {
+        onlyMigrator();
         require(_tokenA != _tokenB, 'ZF: IA');
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
@@ -104,29 +111,41 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
     }
 
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee) external onlyFeeToSetter{
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod) external {
+        onlyFeeToSetter();
         maximumPercentageSync = _maximumPercentageSync;
         deltaGammaThreshold = _deltaGammaThreshold;
         deltaGammaMinFee = _deltaGammaMinFee;
+        muUpdatePeriod = _muUpdatePeriod;
     }
 
-    function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {
+    function setMigrator(address _migrator) external  {
+        onlyMigrator();
+        migrator = _migrator;
+    }
+
+    function setFeeToSetter(address _feeToSetter) external {
+        onlyFeeToSetter();
         feeToSetter = _feeToSetter;
     }
 
-    function migrateLiquidity(address _oldPylon, address _newPylon) external onlyMigrator {
+    function migrateLiquidity(address _oldPylon, address _newPylon) external {
+        onlyMigrator();
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
     }
 
-    function startPylon(address _pylon, uint _gamma, uint _vab) external onlyMigrator {
+    function startPylon(address _pylon, uint _gamma, uint _vab) external {
+        onlyMigrator();
         ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab);
     }
 
-    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external onlyMigrator {
+    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external {
+        onlyMigrator();
         ZirconPylon(_pylonAddress).changeEnergyAddress(_newEnergy);
     }
 
-    function pausePylon(bool _paused) external onlyFeeToSetter{
+    function setPaused(bool _paused) external {
+        onlyFeeToSetter();
         paused = _paused;
     }
 }

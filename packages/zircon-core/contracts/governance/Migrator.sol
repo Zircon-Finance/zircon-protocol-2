@@ -31,30 +31,18 @@ contract Migrator {
         pairFactory = pairFactory_;
     }
 
+    function setMigrator(address migrator_) public onlyOwner {
+        IZirconPylonFactory(pylonFactory).setMigrator(migrator_);
+        IZirconEnergyFactory(energyFactory).setMigrator(migrator_);
+        IZirconFactory(pairFactory).setMigrator(migrator_);
+        IZirconPTFactory(ptFactory).setMigrator(migrator_);
+    }
+
     // allows owner to change itself at any time
     function setOwner(address owner_) public {
         require(msg.sender == owner, 'FeeToSetter::setOwner: not allowed');
         owner = owner_;
     }
-
-    // @notice allows to migrate pylon address to new pylon
-    //    function migratePylon(address oldPylonA, address newPylonA, address oldPylonB, address newPylonB, address tokenA,
-    //        address tokenB, address pylonFactory, address pair, address newEnergyA, address newEnergyB) public onlyOwner {
-    //        // Changing Pylon Address on Energy
-    //        //        IZirconEnergyFactory(energyFactory).changePylonAddress(oldPylonA, newPylonA, oldPylonB, newPylonB, pair, tokenA, tokenB);
-    //
-    //        IZirconEnergyFactory(energyFactory).migrateEnergyLiquidity(pair, tokenA, newEnergyA);
-    //        IZirconEnergyFactory(energyFactory).migrateEnergyLiquidity(pair, tokenB, newEnergyB);
-    //        //        IZirconEnergyFactory(energyFactory).migrateEnergyRevenue(pair, tokenA, tokenB, newEnergyB);
-    //
-    //        // Changing pylon address on Pool Tokens (Float/Anchor)
-    //        IZirconPTFactory(ptFactory).changePylonAddress(oldPylonA, tokenA, tokenB, newPylonA, pylonFactory);
-    //        IZirconPTFactory(ptFactory).changePylonAddress(oldPylonB, tokenB, tokenA, newPylonB, pylonFactory);
-    //
-    //        // Migrating Liquidity from Pylon to new Pylon
-    //        IZirconPylonFactory(pylonFactory).migrateLiquidity(oldPylonA, newPylonA);
-    //        IZirconPylonFactory(pylonFactory).migrateLiquidity(oldPylonB, newPylonB);
-    //    }
 
     function migratePylon(address oldPylon, address newPylon, address tokenA,
         address tokenB, address pair, address newEnergy) private {
@@ -75,16 +63,12 @@ contract Migrator {
 
         migratePylon(oldPylon, pylon, _tokenA, _tokenB, _pairAddress, energy);
         IZirconPylonFactory(newPylonFactory).startPylon(pylon, gamma, vab);
-
-
-
     }
 
     function migrateEnergyRevenue(address pair, address oldEnergyRev, address _tokenA, address _tokenB, address _pylonFactory, address newEnergyFactory) external onlyOwner{
         IZirconFactory(pairFactory).changeEnergyFactoryAddress(newEnergyFactory);
         address newEnergy = IZirconFactory(pairFactory).changeEnergyRevAddress(pair, _tokenA, _tokenB, _pylonFactory);
         IZirconEnergyFactory(energyFactory).migrateEnergyRevenue(oldEnergyRev, newEnergy);
-
     }
 
     function updateFactories(address newEnergyFactory, address newPTFactory, address newPylonFactory, address newPairFactory) external onlyOwner{

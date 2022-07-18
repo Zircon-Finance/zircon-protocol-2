@@ -53,7 +53,6 @@ contract ZirconEnergy is IZirconEnergy {
     address pairAddress;
     address floatToken;
     address anchorToken;
-    uint insurancePerMille;
     uint insuranceUni;
     uint revenueUni;
   }
@@ -75,7 +74,7 @@ contract ZirconEnergy is IZirconEnergy {
     (minFee, maxFee) = IZirconEnergyFactory(energyFactory).getMinMaxFee();
   }
 
-  function initialize(address _pylon, address _pair, address _token0, address _token1, uint _insurancePerMille) external {
+  function initialize(address _pylon, address _pair, address _token0, address _token1) external {
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
     bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
     (address tokenA, address tokenB) = isFloatToken0 ? (_token0, _token1) : (_token1, _token0);
@@ -84,7 +83,6 @@ contract ZirconEnergy is IZirconEnergy {
       _pair,
       tokenA,
       tokenB,
-      _insurancePerMille,
       1,
       1
     );
@@ -123,10 +121,11 @@ contract ZirconEnergy is IZirconEnergy {
     uint feeLiquidity = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this)).sub(lastPtBalance);
     uint pylonLiquidity = IUniswapV2ERC20(pylon.pairAddress).balanceOf(pylon.pylonAddress);
     uint ptTotalSupply = IUniswapV2ERC20(pylon.pairAddress).totalSupply();
+    uint insurancePerMille = IZirconEnergyFactory(energyFactory).insurancePerMille();
 
     uint float0Fee = pylonLiquidity.mul(feeLiquidity)/ptTotalSupply;
-    pylon.insuranceUni += float0Fee.mul(pylon.insurancePerMille)/1e3;
-    pylon.revenueUni += float0Fee.mul((1e3)-(pylon.insurancePerMille))/1e3;
+    pylon.insuranceUni += float0Fee.mul(insurancePerMille)/1e3;
+    pylon.revenueUni += float0Fee.mul((1e3)-(insurancePerMille))/1e3;
     _returnExcess();
 
     uint pairLiquidity = ptTotalSupply.add(pylonLiquidity); //fundamentally impossible for this to over/sub flow

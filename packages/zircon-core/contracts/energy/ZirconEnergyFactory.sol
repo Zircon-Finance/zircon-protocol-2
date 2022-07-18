@@ -12,6 +12,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     address[] public allEnergiesRevenue;
     address public feeToSetter;
     address public migrator;
+    uint public insurancePerMille;
 
     struct Fee {
         uint112 minPylonFee;
@@ -32,14 +33,14 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
     constructor(address _feeToSetter, address _migrator) public {
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
+        insurancePerMille = 100;
         feeToSetter = _feeToSetter;
         migrator = _migrator;
     }
 
     function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee) {
-        uint112 minFee = fee.minPylonFee;
-        uint112 maxFee = fee.maxPylonFee;
-        return (minFee, maxFee);
+        minFee = fee.minPylonFee;
+        maxFee = fee.maxPylonFee;
     }
 
     function setFee(uint112 _minPylonFee, uint112 _maxPylonFee) external onlyFeeToSetter {
@@ -47,8 +48,11 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         fee.maxPylonFee = _maxPylonFee;
     }
 
+    function setInsurancePerMille(uint _insurancePerMille) external onlyFeeToSetter {
+        insurancePerMille = _insurancePerMille;
+    }
+
     function allEnergiesLength() external view returns (uint) {
-        return allEnergies.length;
         return allEnergies.length;
     }
 
@@ -117,7 +121,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
             energy := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
         require(energy != address(0), "Create2: Failed on deploy");
-        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB, 100);
+        IZirconEnergy(energy).initialize(_pylon, _pair, _tokenA, _tokenB);
         getEnergy[_tokenA][_tokenB] = energy;
         allEnergies.push(energy);
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
@@ -138,5 +142,13 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
 
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
+    }
+
+    function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {
+        feeToSetter = _feeToSetter;
+    }
+
+    function setMigrator(address _migrator) external onlyMigrator {
+        migrator = _migrator;
     }
 }

@@ -33,7 +33,7 @@ describe('AirDrop', (taskArguments) => {
     const TestTokenA = await ethers.getContractFactory('TestTokenA')
     const testTokenA = await TestTokenA.deploy(amount)
     testTokenADeployed = await testTokenA.deployed()
-    const Airdrop = await ethers.getContractFactory('Airdrop', creator)
+    const Airdrop = await ethers.getContractFactory('ZirconDrop', creator)
     const airdrop = await Airdrop.deploy(
       testTokenADeployed.address,
       process.env.REAL === 'true' ? generatedReal.merkleRoot : merkleRoot,

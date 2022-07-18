@@ -4,15 +4,21 @@ import './ZirconPoolToken.sol';
 import './interfaces/IZirconPTFactory.sol';
 
 contract ZirconPTFactory is IZirconPTFactory {
-
     address public migrator;
+    address public feeToSetter;
 
-    constructor(address migrator_) public {
+    constructor(address migrator_, address feeToSetter_) public {
         migrator = migrator_;
+        feeToSetter = feeToSetter_;
     }
 
-    modifier onlyMigrator {
+    modifier _onlyMigrator {
         require(msg.sender == migrator, 'ZPT: FORBIDDEN');
+        _;
+    }
+
+    modifier _onlyFeeToSetter {
+        require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
         _;
     }
 
@@ -36,7 +42,7 @@ contract ZirconPTFactory is IZirconPTFactory {
         }
     }
 
-    function changePylonAddress(address oldPylon, address tokenA, address tokenB, address newPylon, address pylonFactory) external  onlyMigrator {
+    function changePylonAddress(address oldPylon, address tokenA, address tokenB, address newPylon, address pylonFactory) external  _onlyMigrator {
 
         address poolTokenA = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
@@ -54,6 +60,14 @@ contract ZirconPTFactory is IZirconPTFactory {
 
         ZirconPoolToken(poolTokenA).changePylonAddress(newPylon);
         ZirconPoolToken(poolTokenB).changePylonAddress(newPylon);
+    }
+
+    function setMigrator(address _migrator) external _onlyMigrator {
+        migrator = _migrator;
+    }
+
+    function setFeeToSetter(address _feeToSetter) external _onlyFeeToSetter {
+        feeToSetter = _feeToSetter;
     }
 
 }
