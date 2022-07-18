@@ -62,4 +62,5 @@ contract ZirconFactory is IZirconFactory {
         energyFactory = _newEnergyFactory;
     }
 
+
 }

@@ -18,16 +18,15 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     bool public paused;
 
     uint public maximumPercentageSync;
-
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
-
     uint public muUpdatePeriod;
 
     modifier onlyFeeToSetter {
         require(msg.sender == feeToSetter, 'ZPT: F');
         _;
     }
+
     modifier onlyMigrator {
         require(msg.sender == migrator, 'ZPT: F');
         _;
@@ -104,10 +103,11 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
     }
 
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee) external onlyFeeToSetter{
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod) external onlyFeeToSetter{
         maximumPercentageSync = _maximumPercentageSync;
         deltaGammaThreshold = _deltaGammaThreshold;
         deltaGammaMinFee = _deltaGammaMinFee;
+        muUpdatePeriod = _muUpdatePeriod;
     }
 
     function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {

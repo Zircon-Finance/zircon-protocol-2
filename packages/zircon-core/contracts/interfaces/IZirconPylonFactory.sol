@@ -19,7 +19,7 @@ interface IZirconPylonFactory {
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress);
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external returns (address pylonAddress);
     function setFeeToSetter(address) external;
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee) external;
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod) external;
 
     function changeEnergyAddress(address _newEnergy, address _pylonAddress) external;
     function migrateLiquidity(address _oldPylon, address _newPylon) external;

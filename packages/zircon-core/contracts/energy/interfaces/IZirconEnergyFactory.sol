@@ -7,7 +7,7 @@ interface IZirconEnergyFactory {
     function getEnergy(address _tokenA, address _tokenB) external view returns (address pair);
     function allEnergiesLength() external view returns (uint);
     function feeToSetter() external pure returns (address);
-
+    function setFeeToSetter(address _feeToSetter) external;
     // Functions
     function createEnergy(address, address, address, address) external returns (address energy);
     function createEnergyRev(address, address, address, address) external returns (address energy);

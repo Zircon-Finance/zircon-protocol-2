@@ -139,4 +139,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
     }
+
+    function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {
+        feeToSetter = _feeToSetter;
+    }
 }
