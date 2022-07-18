@@ -43,10 +43,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         migrator = _migrator;
 
         // Starting Variables
-//        maximumPercentageSync = 10;
-//        deltaGammaThreshold = 4 * 1e16; // 4%
-//        deltaGammaMinFee = 100; // 1%
-//        muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
+        maximumPercentageSync = 10;
+        deltaGammaThreshold = 4 * 1e16; // 4%
+        deltaGammaMinFee = 100; // 1%
+        muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
         paused = false;
     }
 
@@ -108,6 +108,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         deltaGammaThreshold = _deltaGammaThreshold;
         deltaGammaMinFee = _deltaGammaMinFee;
         muUpdatePeriod = _muUpdatePeriod;
+    }
+
+    function setMigrator(address _migrator) external onlyMigrator {
+        migrator = _migrator;
     }
 
     function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {

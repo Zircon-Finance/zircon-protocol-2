@@ -22,11 +22,11 @@ exports.coreFixtures = async function coreFixtures(address) {
 
     // Deploy Factory
     let factory = await ethers.getContractFactory('ZirconFactory');
-    let factoryInstance = await factory.deploy(factoryEnergyInstance.address, migratorInstance.address);
+    let factoryInstance = await factory.deploy(factoryEnergyInstance.address, migratorInstance.address, feeToSetterInstance.address);
 
     // Deploy Pool Token Factory
     let ptFactory = await ethers.getContractFactory('ZirconPTFactory');
-    let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address);
+    let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address, feeToSetterInstance.address);
 
     // Deploying Pylon Factory
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');

@@ -147,4 +147,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {
         feeToSetter = _feeToSetter;
     }
+
+    function setMigrator(address _migrator) external onlyMigrator {
+        migrator = _migrator;
+    }
 }

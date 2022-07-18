@@ -10,6 +10,8 @@ contract ZirconFactory is IZirconFactory {
     address public migrator;
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
+    address public feeToSetter;
+    uint public liquidityFee;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -18,9 +20,16 @@ contract ZirconFactory is IZirconFactory {
         _;
     }
 
-    constructor(address _energyFactory, address _migrator) public {
+    modifier _onlyFeeToSetter {
+        require(msg.sender == feeToSetter, 'ZPT: FORBIDDEN');
+        _;
+    }
+
+    constructor(address _energyFactory, address _feeToSetter, address _migrator) public {
         energyFactory = _energyFactory;
         migrator = _migrator;
+        feeToSetter = _feeToSetter;
+        liquidityFee = 30;
     }
 
     function allPairsLength() external view returns (uint) {
@@ -53,13 +62,26 @@ contract ZirconFactory is IZirconFactory {
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
 
+    function setFeeToSetter(address _feeToSetter) external _onlyFeeToSetter {
+        feeToSetter = _feeToSetter;
+    }
+
+    function setMigrator(address _migrator) external _onlyMigrator {
+        migrator = _migrator;
+    }
+
     function changeEnergyRevAddress(address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) external _onlyMigrator returns (address newEnergy){
         newEnergy = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, _pylonFactory);
 
         ZirconPair(_pairAddress).changeEnergyRevAddress(newEnergy);
     }
+
     function changeEnergyFactoryAddress(address _newEnergyFactory) external _onlyMigrator {
         energyFactory = _newEnergyFactory;
+    }
+
+    function setLiquidityFee(uint _liquidityFee) external _onlyFeeToSetter {
+        liquidityFee = _liquidityFee;
     }
 
 
