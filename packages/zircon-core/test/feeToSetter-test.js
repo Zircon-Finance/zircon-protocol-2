@@ -26,7 +26,7 @@ async function addLiquidity(token0Amount, token1Amount) {
 }
 
 
-// TODO: See case where we have a big dump
+// TODO: SfeeToSetteree case where we have a big dump
 describe("Pylon", () => {
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
@@ -43,47 +43,14 @@ describe("Pylon", () => {
         feeToSetterInstance = fixtures.feeToSetterInstance
 
     });
-    const init = async (token0Amount, token1Amount) => {
-        // Let's initialize the Pool, inserting some liquidity in it
-        await addLiquidity(token0Amount, token1Amount)
+
+    it('should pause', async function () {
+        await feeToSetterInstance.setPaused(true)
+        await addLiquidity(expandTo18Decimals(10), expandTo18Decimals(10))
         // Let's transfer some tokens to the Pylon
-        await token0.transfer(pylonInstance.address, token0Amount.div(11))
-        await token1.transfer(pylonInstance.address, token1Amount.div(11))
+        await token0.transfer(pylonInstance.address, expandTo18Decimals(  10).div(11))
+        await token1.transfer(pylonInstance.address, expandTo18Decimals(  10).div(11))
         //Let's initialize the Pylon, this should call two sync
-        await pylonInstance.initPylon(account.address)
-    }
-    it('should change fees from FeeToSetter', async function () {
-        await feeToSetterInstance.setFees(2, 3, 4, 5)
-
-        // Initializing
-        await init(expandTo18Decimals(10), expandTo18Decimals(100))
-
-        // VAB at the beginning is equal to the minted pool tokens
-        let vab = await pylonInstance.virtualAnchorBalance();
-        expect(vab).to.eq(ethers.BigNumber.from('9090909090909090909'))
-        // Time to swap, let's generate some fees
-        await token0.transfer(pair.address, expandTo18Decimals(1))
-        await pair.swap(0, ethers.BigNumber.from('1662497915624478906'), account.address, '0x', overrides)
-        // Minting tokens is going to trigger a change in the VAB & VFB so let's check
-        const newAmount0 = ethers.BigNumber.from('5000000000000000')
-        await token0.transfer(pylonInstance.address, newAmount0)
-        await pylonInstance.mintPoolTokens(account.address, false)
-
-        // So here we increase our vab and vfb
-        let vab2 = await pylonInstance.virtualAnchorBalance();
-        // expect(vfb).to.eq(ethers.BigNumber.from('902024227015522550'))
-        expect(vab2).to.eq(ethers.BigNumber.from('9090909090909090910'))
-        // Let's mint some LP Tokens
-        // no fee changes so vab & vfb should remain the same
-        await addLiquidity(expandTo18Decimals(1), expandTo18Decimals(10))
-        let vab3 = await pylonInstance.virtualAnchorBalance();
-        // expect(vfb3).to.eq(ethers.BigNumber.from('902024227015522550'))
-        expect(vab3).to.eq(ethers.BigNumber.from('9090909090909090910'))
-
-        await token1.transfer(pylonInstance.address, newAmount0)
-        await pylonInstance.mintPoolTokens(account.address, true)
-
-        await token1.transfer(pylonInstance.address, newAmount0)
-        await pylonInstance.mintPoolTokens(account.address, true)
+        await expect(pylonInstance.initPylon(account.address)).to.be.revertedWith("ZP: P")
     });
 })

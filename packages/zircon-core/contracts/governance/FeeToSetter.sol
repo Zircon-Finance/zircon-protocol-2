@@ -49,4 +49,12 @@ contract FeeToSetter {
     function setMinMaxFee(uint112 minFee, uint112 maxFee) external onlyOwner {
         IZirconEnergyFactory(energyFactory).setFee(minFee, maxFee);
     }
+
+    function setPaused(bool paused) external onlyOwner {
+        IZirconPylonFactory(pylonFactory).setPaused(paused);
+    }
+
+    function setInsurancePerMille(uint insurancePerMille) external onlyOwner {
+        IZirconEnergyFactory(energyFactory).setInsurancePerMille(insurancePerMille);
+    }
 }
