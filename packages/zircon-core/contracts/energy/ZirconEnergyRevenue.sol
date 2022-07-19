@@ -102,7 +102,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         _safeTransfer(zircon.pairAddress, newEnergy, balance);
     }
     function getBalanceFromPair() external returns (uint) {
-//        require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
+        require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         console.log("ZE: getBalanceFromPair");
         if(msg.sender == zircon.pylon0) {
             uint balanceToReturn = pylon0Balance;
