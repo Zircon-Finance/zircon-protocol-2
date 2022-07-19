@@ -551,7 +551,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // balance of float/anchor sent to this
         uint balance = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this));
         //Reduces by amount that was in sync reserves
-        uint amountIn = payFees(balance.sub(isAnchor ? _reserve1 : reserve0), isAnchor);
+        uint amountIn = balance.sub(isAnchor ? _reserve1 : reserve0);
+        notZero(amountIn);
+
+        amountIn = payFees(amountIn, isAnchor);
+
         uint amountOut;
         (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
             isAnchor ? reserve1 : reserve0, isAnchor);

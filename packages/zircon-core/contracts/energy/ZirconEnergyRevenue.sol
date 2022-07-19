@@ -76,12 +76,14 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             uint112 reserve0 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair0 : _reservePair1;
             uint112 reserve1 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair1 : _reservePair0;
             pylon0Balance += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
-            pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
+            pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
         {
             uint amount = balance.sub(reserve);
             uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
             uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
+            console.log("pylon0Liq", pylon0Liq, zircon.energy0);
+            console.log("pylon1Liq", pylon1Liq, zircon.energy1);
             _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
             _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));
@@ -101,17 +103,15 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint balance = IZirconPair(zircon.pairAddress).balanceOf(address(this));
         _safeTransfer(zircon.pairAddress, newEnergy, balance);
     }
-    function getBalanceFromPair() external returns (uint) {
+    function getBalanceFromPair() external returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         console.log("ZE: getBalanceFromPair");
         if(msg.sender == zircon.pylon0) {
-            uint balanceToReturn = pylon0Balance;
+            balance = pylon0Balance;
             pylon0Balance = 0;
-            return balanceToReturn;
         } else if(msg.sender == zircon.pylon1) {
-            uint balanceToReturn = pylon1Balance;
+            balance = pylon1Balance;
             pylon1Balance = 0;
-            return balanceToReturn;
         }
     }
 }
