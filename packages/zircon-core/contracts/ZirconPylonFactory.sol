@@ -20,7 +20,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public maximumPercentageSync;
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
+    uint public EMASamples;
+
     uint public muUpdatePeriod;
+    uint public muChangeFactor;
 
 //    modifier onlyFeeToSetter {
 //        require(msg.sender == feeToSetter, 'ZPT: F');
@@ -46,7 +49,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         maximumPercentageSync = 10;
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 100; // 1%
+        EMASamples = 4; //Previous average is multiplied by this number, sum is divided by samples + 1
+
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
+        muChangeFactor = 3; //Increases absolute gamma deviation factor to speed up mu change
         paused = false;
     }
 
@@ -111,12 +117,14 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
     }
 
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod) external {
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external {
         onlyFeeToSetter();
         maximumPercentageSync = _maximumPercentageSync;
         deltaGammaThreshold = _deltaGammaThreshold;
         deltaGammaMinFee = _deltaGammaMinFee;
         muUpdatePeriod = _muUpdatePeriod;
+        muChangeFactor = _muChangeFactor;
+        EMASamples = _EMASamples;
     }
 
     function setMigrator(address _migrator) external  {

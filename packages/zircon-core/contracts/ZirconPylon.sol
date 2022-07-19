@@ -51,6 +51,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
     uint public thisBlockEMA; //A storage var for this block's changes.
     uint public EMASamples;
+    uint public strikeBlock;
 
     uint public EMABlockNumber; //Last block height of the EMA update
     uint public muBlockNumber; //block height of last mu update
@@ -364,6 +365,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint112 max0 = uint112(reservesTranslated0.mul(maximumPercentageSync)/100);
         uint112 max1 = uint112(reservesTranslated1.mul(maximumPercentageSync)/100);
         updateReservesRemovingExcess(balance0, balance1, max0, max1);
+
+        (, uint pylonReserve1,) = getSyncReserves();
+
+        //Counts gamma change and applies strike condition if necessary
+        uint _newGamma = _calculateGamma(virtualAnchorBalance, pylonReserve1, reservesTranslated1.mul(2));
+        uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+
+        if(ZirconLibrary.absoluteDiff(_newGamma, gammaMulDecimals) >= deltaGammaThreshold) {
+            //This makes sure that a massive mintAsync can't be exited in the same block
+            strikeBlock = block.number;
+        }
     }
 
 
@@ -389,6 +401,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //We only go ahead with this if a sufficient amount of time passes
         //This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
         if((_lastBlockHeight - _newBlockHeight) > muUpdatePeriod) { //reasonable to assume it won't subflow
+
             uint _newGamma = gammaMulDecimals; //y2
             uint _oldGamma = muOldGamma; //y1
 
@@ -414,15 +427,19 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 // This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
                 // Due to uint math we can't do this in one line
+
+                //Parameter to tweak the speed at which mu seeks to follow gamma
+                uint muChangeFactor = IZirconPylonFactory(factoryAddress).muChangeFactor();
+
                 if (deltaGammaIsPositive) {
-                    uint deltaMu = (_newGamma - _oldGamma).mul(absoluteGammaDeviation);
+                    uint deltaMu = (_newGamma - _oldGamma).mul(absoluteGammaDeviation * muChangeFactor)/1e18;
                     if (deltaMu + muMulDecimals <= 1e18) {
                         // Only updates if the result doesn't go above 1.
                         muMulDecimals += deltaMu;
                     }
 
                 } else {
-                    uint deltaMu = (_oldGamma - _newGamma).mul(absoluteGammaDeviation);
+                    uint deltaMu = (_oldGamma - _newGamma).mul(absoluteGammaDeviation)/1e18;
                     // Sublow check
                     if(deltaMu <= muMulDecimals) {
                         muMulDecimals -= deltaMu;
@@ -556,7 +573,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Mints zircon pool tokens to user after throwing their assets in the pool
         IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(_to, liquidity);
 
-        // Updates variables used in sync()
         _update();
     }
 
@@ -603,21 +619,28 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         //If either this block's gamma derivative or EMA is higher than threshold we go into the deltaTax mechanism
         if (maxDerivative >= deltaGammaThreshold) {
-            applied = true;
-            //if() forces maxDerivative/dgt to be at least 1, so we can subtract 10000 without worrying
-            uint feeBps = (maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + deltaGammaMinFee;
-            feeBps = feeBps.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
+            uint strikeDiff = block.number - strikeBlock;
 
-            //Avoids underflow issues downstream
-            require(feeBps < 10000, "ZP: FTH");
-            fee = _amountIn.mul(feeBps)/10000;
+            if(strikeDiff > 10) {
+                //This is the first strike (in a while)
+                //We don't apply deltaTax at this time, but Pylon will remember that
+                strikeBlock = block.number;
+            } else {
+                //You're a naughty naughty boy
+                //parent if condition forces maxDerivative/dgt to be at least 1, so we can subtract 10000 without worrying
+                uint feeBps = (maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + deltaGammaMinFee;
+                feeBps = feeBps.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
 
+                //Avoids underflow issues downstream
+                require(feeBps < 10000, "ZP: FTH");
+                applied = true;
+                fee = _amountIn.mul(feeBps)/10000;
+                return(fee, applied);
+            }
         }
-        //Base case where the threshold isn't passed
-        else {
-            applied = false;
-            fee = _amountIn.mul(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals))/10000;
-        }
+        //Base case where the threshold isn't passed or it's first strike
+        applied = false;
+        fee = _amountIn.mul(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals))/10000;
         emit DeltaTax(fee, applied);
     }
 
@@ -764,37 +787,38 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             //Mu mostly follows gamma but it's designed to find an equilibrium point different from 50/50
             //More on this in the function itself;
-
-            _updateMu();
             virtualAnchorBalance += ((feeValueAnchor.mul(1e18-muMulDecimals))/1e18);
 
             //Fees to floats are automatically assigned due to dTPV > dVAB
             //virtualFloatBalance += ((gammaMulDecimals).mul(feeValueFloat)/1e18);
 
-            if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
+            gammaMulDecimals = _calculateGamma(virtualAnchorBalance, pylonReserve1, totalPoolValueAnchorPrime);
 
-                //Here gamma is simply a variation of tpv - vab
-
-                gammaMulDecimals = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
-            } else {
-
-                //Here gamma fixes the amount of float assets and lets anchors get slashed
-
-                //This is a heavily simplified expression of a "derived" virtual Float balance (quantity of float asset supplied)
-                //The formula assumes that the virtual anchor balance was once matched with an equal value of float assets
-                //It then assumes that this point had the same k as now. Simplify a lot and suddenly there's no k in the formula :)
-                //The derived vfb shifts when new assets are supplied/removed to ensure there are no gaps between the two gamma formulas
-
-                //This shift in the vfb means that the pool has a collective break even point that moves around.
-                //Supplying anchors moves the break even higher. This can massively reduce IL for very strong pumps.
-                //The flipside is that float LPs can lose more than they gained on a redump.
-                //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
-
-
-                gammaMulDecimals = (totalPoolValueAnchorPrime.mul(1e18))/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
-
-
-            }
+            _updateMu();
+//            if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
+//
+//                //Here gamma is simply a variation of tpv - vab
+//
+//                gammaMulDecimals = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
+//            } else {
+//
+//                //Here gamma fixes the amount of float assets and lets anchors get slashed
+//
+//                //This is a heavily simplified expression of a "derived" virtual Float balance (quantity of float asset supplied)
+//                //The formula assumes that the virtual anchor balance was once matched with an equal value of float assets
+//                //It then assumes that this point had the same k as now. Simplify a lot and suddenly there's no k in the formula :)
+//                //The derived vfb shifts when new assets are supplied/removed to ensure there are no gaps between the two gamma formulas
+//
+//                //This shift in the vfb means that the pool has a collective break even point that moves around.
+//                //Supplying anchors moves the break even higher. This can massively reduce IL for very strong pumps.
+//                //The flipside is that float LPs can lose more than they gained on a redump.
+//                //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
+//
+//
+//                gammaMulDecimals = (totalPoolValueAnchorPrime.mul(1e18))/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
+//
+//
+//            }
 
 
             //updateDelta()
@@ -808,20 +832,42 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //Block numbers are overall harder to manipulate and more relevant for our purposes.
             //There is some variability due to block time, it would make sense to tune the number of samples for each chain.
 
+
             uint blockDiff = block.number.sub(EMABlockNumber);
             if (blockDiff != 0) {
 
+                uint EMASamples = IZirconPylonFactory(factoryAddress).EMASamples();
                 //Using past average means that delta spikes stay embedded in it for a while
+                console.log("Gamma EMA Before, blockDiff, EMASamples", gammaEMA, blockDiff, EMASamples);
 
-                gammaEMA = (gammaEMA.mul(EMASamples).add(thisBlockEMA))/(EMASamples.add(blockDiff));
+                //Strike block is recorded by applyDeltaTax. It means that one of gamma/thisBlock triggered the failsafe
+                //The first transaction is allowed but if there's anything else in this block/triggering a massive gamma change, it fails.
+                //Threshold is quite high, this is unlikely to impact legitimate usage.
 
-                //Resets thisBlock values
+                //To recover from this strike condition we add a general time-based bleed that starts 10 blocks after the strike was triggered.
+
+                uint bleed = (block.number - strikeBlock > 10) ? blockDiff / 10 : 0;
+
+                //Adds old blockEMA
+                //EMA primarily meant for non-flashloan manipulation attempts
+
+
+                gammaEMA = ((gammaEMA * EMASamples).add(thisBlockEMA))/((EMASamples + 1).add(bleed));
+
+                //This one is more for flash loans
+                //Adds new value
 
                 thisBlockEMA = ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma);
+
+                console.log("Gamma EMA After, thisBlock", gammaEMA, thisBlockEMA);
+                //Resets thisBlock values
+
+
                 EMABlockNumber = block.number;
             } else {
 
                 //Adds any delta change if it's in the same block.
+                console.log("thisBlockEMA Set", thisBlockEMA);
                 thisBlockEMA = thisBlockEMA.add(ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma));
             }
 
@@ -836,6 +882,33 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         }
     }
 
+
+    function _calculateGamma(uint virtualAnchorBalance, uint pylonReserve1, uint totalPoolValueAnchorPrime) private returns (uint gamma) {
+        if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
+
+            //Here gamma is simply a variation of tpv - vab
+
+            gamma = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
+        } else {
+
+            //Here gamma fixes the amount of float assets and lets anchors get slashed
+
+            //This is a heavily simplified expression of a "derived" virtual Float balance (quantity of float asset supplied)
+            //The formula assumes that the virtual anchor balance was once matched with an equal value of float assets
+            //It then assumes that this point had the same k as now. Simplify a lot and suddenly there's no k in the formula :)
+            //The derived vfb shifts when new assets are supplied/removed to ensure there are no gaps between the two gamma formulas
+
+            //This shift in the vfb means that the pool has a collective break even point that moves around.
+            //Supplying anchors moves the break even higher. This can massively reduce IL for very strong pumps.
+            //The flipside is that float LPs can lose more than they gained on a redump.
+            //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
+
+
+            gamma = (totalPoolValueAnchorPrime.mul(1e18))/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
+
+
+        }
+    }
 
     /// @notice TODO
     function calculateLPTU(bool _isAnchor, uint _liquidity, uint _ptTotalSupply) view private returns (uint claim){
