@@ -51,7 +51,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     uint public gammaEMA; //A moving average of the gamma used to make price manipulation vastly more complex
     uint public thisBlockEMA; //A storage var for this block's changes.
-    uint public EMASamples;
     uint public strikeBlock;
 
     uint public EMABlockNumber; //Last block height of the EMA update
@@ -897,12 +896,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    function _calculateGamma(uint virtualAnchorBalance, uint pylonReserve1, uint totalPoolValueAnchorPrime) private returns (uint gamma) {
-        if ((virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
+    function _calculateGamma(uint _virtualAnchorBalance, uint pylonReserve1, uint totalPoolValueAnchorPrime) pure private returns (uint gamma) {
+        if ((_virtualAnchorBalance.sub(pylonReserve1)) < totalPoolValueAnchorPrime/2) {
 
             //Here gamma is simply a variation of tpv - vab
 
-            gamma = 1e18 - ((virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
+            gamma = 1e18 - ((_virtualAnchorBalance.sub(pylonReserve1))*1e18 /  totalPoolValueAnchorPrime);
         } else {
 
             //Here gamma fixes the amount of float assets and lets anchors get slashed
@@ -918,7 +917,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //Supplying floats moves the breakeven lower, so floats lose less, useful to preserve the pool in downturns.
 
 
-            gamma = (totalPoolValueAnchorPrime.mul(1e18))/((virtualAnchorBalance.sub(pylonReserve1)).mul(4));
+            gamma = (totalPoolValueAnchorPrime.mul(1e18))/((_virtualAnchorBalance.sub(pylonReserve1)).mul(4));
 
 
         }
