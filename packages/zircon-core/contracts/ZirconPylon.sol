@@ -527,7 +527,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             freeSpace = max.sub(_reserve);
             //If amountIn is less than freeSpace, this liquidity is thrown into sync pool only, for future matching.
             if (_amountIn <= freeSpace) {
-                console.log("Minting sync");
+                //console.log("Minting sync");
                 (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 //Matches tokens to send into pool
                 _syncMinting();
@@ -550,7 +550,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // sending the async minting part to the pair
         //Uses raw amount since mintOneSide compensates for slippage by itself
         _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
-        console.log("Async minting: ", amountAsyncToMint);
+        //console.log("Async minting: ", amountAsyncToMint);
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !_isAnchor : _isAnchor);
     }
 
@@ -755,7 +755,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (, uint112 pylonReserve1,) = getSyncReserves();
 
         uint oldGamma = gammaMulDecimals;
-        console.log("<<<Pylon:sync::::::::", energyRevAddress);
+        //console.log("<<<Pylon:sync::::::::", energyRevAddress);
         uint mintPT = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair();
         console.log("<<<Pylon:sync::::::::", mintPT);
 
@@ -785,7 +785,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //            uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
             // Multiply by total pool value to get fee value in native units
             uint feeValueAnchor = mintPT; //totalPoolValueAnchorPrime.mul(d)/1e18;
-            console.log("feeValueAnchor", feeValueAnchor);
+            //console.log("feeValueAnchor", feeValueAnchor);
             // uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 
 
@@ -854,7 +854,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 uint EMASamples = IZirconPylonFactory(factoryAddress).EMASamples();
                 //Using past average means that delta spikes stay embedded in it for a while
-                console.log("Gamma EMA Before, blockDiff, EMASamples", gammaEMA, blockDiff, EMASamples);
+                //console.log("Gamma EMA Before, blockDiff, EMASamples", gammaEMA, blockDiff, EMASamples);
 
                 //Strike block is recorded by applyDeltaTax. It means that one of gamma/thisBlock triggered the failsafe
                 //The first transaction is allowed but if there's anything else in this block/triggering a massive gamma change, it fails.
@@ -875,7 +875,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 thisBlockEMA = ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma);
 
-                console.log("Gamma EMA After, thisBlock", gammaEMA, thisBlockEMA);
+                //console.log("Gamma EMA After, thisBlock", gammaEMA, thisBlockEMA);
                 //Resets thisBlock values
 
 
@@ -883,7 +883,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
 
                 //Adds any delta change if it's in the same block.
-                console.log("thisBlockEMA Set", thisBlockEMA);
+                //console.log("thisBlockEMA Set", thisBlockEMA);
                 thisBlockEMA = thisBlockEMA.add(ZirconLibrary.absoluteDiff(gammaMulDecimals, oldGamma));
             }
 

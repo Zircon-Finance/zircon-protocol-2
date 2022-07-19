@@ -219,9 +219,16 @@ describe("Pylon", () => {
         console.log("gamma before new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
         console.log("vab before new token: ", ethers.utils.formatEther(await pylonInstance.virtualAnchorBalance()));
 
-        await token0.transfer(pylonInstance.address, token0Amount.div(10000))
+
+        //Need to mint twice to see results. The first calls mintFee, the second assigns them to the pool
+        await token0.transfer(pylonInstance.address, token0Amount.div(20000))
         //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
         await pylonInstance.mintPoolTokens(account.address, false)
+
+        await token0.transfer(pylonInstance.address, token0Amount.div(20000))
+        //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
+        await pylonInstance.mintPoolTokens(account.address, false)
+
 
         console.log("mu after new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
         console.log("gamma after new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
