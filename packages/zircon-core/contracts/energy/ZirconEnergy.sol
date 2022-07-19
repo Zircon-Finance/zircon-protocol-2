@@ -151,9 +151,11 @@ contract ZirconEnergy is IZirconEnergy {
   //This is only used for the burn/mint async 50/50, which is effectively a swap that can cause issues when gamma is imbalanced.
   function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount) {
     (uint _minFee, uint _maxFee) = getFee();
+    console.log("minFee: ", _minFee);
     uint _gammaHalf = 5e17;
     uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
     if (gammaMulDecimals <= 45e16 || gammaMulDecimals >= 55e16) {
+
       amount = (_maxFee.mul(x)/1e18).mul(x)/(25e18); //25 is a reduction factor based on the 0.45-0.55 range we're using.
       console.log("feeAmount: ", amount);
     } else {

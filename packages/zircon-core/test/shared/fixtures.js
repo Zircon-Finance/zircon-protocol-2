@@ -57,7 +57,7 @@ exports.coreFixtures = async function coreFixtures(address) {
     let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
     let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
     let pylonInstance = await zPylon.attach(pylonAddress);
-
+    console.log("pylon", pylonInstance.address);
     let energyContract = await ethers.getContractFactory('ZirconEnergy')
 
     // Configuring Pool Tokens Anchor And Float

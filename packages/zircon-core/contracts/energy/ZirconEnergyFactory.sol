@@ -73,7 +73,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
                 hex'ff',
                 address(this),
                 keccak256(abi.encodePacked(tokenA, pair)),
-                hex'54b32cbdca18a7fd47e1f58282859004237e368f9c1339eabf118516ac845689' // init code hash
+                hex'aa47a0e79cc42a7a3d5b423bcf70237c97a6cd901c5bcd0caa0bfab4175e6b61' // init code hash
             ))));
     }
 
@@ -82,13 +82,13 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
                 hex'ff',
                 pylonFactory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'9f8b1a31c3eb853fb27a1e2744015983ada7f068bb8f7f95aa6886c04fa0fd7d' // init code hash
+                hex'6628b75668108d06aa7df0145cc243cf9fbde4b98127f63f0f04be0500c58ff4' // init code hash
             ))));
     }
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
 
-    require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
+        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
         require(_pair != address(0), 'ZE: ZERO_ADDRESS');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
         require(getEnergyRevenue[token0][token1] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
@@ -103,8 +103,11 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         address energy1 = energyFor(token1, _pair);
         address pylon0 = pylonFor(token0, token1, _pair, _pylonFactory);
         address pylon1 = pylonFor(token1, token0, _pair, _pylonFactory);
+        console.log("ZF: pylon0:", pylon0);
+        console.log("ZF: pylon1:", pylon1);
         IZirconEnergyRevenue(energy).initialize(_pair, token0, token1, energy0, energy1, pylon0, pylon1);
         getEnergyRevenue[token0][token1] = energy;
+        getEnergyRevenue[token1][token0] = energy;
         allEnergiesRevenue.push(energy);
         emit EnergyCreated(_pair, energy, token0, token1, allEnergies.length);
     }

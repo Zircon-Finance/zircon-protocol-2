@@ -2,6 +2,7 @@ pragma solidity =0.5.16;
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
+import "../interfaces/IZirconPylon.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 contract ZirconEnergyRevenue is ReentrancyGuard  {
@@ -10,6 +11,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     uint public reserve;
     address public energyFactory;
+    uint public pylon1Balance;
+    uint public pylon0Balance;
     struct Zircon {
         address pairAddress;
         address floatToken;
@@ -39,6 +42,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     constructor() public {
         energyFactory = msg.sender;
+        pylon0Balance = 0;
+        pylon1Balance = 0;
     }
 
     function initialize(address _pair, address _tokenA, address _tokenB, address energy0, address energy1, address pylon0, address pylon1) external {
@@ -58,21 +63,31 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     }
 
-    function calculate() external _onlyPair nonReentrant {
+    function calculate(uint percentage) external _onlyPair nonReentrant {
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
         require(balance > reserve, "ZER: Reverted");
 
+        uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
         uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);
         uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
-        uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
-        uint amount = balance.sub(reserve);
 
-        uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
-        uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
+        {
+            (uint112 _reservePair0, uint112 _reservePair1,) = IZirconPair(zircon.pairAddress).getReserves();
+            uint112 reserve0 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair0 : _reservePair1;
+            uint112 reserve1 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair1 : _reservePair0;
+            pylon0Balance += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
+            pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
+        }
+        {
+            uint amount = balance.sub(reserve);
+            uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
+            uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
+            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
+            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
+            reserve = balance.sub(pylon0Liq.add(pylon1Liq));
+        }
 
-        _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
-        _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
-        reserve = balance.sub(pylon0Liq.add(pylon1Liq));
+
     }
 
     function changePylonAddresses(address _pylonAddressA, address _pylonAddressB) external {
@@ -86,5 +101,17 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint balance = IZirconPair(zircon.pairAddress).balanceOf(address(this));
         _safeTransfer(zircon.pairAddress, newEnergy, balance);
     }
-
+    function getBalanceFromPair() external returns (uint) {
+//        require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
+        console.log("ZE: getBalanceFromPair");
+        if(msg.sender == zircon.pylon0) {
+            uint balanceToReturn = pylon0Balance;
+            pylon0Balance = 0;
+            return balanceToReturn;
+        } else if(msg.sender == zircon.pylon1) {
+            uint balanceToReturn = pylon1Balance;
+            pylon1Balance = 0;
+            return balanceToReturn;
+        }
+    }
 }

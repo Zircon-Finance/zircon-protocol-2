@@ -2,6 +2,10 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
+
+    console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
+    console.log("\n\n 📡 Deploying...\n");
+
     /// Deploy Energy
     let energyInstance = await deploy('ZirconEnergyFactory', {
         from: deployer,
@@ -22,5 +26,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         args: [factoryInstance.address, energyInstance.address],
         log: true
     });
+    console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
+
 };
 module.exports.tags = ['CoreFactories'];

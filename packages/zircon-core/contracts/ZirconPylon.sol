@@ -34,6 +34,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     address public floatPoolTokenAddress;
     address public anchorPoolTokenAddress;
     address public energyAddress;
+    address public energyRevAddress;
 
     // Indicates if in the pair the token0 is float or anchor
     bool public isFloatReserve0;
@@ -78,14 +79,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 //        _;
 //    }
 
-    function notPaused() internal {
+    function notPaused() internal view {
         require(initialized == 1, 'ZP: NI');
         require(!IZirconPylonFactory(factoryAddress).paused(), 'ZP: P');
     }
-    function onlyFactory() internal{
+    function onlyFactory() internal view{
         require(msg.sender == factoryAddress, 'ZP: F'); // sufficient check
     }
-    function notZero(uint256 _value) internal {
+    function notZero(uint256 _value) pure internal {
         require(_value > 0, 'ZP: Z');
     }
     // Calls dummy function with lock modifier
@@ -187,7 +188,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @_anchorPoolTokenAddress -> Contains Address Of Anchor PT
     // @floatToken -> Float token
     // @anchorToken -> Anchor token
-    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy) external nonReentrant {
+    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external nonReentrant {
         onlyFactory();
         floatPoolTokenAddress = _floatPoolTokenAddress;
         anchorPoolTokenAddress = _anchorPoolTokenAddress;
@@ -196,6 +197,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         pylonToken = PylonToken(_floatToken, _anchorToken);
         pairFactoryAddress = _pairFactoryAddress;
         energyAddress = _energy;
+        energyRevAddress = _energyRev;
     }
 
     function initMigratedPylon(uint _gamma, uint _vab) external {
@@ -210,11 +212,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // The first case is when we initialize the pair through the pylon
     // And the second one is when initialize the pylon with a pair already existing
     function initPylon(address _to) external nonReentrant returns (uint floatLiquidity, uint anchorLiquidity) {
+        console.log("ciao", anchorLiquidity, floatLiquidity);
         require(initialized == 0, "ZP: AI");
         require(!IZirconPylonFactory(factoryAddress).paused(), 'ZP: P');
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
-
         notZero(balance0);
         notZero(balance1);
 
@@ -222,6 +224,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // As we are initializing the reserves are going to be null
         // Let's see if the pair contains some reserves
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
+//        lastPoolTokens = IZirconPair(pairAddress).totalSupply();
+//        lastK = _reservePair0.mul(_reservePair1);
         // If pair contains reserves we have to use the ratio of the Pair so...
         virtualAnchorBalance = balance1;
 
@@ -245,9 +249,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (anchorLiquidity) = _calculateSyncLiquidity(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
         (floatLiquidity) = _calculateSyncLiquidity(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
 
-        lastPoolTokens = IZirconPair(pairAddress).totalSupply();
-        lastK = _reservePair0.mul(_reservePair1);
-
+        console.log("ciao", anchorLiquidity, floatLiquidity);
         _syncMinting();
 
         IZirconPoolToken(anchorPoolTokenAddress).mint(_to, anchorLiquidity);
@@ -261,6 +263,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Here it updates the state and throws liquidity into the pool if possible
 
         _update();
+
         initialized = 1;
     }
 
@@ -454,7 +457,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             muBlockNumber = _newBlockHeight;
         }
 
-
     }
 
 
@@ -508,6 +510,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             freeSpace = max.sub(_reserve);
             //If amountIn is less than freeSpace, this liquidity is thrown into sync pool only, for future matching.
             if (_amountIn <= freeSpace) {
+                console.log("Minting sync");
                 (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 //Matches tokens to send into pool
                 _syncMinting();
@@ -530,6 +533,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // sending the async minting part to the pair
         //Uses raw amount since mintOneSide compensates for slippage by itself
         _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
+        console.log("Async minting: ", amountAsyncToMint);
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !_isAnchor : _isAnchor);
     }
 
@@ -569,7 +573,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, bool isAnchor) private returns (uint amountOut){
         (uint fee, ) = _applyDeltaAndGammaTax(amountIn);
-        // TODO: This should never go above the balcance
+        // TODO: This should never go above the balance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
@@ -642,11 +646,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
         uint amountIn;
         if (isAnchor) {
-            uint balance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
-            amountIn = balance.sub(_reserve1);
+            amountIn = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this)).sub(_reserve1);
         }else{
-            uint balance = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-            amountIn = balance.sub(_reserve0);
+            amountIn = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this)).sub(_reserve0);
         }
         amountIn = payFees(amountIn, isAnchor);
         notZero(amountIn);
@@ -726,12 +728,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (, uint112 pylonReserve1,) = getSyncReserves();
 
         uint oldGamma = gammaMulDecimals;
+        console.log("<<<Pylon:sync::::::::", energyRevAddress);
+        uint mintPT = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair();
+        console.log("<<<Pylon:sync::::::::", mintPT);
 
         // If the current K is equal to the last K, means that we haven't had any updates on the pair level
         // So is useless to update any variable because fees on pair haven't changed
-        uint currentK = uint(pairReserve0).mul(pairReserve1);
-        uint poolTokensPrime = IZirconPair(pairAddress).totalSupply();
-        if (lastPoolTokens != 0 && pairReserve0 != 0 && pairReserve1 != 0) {
+//        uint currentK = uint(pairReserve0).mul(pairReserve1);
+//        uint poolTokensPrime = IZirconPair(pairAddress).totalSupply();
+        if (pairReserve0 != 0 && pairReserve1 != 0) {
 
             //uint poolTokensPrime = IZirconPair(pairAddress).totalSupply();
             // Here it is going to be useful to have a Minimum Liquidity
@@ -743,10 +748,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //uint totalPoolValueFloatPrime = translateToPylon(pairReserve0.mul(2), 0);
 
             //Fee value/total pool value ratio, modified implementation of Uniswap's mintFee formula
-            uint one = 1e18;
-            uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
+//            uint one = 1e18;
+//            console.log("<<<Pylon:sync::::::::", (Math.sqrt(lastK)*(poolTokensPrime.sub(mintPT))*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
+//            uint percentage = ((Math.sqrt(currentK).sub(Math.sqrt(lastK)))*1e18)/(Math.sqrt(lastK));
+//            uint fees = percentage.mul(lastPoolTokens)/1e18;//(poolTokensPrime.sub(mintPT));
+//            uint d = (mintPT*6e18)/poolTokensPrime.sub(mintPT);
+//            uint d = one.sub(((poolTokensPrime.sub(mintPT).sub(10**3)).sub(Math.sqrt(currentK).sub(Math.sqrt(lastK)))*1e18)/Math.sqrt(lastK));
+
+            //            uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
             // Multiply by total pool value to get fee value in native units
-            uint feeValueAnchor = totalPoolValueAnchorPrime.mul(d)/1e18;
+            uint feeValueAnchor = mintPT; //totalPoolValueAnchorPrime.mul(d)/1e18;
+            console.log("feeValueAnchor", feeValueAnchor);
             // uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 
 
@@ -826,8 +838,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
 
             //Updating vars for next cycle
-            lastPoolTokens = poolTokensPrime;
-            lastK = currentK;
+//            lastPoolTokens = poolTokensPrime;
+//            lastK = currentK;
 
 
             // Sync pool also gets a claim to these

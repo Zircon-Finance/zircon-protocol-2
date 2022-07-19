@@ -5,6 +5,7 @@ interface IZirconPylon {
     function floatPoolTokenAddress() external view returns (address);
     function energyAddress() external view returns (address);
     function gammaMulDecimals() external view returns (uint);
+    function isFloatReserve0() external view returns (bool);
     function virtualAnchorBalance() external view returns (uint);
     function getSyncReserves() external view returns  (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast);
     // Called once by the factory at time of deployment
@@ -13,7 +14,7 @@ interface IZirconPylon {
     // @token0 -> Float token
     // @token1 -> Anchor token
     function initMigratedPylon(uint _gamma, uint _vab) external;
-    function initialize(address, address, address, address, address, address, address) external;
+    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external;
     // On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon
     // And the second one is when initialize the pylon with a pair al ready existing

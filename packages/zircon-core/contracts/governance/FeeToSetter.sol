@@ -44,7 +44,6 @@ contract FeeToSetter {
         IZirconPylonFactory(pylonFactory).setFees(_maximumPercentageSync, _deltaGammaTreshold, _deltaGammaMinFee, _muUpdatePeriod);
     }
 
-
     function setMinMaxFee(uint112 minFee, uint112 maxFee) external onlyOwner {
         IZirconEnergyFactory(energyFactory).setFee(minFee, maxFee);
     }
@@ -59,5 +58,9 @@ contract FeeToSetter {
 
     function setLiquidityFee(uint liquidityFee) external onlyOwner {
         IZirconFactory(energyFactory).setLiquidityFee(liquidityFee);
+    }
+
+    function setDynamicRatio(uint dynamicRatio) external onlyOwner {
+        IZirconFactory(energyFactory).setDynamicRatio(dynamicRatio);
     }
 }
