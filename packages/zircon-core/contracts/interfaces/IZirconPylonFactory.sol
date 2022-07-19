@@ -7,6 +7,7 @@ interface IZirconPylonFactory {
     function deltaGammaMinFee() external view returns (uint);
     function muUpdatePeriod() external view returns (uint);
     function muChangeFactor() external view returns (uint);
+    function liquidityFee() external view returns (uint);
     function EMASamples() external view returns (uint);
 
     function allPylons(uint p) external view returns (address);
@@ -16,7 +17,8 @@ interface IZirconPylonFactory {
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
     function allPylonsLength() external view returns (uint);
     function paused() external view returns (bool);
-    // Adding Pylon
+    function setLiquidityFee(uint _liquidityFee) external;
+        // Adding Pylon
     // First Token is always the Float and the second one is the Anchor
     function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress);
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external returns (address pylonAddress);

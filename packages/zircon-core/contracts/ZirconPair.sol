@@ -108,11 +108,11 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             uint rootKLast = Math.sqrt(_kLast);
             if (rootK > rootKLast) {
                 uint dynamicRatio = IZirconFactory(factory).dynamicRatio();
-
                 uint numerator = (rootK.sub(rootKLast)).mul(1e18);
                 uint denominator = rootK.mul(dynamicRatio).add(rootKLast);
                 uint liquidityPercentage = numerator / denominator;
                 if (liquidityPercentage > 0) {
+                    console.log("Minting ", liquidityPercentage, " % of liquidity");
                     _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
                     uint totalPercentage = ((rootK.sub(rootKLast)).mul(1e18))/rootKLast;
                     IZirconEnergyRevenue(energyRevenueAddress).calculate(totalPercentage.sub(liquidityPercentage));
@@ -123,7 +123,6 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // this low-level function should be called from a contract which performs important safety checks
     function mint(address to) external lock returns (uint liquidity) {
-        console.log("mint");
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
@@ -137,6 +136,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             console.log("Minting liquidity: ", MINIMUM_LIQUIDITY);
             _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
         } else {
+            console.log("Minting liquidity: ",amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
             liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
         }
         require(liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED');
@@ -158,18 +158,19 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         amount0 = balance0.sub(_reserve0);
         amount1 = balance1.sub(_reserve1);
         require(amount0 > 1 || amount1 > 1, "ZP: Insufficient Amount");
+        uint _liquidityFee = IZirconFactory(factory).liquidityFee();
+
         if (isReserve0) {
-            amount1 = ZirconLibrary.getAmountOut(amount0/2, reserve0, reserve1);
+            amount1 = ZirconLibrary.getAmountOut(amount0/2, reserve0, reserve1, _liquidityFee);
             amount0 = amount0/2;
             console.log("ZPPair1 amount1, amount0", amount1, amount0);
         }else {
-            amount0 = ZirconLibrary.getAmountOut(amount1/2, reserve1, reserve0);
+            amount0 = ZirconLibrary.getAmountOut(amount1/2, reserve1, reserve0, _liquidityFee);
             amount1 = amount1/2;
             console.log("ZPPair0 amount1, amount0", amount1, amount0);
 
 
         }
-        //TODO: Fee
         reserve0 = uint112(balance0);
         reserve1 = uint112(balance1);
 
@@ -205,6 +206,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         uint balance1 = IUniswapV2ERC20(_token1).balanceOf(address(this));
         uint liquidity = balanceOf[address(this)];
         //console.log("liquidity", liquidity);
+        uint _liquidityFee = IZirconFactory(factory).liquidityFee();
 
         _mintFee(_reserve0, _reserve1);
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
@@ -212,13 +214,13 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
         if (isReserve0) {
             console.log("ZPPairB1 amount0", amount0);
-            amount0 += ZirconLibrary.getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0);
+            amount0 += ZirconLibrary.getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0, _liquidityFee);
             console.log("amount0 after add", amount0);
             amount = amount0;
             require(amount < balance0, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
         }else{
             console.log("ZPPairB1 amount1", amount1);
-            amount1 += ZirconLibrary.getAmountOut(amount0, _reserve0 - amount0, _reserve1 - amount1);
+            amount1 += ZirconLibrary.getAmountOut(amount0, _reserve0 - amount0, _reserve1 - amount1, _liquidityFee);
             console.log("amount1", amount1);
             amount = amount1;
             require(amount < balance1, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
