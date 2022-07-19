@@ -51,6 +51,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
         bool isFloatToken0 = IZirconPair(_pair).token0() == _tokenA;
         (address tokenA, address tokenB) = isFloatToken0 ? (_tokenA, _tokenB) : (_tokenA, _tokenB);
+        console.log("energy0", energy0);
+        console.log("energy1", energy1);
         zircon = Zircon(
             _pair,
             tokenA,
@@ -75,11 +77,13 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             (uint112 _reservePair0, uint112 _reservePair1,) = IZirconPair(zircon.pairAddress).getReserves();
             uint112 reserve0 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair0 : _reservePair1;
             uint112 reserve1 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair1 : _reservePair0;
+
             pylon0Balance += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
             pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
         {
             uint amount = balance.sub(reserve);
+            console.log("amount received:", amount);
             uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
             uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
             console.log("pylon0Liq", pylon0Liq, zircon.energy0);
@@ -105,7 +109,6 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
     function getBalanceFromPair() external returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
-        console.log("ZE: getBalanceFromPair");
         if(msg.sender == zircon.pylon0) {
             balance = pylon0Balance;
             pylon0Balance = 0;

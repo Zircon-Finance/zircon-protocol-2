@@ -61,8 +61,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //uint public deltaGammaThreshold; //Shouldn't be unreasonably low. A 3-4% change in a single block should be large enough to detect manipulation attempts.
     //uint public deltaGammaMinFee;
 
-    uint public lastK;
-    uint public lastPoolTokens;
+//    uint public lastK;
+//    uint public lastPoolTokens;
 
     uint112 private reserve0;// uses single storage slot, accessible via getReserves (always anchor)
     uint112 private reserve1;// us es single storage slot, accessible via getReserves (always float)
@@ -545,20 +545,20 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Master sync function
         notPaused();
         sync();
-        (, uint112 _reserve1,) = getSyncReserves();
+        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
 
         // balance of float/anchor sent to this
         uint balance = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this));
         //Reduces by amount that was in sync reserves
-        uint amountIn = balance.sub(isAnchor ? _reserve1 : reserve0);
+        uint amountIn = balance.sub(isAnchor ? _reserve1 : _reserve0);
         notZero(amountIn);
 
         amountIn = payFees(amountIn, isAnchor);
 
         uint amountOut;
         (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
-            isAnchor ? reserve1 : reserve0, isAnchor);
+            isAnchor ? _reserve1 : _reserve0, isAnchor);
         if(isAnchor) virtualAnchorBalance += amountOut;
 
         //Mints zircon pool tokens to user after throwing their assets in the pool
@@ -733,9 +733,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         uint oldGamma = gammaMulDecimals;
         console.log("<<<Pylon:sync::::::::", energyRevAddress);
-        uint mintPT = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair();
-        console.log("<<<Pylon:sync::::::::", mintPT);
-
         // If the current K is equal to the last K, means that we haven't had any updates on the pair level
         // So is useless to update any variable because fees on pair haven't changed
 //        uint currentK = uint(pairReserve0).mul(pairReserve1);
@@ -761,7 +758,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             //            uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
             // Multiply by total pool value to get fee value in native units
-            uint feeValueAnchor = mintPT; //totalPoolValueAnchorPrime.mul(d)/1e18;
+            uint feeValueAnchor = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair(); //totalPoolValueAnchorPrime.mul(d)/1e18;
             console.log("feeValueAnchor", feeValueAnchor);
             // uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 
@@ -890,6 +887,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
             //finds how much we can cover
             uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
+            console.log("energy pt balance",energyPTBalance);
+            console.log("energy pt amountToAdd",amountToAdd);
+
             if (amountToAdd < energyPTBalance) {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 //sends pool tokens directly to pair
@@ -898,8 +898,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
+                console.log("energy pt balance",energyAddress, pairAddress, energyPTBalance);
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
-                remainingPercentage = (amountToAdd.sub(energyPTBalance))/(liquidity);
+//                bool hey = IUniswapV2ERC20(pairAddress).transferFrom(energyAddress, pairAddress, energyPTBalance);
+//                uint tk = IUniswapV2ERC20(pairAddress).allowance(energyAddress, address(this));
+//                console.log("success", hey, tk);
+                remainingPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(liquidity);
+                console.log("energy pt balance", remainingPercentage);
+
             }
         } else {
             remainingPercentage = 0;
@@ -917,6 +923,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 totalAmount += ZirconLibrary.getAmountOut(floatAmount, res0, res1);
             }
             uint amountToTransfer = totalAmount.mul(percentage)/1e18; //percentage is calculated "natively" as a full 1e18
+            console.log("amountToTransfer", amountToTransfer);
             if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
             }
@@ -953,8 +960,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             //Calculates user's share of Uniswap pool tokens held by Pylon
             uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
-
+            console.log("ptu: ", ptu);
             ptu = payBurnFees(ptu);
+            console.log("payed fees: ", ptu);
             if (_isAnchor) {
                 //If it's an anchor, it needs to compensate for potential slashing
                 //This function tries to get compensation in the form of pool tokens
@@ -964,7 +972,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //ptu returned is the omega-adjusted share
                 (ptu, extraPercentage) = handleOmegaSlashing(ptu); //This one retrieves tokens from ZirconEnergy if available
             }
-
+            console.log("ptu after handling omega: ", ptu);
             //Sends for burning
             _safeTransfer(pairAddress, pairAddress, ptu);
         }
