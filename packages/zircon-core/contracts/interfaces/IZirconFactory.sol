@@ -9,6 +9,7 @@ interface IZirconFactory {
     function getPair(address, address) external view returns (address pair);
     function allPairs(uint) external view returns (address pair);
     function allPairsLength() external view returns (uint);
+    function dynamicRatio() external view returns (uint);
     function liquidityFee() external view returns (uint);
     function setLiquidityFee(uint _liquidityFee) external;
 
@@ -20,5 +21,6 @@ interface IZirconFactory {
     function changeEnergyRevAddress(address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) external returns (address newEnergy);
 
     function changeEnergyFactoryAddress(address _newEnergyFactory) external;
+    function setDynamicRatio(uint _dynamicRatio) external;
 
 }

@@ -56,10 +56,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         paused = false;
     }
 
-    function onlyFeeToSetter() internal {
+    function onlyFeeToSetter() internal view{
         require(msg.sender == feeToSetter, 'ZPT: F');
     }
-    function onlyMigrator() internal {
+    function onlyMigrator() internal view{
         require(msg.sender == migrator, 'ZPT: F');
     }
 
@@ -91,8 +91,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
     function configurePylon(address _tokenA, address _tokenB, address poolTokenA, address poolTokenB, address _pairAddress, address pylonAddress) private {
         address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
-
-        IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy);
+        address energyRev = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
+        IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy, energyRev);
 
         emit PylonCreated(_tokenA, _tokenB, poolTokenA, poolTokenB, pylonAddress, _pairAddress);
 

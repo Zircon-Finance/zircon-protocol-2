@@ -68,12 +68,12 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
-    function energyFor(address tokenA, address pair) view internal returns (address energy) {
+    function energyFor(address token, address pair) view internal returns (address energy) {
         energy = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 address(this),
-                keccak256(abi.encodePacked(tokenA, pair)),
-                hex'54b32cbdca18a7fd47e1f58282859004237e368f9c1339eabf118516ac845689' // init code hash
+                keccak256(abi.encodePacked(pair, token)),
+                hex'5555b6a4334e46029950bd3d79deb2adeb0a50f7f577803d21cee4c274a406bf' // init code hash
             ))));
     }
 
@@ -82,13 +82,12 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
                 hex'ff',
                 pylonFactory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'9f8b1a31c3eb853fb27a1e2744015983ada7f068bb8f7f95aa6886c04fa0fd7d' // init code hash
+                hex'53e9a955b0530c32981662b7307c9128cf47907827b5459108dd8b1aee1b994c' // init code hash
             ))));
     }
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
-
-    require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
+        require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
         require(_pair != address(0), 'ZE: ZERO_ADDRESS');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
         require(getEnergyRevenue[token0][token1] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
@@ -103,8 +102,10 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         address energy1 = energyFor(token1, _pair);
         address pylon0 = pylonFor(token0, token1, _pair, _pylonFactory);
         address pylon1 = pylonFor(token1, token0, _pair, _pylonFactory);
+
         IZirconEnergyRevenue(energy).initialize(_pair, token0, token1, energy0, energy1, pylon0, pylon1);
         getEnergyRevenue[token0][token1] = energy;
+        getEnergyRevenue[token1][token0] = energy;
         allEnergiesRevenue.push(energy);
         emit EnergyCreated(_pair, energy, token0, token1, allEnergies.length);
     }

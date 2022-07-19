@@ -12,6 +12,7 @@ contract ZirconFactory is IZirconFactory {
     address[] public allPairs;
     address public feeToSetter;
     uint public liquidityFee;
+    uint public dynamicRatio;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
@@ -30,6 +31,7 @@ contract ZirconFactory is IZirconFactory {
         migrator = _migrator;
         feeToSetter = _feeToSetter;
         liquidityFee = 30;
+        dynamicRatio = 5;
     }
 
     function allPairsLength() external view returns (uint) {
@@ -82,6 +84,10 @@ contract ZirconFactory is IZirconFactory {
 
     function setLiquidityFee(uint _liquidityFee) external _onlyFeeToSetter {
         liquidityFee = _liquidityFee;
+    }
+
+    function setDynamicRatio(uint _dynamicRatio) external _onlyFeeToSetter {
+        dynamicRatio = _dynamicRatio;
     }
 
 
