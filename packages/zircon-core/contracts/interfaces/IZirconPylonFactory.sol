@@ -6,6 +6,8 @@ interface IZirconPylonFactory {
     function deltaGammaThreshold() external view returns (uint);
     function deltaGammaMinFee() external view returns (uint);
     function muUpdatePeriod() external view returns (uint);
+    function muChangeFactor() external view returns (uint);
+    function EMASamples() external view returns (uint);
 
     function allPylons(uint p) external view returns (address);
     function getPylon(address tokenA, address tokenB) external view returns (address pair);
@@ -20,7 +22,7 @@ interface IZirconPylonFactory {
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external returns (address pylonAddress);
     function setMigrator(address _migrator) external;
     function setFeeToSetter(address _feeToSetter) external;
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod) external;
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external;
     function setPaused(bool _paused) external;
 
     function changeEnergyAddress(address _newEnergy, address _pylonAddress) external;
