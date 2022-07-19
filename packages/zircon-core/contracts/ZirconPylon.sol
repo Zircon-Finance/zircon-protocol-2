@@ -1034,6 +1034,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Let's get how much liquidity was sent to burn
         // Outside of scope to be used for vab/vfb adjustment later
         uint liquidity = pt.balanceOf(address(this));
+
         notZero(liquidity);
         uint _totalSupply = pt.totalSupply();
         {
