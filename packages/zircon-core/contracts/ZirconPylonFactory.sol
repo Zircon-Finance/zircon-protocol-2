@@ -76,9 +76,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
             pylon := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
     }
-    function createEnergy(address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) private returns (address energy){
-        energy = IZirconEnergyFactory(energyFactory).createEnergy( _pylonAddress, _pairAddress, _tokenA, _tokenB);
-   }
 
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external  returns (address pylonAddress)  {
         onlyMigrator();
@@ -90,7 +87,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     }
 
     function configurePylon(address _tokenA, address _tokenB, address poolTokenA, address poolTokenB, address _pairAddress, address pylonAddress) private {
-        address energy = createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
+        address energy = IZirconEnergyFactory(energyFactory).createEnergy( pylonAddress, _pairAddress, _tokenA, _tokenB);
         address energyRev = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
         IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy, energyRev);
 
