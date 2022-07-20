@@ -63,7 +63,7 @@ describe("Pair", () => {
     expect(reserves[1]).to.eq(token1Amount)
   })
 
-    // Same as Uniswap v2 - CORE
+  // Same as Uniswap v2 - CORE
   it('mintOneSide', async () => {
 
     const token0Amount = expandTo18Decimals(1)
@@ -71,28 +71,45 @@ describe("Pair", () => {
     await token0.transfer(pair.address, token0Amount)
     await token1.transfer(pair.address, token1Amount)
 
-    const expectedLiquidity = expandTo18Decimals(2)
-    await expect(pair.mint(account.address))
-        .to.emit(pair, 'Transfer')
-        .withArgs(ethers.constants.AddressZero, ethers.constants.AddressZero, MINIMUM_LIQUIDITY)
-        .to.emit(pair, 'Transfer')
-        .withArgs(ethers.constants.AddressZero, account.address, expectedLiquidity.sub(MINIMUM_LIQUIDITY))
-        .to.emit(pair, 'Sync')
-        .withArgs(token0Amount, token1Amount)
-        .to.emit(pair, 'Mint')
-        .withArgs(account.address, token0Amount, token1Amount)
-      
-      await token0.transfer(pair.address, token0Amount)
+    await pair.mint(account.address)
 
-      await expect(pair.mintOneSide(account.address, true))
+    let expectedLiquidity = ethers.BigNumber.from('14131525041551601765')
+
+    await token0.transfer(pair.address, token0Amount)
+
+    await expect(pair.mintOneSide(account.address, true))
+    await expect(pair.mintOneSide(account.address, false)).to.be.revertedWith("ZP: Insufficient Amount")
 
     expect(await pair.totalSupply()).to.eq(expectedLiquidity)
-    expect(await pair.balanceOf(account.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
-    expect(await token0.balanceOf(pair.address)).to.eq(token0Amount)
+    // expect(await pair.balanceOf(account.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
+    expect(await token0.balanceOf(pair.address)).to.eq(token0Amount.mul(2))
     expect(await token1.balanceOf(pair.address)).to.eq(token1Amount)
     const reserves = await pair.getReserves()
-    expect(reserves[0]).to.eq(token0Amount)
+    expect(reserves[0]).to.eq(token0Amount.mul(2))
     expect(reserves[1]).to.eq(token1Amount)
+  })
+  it('mintOneSide 2', async () => {
+
+    const token0Amount = expandTo18Decimals(1)
+    const token1Amount = expandTo18Decimals(100)
+    await token0.transfer(pair.address, token0Amount)
+    await token1.transfer(pair.address, token1Amount)
+
+    await pair.mint(account.address)
+
+    let expectedLiquidity = ethers.BigNumber.from('10049726364434008807')
+
+    await token1.transfer(pair.address, token0Amount)
+    await expect(pair.mintOneSide(account.address, true)).to.be.revertedWith("ZP: Insufficient Amount")
+    await expect(pair.mintOneSide(account.address, false))
+
+    expect(await pair.totalSupply()).to.eq(expectedLiquidity)
+    // expect(await pair.balanceOf(account.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
+    expect(await token0.balanceOf(pair.address)).to.eq(token0Amount)
+    expect(await token1.balanceOf(pair.address)).to.eq(token1Amount.add(token0Amount))
+    const reserves = await pair.getReserves()
+    expect(reserves[0]).to.eq(token0Amount)
+    expect(reserves[1]).to.eq(token1Amount.add(token0Amount))
   })
 
   const swapTestCases = [
@@ -234,14 +251,14 @@ describe("Pair", () => {
     const expectedLiquidity = expandTo18Decimals(1000)
     await pair.transfer(pair.address, expectedLiquidity.sub(MINIMUM_LIQUIDITY))
     await pair.burn(account.address, overrides)
-    expect(await pair.totalSupply()).to.eq(MINIMUM_LIQUIDITY.add('249750499251388'))
+    expect(await pair.totalSupply()).to.eq(MINIMUM_LIQUIDITY.add('249750499251000'))
     let energyRevAddress = await pair.energyRevenueAddress()
-    expect(await pair.balanceOf(energyRevAddress)).to.eq('249750499251388')
+    expect(await pair.balanceOf(energyRevAddress)).to.eq('249750499251000')
 
     // using 1000 here instead of the symbolic MINIMUM_LIQUIDITY because the amounts only happen to be equal...
     // ...because the initial liquidity amounts were equal
-    expect(await token0.balanceOf(pair.address)).to.eq(ethers.BigNumber.from(1000).add('249501683697445'))
-    expect(await token1.balanceOf(pair.address)).to.eq(ethers.BigNumber.from(1000).add('250000187312969'))
+    expect(await token0.balanceOf(pair.address)).to.eq(ethers.BigNumber.from(1000).add('249501683697057'))
+    expect(await token1.balanceOf(pair.address)).to.eq(ethers.BigNumber.from(1000).add('250000187312581'))
   })
 
 

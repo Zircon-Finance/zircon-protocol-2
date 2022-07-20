@@ -152,25 +152,41 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     // TODO: will be better if we pass the output amount
     function mintOneSide(address to, bool isReserve0) external lock returns (uint liquidity, uint amount0, uint amount1) {
         console.log("mintOneSide");
+        require(totalSupply > 0, 'UniswapV2: Use mint to start pair');
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
+
         uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
         amount0 = balance0.sub(_reserve0);
         amount1 = balance1.sub(_reserve1);
-        require(amount0 > 1 || amount1 > 1, "ZP: Insufficient Amount");
+
         uint _liquidityFee = IZirconFactory(factory).liquidityFee();
-        uint k = Math.sqrt(uint(reserve0 + (amount0.mul(10000-(_liquidityFee/2))/10000)).mul(balance1));
+        uint k;
+        if (isReserve0){
+            require(amount0 > 1, "ZP: Insufficient Amount");
+            k = Math.sqrt(uint(reserve0 + (amount0.mul(10000-(_liquidityFee))/10000)).mul(balance1));
+        }else{
+            require(amount1 > 1, "ZP: Insufficient Amount");
+            k = Math.sqrt(balance0.mul(uint(reserve1 + (amount1.mul(10000-(_liquidityFee))/10000))));
+        }
         uint kLast = Math.sqrt(uint(reserve0).mul(reserve1));
 
         uint numerator = (k.sub(kLast)).mul(totalSupply);
         uint denominator = kLast;
         uint liquidity = numerator / denominator;
-        console.log("liquidityPercentage: ", liquidityPercentage);
-//
+        console.log("Minting liquidity: ", liquidity, k, kLast);
+        reserve0 = uint112(balance0);
+        reserve1 = uint112(balance1);
+        _mintFee(_reserve0, _reserve1);
+
+        require(liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED');
+        _mint(to, liquidity);
+        _update(balance0, balance1, _reserve0, _reserve1);
+        kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
+        emit Mint(msg.sender, amount0, amount1);
+
+        //
 //        if (isReserve0) {
-//
-//
-//
 ////            uint r2 = uint(reserve0 * (reserve0));
 ////            uint r1 = uint(reserve1 * (reserve1));
 ////            uint x = (r1 * 1e18)/(r1+r2);
@@ -202,13 +218,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 //        console.log("Minting liquidity: ",amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
 //        liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
 
-        require(liquidity > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED');
-        console.log("Uni: liquidity: ", liquidity);
-        _mint(to, liquidity);
 
-        _update(balance0, balance1, _reserve0, _reserve1);
-        kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
-        emit Mint(msg.sender, amount0, amount1);
     }
 
     // this low-level function should be called from a contract which performs important safety checks
