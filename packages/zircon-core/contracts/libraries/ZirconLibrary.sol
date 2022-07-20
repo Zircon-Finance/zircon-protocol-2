@@ -9,12 +9,12 @@ library ZirconLibrary {
     uint public constant MINIMUM_LIQUIDITY = 10**3;
 
     // Same Function as Uniswap Library, used here for incompatible solidity versions
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) internal pure returns (uint amountOut) {
+    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
         require(amountIn > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT');
         require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
-        uint amountInWithFee = amountIn.mul(997);
+        uint amountInWithFee = amountIn.mul(10000-fee);
         uint numerator = amountInWithFee.mul(reserveOut);
-        uint denominator = reserveIn.mul(1000).add(amountInWithFee);
+        uint denominator = reserveIn.mul(10000).add(amountInWithFee);
         amountOut = numerator / denominator;
     }
 
@@ -22,17 +22,31 @@ library ZirconLibrary {
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
     // @b0, @b1 the balances to calculate
-    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
+//    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
+//
+//        //Expresses b1 in units of reserve0
+//        uint px = _reserve0.mul(_b1)/_reserve1;
+//
+//        if (px > _b0) {
+//            maxX = _b0;
+//            maxY = _b0.mul(_reserve1)/_reserve0; //b0 in units of reserve1
+//        } else {
+//            maxX = px; //max is b1 but in reserve0 units
+//            maxY = _b1;
+//        }
+//    }
+    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
 
         //Expresses b1 in units of reserve0
-        uint px = _reserve0.mul(_b1)/_reserve1;
-
-        if (px > _b0) {
-            maxX = _b0;
-            maxY = _b0.mul(_reserve1)/_reserve0; //b0 in units of reserve1
+        uint px = ts.mul(_b0)/_reserve0;
+        uint py = ts.mul(_b1)/_reserve1;
+        console.log("px: ", px, py);
+        if (px > py) {
+            maxX = py.mul(_reserve0)/ts;
+            maxY = _b1; //b0 in units of reserve1
         } else {
-            maxX = px; //max is b1 but in reserve0 units
-            maxY = _b1;
+            maxX = _b0; //max is b1 but in reserve0 units
+            maxY = px.mul(_reserve1)/ts;
         }
     }
 

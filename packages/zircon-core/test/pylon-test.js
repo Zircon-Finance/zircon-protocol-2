@@ -26,7 +26,6 @@ async function addLiquidity(token0Amount, token1Amount) {
 }
 
 
-// TODO: See case where we have a big dump
 describe("Pylon", () => {
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
@@ -108,7 +107,7 @@ describe("Pylon", () => {
                 .withArgs(expectedRes0, expectedRes1);
 
 
-        	let pylonRes2 = await pylonInstance.getSyncReserves();
+            let pylonRes2 = await pylonInstance.getSyncReserves();
             console.log("Pylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes2[0]));
             console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes2[1]));
             let pairRes2 = await pair.getReserves()
@@ -968,7 +967,7 @@ describe("Pylon", () => {
         console.log("\nPylon Sync Reserve0 after second mint: ", ethers.utils.formatEther(pylonRes2[0]));
         console.log("Pylon Sync Reserve1 after second mint: ", ethers.utils.formatEther(pylonRes2[1]));
 
-    	ptb = await pair.balanceOf(pylonInstance.address);
+        ptb = await pair.balanceOf(pylonInstance.address);
         ptt = await pair.totalSupply();
         console.log("ptb after second mint: ", ethers.utils.formatEther(ptb));
         console.log("ptt after second mint: ", ethers.utils.formatEther(ptt));
@@ -1231,14 +1230,14 @@ describe("Pylon", () => {
         //Pylon init with 1/11 of token amounts into pylon.
         await init(token0Amount, token1Amount)
 
-		let ptb = await pair.balanceOf(pylonInstance.address);
+        let ptb = await pair.balanceOf(pylonInstance.address);
         let ptt = await pair.totalSupply();
         console.log("ptb after first mint: ", ethers.utils.formatEther(ptb));
         console.log("ptt after first mint: ", ethers.utils.formatEther(ptt));
 
 
 
-		let pairRes = await pair.getReserves();
+        let pairRes = await pair.getReserves();
         console.log("Pylon Pair Reserve0 initial: ", ethers.utils.formatEther(pairRes[0]))
         console.log("Pylon Pair Reserve1 initial: ", ethers.utils.formatEther(pairRes[1]))
 
