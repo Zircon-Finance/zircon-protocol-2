@@ -364,7 +364,7 @@ describe("Energy", () => {
         // expect(await token1.balanceOf(energyAddress)).to.eq("481")
     });
 
-    it('burning async with energy', async function () {
+    it('burning async with energy (checking slashing tokens)', async function () {
         await init(expandTo18Decimals(10), expandTo18Decimals(10))
         let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);
         let initialPTS1 = await poolTokenInstance1.balanceOf(account.address);
@@ -380,15 +380,22 @@ describe("Energy", () => {
         // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
         // Let's check that...
         let energyRevenueAddress = await pair.energyRevenueAddress()
-        let energyAddress = await pylonInstance.energyAddress()
+        let energyRevAddress = await pylonInstance.energyAddress()
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
-        let zirconEnergyRevenue = await zEnergyRev.attach(energyAddress);
+        let zEnergy = await ethers.getContractFactory('ZirconEnergy')
+        let zirconEnergyRevenue = await zEnergyRev.attach(energyRevAddress);
+        let zirconEnergy = await zEnergy.attach(await pylonInstance.energyAddress());
 
         let ptb1 = await poolTokenInstance1.balanceOf(account.address);
         await poolTokenInstance1.transfer(pylonInstance.address, ptb1.sub(initialPTS1))
-        await pylonInstance.burnAsync(account2.address, true) //Burns to an account2
-        console.log("Burning...", ptb1.sub(initialPTS1).toString());
-        console.log("Burning...", energyAddress);
+
+        await expect(pylonInstance.burnAsync(account2.address, true))
+            .to.emit(poolTokenInstance1, 'Transfer')
+            .withArgs(zirconEnergy.address, account2.address, '1527302607')
+            .to.emit(pair, 'Transfer')
+            .withArgs(zirconEnergy.address, pair.address, '9937237')
+
+
         //
         // // Here no fees for swapping
         // expect(await pair.balanceOf(energyRevenueAddress)).to.eq("0")
