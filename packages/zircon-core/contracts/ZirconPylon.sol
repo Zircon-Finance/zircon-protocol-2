@@ -326,7 +326,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Get Maximum finds the highest amount that can be matched at 50/50
             uint px;
             uint py;
-            console.log("pts",IZirconPair(pairAddress).totalSupply());
             if (pairReserves0 == 0 && pairReserves1 == 0) {
                 (px, py) = ZirconLibrary._getMaximum(
                     balance0,
@@ -795,7 +794,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //            uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
             // Multiply by total pool value to get fee value in native units
             uint feeValueAnchor = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair(); //totalPoolValueAnchorPrime.mul(d)/1e18;
-            console.log("<<<Pylon:sync::::::::", feeValueAnchor);
             // uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 
 
@@ -980,12 +978,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if (amountToAdd < energyPTBalance) {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 //sends pool tokens directly to pair
+                console.log("SPT", amountToAdd);
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, amountToAdd);
                 remainingPercentage = 0;
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
 //                console.log("energy pt balance",energyAddress, pairAddress, energyPTBalance);
+                console.log("SPTP", energyPTBalance);
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
 //                bool hey = IUniswapV2ERC20(pairAddress).transferFrom(energyAddress, pairAddress, energyPTBalance);
 //                uint tk = IUniswapV2ERC20(pairAddress).allowance(energyAddress, address(this));
@@ -1011,7 +1011,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
             uint amountToTransfer = totalAmount.mul(percentage)/1e18; //percentage is calculated "natively" as a full 1e18
             if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
+                console.log("Sending tokens to user", _to, amountToTransfer);
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
+            }else{
+                console.log("Sending tokens to user", _to, amountToTransfer);
+                _safeTransferFrom(pylonToken.anchor, energyAddress, _to, IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress));
             }
         }
     }
