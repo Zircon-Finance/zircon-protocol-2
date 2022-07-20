@@ -878,10 +878,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //Adds old blockEMA
                 //averaged out EMA primarily meant for non-flashloan manipulation attempts
 
-                //We multiply thisBlock values by 2 to accumulate changes
-                //This means that a constant stream of small operations that barely don't trip thibBlock, will eventually trip the EMA
-
-                gammaEMA = ((gammaEMA * EMASamples).add(thisBlockEMA.mul(2)))/((EMASamples + 1).add(bleed));
+                gammaEMA = ((gammaEMA * EMASamples).add(thisBlockEMA))/((EMASamples + 1).add(bleed));
 
                 //This one is more for flash loans
                 //Adds new value
