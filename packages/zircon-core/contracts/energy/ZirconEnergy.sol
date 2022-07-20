@@ -104,7 +104,6 @@ contract ZirconEnergy is IZirconEnergy {
     uint register = balance.sub(anchorReserve);
     uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageEnergy();
     address energyRevAddress = IZirconEnergyFactory(energyFactory).getEnergyRevenue(pylon.floatToken, pylon.anchorToken);
-    console.log(energyRevAddress);
     uint toSend = register.mul(feePercentageForRev)/(100);
     if(toSend != 0) _safeTransfer(pylon.anchorToken, energyRevAddress, toSend);
 

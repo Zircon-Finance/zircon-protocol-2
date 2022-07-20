@@ -86,10 +86,10 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         {
             uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageRev();
             uint amount = balance.sub(reserve);
-            uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
-            uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
-            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq.mul(100 - feePercentageForRev)/(100));
-            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq.mul(100 - feePercentageForRev)/(100));
+            uint pylon0Liq = (amount.mul(pylonBalance0)/totalSupply).mul(100 - feePercentageForRev)/(100);
+            uint pylon1Liq = (amount.mul(pylonBalance1)/totalSupply).mul(100 - feePercentageForRev)/(100);
+            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
+            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));
         }
 
@@ -122,6 +122,11 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     function getFees(address _token, uint _amount, address _to) external {
         require(msg.sender == energyFactory, "ZER: Not properly called");
         require(_amount != 0, "Operations: Cannot recover zero balance");
+
+        if(_token == zircon.pairAddress) {
+            require(_amount <= reserve, "ZER: Reverted");
+            reserve = reserve.sub(_amount);
+        }
 
         _safeTransfer(_token, _to, _amount);
     }
