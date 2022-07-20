@@ -53,17 +53,11 @@ contract ZirconEnergy is IZirconEnergy {
     address pairAddress;
     address floatToken;
     address anchorToken;
-    uint insuranceUni;
-    uint revenueUni;
   }
   Pylon pylon;
-  struct PairFields {
-    address pylonFloat0; //Means that this pylon has token0 as float
-    address pylonFloat1;
-    uint revenueUni;
-  }
+
   address energyFactory;
-  uint lastPtBalance; //Used to track balances and sync up in case of donations
+  uint anchorReserve; //Used to track balances and sync up in case of donations
   bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
 
   constructor() public {
@@ -82,16 +76,11 @@ contract ZirconEnergy is IZirconEnergy {
       _pylon,
       _pair,
       tokenA,
-      tokenB,
-      1,
-      1
+      tokenB
     );
     // Approving pylon to use anchor tokens
-    console.log('Approving pylon to use anchor tokens', _pylon, _pair);
     IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
     IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-
-
   }
 
   // ****** HELPER FUNCTIONS *****
@@ -108,43 +97,56 @@ contract ZirconEnergy is IZirconEnergy {
     require(pylon.pairAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
+  function registerFee() external _onlyPylon {
+    uint balance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+    require(balance >= anchorReserve, "ZE: Anchor not sent");
 
-  function breakPiggybank(uint _requestedLiquidity) _onlyPylon external returns (uint returnedLiquidity) {
-    //Called by Pylon if omega is below 1. Pylon asks for X liquidity, breakPiggybank responds by depositing X or less and returning how much.
-    returnedLiquidity = pylon.insuranceUni >= _requestedLiquidity ? _requestedLiquidity : pylon.insuranceUni;
+    uint register = anchorReserve.sub(balance);
+    uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageEnergy();
+    address energyRevAddress = IZirconEnergyFactory(energyFactory).getEnergyRevenue(pylon.floatToken, pylon.anchorToken);
 
-    if (returnedLiquidity != 0) {
-      IUniswapV2ERC20(pylon.pairAddress).transfer(msg.sender, returnedLiquidity);
-      pylon.insuranceUni -= returnedLiquidity;
-    }
+    uint toSend = register.mul(feePercentageForRev)/(100);
+    _safeTransfer(pylon.anchorToken, energyRevAddress, toSend);
+
+    anchorReserve = balance.sub(toSend);
   }
 
-  function syncFee() private {
-    uint feeLiquidity = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this)).sub(lastPtBalance);
-    uint pylonLiquidity = IUniswapV2ERC20(pylon.pairAddress).balanceOf(pylon.pylonAddress);
-    uint ptTotalSupply = IUniswapV2ERC20(pylon.pairAddress).totalSupply();
-    uint insurancePerMille = IZirconEnergyFactory(energyFactory).insurancePerMille();
-
-    uint float0Fee = pylonLiquidity.mul(feeLiquidity)/ptTotalSupply;
-    pylon.insuranceUni += float0Fee.mul(insurancePerMille)/1e3;
-    pylon.revenueUni += float0Fee.mul((1e3)-(insurancePerMille))/1e3;
-    _returnExcess();
-
-    uint pairLiquidity = ptTotalSupply.add(pylonLiquidity); //fundamentally impossible for this to over/sub flow
-
-    pylon.revenueUni += feeLiquidity.mul(pairLiquidity)/ptTotalSupply;
-
-    lastPtBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this));
-  }
-
-  function syncPylonFee() _onlyPylon external {
-    syncFee();
-  }
-
-  //Called by pair mintFee to register inflow. Any excess is spread evenly.
-  function syncPairFee() _onlyPair external {
-    syncFee();
-  }
+//  function breakPiggybank(uint _requestedLiquidity) _onlyPylon external returns (uint returnedLiquidity) {
+//    //Called by Pylon if omega is below 1. Pylon asks for X liquidity, breakPiggybank responds by depositing X or less and returning how much.
+//    returnedLiquidity = pylon.insuranceUni >= _requestedLiquidity ? _requestedLiquidity : pylon.insuranceUni;
+//
+//    if (returnedLiquidity != 0) {
+//      IUniswapV2ERC20(pylon.pairAddress).transfer(msg.sender, returnedLiquidity);
+//      pylon.insuranceUni -= returnedLiquidity;
+//    }
+//  }
+//
+//  function syncFee() private {
+//    uint feeLiquidity = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this)).sub(lastPtBalance);
+//    uint pylonLiquidity = IUniswapV2ERC20(pylon.pairAddress).balanceOf(pylon.pylonAddress);
+//    uint ptTotalSupply = IUniswapV2ERC20(pylon.pairAddress).totalSupply();
+//    uint insurancePerMille = IZirconEnergyFactory(energyFactory).insurancePerMille();
+//
+//    uint float0Fee = pylonLiquidity.mul(feeLiquidity)/ptTotalSupply;
+//    pylon.insuranceUni += float0Fee.mul(insurancePerMille)/1e3;
+//    pylon.revenueUni += float0Fee.mul((1e3)-(insurancePerMille))/1e3;
+//    _returnExcess();
+//
+//    uint pairLiquidity = ptTotalSupply.add(pylonLiquidity); //fundamentally impossible for this to over/sub flow
+//
+//    pylon.revenueUni += feeLiquidity.mul(pairLiquidity)/ptTotalSupply;
+//
+//    lastPtBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this));
+//  }
+//
+//  function syncPylonFee() _onlyPylon external {
+//    syncFee();
+//  }
+//
+//  //Called by pair mintFee to register inflow. Any excess is spread evenly.
+//  function syncPairFee() _onlyPair external {
+//    syncFee();
+//  }
 
 
   //Returns the fee in basis points (0.01% units, needs to be divided by 10000)
@@ -153,37 +155,32 @@ contract ZirconEnergy is IZirconEnergy {
   //This is only used for the burn/mint async 50/50, which is effectively a swap that can cause issues when gamma is imbalanced.
   function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount) {
     (uint _minFee, uint _maxFee) = getFee();
-    console.log("minFee: ", _minFee);
     uint _gammaHalf = 5e17;
     uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
     if (gammaMulDecimals <= 45e16 || gammaMulDecimals >= 55e16) {
-
       amount = (_maxFee.mul(x)/1e18).mul(x)/(25e18); //25 is a reduction factor based on the 0.45-0.55 range we're using.
-      console.log("feeAmount: ", amount);
     } else {
       amount = ((_minFee.mul(x)/1e18).mul(x).mul(36)/(1e18)).add(_minFee); //Ensures minFee is the lowest value.
-      console.log("feeAmount2: ", amount);
     }
-
   }
 
   //Function called periodically to check if the reserves are too large, returns them back to pylon if they are
-  function _returnExcess() private {
-
-    //Under an LP only model there is no "excess". You may need to cover 100% of the pool's worth
-    //But if it is over 100% (maybe due to heavy outflows) this function returns funds to Pylon LPs.
-    //Called by syncFee
-
-    //TODO: Critical to let Pylon manage uni token excesses effectively
-    //Pylon storage pylonRef = pylonAccounts[_pylonAddress];
-    uint pylonBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(pylon.pylonAddress);
-    if(pylon.insuranceUni > pylonBalance) {
-      uint liquidity = pylon.insuranceUni - pylonBalance;
-      _safeTransfer(pylon.pairAddress, pylon.pylonAddress, liquidity);
-      pylon.insuranceUni -= liquidity;
-    }
-
-  }
+//  function _returnExcess() private {
+//
+//    //Under an LP only model there is no "excess". You may need to cover 100% of the pool's worth
+//    //But if it is over 100% (maybe due to heavy outflows) this function returns funds to Pylon LPs.
+//    //Called by syncFee
+//
+//    //TODO: Critical to let Pylon manage uni token excesses effectively
+//    //Pylon storage pylonRef = pylonAccounts[_pylonAddress];
+//    uint pylonBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(pylon.pylonAddress);
+//    if(pylon.insuranceUni > pylonBalance) {
+//      uint liquidity = pylon.insuranceUni - pylonBalance;
+//      _safeTransfer(pylon.pairAddress, pylon.pylonAddress, liquidity);
+//      pylon.insuranceUni -= liquidity;
+//    }
+//
+//  }
   function migrateLiquidity(address newEnergy) external{
     require(msg.sender == energyFactory, 'ZP: FORBIDDEN'); // sufficient check
 

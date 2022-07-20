@@ -85,6 +85,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     // update reserves and, on the first call per block, price accumulators
     function _update(uint balance0, uint balance1,
         uint112 _reserve0, uint112 _reserve1) private {
+        console.log("_update");
         require(balance0 <= uint112(-1) && balance1 <= uint112(-1), 'UniswapV2: OVERFLOW');
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
@@ -102,6 +103,8 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private {
+
+        console.log("minting fee");
         uint _kLast = kLast; // gas savings
         if (_kLast != 0) {
             uint rootK = Math.sqrt(uint(_reserve0).mul(_reserve1));
@@ -123,6 +126,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // this low-level function should be called from a contract which performs important safety checks
     function mint(address to) external lock returns (uint liquidity) {
+        console.log(reserve0, reserve1);
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
@@ -146,6 +150,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         _update(balance0, balance1, _reserve0, _reserve1);
         kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
         emit Mint(msg.sender, amount0, amount1);
+        console.log(reserve0, reserve1);
     }
 
     // this low-level function should be called from a contract which performs important safety checks
@@ -169,12 +174,11 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             require(amount1 > 1, "ZP: Insufficient Amount");
             k = Math.sqrt(balance0.mul(uint(reserve1 + (amount1.mul(10000-(_liquidityFee))/10000))));
         }
-        uint kLast = Math.sqrt(uint(reserve0).mul(reserve1));
+        uint kBefore = Math.sqrt(uint(reserve0).mul(reserve1));
 
-        uint numerator = (k.sub(kLast)).mul(totalSupply);
-        uint denominator = kLast;
-        uint liquidity = numerator / denominator;
-        console.log("Minting liquidity: ", liquidity, k, kLast);
+        uint numerator = (k.sub(kBefore)).mul(totalSupply);
+        uint denominator = kBefore;
+        liquidity = numerator / denominator;
         reserve0 = uint112(balance0);
         reserve1 = uint112(balance1);
         _mintFee(_reserve0, _reserve1);
@@ -184,46 +188,11 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         _update(balance0, balance1, _reserve0, _reserve1);
         kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
         emit Mint(msg.sender, amount0, amount1);
-
-        //
-//        if (isReserve0) {
-////            uint r2 = uint(reserve0 * (reserve0));
-////            uint r1 = uint(reserve1 * (reserve1));
-////            uint x = (r1 * 1e18)/(r1+r2);
-////
-////            console.log("x: ", x);
-////
-////            uint l = amount0.mul(totalSupply) / (reserve0 + reserve1);
-////            console.log("M: ", l);
-////
-////            amount1 = ZirconLibrary.getAmountOut((amount0*(x))/1e18, reserve0, reserve1, _liquidityFee);
-////            amount0 = amount0*(1e18-x)/1e18;
-//            console.log("ZPPair1 amount1, amount0", amount1, amount0);
-//        }else {
-//            uint l = amount1.mul(totalSupply) / (reserve0 + reserve1);
-//            console.log("M: ", l);
-//
-//            amount0 = ZirconLibrary.getAmountOut(amount1/2, reserve1, reserve0, _liquidityFee);
-//            amount1 = amount1/2;
-//            console.log("ZPPair0 amount1, amount0", amount1, amount0);
-//        }
-//
-//        reserve0 = uint112(balance0);
-//        reserve1 = uint112(balance1);
-//
-//        _mintFee(_reserve0, _reserve1);
-//        uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
-//        require(_totalSupply > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_MINTED');
-//
-//        console.log("Minting liquidity: ",amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
-//        liquidity = Math.min(amount0.mul(_totalSupply) / _reserve0, amount1.mul(_totalSupply) / _reserve1);
-
-
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    //TODO: Test this function
-    //TODO: maybe allow burning both sides to one
+    // TODO: Test this function
+    // TODO: maybe allow burning both sides to one
     function burnOneSide(address to, bool isReserve0) external lock returns (uint amount) {
         console.log("burnOneSide");
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
@@ -271,6 +240,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // this low-level function should be called from a contract which performs important safety checks
     function burn(address to) external lock returns (uint amount0, uint amount1) {
+        console.log("burn");
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         address _token0 = token0;                                // gas savings
         address _token1 = token1;                                // gas savings
@@ -322,6 +292,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             uint balance1Adjusted = balance1.mul(10000).sub(amount1In.mul(_liquidityFee));
             require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(10000**2), 'UniswapV2: K');
         }
+        console.log("swap", amount0In, amount1Out);
 
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);

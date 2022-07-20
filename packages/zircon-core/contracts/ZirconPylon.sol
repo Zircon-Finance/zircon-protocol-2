@@ -331,12 +331,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 (px, py) = ZirconLibrary._getMaximum(
                     balance0,
                     balance1,
-                    balance0.sub(max0), balance1.sub(max1), IZirconPair(pairAddress).totalSupply());
+                    balance0.sub(max0), balance1.sub(max1));
             }else{
                 (px, py) = ZirconLibrary._getMaximum(
                     pairReserves0,
                     pairReserves1,
-                    balance0.sub(max0), balance1.sub(max1), IZirconPair(pairAddress).totalSupply());
+                    balance0.sub(max0), balance1.sub(max1));
             }
 
 
@@ -793,6 +793,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //            uint d = (one).sub((Math.sqrt(lastK)*poolTokensPrime*1e18)/(Math.sqrt(currentK)*lastPoolTokens));
             // Multiply by total pool value to get fee value in native units
             uint feeValueAnchor = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair(); //totalPoolValueAnchorPrime.mul(d)/1e18;
+            console.log("<<<Pylon:sync::::::::", feeValueAnchor);
             // uint feeValueFloat = totalPoolValueFloatPrime.mul(d)/1e18;
 
 
@@ -985,7 +986,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
-                //console.log("energy pt balance",energyAddress, pairAddress, energyPTBalance);
+//                console.log("energy pt balance",energyAddress, pairAddress, energyPTBalance);
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
 //                bool hey = IUniswapV2ERC20(pairAddress).transferFrom(energyAddress, pairAddress, energyPTBalance);
 //                uint tk = IUniswapV2ERC20(pairAddress).allowance(energyAddress, address(this));

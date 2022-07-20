@@ -5,6 +5,8 @@ import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "hardhat/console.sol";
+import "./interfaces/IZirconEnergyFactory.sol";
+
 contract ZirconEnergyRevenue is ReentrancyGuard  {
     using SafeMath for uint112;
     using SafeMath for uint256;
@@ -82,14 +84,12 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
         {
+            uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageRev();
             uint amount = balance.sub(reserve);
-            console.log("amount received:", amount);
             uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
             uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
-            console.log("pylon0Liq", pylon0Liq, zircon.energy0);
-            console.log("pylon1Liq", pylon1Liq, zircon.energy1);
-            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
-            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
+            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);//.mul(100 - feePercentageForRev)/(100));
+            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);//.mul(100 - feePercentageForRev)/(100));
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));
         }
 
