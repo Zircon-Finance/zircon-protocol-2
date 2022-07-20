@@ -1,5 +1,3 @@
-/*
-// TODO: clean this...
 const { expect } = require("chai");
 const { ethers } = require('hardhat');
 const assert = require("assert");
@@ -97,6 +95,7 @@ describe("Energy", () => {
     it('should create oposite pylon and check energy', async function () {
         let tok1Amount = expandTo18Decimals(5300)
         await init(expandTo18Decimals(1700), tok1Amount)
+        console.log("pairBalance account:", (await pair.balanceOf(account.address)).toString())
 
         await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
         let pylonAddress = await factoryPylonInstance.getPylon(token1.address, token0.address)
@@ -114,7 +113,7 @@ describe("Energy", () => {
         await newPylonInstance.mintPoolTokens(account.address, true);
 
         let energyAddress = await newPylonInstance.energyAddress()
-        expect(await token0.balanceOf(energyAddress)).to.eq("2398190045248868") // TODO: Change fee percentage
+        expect(await token0.balanceOf(energyAddress)).to.eq("2398190045248868")
 
         await token0.transfer(pair.address, expandTo18Decimals(1))
         await pair.swap(0, ethers.BigNumber.from('1662497915624478906'), account.address, '0x', overrides)
@@ -125,9 +124,11 @@ describe("Energy", () => {
 
         let eAddress = await pylonInstance.energyAddress()
         let eAddress2 = await newPylonInstance.energyAddress()
-
-        expect(await pair.balanceOf(eAddress)).to.eq("5265289425935735") // TODO: Change fee percentage
-        expect(await pair.balanceOf(eAddress2)).to.eq("993161967017842") // TODO: Change fee percentage
+        console.log("energyRev", ethers.utils.formatEther(await pair.balanceOf(await pair.energyRevenueAddress())))
+        console.log("energy", ethers.utils.formatEther(await pair.balanceOf(eAddress)))
+        console.log("energy2", ethers.utils.formatEther(await pair.balanceOf(eAddress2)))
+        expect(await pair.balanceOf(eAddress)).to.eq("5265289425935735")
+        expect(await pair.balanceOf(eAddress2)).to.eq("994442977407204")
 
     });
 
@@ -236,11 +237,11 @@ describe("Energy", () => {
         await pylonInstance.mintPoolTokens(account.address, true);
 
         let energyAddress = await pair.energyRevenueAddress()
-        expect(await pair.balanceOf(energyAddress)).to.eq("189199528554537436")
+        expect(await pair.balanceOf(energyAddress)).to.eq("189199528554539331")
 
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
         let zirconEnergyRevenue = await zEnergyRev.attach(energyAddress);
-        expect(await zirconEnergyRevenue.reserve()).to.eq("189199528554537436")
+        expect(await zirconEnergyRevenue.reserve()).to.eq("189199528554539331")
 
     });
 
@@ -254,50 +255,53 @@ describe("Energy", () => {
         expect(await pair.balanceOf(energyRevenueAddress)).to.eq("0") //TODO
 
         // Let's get some float shares...
+        let swappedTokens = "49849771254208"
         await token0.transfer(pylonInstance.address, newAmount0)
-        await pylonInstance.mintPoolTokens(account.address, false)
+        await expect(pylonInstance.mintPoolTokens(account.address, false))
+            .to.emit(pair, 'Swap')
+            .withArgs(pylonInstance.address, "50000000000000", "0", "0", swappedTokens, await pylonInstance.energyAddress())
 
         // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
         // Let's check that...
         let energyAddress = await pylonInstance.energyAddress()
 
         // Here the fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("115062756") //TODO
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("11506223241")
 
         // Here the Fees for entering the pool
-        expect(await token1.balanceOf(energyAddress)).to.eq("498499977125")
+        expect(await token1.balanceOf(energyAddress)).to.eq(swappedTokens)
 
         // Let's get some anchor shares...
-        await token1.transfer(pylonInstance.address, newAmount0);
-        await pylonInstance.mintPoolTokens(account.address, true);
-
-        // Here no fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("115062756")
-
-        // Here the Fees for entering the pool
-        expect(await token1.balanceOf(energyAddress)).to.eq("998499977125")
-
-        let ptb1 = await poolTokenInstance1.balanceOf(account.address);
-        await poolTokenInstance1.transfer(pylonInstance.address, ptb1.sub(initialPTS1))
-        await pylonInstance.burn(account2.address, true) //Burns to an account2
-        console.log("Burning...", ptb1.sub(initialPTS1).toString());
-
-        // Here no fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("115062756")
-
-        // Here the Fees for entering the pool
-        expect(await token1.balanceOf(energyAddress)).to.eq("241")
-
-        let ptb0 = await poolTokenInstance0.balanceOf(account.address);
-        await poolTokenInstance0.transfer(pylonInstance.address, ptb0)
-        await pylonInstance.burn(account2.address, false) //Burns to an account2
-        console.log("Burning...", ptb0.toString());
-
-        // Here no fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("0")
+        // await token1.transfer(pylonInstance.address, newAmount0);
+        // await pylonInstance.mintPoolTokens(account.address, true);
+        //
+        // // Here no fees for swapping
+        // expect(await pair.balanceOf(energyRevenueAddress)).to.eq("115062756")
+        //
+        // // Here the Fees for entering the pool
+        // expect(await token1.balanceOf(energyAddress)).to.eq(swappedTokens)
+        //
+        // let ptb1 = await poolTokenInstance1.balanceOf(account.address);
+        // await poolTokenInstance1.transfer(pylonInstance.address, ptb1.sub(initialPTS1))
+        // await pylonInstance.burn(account2.address, true) //Burns to an account2
+        // console.log("Burning...", ptb1.sub(initialPTS1).toString());
+        //
+        // // Here no fees for swapping
+        // expect(await pair.balanceOf(energyRevenueAddress)).to.eq("115062756")
 
         // Here the Fees for entering the pool
-        expect(await token1.balanceOf(energyAddress)).to.eq("481")
+        // expect(await token1.balanceOf(energyAddress)).to.eq("241")
+        //
+        // let ptb0 = await poolTokenInstance0.balanceOf(account.address);
+        // await poolTokenInstance0.transfer(pylonInstance.address, ptb0)
+        // await pylonInstance.burn(account2.address, false) //Burns to an account2
+        // console.log("Burning...", ptb0.toString());
+        //
+        // // Here no fees for swapping
+        // expect(await pair.balanceOf(energyRevenueAddress)).to.eq("0")
+        //
+        // // Here the Fees for entering the pool
+        // expect(await token1.balanceOf(energyAddress)).to.eq("481")
     });
 
     it('burning async with energy', async function () {
@@ -357,10 +361,10 @@ describe("Energy", () => {
         console.log("Burning...", ptb1.sub(initialPTS1).toString());
 
         // Here no fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("0")
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("115062750")
 
         // Here the Fees for entering the pool
-        expect(await token1.balanceOf(energyAddress)).to.eq("319")
+        expect(await token1.balanceOf(energyAddress)).to.eq("1496172743802")
     });
 
     it('burning async with swap fees', async function () {
@@ -379,12 +383,12 @@ describe("Energy", () => {
         await token0.transfer(pylonInstance.address, newAmount0)
         await pylonInstance.mintPoolTokens(account.address, false)
         //expect(await pair.balanceOf(energyAddress)).to.eq("2728835295394547")
-        expect(await token1.balanceOf(energyAddress)).to.eq("79")
+        expect(await token1.balanceOf(energyAddress)).to.eq("494160702744")
 
         // Let's get some anchor shares...
         await token1.transfer(pylonInstance.address, newAmount0);
         await pylonInstance.mintPoolTokens(account.address, true);
-        expect(await token1.balanceOf(energyAddress)).to.eq("159")
+        expect(await token1.balanceOf(energyAddress)).to.eq("994160702744")
 
 
         // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
@@ -393,12 +397,10 @@ describe("Energy", () => {
         await poolTokenInstance1.transfer(pylonInstance.address, ptb1.sub(initialPTS1))
         await pylonInstance.burnAsync(account2.address, true)
         //Burns to an account2
-        expect(await token1.balanceOf(account2.address)).to.eq("2440604150336633")
+        expect(await token1.balanceOf(account2.address)).to.eq("2499500022121607")
         // Here no fees for swapping
-        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("7985796330232221")
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("7350965676206650")
         // Here the Fees for entering the pool
-        expect(await token1.balanceOf(energyAddress)).to.eq("317")
+        expect(await token1.balanceOf(energyAddress)).to.eq("1493360777454")
     });
 })
-
-*/

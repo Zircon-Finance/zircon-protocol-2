@@ -89,8 +89,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     }
 
     function configurePylon(address _tokenA, address _tokenB, address poolTokenA, address poolTokenB, address _pairAddress, address pylonAddress) private {
-        address energy = IZirconEnergyFactory(energyFactory).createEnergy( pylonAddress, _pairAddress, _tokenA, _tokenB);
         address energyRev = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
+        address energy = IZirconEnergyFactory(energyFactory).createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
         IZirconPylon(pylonAddress).initialize(poolTokenA, poolTokenB, _tokenA, _tokenB, _pairAddress, factory, energy, energyRev);
 
         emit PylonCreated(_tokenA, _tokenB, poolTokenA, poolTokenB, pylonAddress, _pairAddress);

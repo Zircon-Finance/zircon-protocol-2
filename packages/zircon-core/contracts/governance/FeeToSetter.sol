@@ -64,4 +64,17 @@ contract FeeToSetter {
     function setDynamicRatio(uint dynamicRatio) external onlyOwner {
         IZirconFactory(factory).setDynamicRatio(dynamicRatio);
     }
+
+    function setFeePercentageRev(uint fee) external onlyOwner {
+        require(fee <= 100, 'ZE: FEE_TOO_HIGH');
+        require(fee >= 0, 'ZE: FEE_TOO_LOW');
+        IZirconEnergyFactory(energyFactory).setFeePercentageRev(fee);
+    }
+
+    function setFeePercentageEnergy(uint fee) external onlyOwner {
+        require(fee <= 100, 'ZE: FEE_TOO_HIGH');
+        require(fee >= 0, 'ZE: FEE_TOO_LOW');
+        IZirconEnergyFactory(energyFactory).setFeePercentageEnergy(fee);
+    }
+
 }

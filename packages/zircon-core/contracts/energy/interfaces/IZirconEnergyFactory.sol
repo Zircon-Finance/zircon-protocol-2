@@ -5,6 +5,8 @@ interface IZirconEnergyFactory {
     // Variables
     function allEnergies(uint p) external view returns (address);
     function insurancePerMille() external view returns (uint);
+    function feePercentageRev() external view returns (uint);
+    function feePercentageEnergy() external view returns (uint);
     function getEnergy(address _tokenA, address _tokenB) external view returns (address energy);
     function getEnergyRevenue(address _tokenA, address _tokenB) external view returns (address energy);
     function allEnergiesLength() external view returns (uint);
@@ -12,7 +14,8 @@ interface IZirconEnergyFactory {
     function setMigrator(address _migrator) external;
     function setFeeToSetter(address _feeToSetter) external;
     function setInsurancePerMille(uint _insurancePerMille) external;
-
+    function setFeePercentageRev(uint fee) external;
+    function setFeePercentageEnergy(uint fee) external;
     // Functions
     function createEnergy(address, address, address, address) external returns (address energy);
     function createEnergyRev(address, address, address, address) external returns (address energy);
