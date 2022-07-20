@@ -88,8 +88,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             uint amount = balance.sub(reserve);
             uint pylon0Liq = amount.mul(pylonBalance0)/totalSupply;
             uint pylon1Liq = amount.mul(pylonBalance1)/totalSupply;
-            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);//.mul(100 - feePercentageForRev)/(100));
-            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);//.mul(100 - feePercentageForRev)/(100));
+            _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq.mul(100 - feePercentageForRev)/(100));
+            _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq.mul(100 - feePercentageForRev)/(100));
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));
         }
 

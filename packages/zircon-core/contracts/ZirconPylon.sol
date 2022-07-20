@@ -248,6 +248,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (anchorLiquidity) = _calculateSyncLiquidity(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
         (floatLiquidity) = _calculateSyncLiquidity(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
 
+        console.log("m");
+
         _syncMinting();
 
         IZirconPoolToken(anchorPoolTokenAddress).mint(_to, anchorLiquidity);
@@ -324,6 +326,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Get Maximum finds the highest amount that can be matched at 50/50
             uint px;
             uint py;
+            console.log("pts",IZirconPair(pairAddress).totalSupply());
             if (pairReserves0 == 0 && pairReserves1 == 0) {
                 (px, py) = ZirconLibrary._getMaximum(
                     balance0,
@@ -647,7 +650,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 uint feeBps = (maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + deltaGammaMinFee;
                 feeBps = feeBps.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
 
-                console.log("dgt feeBps", feeBps);
+                //console.log("dgt feeBps", feeBps);
 
                 //Avoids underflow issues downstream
                 require(feeBps < 10000, "ZP: FTH");
@@ -991,7 +994,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 //                uint tk = IUniswapV2ERC20(pairAddress).allowance(energyAddress, address(this));
 //                console.log("success", hey, tk);
                 remainingPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(liquidity);
-//                console.log("energy pt balance", remainingPercentage);
+                //console.log("energy pt balance", remainingPercentage);
 
             }
         } else {
@@ -1046,9 +1049,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             //Calculates user's share of Uniswap pool tokens held by Pylon
             uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
-            console.log("ptu: ", ptu);
+            //console.log("ptu: ", ptu);
             ptu = payBurnFees(ptu);
-            console.log("payed fees: ", ptu);
+            //console.log("payed fees: ", ptu);
             if (_isAnchor) {
                 //If it's an anchor, it needs to compensate for potential slashing
                 //This function tries to get compensation in the form of pool tokens
@@ -1058,7 +1061,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //ptu returned is the omega-adjusted share
                 (ptu, extraPercentage) = handleOmegaSlashing(ptu); //This one retrieves tokens from ZirconEnergy if available
             }
-            console.log("ptu after handling omega: ", ptu);
+            //console.log("ptu after handling omega: ", ptu);
             //Sends for burning
             _safeTransfer(pairAddress, pairAddress, ptu);
         }

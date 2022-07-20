@@ -101,10 +101,10 @@ contract ZirconEnergy is IZirconEnergy {
     uint balance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
     require(balance >= anchorReserve, "ZE: Anchor not sent");
 
-    uint register = anchorReserve.sub(balance);
+    uint register = balance.sub(anchorReserve);
     uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageEnergy();
     address energyRevAddress = IZirconEnergyFactory(energyFactory).getEnergyRevenue(pylon.floatToken, pylon.anchorToken);
-
+    console.log(energyRevAddress);
     uint toSend = register.mul(feePercentageForRev)/(100);
     if(toSend != 0) _safeTransfer(pylon.anchorToken, energyRevAddress, toSend);
 
