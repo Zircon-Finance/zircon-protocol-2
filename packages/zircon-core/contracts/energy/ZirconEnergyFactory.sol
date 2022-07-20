@@ -13,8 +13,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     address public feeToSetter;
     address public migrator;
     uint public insurancePerMille;
-    uint public feePercentageRev;
-    uint public feePercentageEnergy;
+
     struct Fee {
         uint112 minPylonFee;
         uint112 maxPylonFee;
@@ -35,7 +34,6 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     constructor(address _feeToSetter, address _migrator) public {
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         insurancePerMille = 100;
-        feePercentageRev = 20;
         feeToSetter = _feeToSetter;
         migrator = _migrator;
     }
@@ -75,7 +73,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
                 hex'ff',
                 address(this),
                 keccak256(abi.encodePacked(pair, token)),
-                hex'8e900d090fd1574f482e08e5b73fcac0ab69e310cce7555d9414367c7b70f867' // init code hash
+                hex'7e7a10109c49b102856695a7340fd053f1242b2391cdc4eccf5a2bf7d8a3e81e' // init code hash
             ))));
     }
 
@@ -84,7 +82,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
                 hex'ff',
                 pylonFactory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'93b52c6f421e6a087efc69543911262bde44dd6b3a5e40cbebce983a31340152' // init code hash
+                hex'db96eddb1a5f78c6cc63c6ec1e203ebba26532098f8fe8ab6f9f1894a8a901a4' // init code hash
+
             ))));
     }
 
@@ -143,19 +142,8 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
-    }
-
-    function setFeePercentageRev(uint _fee) external onlyFeeToSetter {
-        require(_fee <= 100, 'ZE: FEE_TOO_HIGH');
-        require(_fee >= 0, 'ZE: FEE_TOO_LOW');
-        feePercentageRev = _fee;
-    }
-
-    function setFeePercentageEnergy(uint _fee) external onlyFeeToSetter {
-        require(_fee <= 100, 'ZE: FEE_TOO_HIGH');
-        require(_fee >= 0, 'ZE: FEE_TOO_LOW');
-        feePercentageEnergy = _fee;
     }
 
     function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {

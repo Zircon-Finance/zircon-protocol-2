@@ -626,7 +626,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if (maxDerivative >= deltaGammaThreshold) {
             uint strikeDiff = block.number - strikeBlock;
 
-            if(strikeDiff > 10) {
+            //To avoid calling factory again we connect cooldown period to gammaThreshold.
+            //If threshold is 4%, cooldownBlocks will be 25
+
+            //The lower the threshold the higher the cooldown blocks
+            //This cooldown is potentially higher than the one applied to EMA bleed.
+            //It's meant to ensure that a single episode gives time to gammaEMA to return below threshold.
+
+            uint cooldownBlocks = 1e18/deltaGammaThreshold;
+
+            if(strikeDiff > cooldownBlocks) {
                 //This is the first strike (in a while)
                 //We don't apply deltaTax at this time, but Pylon will remember that
                 strikeBlock = block.number;
@@ -635,6 +644,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //parent if condition forces maxDerivative/dgt to be at least 1, so we can subtract 10000 without worrying
                 uint feeBps = (maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + deltaGammaMinFee;
                 feeBps = feeBps.add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals));
+
+                console.log("dgt feeBps", feeBps);
 
                 //Avoids underflow issues downstream
                 require(feeBps < 10000, "ZP: FTH");
@@ -856,13 +867,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 //To recover from this strike condition we add a general time-based bleed that starts 10 blocks after the strike was triggered.
 
+
+                //Bleed ensures pool doesn't get deadlocked by reducing EMA based on inactivity
+                //To do this we use blockDiff instead of strikeDiff since otherwise EMA would almost always bleed to zero.
                 uint bleed = (block.number - strikeBlock > 10) ? blockDiff / 10 : 0;
 
                 //Adds old blockEMA
-                //EMA primarily meant for non-flashloan manipulation attempts
+                //averaged out EMA primarily meant for non-flashloan manipulation attempts
 
+                //We multiply thisBlock values by 2 to accumulate changes
+                //This means that a constant stream of small operations that barely don't trip thibBlock, will eventually trip the EMA
 
-                gammaEMA = ((gammaEMA * EMASamples).add(thisBlockEMA))/((EMASamples + 1).add(bleed));
+                gammaEMA = ((gammaEMA * EMASamples).add(thisBlockEMA.mul(2)))/((EMASamples + 1).add(bleed));
 
                 //This one is more for flash loans
                 //Adds new value

@@ -50,7 +50,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         maximumPercentageSync = 10;
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 100; // 1%
-        EMASamples = 4; //Previous average is multiplied by this number, sum is divided by samples + 1
+        EMASamples = 2; //Previous average is multiplied by this number, sum is divided by samples + 1
 
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
         muChangeFactor = 3; //Increases absolute gamma deviation factor to speed up mu change
