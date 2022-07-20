@@ -27,7 +27,7 @@ interface IZirconPylonFactory {
     function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external;
     function setPaused(bool _paused) external;
 
-    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external;
+    function changeEnergyAddress(address _newEnergy, address _newEnergyRev, address _pylonAddress) external;
     function migrateLiquidity(address _oldPylon, address _newPylon) external;
     function startPylon(address _pylon, uint _gamma, uint _vab) external;
 }

@@ -25,6 +25,10 @@ contract Migrator {
     }
 
     function initialize(address energyFactory_, address ptFactory_, address pylonFactory_, address pairFactory_) public onlyOwner {
+        require(energyFactory_ != address(0), 'ZPT: FORBIDDEN');
+        require(ptFactory_ != address(0), 'ZPT: FORBIDDEN');
+        require(pylonFactory_ != address(0), 'ZPT: FORBIDDEN');
+        require(pairFactory_ != address(0), 'ZPT: FORBIDDEN');
         energyFactory = energyFactory_;
         ptFactory = ptFactory_;
         pylonFactory = pylonFactory_;
@@ -32,6 +36,7 @@ contract Migrator {
     }
 
     function setMigrator(address migrator_) public onlyOwner {
+        require(migrator_ != address(0), 'ZPT: Address zero');
         IZirconPylonFactory(pylonFactory).setMigrator(migrator_);
         IZirconEnergyFactory(energyFactory).setMigrator(migrator_);
         IZirconFactory(pairFactory).setMigrator(migrator_);
@@ -40,12 +45,14 @@ contract Migrator {
 
     // allows owner to change itself at any time
     function setOwner(address owner_) public {
+        require(owner_ != address(0), 'ZPT: Address zero');
         require(msg.sender == owner, 'FeeToSetter::setOwner: not allowed');
         owner = owner_;
     }
 
     function migratePylon(address oldPylon, address newPylon, address tokenA,
         address tokenB, address pair, address newEnergy) private {
+
         IZirconEnergyFactory(energyFactory).migrateEnergyLiquidity(pair, tokenA, newEnergy);
         IZirconPTFactory(ptFactory).changePylonAddress(oldPylon, tokenA, tokenB, newPylon, pylonFactory);
         IZirconPylonFactory(pylonFactory).migrateLiquidity(oldPylon, newPylon);
@@ -53,6 +60,11 @@ contract Migrator {
     }
 
     function startNewPylon(address oldPylon, address newPylonFactory, address _pairAddress, address _tokenA, address _tokenB) external onlyOwner {
+        require(newPylonFactory != address(0), 'ZPT: Address zero');
+        require(_pairAddress != address(0), 'ZPT: Address zero');
+        require(_tokenA != address(0), 'ZPT: Address zero');
+        require(_tokenB != address(0), 'ZPT: Address zero');
+
         address anchorAddress = IZirconPylon(oldPylon).anchorPoolTokenAddress();
         address floatAddress = IZirconPylon(oldPylon).floatPoolTokenAddress();
 
@@ -66,16 +78,31 @@ contract Migrator {
     }
 
     function migrateEnergyRevenue(address pair, address oldEnergyRev, address _tokenA, address _tokenB, address _pylonFactory, address newEnergyFactory) external onlyOwner{
+        require(oldEnergyRev != address(0), 'ZPT: Address zero');
+        require(_tokenA != address(0), 'ZPT: Address zero');
+        require(_tokenB != address(0), 'ZPT: Address zero');
+        require(_pylonFactory != address(0), 'ZPT: Address zero');
+        require(newEnergyFactory != address(0), 'ZPT: Address zero');
         IZirconFactory(pairFactory).changeEnergyFactoryAddress(newEnergyFactory);
         address newEnergy = IZirconFactory(pairFactory).changeEnergyRevAddress(pair, _tokenA, _tokenB, _pylonFactory);
         IZirconEnergyFactory(energyFactory).migrateEnergyRevenue(oldEnergyRev, newEnergy);
     }
 
     function updateFactories(address newEnergyFactory, address newPTFactory, address newPylonFactory, address newPairFactory) external onlyOwner{
+        require(newEnergyFactory != address(0), 'ZPT: Address zero');
+        require(newPTFactory != address(0), 'ZPT: Address zero');
+        require(newPylonFactory != address(0), 'ZPT: Address zero');
+        require(newPairFactory != address(0), 'ZPT: Address zero');
         energyFactory = newEnergyFactory;
         ptFactory = newPTFactory;
         pylonFactory = newPylonFactory;
         pairFactory = newPairFactory;
+    }
+
+    function updateEnergyOnPylon(address pylon, address newEnergy, address newEnergyRev) external onlyOwner{
+        require(newEnergy != address(0), 'ZPT: Address zero');
+        require(newEnergyRev != address(0), 'ZPT: Address zero');
+        IZirconPylon(pylon).changeEnergyAddress(newEnergy, newEnergyRev);
     }
 
 }

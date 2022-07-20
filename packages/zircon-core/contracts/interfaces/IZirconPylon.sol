@@ -31,6 +31,6 @@ interface IZirconPylon {
     // The function first uses the reserves of the Pylon
     // If not enough reserves it burns The Pool Tokens of the pylon
     function burn(address _to, bool _isAnchor) external returns (uint amount);
-    function changeEnergyAddress(address _energyAddress) external;
+    function changeEnergyAddress(address _energyAddress, address _energyRevAddress) external;
 
 }
