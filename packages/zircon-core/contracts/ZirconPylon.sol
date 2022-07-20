@@ -328,12 +328,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 (px, py) = ZirconLibrary._getMaximum(
                     balance0,
                     balance1,
-                    balance0.sub(max0), balance1.sub(max1), IZirconPair(pairAddress).totalSupply());
+                    balance0.sub(max0), balance1.sub(max1));
             }else{
                 (px, py) = ZirconLibrary._getMaximum(
                     pairReserves0,
                     pairReserves1,
-                    balance0.sub(max0), balance1.sub(max1), IZirconPair(pairAddress).totalSupply());
+                    balance0.sub(max0), balance1.sub(max1));
             }
 
 

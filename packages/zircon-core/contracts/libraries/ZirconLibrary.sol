@@ -22,33 +22,33 @@ library ZirconLibrary {
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
     // @b0, @b1 the balances to calculate
-//    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
-//
-//        //Expresses b1 in units of reserve0
-//        uint px = _reserve0.mul(_b1)/_reserve1;
-//
-//        if (px > _b0) {
-//            maxX = _b0;
-//            maxY = _b0.mul(_reserve1)/_reserve0; //b0 in units of reserve1
-//        } else {
-//            maxX = px; //max is b1 but in reserve0 units
-//            maxY = _b1;
-//        }
-//    }
-    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
+    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
 
         //Expresses b1 in units of reserve0
-        uint px = ts.mul(_b0)/_reserve0;
-        uint py = ts.mul(_b1)/_reserve1;
-        console.log("px: ", px, py);
-        if (px > py) {
-            maxX = py.mul(_reserve0)/ts;
-            maxY = _b1; //b0 in units of reserve1
+        uint px = _reserve0.mul(_b1)/_reserve1;
+
+        if (px > _b0) {
+            maxX = _b0;
+            maxY = _b0.mul(_reserve1)/_reserve0; //b0 in units of reserve1
         } else {
-            maxX = _b0; //max is b1 but in reserve0 units
-            maxY = px.mul(_reserve1)/ts;
+            maxX = px; //max is b1 but in reserve0 units
+            maxY = _b1;
         }
     }
+//    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
+//
+//        //Expresses b1 in units of reserve0
+//        uint px = ts.mul(_b0)/_reserve0;
+//        uint py = ts.mul(_b1)/_reserve1;
+//        console.log("px: ", px, py);
+//        if (px > py) {
+//            maxX = py.mul(_reserve0)/ts;
+//            maxY = _b1; //b0 in units of reserve1
+//        } else {
+//            maxX = _b0; //max is b1 but in reserve0 units
+//            maxY = px.mul(_reserve1)/ts;
+//        }
+//    }
 
     // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
     // @_amount is the quantity to convert
