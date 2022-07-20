@@ -6,7 +6,7 @@ interface IZirconEnergy {
 //    function syncPylonFee() external;
 //    function syncPairFee() external;
     function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount);
-
+    function registerFee() external;
     function migrateLiquidity(address newEnergy) external;
 
 }

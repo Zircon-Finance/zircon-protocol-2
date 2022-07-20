@@ -77,4 +77,9 @@ contract FeeToSetter {
         IZirconEnergyFactory(energyFactory).setFeePercentageEnergy(fee);
     }
 
+    function getFees(address _token, uint _amount, address _to, address energyRev) external onlyOwner {
+        require(_amount != 0, "Operations: Cannot recover zero balance");
+        IZirconEnergyFactory(energyFactory).getFees(_token, _amount, _to, energyRev);
+    }
+
 }

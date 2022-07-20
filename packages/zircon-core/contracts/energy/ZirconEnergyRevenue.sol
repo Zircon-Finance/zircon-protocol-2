@@ -33,12 +33,12 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
 
 
-    modifier _onlyEnergy() {
-        require(msg.sender == zircon.energy0 || msg.sender == zircon.energy1, "ZE: Not Pylon");
-        _;
-    }
+//    modifier _onlyEnergy() {
+//        require(msg.sender == zircon.energy0 || msg.sender == zircon.energy1, "ZE: Not Energy");
+//        _;
+//    }
     modifier _onlyPair() {
-        require(zircon.pairAddress == msg.sender, "ZE: Not Pylon");
+        require(zircon.pairAddress == msg.sender, "ZE: Not Pair");
         _;
     }
 
@@ -107,6 +107,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint balance = IZirconPair(zircon.pairAddress).balanceOf(address(this));
         _safeTransfer(zircon.pairAddress, newEnergy, balance);
     }
+
     function getBalanceFromPair() external returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         if(msg.sender == zircon.pylon0) {
@@ -116,5 +117,12 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             balance = pylon1Balance;
             pylon1Balance = 0;
         }
+    }
+
+    function getFees(address _token, uint _amount, address _to) external {
+        require(msg.sender == energyFactory, "ZER: Not properly called");
+        require(_amount != 0, "Operations: Cannot recover zero balance");
+
+        _safeTransfer(_token, _to, _amount);
     }
 }

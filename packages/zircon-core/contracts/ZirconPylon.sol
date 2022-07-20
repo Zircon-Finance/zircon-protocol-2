@@ -599,11 +599,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, IZirconPylonFactory(factoryAddress).liquidityFee());
             IZirconPair(pairAddress).swap(isFloatReserve0 ? 0 : amountSwapped, isFloatReserve0 ? amountSwapped : 0, energyAddress, "");
         }
+
+        IZirconEnergy(energyAddress).registerFee();
         amountOut =  amountIn.sub(fee);
     }
 
     /// @notice private function that sends to pair the LP tokens
-    /// Burns them sending it to the energy address
+    /// Burns them spayFeesending it to the energy address
     function payBurnFees(uint amountIn) private returns (uint amountOut) {
         (uint fee, ) = _applyDeltaAndGammaTax(amountIn);
         _safeTransfer(pairAddress, pairAddress, fee);
@@ -1175,9 +1177,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         _safeTransfer(pylonToken.float, newPylon, IUniswapV2ERC20(pylonToken.float).balanceOf(address(this)));
     }
 
-    function changeEnergyAddress(address _energyAddress) external {
+    function changeEnergyAddress(address _energyAddress, address _energyRevAddress) external {
         onlyFactory();
         energyAddress = _energyAddress;
-    }
+        energyRevAddress = _energyRevAddress;
 
+    }
 }

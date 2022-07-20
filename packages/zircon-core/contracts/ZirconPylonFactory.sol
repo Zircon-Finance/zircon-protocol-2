@@ -146,9 +146,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab);
     }
 
-    function changeEnergyAddress(address _newEnergy, address _pylonAddress) external {
+    function changeEnergyAddress(address _newEnergy, address _newEnergyRev, address _pylonAddress) external {
         onlyMigrator();
-        ZirconPylon(_pylonAddress).changeEnergyAddress(_newEnergy);
+        ZirconPylon(_pylonAddress).changeEnergyAddress(_newEnergy, _newEnergyRev);
     }
 
     function setPaused(bool _paused) external {

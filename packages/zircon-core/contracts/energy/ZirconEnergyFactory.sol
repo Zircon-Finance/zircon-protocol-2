@@ -76,7 +76,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
-        hex'8e900d090fd1574f482e08e5b73fcac0ab69e310cce7555d9414367c7b70f867' // init code hash
+        hex'4c0cc638980f92a78eb400874480774ada23af54c7b2c81c3c0d5e68498fefbe' // init code hash
         ))));
     }
 
@@ -85,7 +85,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'de4c41d8da7d675681a2956556ea5f23120b8671f63adcf02901115014fb6e91' // init code hash
+        hex'17b1debc1871f00859febc24d6387f688af76ae292e03a75f7a6defd79b03166' // init code hash
         ))));
     }
 
@@ -166,6 +166,12 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
     function setMigrator(address _migrator) external onlyMigrator {
         migrator = _migrator;
+    }
+    function getFees(address _token, uint _amount, address _to, address energyRev) external onlyFeeToSetter {
+
+        require(_amount != 0, "Operations: Cannot recover zero balance");
+
+        IZirconEnergyRevenue(energyRev).getFees(_token, _amount, _to);
     }
 }
 
