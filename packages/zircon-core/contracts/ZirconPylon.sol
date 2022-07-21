@@ -515,6 +515,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @liquidity -> In case async minting is done is returned the PT Liquidity to mint for the users on the async call, if not 0
     // @amount -> Amount on async if not 0
     function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
+
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
 
         //Calculates max tokens to be had in this reserve pool
@@ -532,6 +533,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
         }
 
+
         uint amountAsyncToMint = _amountIn.sub(freeSpace);
         //Calculates pylon pool tokens and amount it considers to have entered pool (slippage adjusted)
         (amountOut, liquidity) = calculateLiquidity(amountAsyncToMint, _isAnchor);
@@ -548,6 +550,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Uses raw amount since mintOneSide compensates for slippage by itself
         _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 ? !_isAnchor : _isAnchor);
+
+
     }
 
     // @notice External Function called to mint pool Token
@@ -558,16 +562,20 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Master sync function
         notPaused();
         sync();
+
+
         (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
 
         // balance of float/anchor sent to this
         uint balance = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this));
+
         //Reduces by amount that was in sync reserves
         uint amountIn = balance.sub(isAnchor ? _reserve1 : _reserve0);
         notZero(amountIn);
 
         amountIn = payFees(amountIn, isAnchor);
+
 
         uint amountOut;
         (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,

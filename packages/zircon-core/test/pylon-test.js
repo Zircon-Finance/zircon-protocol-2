@@ -235,7 +235,7 @@ describe("Pylon", () => {
         console.log("gamma after new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
         let vab = await pylonInstance.virtualAnchorBalance();
         console.log("vab after new token: ", ethers.utils.formatEther(vab));
-
+        console.log(token0.address);
         //We swapped slightly less than 1% of the pool, vab should be increased by
         // 50% (gamma) * 1% (swap amount) * 0.3% (fee) * 1% (pylon ownership) * 5/6 (mintfee)
         expect(vab).to.eq(ethers.BigNumber.from("53001252067667698169"));

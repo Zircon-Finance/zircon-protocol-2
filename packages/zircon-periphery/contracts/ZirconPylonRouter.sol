@@ -9,7 +9,6 @@ import "./libraries/ZirconPeripheralLibrary.sol";
 import "./libraries/UniswapV2Library.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
-
 contract ZirconPylonRouter is IZirconPylonRouter {
 
     address public immutable override factory;
@@ -276,12 +275,10 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         } else {
             uint amountBOptimal = UniswapV2Library.quote(amountADesired, reserveA, reserveB);
             if (amountBOptimal <= amountBDesired) {
-                //consoleg("B Optimal", amountBOptimal);
                 require(amountBOptimal >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
                 (amountA, amountB) = (amountADesired, amountBOptimal);
             } else {
                 uint amountAOptimal = UniswapV2Library.quote(amountBDesired, reserveB, reserveA);
-                //consoleg("B Optimal", amountAOptimal);
                 assert(amountAOptimal <= amountADesired);
                 require(amountAOptimal >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
                 (amountA, amountB) = (amountAOptimal, amountBDesired);

@@ -68,6 +68,7 @@ exports.coreFixtures = async function coreFixtures(address) {
 
     await feeToSetterInstance.setFeePercentageEnergy(0)
     await feeToSetterInstance.setFeePercentageRev(0)
+
     return {
         factoryInstance,
         pylonInstance,

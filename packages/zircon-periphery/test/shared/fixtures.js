@@ -3,6 +3,9 @@ const {expandTo18Decimals} = require("./utils");
 const zirconFactory = require('../../core_contracts/abi/ZirconFactory.json')
 const zirconPylonFactory = require('../../core_contracts/abi/ZirconPylonFactory.json')
 const zirconEnergyFactory = require('../../core_contracts/abi/ZirconEnergyFactory.json')
+const zirconPTFactory = require('../../core_contracts/abi/ZirconPTFactory.json')
+const feeToSetter = require('../../core_contracts/abi/FeeToSetter.json')
+const migrator = require('../../core_contracts/abi/Migrator.json')
 const zirconPair = require('../../core_contracts/abi/ZirconPair.json')
 const zirconPylon = require('../../core_contracts/abi/ZirconPylon.json')
 const zirconPoolToken = require('../../core_contracts/abi/ZirconPoolToken.json')
@@ -13,6 +16,14 @@ const OVERRIDES = {
 }
 exports.coreFixtures = async function coreFixtures(address, signer) {
 
+    // Deploy feeToSetter contract
+    let feeToSetterContract = await ethers.getContractFactory(feeToSetter['abi'], feeToSetter['bytecode']);
+    let feeToSetterInstance = await feeToSetterContract.deploy();
+
+    // Deploy Migrator contract
+    let migratorContract = await ethers.getContractFactory(migrator['abi'], migrator['bytecode']);
+    let migratorInstance = await migratorContract.deploy();
+
     // Creating Random ERC20
     let tok = await ethers.getContractFactory('Token');
     let tk0 = await tok.deploy('Token1', 'TOK1');
@@ -20,15 +31,19 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
 
     // Creating Energy
     let factoryEnergy = await ethers.getContractFactory(zirconEnergyFactory['abi'], zirconEnergyFactory['bytecode'])
-    let factoryEnergyInstance = await factoryEnergy.deploy();
+    let factoryEnergyInstance = await factoryEnergy.deploy(feeToSetterInstance.address, migratorInstance.address);
 
     // Creating Factory
     const factory = await ethers.getContractFactory(zirconFactory['abi'], zirconFactory['bytecode'])
-    let factoryInstance = await factory.deploy(factoryEnergyInstance.address)
+    let factoryInstance = await factory.deploy(factoryEnergyInstance.address, feeToSetterInstance.address, migratorInstance.address)
+
+    // Deploy Pool Token Factory
+    let ptFactory = await ethers.getContractFactory(zirconPTFactory['abi'], zirconPTFactory['bytecode']);
+    let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address, feeToSetterInstance.address);
 
     // Creating Pylon Factory
     const pylonFactory = await ethers.getContractFactory(zirconPylonFactory['abi'], zirconPylonFactory['bytecode'])
-    let factoryPylonInstance = await pylonFactory.deploy(factoryInstance.address, factoryEnergyInstance.address)
+    let factoryPylonInstance = await pylonFactory.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address, feeToSetterInstance.address, migratorInstance.address);
 
     // Creating a Pair
     let pairT =  await factoryInstance.callStatic.createPair(tk0.address, tk1.address, factoryPylonInstance.address, OVERRIDES);
@@ -63,11 +78,11 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
     let farmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress1, [token0.address], 0, 1000, 0, 0, address)
     await psionicFactoryInstance.deployPool(poolAddress1, [token0.address], 0, 1000, 0, 0, address)
     const psionicFarmInit = await ethers.getContractFactory(psionicFarm['abi'], psionicFarm['bytecode'])
-    let anchorFarm = psionicFarmInit.attach(farmAddress);
+    let anchorFarm = psionicFarmInit.attach(farmAddress[0]);
 
     let floatFarmAddress = await psionicFactoryInstance.callStatic.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, address)
     await psionicFactoryInstance.deployPool(poolAddress0, [token0.address], 0, 1000, 0, 0, address)
-    let floatFarm = psionicFarmInit.attach(floatFarmAddress);
+    let floatFarm = psionicFarmInit.attach(floatFarmAddress[0]);
 
     // Creating Wrapped Ethereum
     let WETH = await ethers.getContractFactory('WETH');

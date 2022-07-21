@@ -76,7 +76,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
-        hex'faa9d243c4360508dae3b19c46b9a36bf3e428701a519d6d2e919305b2f48fb3' // init code hash
+        hex'bc38003108dfda0f103b524d9e408c9816ba8ad4903450734a22872aa595cf84' // init code hash
         ))));
     }
 
@@ -85,7 +85,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'da78e2162be0af9f382e82a6e4ec2bfcb7642b39f2cbc2e2d1d358ef7fb72709' // init code hash
+        hex'e9f29a32ecac75732f474db4cc8a5f7200df9570f98d23ea3e38151c6d21d16c' // init code hash
         ))));
     }
 
@@ -103,6 +103,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         require(energy != address(0), "Create2: Failed on deploy");
         address energy0 = energyFor(token0, _pair);
         address energy1 = energyFor(token1, _pair);
+        // pylon 0 always with token0 first
         address pylon0 = pylonFor(token0, token1, _pair, _pylonFactory);
         address pylon1 = pylonFor(token1, token0, _pair, _pylonFactory);
 
