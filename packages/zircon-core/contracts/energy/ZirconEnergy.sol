@@ -150,8 +150,7 @@ contract ZirconEnergy is IZirconEnergy {
 
   //Returns the fee in basis points (0.01% units, needs to be divided by 10000)
   //Uses two piece-wise parabolas. Between 0.45 and 0.55 the fee is very low (minFee).
-  //After the cutoff it uses a steeper parabola defined by a max fee at the extremes (very high, up to 15% by default).
-  //This is only used for the burn/mint async 50/50, which is effectively a swap that can cause issues when gamma is imbalanced.
+  //After the cutoff it uses a steeper parabola defined by a max fee at the extremes (very high, up to 1% by default).
   function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount) {
     (uint _minFee, uint _maxFee) = getFee();
     uint _gammaHalf = 5e17;
