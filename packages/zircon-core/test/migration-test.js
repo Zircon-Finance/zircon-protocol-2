@@ -72,9 +72,9 @@ describe("Migrations", () => {
         let newPylonInstance2 = await zPylon.attach(pylonAddress2)
 
         await migrator.migrateEnergyRevenue(pair.address, await pair.energyRevenueAddress(), token0.address, token1.address, newFactoryPylonInstance.address, factoryEnergyInstance2.address)
+        await migrator.updateEnergyOnPylon(await pylonInstance.energyAddress(), await pair.energyRevenueAddress(), await newPylonInstance.address, pair.address, token0.address, token1.address, newFactoryPylonInstance.address)
+        await migrator.updateEnergyOnPylon(await pylonInstance2.energyAddress(), await pair.energyRevenueAddress(), await newPylonInstance2.address, pair.address, token1.address, token0.address, newFactoryPylonInstance.address)
         await migrator.updateFactories(factoryEnergyInstance2.address, ptFactoryInstance.address, newFactoryPylonInstance.address, factoryInstance.address)
-        await migrator.updateEnergyOnPylon(await pair.energyRevenueAddress(), await newPylonInstance.address, pair.address, token0.address, token1.address)
-        await migrator.updateEnergyOnPylon(await pair.energyRevenueAddress(), await newPylonInstance2.address, pair.address, token1.address, token0.address)
 
         return [newPylonInstance, newPylonInstance2]
     }
@@ -88,12 +88,9 @@ describe("Migrations", () => {
         let pAddress = await factoryPylonInstance.getPylon(token1.address, token0.address)
         let pylonInstance2 = zPylon.attach(pAddress)
 
-        await migrator.migrateEnergyRevenue(pair.address, await pair.energyRevenueAddress(), token0, token1, factoryPylonInstance.address, factoryEnergyInstance2.address)
-        await migrator.updateEnergyOnPylon(await pair.energyRevenueAddress(), pylonInstance.address, pair.address, token0, token1)
-        await migrator.updateEnergyOnPylon(await pair.energyRevenueAddress(), pylonInstance2.address, pair.address, token1, token0)
-
-
-        return [newPylonInstance, newPylonInstance2]
+        await migrator.migrateEnergyRevenue(pair.address, await pair.energyRevenueAddress(), token0.address, token1.address, factoryPylonInstance.address, factoryEnergyInstance2.address)
+        await migrator.updateEnergyOnPylon(await pylonInstance.energyAddress(), await pair.energyRevenueAddress(), pylonInstance.address, pair.address, token0.address, token1.address, factoryPylonInstance.address)
+        await migrator.updateEnergyOnPylon(await pylonInstance2.energyAddress(), await pair.energyRevenueAddress(), pylonInstance2.address, pair.address, token1.address, token0.address,factoryPylonInstance.address)
     }
 
     const init = async (token0Amount, token1Amount) => {
@@ -238,8 +235,37 @@ describe("Migrations", () => {
     });
 
     it('should migrate energy and energy Rev', async function () {
-        await init(expandTo18Decimals(1700), expandTo18Decimals(5300))
+        let energyRevenueAddress = await pair.energyRevenueAddress()
+        let energyAddress = await pylonInstance.energyAddress()
+        await feeToSetterInstance.setFeePercentageRev(20)
+        await feeToSetterInstance.setFeePercentageEnergy(20)
+        await init(expandTo18Decimals(200), expandTo18Decimals(200))
+        let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);
+        let initialPTS1 = await poolTokenInstance1.balanceOf(account.address);
+
+        const newAmount0 = ethers.BigNumber.from('5000000000000000')
+
+        await token0.transfer(pair.address, expandTo18Decimals(1))
+        await pair.swap(0, ethers.BigNumber.from('900000000000000000'), account.address, '0x', overrides)
+        // Let's get some float shares...
+        await token0.transfer(pylonInstance.address, newAmount0)
+        await pylonInstance.mintPoolTokens(account.address, false)
+
+
+        expect(await pair.balanceOf(energyRevenueAddress)).to.eq("7477931831893567")
+        expect(await pair.balanceOf(energyAddress)).to.eq("507864622747667")
+        expect(await token1.balanceOf(energyRevenueAddress)).to.eq("98832140548")
+        expect(await token1.balanceOf(energyAddress)).to.eq("395328562196")
         await migrateEnergy();
+        let energyRevenueAddress2 = await pair.energyRevenueAddress()
+        let energyAddress2 = await pylonInstance.energyAddress()
+        expect(energyAddress).to.not.eq(energyAddress2)
+        expect(energyRevenueAddress).to.not.eq(energyRevenueAddress2)
+
+        expect(await pair.balanceOf(energyRevenueAddress2)).to.eq("7477931831893567")
+        expect(await pair.balanceOf(energyAddress2)).to.eq("507864622747667")
+        expect(await token1.balanceOf(energyRevenueAddress2)).to.eq("98832140548")
+        expect(await token1.balanceOf(energyAddress2)).to.eq("395328562196")
 
 
     });

@@ -24,4 +24,6 @@ interface IZirconEnergyFactory {
     function getFees(address _token, uint _amount, address _to, address energyRev) external;
     function migrateEnergyLiquidity(address pair, address token, address newEnergy) external;
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external;
+    function migrateEnergy(address oldEnergy, address newEnergy) external;
+
 }

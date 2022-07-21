@@ -25,9 +25,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
     uint public muUpdatePeriod;
     uint public muChangeFactor;
-
-
-    //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
 
     constructor(address _factory, address _energyFactory, address _ptFactory, address _feeToSetter, address _migrator) public {
@@ -49,9 +46,11 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         paused = false;
     }
 
+    // @dev modifiers are function for space purposes
     function onlyFeeToSetter() internal view{
         require(msg.sender == feeToSetter, 'ZPT: F');
     }
+
     function onlyMigrator() internal view{
         require(msg.sender == migrator, 'ZPT: F');
     }
@@ -70,6 +69,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         }
     }
 
+    // @notice Function to help with the migrartion of the pylons
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external  returns (address pylonAddress)  {
         onlyMigrator();
         require(_tokenA != _tokenB, 'ZF: IA');
@@ -79,6 +79,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         configurePylon(_tokenA, _tokenB, floatPTAddress, anchorPTAddress, _pairAddress, pylonAddress);
     }
 
+    // @notice Configuring pylon
     function configurePylon(address _tokenA, address _tokenB, address poolTokenA, address poolTokenB, address _pairAddress, address pylonAddress) private {
         address energyRev = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
         address energy = IZirconEnergyFactory(energyFactory).createEnergy(pylonAddress, _pairAddress, _tokenA, _tokenB);
@@ -136,9 +137,11 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         onlyMigrator();
         ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab);
     }
-    function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external {
+
+
+    function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external returns (address energy){
         onlyMigrator();
-        address energy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB);
+        energy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB);
         if (energy == address(0)) {
             energy = IZirconEnergyFactory(energyFactory).createEnergy(_pylonAddress, _pairAddress, _tokenA, _tokenB);
         }

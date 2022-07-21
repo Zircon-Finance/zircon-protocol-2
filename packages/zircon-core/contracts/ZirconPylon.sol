@@ -239,7 +239,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 gammaMulDecimals = tpvAnchorPrime.mul(1e18)/(virtualAnchorBalance.mul(4)); // Subflow already checked by if statement
             }
-            // console.log("ZP: GAMMA_MUL_DECIMALS", gammaMulDecimals);
             // This is gamma formula when FTV <= 50%
         } else {
             // When Pair is not initialized let's start gamma to 0.5
@@ -378,7 +377,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //This makes sure that a massive mintAsync can't be exited in the same block
             strikeBlock = block.number;
         }
-//        console.log("ZP: UPDATE", gammaMulDecimals, _newGamma, deltaGammaThreshold);
 
     }
 
@@ -819,7 +817,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 uint EMASamples = IZirconPylonFactory(factoryAddress).EMASamples();
                 //Using past average means that delta spikes stay embedded in it for a while
-                //console.log("Gamma EMA Before, blockDiff, EMASamples", gammaEMA, blockDiff, EMASamples);
 
                 //Strike block is recorded by applyDeltaTax. It means that one of gamma/thisBlock triggered the failsafe
                 //The first transaction is allowed but if there's anything else in this block/triggering a massive gamma change, it fails.
