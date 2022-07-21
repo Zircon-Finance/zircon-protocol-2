@@ -115,7 +115,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
                 uint denominator = rootK.mul(dynamicRatio).add(rootKLast);
                 uint liquidityPercentage = numerator / denominator;
                 if (liquidityPercentage > 0) {
-                    console.log("Minting ", liquidityPercentage, " % of liquidity");
+                    console.log("Minting ", energyRevenueAddress, " % of liquidity");
                     _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
                     uint totalPercentage = ((rootK.sub(rootKLast)).mul(1e18))/rootKLast;
                     IZirconEnergyRevenue(energyRevenueAddress).calculate(totalPercentage.sub(liquidityPercentage));

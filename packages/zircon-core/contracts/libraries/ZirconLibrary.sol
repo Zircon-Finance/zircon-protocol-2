@@ -90,9 +90,9 @@ library ZirconLibrary {
 
     function absoluteDiff(uint value1, uint value2) pure internal returns (uint abs) {
         if (value1 >= value2) {
-            abs = value1 - value2;
+            abs = value1.sub(value2);
         } else {
-            abs = value2 - value1;
+            abs = value2.sub(value1);
         }
     }
 

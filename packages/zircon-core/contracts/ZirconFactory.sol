@@ -6,7 +6,6 @@ import "./energy/interfaces/IZirconEnergyRevenue.sol";
 
 contract ZirconFactory is IZirconFactory {
     address public energyFactory;
-    bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergyRev(address,address,address,address)')));
     address public migrator;
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
@@ -73,8 +72,11 @@ contract ZirconFactory is IZirconFactory {
     }
 
     function changeEnergyRevAddress(address _pairAddress, address _tokenA, address _tokenB, address _pylonFactory) external _onlyMigrator returns (address newEnergy){
-        newEnergy = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, _pylonFactory);
 
+        newEnergy = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
+        if (newEnergy == address(0)) {
+            newEnergy = IZirconEnergyFactory(energyFactory).createEnergyRev(_pairAddress, _tokenA, _tokenB, _pylonFactory);
+        }
         ZirconPair(_pairAddress).changeEnergyRevAddress(newEnergy);
     }
 

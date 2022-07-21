@@ -26,15 +26,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public muUpdatePeriod;
     uint public muChangeFactor;
 
-//    modifier onlyFeeToSetter {
-//        require(msg.sender == feeToSetter, 'ZPT: F');
-//        _;
-//    }
-//
-//    modifier onlyMigrator {
-//        require(msg.sender == migrator, 'ZPT: F');
-//        _;
-//    }
 
     //bytes4 private constant CREATE = bytes4(keccak256(bytes('createEnergy(address,address,address,address)')));
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
@@ -145,10 +136,13 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         onlyMigrator();
         ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab);
     }
-
-    function changeEnergyAddress(address _newEnergy, address _newEnergyRev, address _pylonAddress) external {
+    function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external {
         onlyMigrator();
-        ZirconPylon(_pylonAddress).changeEnergyAddress(_newEnergy, _newEnergyRev);
+        address energy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB);
+        if (energy == address(0)) {
+            energy = IZirconEnergyFactory(energyFactory).createEnergy(_pylonAddress, _pairAddress, _tokenA, _tokenB);
+        }
+        ZirconPylon(_pylonAddress).changeEnergyAddress(energy, _newEnergyRev);
     }
 
     function setPaused(bool _paused) external {
@@ -158,5 +152,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     function setLiquidityFee(uint _liquidityFee) external {
         onlyFeeToSetter();
         liquidityFee = _liquidityFee;
+    }
+
+    function changeEnergyFactoryAddress(address _newEnergyFactory) external {
+        onlyMigrator();
+        energyFactory = _newEnergyFactory;
     }
 }

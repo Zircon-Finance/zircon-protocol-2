@@ -83,7 +83,10 @@ contract Migrator {
         require(_tokenB != address(0), 'ZPT: Address zero');
         require(_pylonFactory != address(0), 'ZPT: Address zero');
         require(newEnergyFactory != address(0), 'ZPT: Address zero');
+
+        IZirconPylonFactory(pylonFactory).changeEnergyFactoryAddress(newEnergyFactory);
         IZirconFactory(pairFactory).changeEnergyFactoryAddress(newEnergyFactory);
+
         address newEnergy = IZirconFactory(pairFactory).changeEnergyRevAddress(pair, _tokenA, _tokenB, _pylonFactory);
         IZirconEnergyFactory(energyFactory).migrateEnergyRevenue(oldEnergyRev, newEnergy);
     }
@@ -99,10 +102,9 @@ contract Migrator {
         pairFactory = newPairFactory;
     }
 
-    function updateEnergyOnPylon(address pylon, address newEnergy, address newEnergyRev) external onlyOwner{
-        require(newEnergy != address(0), 'ZPT: Address zero');
+    function updateEnergyOnPylon(address newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external onlyOwner{
         require(newEnergyRev != address(0), 'ZPT: Address zero');
-        IZirconPylon(pylon).changeEnergyAddress(newEnergy, newEnergyRev);
+        IZirconPylonFactory(pylonFactory).changeEnergyAddress(newEnergyRev, _pylonAddress, _pairAddress, _tokenA, _tokenB);
     }
 
 }

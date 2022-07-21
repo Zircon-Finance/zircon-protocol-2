@@ -68,6 +68,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
 
     function calculate(uint percentage) external _onlyPair nonReentrant {
+        console.log("calculate", percentage);
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
         require(balance > reserve, "ZER: Reverted");
 
@@ -76,6 +77,9 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
 
         {
+            console.log("calculated", zircon.pylon0);
+            console.log("calculated", zircon.pylon1);
+
             (uint112 _reservePair0, uint112 _reservePair1,) = IZirconPair(zircon.pairAddress).getReserves();
             uint112 reserve0 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair0 : _reservePair1;
             uint112 reserve1 = IZirconPylon(zircon.pylon0).isFloatReserve0() ? _reservePair1 : _reservePair0;
@@ -83,7 +87,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             pylon0Balance += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
             pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
-        {
+
+    {
             uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageRev();
             uint amount = balance.sub(reserve);
             uint pylon0Liq = (amount.mul(pylonBalance0)/totalSupply).mul(100 - feePercentageForRev)/(100);
@@ -105,7 +110,9 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     function migrateLiquidity(address newEnergy) external{
         require(msg.sender == energyFactory, 'ZP: FORBIDDEN'); // sufficient check
         uint balance = IZirconPair(zircon.pairAddress).balanceOf(address(this));
+        uint anchorBalance = IZirconPair(zircon.anchorToken).balanceOf(address(this));
         _safeTransfer(zircon.pairAddress, newEnergy, balance);
+        _safeTransfer(zircon.anchorToken, newEnergy, anchorBalance);
     }
 
     function getBalanceFromPair() external returns (uint balance) {
