@@ -156,9 +156,9 @@ contract ZirconEnergy is IZirconEnergy {
     uint _gammaHalf = 5e17;
     uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);
     if (gammaMulDecimals <= 45e16 || gammaMulDecimals >= 55e16) {
-      amount = (_maxFee.mul(x)/1e18).mul(x)/(25e18); //25 is a reduction factor based on the 0.45-0.55 range we're using.
+      amount = (_maxFee.mul(x).mul(x))/(25e36); //25 is a reduction factor based on the 0.45-0.55 range we're using.
     } else {
-      amount = ((_minFee.mul(x)/1e18).mul(x).mul(36)/(1e18)).add(_minFee); //Ensures minFee is the lowest value.
+      amount = (_minFee.mul(x).mul(x).mul(36)/(1e36)).add(_minFee); //Ensures minFee is the lowest value.
     }
   }
 

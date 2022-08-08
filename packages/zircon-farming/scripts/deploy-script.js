@@ -37,19 +37,19 @@ async function deploy() {
 
     const bNumber = await ethers.provider.getBlockNumber()
     const farming = await ethers.getContractFactory('PsionicFarmFactory');
-    const masterInstance = farming.attach("0xF640Fb705c9Ce966ae1775a111D93e739dc8DD03")
+    const masterInstance = farming.attach("0xa83447201013d6D7Fa3b7b951E0AF07bC3c2E450")
 
     let farmAddress = await masterInstance.callStatic.deployPool(
-        "0xaf3ca2e58f6dae9b3d653dadea3ffcc94a878541",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0x95FF05b0c45fE642fe0A21BA8A66cE54635Ff141",
+        ["0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
         bNumber,
         bNumber + 10000,
         0,
         0,
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     await masterInstance.deployPool(
-        "0xaf3ca2e58f6dae9b3d653dadea3ffcc94a878541",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0x95FF05b0c45fE642fe0A21BA8A66cE54635Ff141",
+        ["0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
         bNumber,
         bNumber + 10000,
         0,
@@ -57,16 +57,16 @@ async function deploy() {
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
 
     let farmAddress2 = await masterInstance.callStatic.deployPool(
-        "0x317533a7c471cffc1b23045cc74378e0d9b8f7c5",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0xC8D67ef36391ae8C08928ca5BFD6d8cF02C077B8",
+        ["0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
         bNumber,
         bNumber + 10000,
         0,
         0,
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     await masterInstance.deployPool(
-        "0x317533a7c471cffc1b23045cc74378e0d9b8f7c5",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0xC8D67ef36391ae8C08928ca5BFD6d8cF02C077B8",
+        ["0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
         bNumber,
         bNumber + 10000,
         0,
@@ -74,32 +74,32 @@ async function deploy() {
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
 
     let farmAddress3 = await masterInstance.callStatic.deployPool(
-        "0xBC6dAA950fF110B8b6526C77c5a74591f11dbd97",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0x0d176f03892811101c1e38cda0E060c721928AFB",
+        ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
         bNumber,
         bNumber + 10000,
         0,
         0,
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     await masterInstance.deployPool(
-        "0xBC6dAA950fF110B8b6526C77c5a74591f11dbd97",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0x0d176f03892811101c1e38cda0E060c721928AFB",
+        ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
         bNumber,
         bNumber + 10000,
         0,
         0,
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     let farmAddress4 = await masterInstance.callStatic.deployPool(
-        "0x4c55Dde762f2E1bf1df8e76c1901799bcc629EF8",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0xbe1aa00dA54733862C07DdD2A1CdE5C48a7dE7f0",
+        ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
         bNumber,
         bNumber + 10000,
         0,
         0,
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     await masterInstance.deployPool(
-        "0x4c55Dde762f2E1bf1df8e76c1901799bcc629EF8",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576"],
+        "0xbe1aa00dA54733862C07DdD2A1CdE5C48a7dE7f0",
+        ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
         bNumber,
         bNumber + 10000,
         0,
@@ -116,7 +116,7 @@ async function deploy() {
     console.log(farmAddress4)
 }
 
-script()
+deploy()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

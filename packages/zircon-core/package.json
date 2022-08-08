@@ -26,6 +26,7 @@
     "hardhat-abi-exporter": "https://github.com/VittoriDavide/hardhat-abi-exporter",
     "hardhat-contract-sizer": "^2.3.0",
     "hardhat-dependency-compiler": "^1.1.2",
+    "hardhat-gas-reporter": "^1.0.8",
     "mocha": "*"
   },
   "dependencies": {
@@ -39,9 +40,11 @@
   },
   "scripts": {
     "deploy": "npx hardhat --network moonbase deploy --export-all ../zircon-periphery/external_contracts/hardhat_contracts.json",
-    "test": "mocha",
+    "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",
-    "bytecode": "npx hardhat run scripts/get-bytecodes.js"
+    "bytecode": "npx hardhat run scripts/get-bytecodes.js",
+    "testScript": "npx hardhat run --network moonbase scripts/add-pair.js"
+
   }
 }

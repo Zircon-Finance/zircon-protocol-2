@@ -1,4 +1,14 @@
 const { ethers } = require('hardhat');
+async function test() {
+    let erc20 = await ethers.getContractFactory('ERC20')
+    let erc20Token = await erc20.attach("0x08B40414525687731C23F430CEBb424b332b3d35")
+    let balance = await erc20Token.balanceOf("0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+
+    let erc20Token2 = await erc20.attach("0x08B40414525687731C23F430CEBb424b332b3d35")
+    let balance2 = await erc20Token2.balanceOf("0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+
+    console.log("balances: ", balance.toString(), balance2.toString())
+}
 
 // Add Pair Function
 async function addPair() {
@@ -38,7 +48,7 @@ async function addPair() {
     // let pRouterInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, wethInstance.address)
 }
 
-addPair()
+test()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

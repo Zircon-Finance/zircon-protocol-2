@@ -3,14 +3,16 @@ pragma solidity =0.6.6;
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
-import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
 import "./libraries/UniswapV2Library.sol";
+import "./interfaces/IZirconRouter.sol";
+import "@zircon/core/contracts/interfaces/IZirconFactory.sol";
 
-contract ZirconRouter is IUniswapV2Router02 {
+contract ZirconRouter is IZirconRouter {
     using SafeMath for uint;
 
     address public immutable override factory;
+    address public immutable override pylonFactory;
     address public immutable override WETH;
 
     modifier ensure(uint deadline) {
@@ -18,9 +20,10 @@ contract ZirconRouter is IUniswapV2Router02 {
         _;
     }
 
-    constructor(address _factory, address _WETH) public {
+    constructor(address _factory, address _pylonFactory, address _WETH) public {
         factory = _factory;
         WETH = _WETH;
+        pylonFactory = _pylonFactory;
     }
 
     receive() external payable {
@@ -38,8 +41,8 @@ contract ZirconRouter is IUniswapV2Router02 {
         uint amountBMin
     ) internal virtual returns (uint amountA, uint amountB) {
         // create the pair if it doesn't exist yet
-        if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
-            IUniswapV2Factory(factory).createPair(tokenA, tokenB);
+        if (IZirconFactory(factory).getPair(tokenA, tokenB) == address(0)) {
+            IZirconFactory(factory).createPair(tokenA, tokenB, pylonFactory);
         }
         (uint reserveA, uint reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
         if (reserveA == 0 && reserveB == 0) {

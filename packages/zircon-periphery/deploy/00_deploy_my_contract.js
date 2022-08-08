@@ -7,7 +7,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
-    /// Deploy Wrapped ETH
+    // Deploy Wrapped ETH
     let wrappedInstance = await deploy('WETH', {
         from: deployer,
         log: true
@@ -16,7 +16,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     /// Deploy Factory
     let router = await deploy('ZirconRouter', {
         from: deployer,
-        args: [coreContracts["ZirconFactory"]["address"], wrappedInstance.address],
+        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"], wrappedInstance.address],
         log: true
     });
 

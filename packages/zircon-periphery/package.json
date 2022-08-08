@@ -24,6 +24,7 @@
     "hardhat": "^2.6.8",
     "hardhat-contract-sizer": "^2.3.0",
     "hardhat-dependency-compiler": "^1.1.2",
+    "hardhat-gas-reporter": "^1.0.8",
     "mocha": "*"
   },
   "dependencies": {
@@ -35,8 +36,8 @@
     "hardhat-watcher": "^2.1.1"
   },
   "scripts": {
-    "deploy": "npx hardhat --network moonbase deploy",
-    "test": "mocha",
+    "deploy": "npx hardhat --network moonbase deploy --reset",
+    "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "ctest": "npx hardhat compile && npm test",
     "testScript": "npx hardhat run --network moonbase scripts/add-pair.js"

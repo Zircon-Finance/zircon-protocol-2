@@ -32,10 +32,6 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
 
 
-    //    modifier _onlyEnergy() {
-    //        require(msg.sender == zircon.energy0 || msg.sender == zircon.energy1, "ZE: Not Energy");
-    //        _;
-    //    }
     modifier _onlyPair() {
         require(zircon.pairAddress == msg.sender, "ZE: Not Pair");
         _;
