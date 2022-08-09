@@ -39,7 +39,7 @@
     "solidity-docgen": "^0.6.0-beta.10"
   },
   "scripts": {
-    "deploy": "npx hardhat --network moonbase deploy --export-all ../zircon-periphery/external_contracts/hardhat_contracts.json",
+    "deploy": "npx hardhat --network moonbase deploy --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",

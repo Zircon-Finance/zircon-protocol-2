@@ -8,6 +8,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IPsionicFarmVault} from "./interfaces/IPsionicFarmVault.sol";
+import {IPsionicFarmFactory} from "./interfaces/IPsionicFarmFactory.sol";
 
 contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20Metadata;
@@ -161,6 +162,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _amount: amount to withdraw (in rewardToken)
      */
     function routerDeposit(uint256 _amount) external nonReentrant {
+        require(IPsionicFarmFactory(address(PSIONIC_FACTORY)).PYLON_ROUTER() == msg.sender, "ONLY PYLON ROUTER");
         deposit(_amount, tx.origin);
     }
 
@@ -168,7 +170,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Withdraw staked tokens and collect reward tokens
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function withdraw(uint256 _amount) external  nonReentrant {
+    function withdraw(uint256 _amount) external nonReentrant {
         UserInfo storage user = userInfo[msg.sender];
 
         require(user.amount >= _amount, "Amount to withdraw too high");

@@ -10,7 +10,17 @@ import "./PsionicFarmVault.sol";
 
 contract PsionicFarmFactory is Ownable {
     event NewPsionicFarmContract(address indexed psionicFarm);
+    address public PYLON_ROUTER = address(0);
     constructor() {}
+
+
+    // @notice: Updates the Pylon Router address to use for the Psionic Farm contract
+    // @param _pylonRouter: Pylon Router Address
+    function updatePylonRouter(address _pylonRouter) external onlyOwner {
+        PYLON_ROUTER = _pylonRouter;
+    }
+
+
     /*
      * @notice Deploy the pool
      * @param _stakedToken: staked token address
