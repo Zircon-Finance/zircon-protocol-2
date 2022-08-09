@@ -14,4 +14,6 @@ interface IPsionicFarmFactory {
         address _admin)
     external returns (address psionicFarmAddress, address psionicVault);
     function updatePylonRouter(address _pylonRouter) external;
+    function isPaused() external view returns (bool);
+    function switchPause() external;
 }

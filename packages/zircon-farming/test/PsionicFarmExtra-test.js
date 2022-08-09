@@ -80,4 +80,20 @@ describe("Psionic Farm Factory", () => {
         await psionicVault.remove(tk0.address)
         await expect(psionicVault.remove(tk1.address)).to.be.revertedWith("At least 1 token is required");
     });
+
+    it('should pause only owner', async function () {
+        await expect(psionicFactory.connect(account2).switchPause()).to.be.revertedWith("Ownable: caller is not the owner");
+    });
+
+    it('should block on pause', async function () {
+        await psionicFactory.switchPause()
+
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
+
+        await expect(psionicFarm.deposit(
+            expandTo18Decimals(100)
+        )).to.be.revertedWith('The factory is paused')
+ 
+
+    });
 })

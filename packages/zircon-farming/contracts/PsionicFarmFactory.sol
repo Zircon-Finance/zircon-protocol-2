@@ -12,6 +12,7 @@ contract PsionicFarmFactory is Ownable {
     event NewPsionicFarmContract(address indexed psionicFarm);
     address public PYLON_ROUTER = address(0);
     constructor() {}
+    bool private _paused = false;
 
 
     // @notice: Updates the Pylon Router address to use for the Psionic Farm contract
@@ -20,6 +21,13 @@ contract PsionicFarmFactory is Ownable {
         PYLON_ROUTER = _pylonRouter;
     }
 
+    function isPaused() external view returns (bool) {
+        return _paused;
+    }
+
+    function switchPause() external onlyOwner {
+        _paused = !_paused;
+    }
 
     /*
      * @notice Deploy the pool

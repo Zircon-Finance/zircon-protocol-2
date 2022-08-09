@@ -115,6 +115,7 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
     *   @param _to: the address to send the rewards token
     */
     function burn(address _to, uint _liquidity) external onlyFarm nonReentrant {
+        require(_to != address(0), "PFV: Invalid address");
         require(_liquidity > 0, "PFV: Not enough");
         address[] memory tokensToWithdraw = rewardTokens;
         uint tokenLength = tokensToWithdraw.length;
