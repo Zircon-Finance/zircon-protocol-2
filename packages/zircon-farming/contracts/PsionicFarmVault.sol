@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 pragma abicoder v2;
-import "hardhat/console.sol";
-
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -117,6 +115,7 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
     *   @param _to: the address to send the rewards token
     */
     function burn(address _to, uint _liquidity) external onlyFarm nonReentrant {
+        require(_to != address(0), "PFV: Invalid address");
         require(_liquidity > 0, "PFV: Not enough");
         address[] memory tokensToWithdraw = rewardTokens;
         uint tokenLength = tokensToWithdraw.length;

@@ -28,7 +28,6 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
     let tok = await ethers.getContractFactory('Token');
     let tk0 = await tok.deploy('Token1', 'TOK1');
     let tk1 = await tok.deploy('Token2', 'TOK2');
-
     // Creating Energy
     let factoryEnergy = await ethers.getContractFactory(zirconEnergyFactory['abi'], zirconEnergyFactory['bytecode'])
     let factoryEnergyInstance = await factoryEnergy.deploy(feeToSetterInstance.address, migratorInstance.address);
@@ -95,10 +94,14 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
             ZirconPeripheralLibrary: peripheralLibrary.address,
         },
     });
+
     let routerInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, WETHInstance.address)
+    await psionicFactoryInstance.updatePylonRouter(routerInstance.address);
+    console.log(await psionicFactoryInstance.PYLON_ROUTER())
+
     // Deploying router
     let routerContract = await ethers.getContractFactory('ZirconRouter');
-    let normalRouterInstance = await routerContract.deploy(factoryInstance.address, WETHInstance.address)
+    let normalRouterInstance = await routerContract.deploy(factoryInstance.address, factoryPylonInstance.address, WETHInstance.address)
 
     // Some console for the hashs
     console.log("REMEMBER TO UPDATE THE KECCAK IN THE PERIPHERAL LIB AND IN THE UNISWAP LIB")

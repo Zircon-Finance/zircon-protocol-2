@@ -8,6 +8,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IPsionicFarmVault} from "./interfaces/IPsionicFarmVault.sol";
+import {IPsionicFarmFactory} from "./interfaces/IPsionicFarmFactory.sol";
 
 contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20Metadata;
@@ -64,6 +65,11 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     event RewardsStop(uint256 blockNumber);
     event TokenRecovery(address indexed token, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
+
+    modifier notPaused {
+        require(!IPsionicFarmFactory(address(PSIONIC_FACTORY)).isPaused(), "The factory is paused");
+        _;
+    }
 
     /**
      * @notice Constructor
@@ -130,6 +136,8 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         require(!userLimit || ((_amount + user.amount) <= poolLimitPerUser), "Deposit: Amount above limit");
 
         _updatePool();
+//        require(user.amount > (user.rewardDebt * PRECISION_FACTOR) / accTokenPerShare,"Not enough user balance");
+
 
         if (user.amount > 0) {
             uint256 pending = (user.amount * accTokenPerShare) / PRECISION_FACTOR - user.rewardDebt;
@@ -152,7 +160,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Deposit staked tokens and collect reward tokens (if any)
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function deposit(uint256 _amount) external nonReentrant {
+    function deposit(uint256 _amount) external nonReentrant notPaused {
         deposit(_amount, msg.sender);
     }
 
@@ -160,7 +168,8 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Deposit staked tokens and collect reward tokens (if any)
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function routerDeposit(uint256 _amount) external nonReentrant {
+    function routerDeposit(uint256 _amount) external nonReentrant notPaused {
+        require(IPsionicFarmFactory(address(PSIONIC_FACTORY)).PYLON_ROUTER() == msg.sender, "ONLY PYLON ROUTER");
         deposit(_amount, tx.origin);
     }
 
@@ -168,7 +177,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Withdraw staked tokens and collect reward tokens
      * @param _amount: amount to withdraw (in rewardToken)
      */
-    function withdraw(uint256 _amount) external  nonReentrant {
+    function withdraw(uint256 _amount) external nonReentrant notPaused{
         UserInfo storage user = userInfo[msg.sender];
 
         require(user.amount >= _amount, "Amount to withdraw too high");
@@ -195,7 +204,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Withdraw staked tokens without caring about rewards rewards
      * @dev Needs to be for emergency.
      */
-    function emergencyWithdraw() external  nonReentrant {
+    function emergencyWithdraw() external  nonReentrant notPaused{
         UserInfo storage user = userInfo[msg.sender];
         uint256 amountToTransfer = user.amount;
         user.amount = 0;
@@ -212,7 +221,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Stop rewards
      * @dev Only callable by owner. Needs to be for emergency.
      */
-    function emergencyRewardWithdraw(uint256 _amount) external  onlyOwner {
+    function emergencyRewardWithdraw(uint256 _amount) external onlyOwner {
         _sendTokens(_amount, address(msg.sender));
     }
 

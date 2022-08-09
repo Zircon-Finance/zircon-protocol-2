@@ -1,8 +1,11 @@
-const CORE_DEPLOYED = require('../external_contracts/hardhat_contracts.json')
+const CORE_DEPLOYED = require('../external_contracts/core_contracts.json')
+const FARMING_DEPLOYED = require('../external_contracts/farming_contracts.json')
+const { ethers, waffle } = require('hardhat');
 
 module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
     let coreContracts = CORE_DEPLOYED[chainId][0].contracts
+    let farmingContracts = FARMING_DEPLOYED[chainId][0].contracts
 
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
@@ -36,6 +39,8 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         log: true
     });
 
-
+    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], farmingContracts["PsionicFarmFactory"]['bytecode'])
+    const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
+    await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
 };
 module.exports.tags = ['ZirconPeripheral'];
