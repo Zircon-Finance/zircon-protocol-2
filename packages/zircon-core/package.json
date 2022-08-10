@@ -35,6 +35,7 @@
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
     "dotenv": "^10.0.0",
+    "hardhat-gas-reporter": "^1.0.8",
     "hardhat-watcher": "^2.1.1",
     "solidity-docgen": "^0.6.0-beta.10"
   },
@@ -45,6 +46,5 @@
     "ctest": "npx hardhat compile && npm test",
     "bytecode": "npx hardhat run scripts/get-bytecodes.js",
     "testScript": "npx hardhat run --network moonbase scripts/add-pair.js"
-
   }
 }
