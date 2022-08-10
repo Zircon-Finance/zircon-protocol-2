@@ -14,6 +14,7 @@ task("test:prepare_data", "Generate data that required by test", async (taskArgu
   /* As hardhat allows to access its runtime environment variables,
     we don't need to declare the self-generated accounts as a global variable */
   const accounts = await hre.ethers.getSigners()
+  console.log(accounts.map(x => x.address.toLowerCase()))
   const template = generate(accounts.map(x => x.address.toLowerCase()))
   await fs.writeFile('./test/generated.js', template, () => {})
   console.log('✨ test/generated.js generated')

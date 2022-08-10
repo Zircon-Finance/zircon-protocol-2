@@ -9,7 +9,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-contract ZirconDrop is ReentrancyGuard, Ownable {
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+contract ZirconDrop is ReentrancyGuard, Ownable, Pausable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -34,12 +35,21 @@ contract ZirconDrop is ReentrancyGuard, Ownable {
     constructor (address _token_address, bytes32 _merkleRoot, uint256 _start_time, uint256 _end_time) {
         require(validRange(48, _start_time), "Invalid Start Time");
         require(validRange(48, _end_time), "Invalid End Time");
+        require(_token_address != address(0), "Invalid Token Address");
 
         merkleRoot = _merkleRoot;
         info.start_time = uint48(_start_time);
         info.end_time = uint48(_end_time);
         info.token_address = _token_address;
         creator = msg.sender;
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     function recharge (uint256 _total) public onlyOwner {
@@ -50,7 +60,7 @@ contract ZirconDrop is ReentrancyGuard, Ownable {
     }
 
     function check(uint256 index, address claimer, uint256 amount, bytes32[] calldata merkleProof) external view
-             returns (bool available, uint256 start, uint256 end, uint256 claimable) {
+    returns (bool available, uint256 start, uint256 end, uint256 claimable) {
         require(!if_claimed(index), "Already Claimed");
         bytes32 leaf = keccak256(abi.encodePacked(index, claimer, amount));
         available = MerkleProof.verify(merkleProof, merkleRoot, leaf);
@@ -63,14 +73,14 @@ contract ZirconDrop is ReentrancyGuard, Ownable {
         }
     }
 
-    function claim(uint256 index, uint256 amount, bytes32[] calldata merkleProof) external nonReentrant {
+    function claim(uint256 index, uint256 amount, bytes32[] calldata merkleProof) external nonReentrant whenNotPaused {
         require(!if_claimed(index), "Already Claimed");
         require(block.timestamp > info.start_time, "Not Started");
         require(block.timestamp < info.end_time && (block.timestamp - info.start_time) / 86400 < 5, "Expired");
         bytes32 leaf = keccak256(abi.encodePacked(index, msg.sender, amount));
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), 'Not Verified');
         amount *= (10 ** 18);                                                               // 18 decimals
-        IERC20(info.token_address).transfer(msg.sender, amount);
+        IERC20(info.token_address).safeTransfer(msg.sender, amount);
         set_claimed(index);
         emit Claimed(amount, block.timestamp);
     }
@@ -88,7 +98,7 @@ contract ZirconDrop is ReentrancyGuard, Ownable {
         require(block.timestamp > _info.end_time, "Not Expired");
         uint256 left = IERC20(_info.token_address).balanceOf(address(this));
         require(left > 0, "What?");
-        IERC20(_info.token_address).transfer(msg.sender, left);
+        IERC20(_info.token_address).safeTransfer(msg.sender, left);
         emit Withdrawed(left, block.timestamp);
     }
 

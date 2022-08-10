@@ -59,6 +59,7 @@ contract PsionicFarmFactory is Ownable {
         assembly {
             psionicVault := create2(0, add(bytecodeVault, 32), mload(bytecodeVault), saltVault)
         }
+        require(psionicVault != address(0), "Vault creation failed");
 
         bytes memory bytecode = type(PsionicFarmInitializable).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(_stakedToken, psionicVault, _startBlock));
@@ -66,6 +67,7 @@ contract PsionicFarmFactory is Ownable {
         assembly {
             psionicFarmAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
+        require(psionicFarmAddress != address(0), "Vault creation failed");
 
         PsionicFarmVault(psionicVault).initialize(
             rewardTokens,

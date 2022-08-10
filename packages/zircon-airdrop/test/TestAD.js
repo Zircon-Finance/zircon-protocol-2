@@ -128,8 +128,8 @@ describe('AirDrop', (taskArguments) => {
         const signer = await ethers.getSigner(leaf.address)
         airdropDeployed = airdropDeployed.connect(signer)
         await airdropDeployed.claim(leaf.index, leaf.amount, leaf.proof)
-        await expect(airdropDeployed.claim(leaf.index, leaf.amount, leaf.proof)).to.be.rejectedWith(
-          getRevertMsg('Already Claimed'),
+        await expect(airdropDeployed.claim(leaf.index, leaf.amount, leaf.proof)).to.be.revertedWith(
+          ('Already Claimed'),
         )
       })
 
@@ -150,7 +150,7 @@ describe('AirDrop', (taskArguments) => {
               reason === 'Not Verified' ? (Number(leaf.amount) + 1).toString() : leaf.amount,
               leaf.proof,
             ),
-          ).to.be.rejectedWith(getRevertMsg(reason))
+          ).to.be.revertedWith(reason)
         }
       }
     })
@@ -160,24 +160,42 @@ describe('AirDrop', (taskArguments) => {
         const leaf = leavesWithProof[2]
         const signer = await ethers.getSigner(leaf.address)
         airdropDeployed = airdropDeployed.connect(signer)
-        await expect(airdropDeployed.withdraw()).to.be.rejectedWith(getRevertMsg('Not Authorized'))
+        await expect(airdropDeployed.withdraw()).to.be.revertedWith(('Ownable: caller is not the owner'))
       })
 
       it('should fail when not Not Expired', async () => {
         airdropDeployed = airdropDeployed.connect(creator)
-        await expect(airdropDeployed.withdraw()).to.be.rejectedWith(getRevertMsg('Not Expired'))
+        await expect(airdropDeployed.withdraw()).to.be.revertedWith(('Not Expired'))
       })
 
       it('should withdraw successful after Expired', async () => {
         await advanceTimeWithLog((86400 * 5) / 10)
         const claimed_amount = BigNumber(await claim()).times(10 ** 18)
-        await advanceTimeWithLog(86400 * 100)
+        await advanceTimeWithLog(86400 * 1000)
         airdropDeployed = airdropDeployed.connect(creator)
         await airdropDeployed.withdraw()
         const log = await getEventLogs(airdropDeployed.address, withdrawed_encode, withdrawed_types)
         expect(log).to.have.property('left').that.to.be.eq(BigNumber(token_amount).minus(claimed_amount).toFixed())
         console.log(`     🐦 withdrawed amount: ${log.left}`)
         console.log(`     🐦 claimed amount: ${claimed_amount.toFixed()}`)
+      })
+
+      it('should pause/unpause contract', async () => {
+        await advanceTimeWithLog((86400 * 5) / 10)
+        await airdropDeployed.pause()
+
+        const leaf = leavesWithProof[0]
+        const signer = await ethers.getSigner(leaf.address)
+        airdropDeployed = airdropDeployed.connect(signer)
+        await expect(airdropDeployed.claim(leaf.index, leaf.amount, leaf.proof)).to.be.revertedWith('Pausable: paused')
+
+        airdropDeployed = airdropDeployed.connect(creator)
+        await airdropDeployed.unpause()
+
+        const leaf2 = leavesWithProof[1]
+        const signer2 = await ethers.getSigner(leaf2.address)
+        airdropDeployed = airdropDeployed.connect(signer2)
+        await airdropDeployed.claim(leaf2.index, leaf2.amount, leaf2.proof)
       })
     })
   }

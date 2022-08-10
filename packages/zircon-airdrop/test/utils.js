@@ -38,7 +38,7 @@ async function advanceTimeWithLog(time) {
 }
 
 function getRevertMsg(msg) {
-  return `VM Exception while processing transaction: revert ${msg}`
+  return `VM Exception while processing transaction: reverted with reason string ${msg}`
 }
 
 async function advanceTime(time) {
