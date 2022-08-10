@@ -18,7 +18,6 @@ library ZirconLibrary {
         amountOut = numerator / denominator;
     }
 
-    // TODO: check getAmountsOut function of v2 library, they use a slightly different formula
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
     // @b0, @b1 the balances to calculate

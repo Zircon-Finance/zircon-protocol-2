@@ -61,7 +61,9 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
         require(balance > reserve, "ZER: Reverted");
 
+        //Percentage is feeValue/TPV, percentage of pool reserves that are actually fee
         uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
+        //These are the PTBs, balance of pool tokens held by each pylon vault
         uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);
         uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
         {
@@ -69,6 +71,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             uint112 reserve0 = IZirconPair(zircon.pairAddress).token0() == zircon.floatToken ? _reservePair0 : _reservePair1;
             uint112 reserve1 = IZirconPair(zircon.pairAddress).token0() == zircon.floatToken ? _reservePair1 : _reservePair0;
 
+            //Increments the contract variable that stores total fees acquired by pair. Multiplies by each Pylon's share
             pylon0Balance += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
             pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
