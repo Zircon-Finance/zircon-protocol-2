@@ -1113,7 +1113,7 @@ describe("Pylon", () => {
 
         // Pylon initialized.
 
-        //We first mint some Async to make sure we send with correct proptions
+        //We mint some Async first to make sure we send with correct proportions
 
         let initialPtBalance = await poolTokenInstance1.balanceOf(account.address)
         //Now we deposit a large amount of Anchors to test Omega
@@ -1123,8 +1123,16 @@ describe("Pylon", () => {
         await token1.transfer(pylonInstance.address, token1Amount.div(50))
 
         console.log("anchors sent for minting: ", ethers.utils.formatEther(token1Amount.div(50)));
+        ptt = await pair.totalSupply();
+        console.log("ptt before async mint", ethers.utils.formatEther(ptt));
+
+
         // await token1.transfer(pylonInstance.address, token0Amount.div(1000))
         await pylonInstance.mintAsync(account.address, true);
+
+        ptt = await pair.totalSupply();
+
+        console.log("ptt after async mint", ethers.utils.formatEther(ptt));
 
         // We now do a few massive swaps to get some fees in + small syncMint to make it stick.
 
@@ -1165,33 +1173,104 @@ describe("Pylon", () => {
         let balancePreBurn = await token1.balanceOf(account.address)
 
         let aptBalance = await poolTokenInstance1.balanceOf(account.address)
+        let oldVab = await pylonInstance.virtualAnchorBalance();
+        let totalApt = await poolTokenInstance1.totalSupply();
 
         aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
+
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(100)));
+
+        //We test with burnAsync to avoid reserve distortions
+        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(100));
+
+        ptt = await pair.totalSupply();
+        console.log("uniptt before burn", ethers.utils.formatEther(ptt));
+
+
+        await pylonInstance.burnAsync(account.address, true);
+
+        ptt = await pair.totalSupply();
+        console.log("uniptt after burn", ethers.utils.formatEther(ptt));
+
+        let balancePostBurn = await token1.balanceOf(account.address);
+
+        console.log("Received anchor tokens after burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
+
+        let newVab = await pylonInstance.virtualAnchorBalance();
+        let totalAptnew = await poolTokenInstance1.totalSupply();
+
+        console.log("newVab", ethers.utils.formatEther(newVab));
+        console.log("oldVab", ethers.utils.formatEther(oldVab));
+        console.log("newptt", ethers.utils.formatEther(totalAptnew));
+        console.log("oldPtt", ethers.utils.formatEther(totalApt));
+
+
+        //Burn again
+
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        balancePreBurn = await token1.balanceOf(account.address)
+
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(100)));
 
         //We test with burnAsync to avoid reserve distortions
         await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(100));
 
         await pylonInstance.burnAsync(account.address, true);
 
-        let balancePostBurn = await token1.balanceOf(account.address);
+        balancePostBurn = await token1.balanceOf(account.address);
 
         console.log("Received anchor tokens after burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
 
+        //TODO: Add an expect here
 
-        gammaEMA = await pylonInstance.gammaEMA();
-        thisBlockEMA = await pylonInstance.thisBlockEMA();
+        //Now we dump the price to trigger slashing (2% or so)
+        //We want to withdraw a smallish amount with burnAsync
+        //The user should receive what he inputted minus fees etc
+
+        //Should be enough?
+        input = token0Amount.div(8);
+        await token0.transfer(pair.address, input)
+        pairRes = await pair.getReserves();
+
+        outcome = getAmountOut(input, pairRes[0], pairRes[1])
+
+        await pair.swap(0, outcome, account.address, '0x', overrides)
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after dumping: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after dumping: ", ethers.utils.formatEther(pairRes[1]))
+
+
+        //Avoid deltaGamma
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
         strikeBlock = await pylonInstance.strikeBlock();
+        let block = await ethers.provider.getBlockNumber();
 
-        let blockNumber = await ethers.provider.getBlockNumber()
+        console.log("strike before burn", strikeBlock);
+        console.log("current block", block);
 
-        console.log("GammaEMA after: ", ethers.utils.formatEther(gammaEMA))
-        console.log("thisblockEMA after: ", ethers.utils.formatEther(thisBlockEMA))
-        console.log("strikeBlock after: ", strikeBlock.toBigInt())
+        balancePreBurn = await token1.balanceOf(account.address)
 
-        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("98821055882662832"));
-        expect(strikeBlock).to.eq(blockNumber);
+        // aptBalance = await poolTokenInstance1.balanceOf(account.address)
+        //
+        // aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
 
-        // Advance time to reset this block ema. GammaEMA should also bleed to zero
+        //We test with burnAsync to avoid reserve distortions
+        //Supposed to cover about 2% of 1% of balance, should be easily covered
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(100)));
+
+        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(100));
+
+        await pylonInstance.burnAsync(account.address, true);
+
+        balancePostBurn = await token1.balanceOf(account.address);
+
+        console.log("Received anchor tokens after second omega burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
+
+
+
 
         let blocksToMine = await factoryPylonInstance.muUpdatePeriod(); //random but should do the trick here
         await ethers.provider.send("hardhat_mine", [blocksToMine.add(1).toHexString()]);

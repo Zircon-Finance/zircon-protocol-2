@@ -971,6 +971,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //finds how much we can cover
             uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
 
+            console.log("amta, eptb", amountToAdd, energyPTBalance);
 
             if (amountToAdd < energyPTBalance) {
                 // Sending PT tokens to Pair because burn one side is going to be called after
@@ -1025,6 +1026,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint ptTotalSupply = pt.totalSupply(); //pylon total supply
         uint extraPercentage = 0;
 
+        (uint feeBps,) = getFeeBps();
+        //Calculates user's share of Uniswap pool tokens held by Pylon
+        //Declared here to be used for payburnfees later
+        uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
+
         {
             (uint reserveFloat, uint reserveAnchor,) = getSyncReserves();
             (uint pairReserves0,) = getPairReservesTranslated(0, 0);
@@ -1037,10 +1043,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 require(liquidity < maxPoolTokens, "ZP: E");
             }
 
-            //Calculates user's share of Uniswap pool tokens held by Pylon
-            uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
-
-            (uint feeBps,) = getFeeBps();
+            console.log("c ptu", ptu);
 
             uint ptuWithFee = ptu.sub(feeBps.mul(ptu)/10000);
 
@@ -1054,18 +1057,24 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
 
+                //The ptu returned is adjusted by Omega
                 (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee); //This one retrieves tokens from ZirconEnergy if available
+                console.log("ptu se", IZirconPair(pairAddress).balanceOf(pairAddress));
+                console.log("ex%", extraPercentage);
             }
 
-            //Burns fee after calculating omega since paying fee introduces loss of precision to omega identity
-            payBurnFees(ptu, feeBps);
             //Sends for burning
             _safeTransfer(pairAddress, pairAddress, ptuWithFee);
         }
         // Burning liquidity and sending to user
         // The pool tokens sent to the Pair are slashed by omega
         // handleOmega has sent the pool tokens if it had them, so this function retrieves the full share
+
         (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(_to);
+
+        //Burn fee after everything to avoid loss of precision to omega identity & burning compensation tokens
+        payBurnFees(ptu, feeBps);
+
 
         amount0 = isFloatReserve0 ? amountA : amountB;
         amount1 = isFloatReserve0 ? amountB : amountA;
@@ -1112,14 +1121,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function handleOmegaSlashing(uint ptu) private returns (uint retPtu, uint extraPercentage){
         (, uint reserveAnchor,) = getSyncReserves();
         (, uint pairReserves1)  = getPairReservesTranslated(0,0);
-        console.log("om inputs g, tvpa", gammaMulDecimals, pairReserves1.mul(2));
-        console.log("vab, res", virtualAnchorBalance, reserveAnchor);
+        //console.log("om inputs g, tvpa", gammaMulDecimals, pairReserves1.mul(2));
+        //console.log("vab, res", virtualAnchorBalance, reserveAnchor);
         uint omegaMulDecimals = ZirconLibrary.slashLiabilityOmega(
             pairReserves1.mul(2),
             reserveAnchor,
             gammaMulDecimals,
             virtualAnchorBalance);
         console.log("om", omegaMulDecimals);
+        //Send slashing should send the extra PTUs to Uniswap.
+        //When burn calls the uniswap burn it will also give users the compensation
         (extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
         retPtu = omegaMulDecimals.mul(ptu)/1e18;
     }
