@@ -1007,11 +1007,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint amountToTransfer = totalAmount.mul(percentage)/1e18; //percentage is calculated "natively" as a full 1e18
             if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
-                IZirconEnergy(energyAddress).syncReserve();
             }else{
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress));
-                IZirconEnergy(energyAddress).syncReserve();
             }
+            IZirconEnergy(energyAddress).syncReserve();
+
         }
     }
 
