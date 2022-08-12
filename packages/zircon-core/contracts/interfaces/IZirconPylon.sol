@@ -22,7 +22,7 @@ interface IZirconPylon {
     // External Function called to mint pool Token
     // Liquidity have to be sent before
     function mintPoolTokens(address to, bool isAnchor) external returns (uint liquidity);
-    function mintAsync100(address to, bool isAnchor) external returns (uint liquidity);
+//    function mintAsync100(address to, bool isAnchor) external returns (uint liquidity);
     function mintAsync(address to, bool shouldMintAnchor) external returns (uint liquidity);
     // Burn Async send both tokens 50-50
     // Liquidity has to be sent before

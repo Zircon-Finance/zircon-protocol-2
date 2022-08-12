@@ -105,7 +105,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // Transform in just one event
     event MintSync(address sender, uint aIn0, bool isAnchor);
     event MintAsync(address sender, uint aIn0, uint aIn1);
-    event MintAsync100(address sender, uint aIn0, bool isAnchor);
+//    event MintAsync100(address sender, uint aIn0, bool isAnchor);
     event Burn(address sender, uint aIn0, bool isAnchor);
     event BurnAsync(address sender, uint aIn0, uint aIn1);
     event Excess(uint aIn0, bool isAnchor);
@@ -703,7 +703,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     // @notice Mint Async 100 lets you invest in one liquidity
     // The difference with Sync Liquidity is that it goes directly to the Pool
-    function mintAsync100(address to, bool isAnchor) nonReentrant  external returns (uint liquidity) {
+//    function mintAsync100(address to, bool isAnchor) nonReentrant  external returns (uint liquidity) {
 //        notPaused();
 //        sync();
 //        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
@@ -735,7 +735,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 //        _update();
 //
 //        emit MintAsync100(msg.sender, amountIn, isAnchor);
-    }
+//    }
 
 
     // @notice Mint Async lets you invest in both liquidity like you normally do on your DEX
@@ -935,7 +935,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     /// @notice TODO
     function calculateLPTU(bool _isAnchor, uint _liquidity, uint _ptTotalSupply) view private returns (uint claim){
-        (uint _reserve0, uint _reserve1) = getPairReservesTranslated(1, 1); // gas savings
+        (uint _reserve0, uint _reserve1) = getPairReservesTranslated(1,1); // gas savings
         (uint112 _pylonReserve0, uint112 _pylonReserve1,) = getSyncReserves(); // gas savings
         uint pylonShare;
         if (_isAnchor) {
