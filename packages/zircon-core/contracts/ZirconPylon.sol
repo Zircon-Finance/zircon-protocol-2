@@ -1002,9 +1002,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint totalAmount = anchorAmount;
             if ( floatAmount > 0 ) {
                 (uint res0, uint res1) = getPairReservesNormalized();
-                totalAmount += ZirconLibrary.getAmountOut(floatAmount, res0, res1, IZirconPylonFactory(factoryAddress).liquidityFee());
+
+                totalAmount += floatAmount.mul(res1)/res0;
             }
-            uint amountToTransfer = totalAmount.mul(percentage)/1e18; //percentage is calculated "natively" as a full 1e18
+
+            //TotalAmount is what the user already received, while percentage is what's missing.
+            //We divide to arrive to the original amount and diff it with totalAmount to get final number.
+            uint originalAmount = totalAmount.mul(1e18)/percentage;
+            uint amountToTransfer = originalAmount.sub(totalAmount); //percentage is calculated "natively" as a full 1e18
+
+
+
             if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
                 IZirconEnergy(energyAddress).syncReserve();
