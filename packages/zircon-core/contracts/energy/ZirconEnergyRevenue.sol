@@ -62,6 +62,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         require(balance > reserve, "ZER: Reverted");
 
         //Percentage is feeValue/TPV, percentage of pool reserves that are actually fee
+        //It's reduced by mint fee already
         uint totalSupply = IUniswapV2ERC20(zircon.pairAddress).totalSupply();
         //These are the PTBs, balance of pool tokens held by each pylon vault
         uint pylonBalance0 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon0);

@@ -110,6 +110,11 @@ contract ZirconEnergy is IZirconEnergy {
     anchorReserve = balance.sub(toSend);
   }
 
+  //Called when tokens are withdrawn to ensure pylon doesn't get bricked
+  function syncReserve() external _onlyPylon {
+      anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+  }
+
 //  function breakPiggybank(uint _requestedLiquidity) _onlyPylon external returns (uint returnedLiquidity) {
 //    //Called by Pylon if omega is below 1. Pylon asks for X liquidity, breakPiggybank responds by depositing X or less and returning how much.
 //    returnedLiquidity = pylon.insuranceUni >= _requestedLiquidity ? _requestedLiquidity : pylon.insuranceUni;

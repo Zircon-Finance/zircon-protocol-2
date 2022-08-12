@@ -7,6 +7,7 @@ interface IZirconEnergy {
 //    function syncPairFee() external;
     function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount);
     function registerFee() external;
+    function syncReserve() external;
     function migrateLiquidity(address newEnergy) external;
 
 }

@@ -111,11 +111,11 @@ describe("Pylon", () => {
     }
     //Let's try to calculate some cases for pylon
     const mintTestCases = [
-        [5, 10, '4625004224854010', '4749990617651023','149366287386702673','99999999999999000', false],
+        [5, 10, '4625004224854010', '4749990617651023','149366287386702671','99999999999999000', false],
         [10, 5, '4749999999999999', '4624999999999999','99999999999999000', '149366473384710075', true],
-        [5, 10, '2374999999999999', '9249999999999997','49999999999999000', '149756841739232199', true],
-        [10, 10, '9250004224858901', '4749995308820878','199256623189905469', '99999999999999000', false],
-        [1000, 1000, '475000000000000000', '925000000000000000','9999999999999999000', '19925671603971329722', true],
+        [5, 10, '2374999999999999', '9249999999999997','49999999999999000', '149871228594744003', true],
+        [10, 10, '9250004224858901', '4749995308820878','199613087934954011', '99999999999999000', false],
+        [1000, 1000, '475000000000000000', '925000000000000000','9999999999999999000', '19961318139684423590', true],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : expandTo18Decimals(n))))
     mintTestCases.forEach((mintCase, i) => {
         it(`mintPylon:${i}`, async () => {
@@ -574,7 +574,7 @@ describe("Pylon", () => {
         console.log("Swap2 vab after new token: ", ethers.utils.formatEther(vab));
 
         //Gamma moved by 5% to 0.45, we expect mu to change by 5%* 5%*3 = 0.0075 (ish)
-        expect(mu).to.eq(ethers.BigNumber.from("408503052279670093"));
+        expect(mu).to.eq(ethers.BigNumber.from("408141539919816298"));
 
 
     });
@@ -661,7 +661,7 @@ describe("Pylon", () => {
         console.log("thisblockEMA after: ", ethers.utils.formatEther(thisBlockEMA))
         console.log("strikeBlock after: ", strikeBlock.toBigInt())
 
-        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("98821055882662832"));
+        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99245732433505360"));
         expect(strikeBlock).to.eq(blockNumber);
 
         // Advance time to reset this block ema. GammaEMA should also bleed to zero
@@ -682,7 +682,7 @@ describe("Pylon", () => {
         console.log("thisblockEMA before mint async: ", ethers.utils.formatEther(thisBlockEMA))
         console.log("strikeBlock before mint async: ", strikeBlock.toBigInt())
 
-        await pylonInstance.mintAsync100(account.address, false);
+        await pylonInstance.mintPoolTokens(account.address, false);
 
         gammaEMA = await pylonInstance.gammaEMA();
         thisBlockEMA = await pylonInstance.thisBlockEMA();
@@ -776,7 +776,7 @@ describe("Pylon", () => {
         console.log("strikeBlock before mint async: ", strikeBlock.toBigInt())
 
         await printValues()
-        await pylonInstance.mintAsync100(account.address, true);
+        await pylonInstance.mintPoolTokens(account.address, true);
 
         gammaEMA = await pylonInstance.gammaEMA();
         thisBlockEMA = await pylonInstance.thisBlockEMA();
@@ -1136,6 +1136,9 @@ describe("Pylon", () => {
 
         // We now do a few massive swaps to get some fees in + small syncMint to make it stick.
 
+        let pairResk = await pair.getReserves();
+        console.log("K before swaps: ", ethers.utils.formatEther(pairResk[0].mul(pairResk[1])))
+
         // 25% of pool swap
         let input = pairRes[0].div(2);
         await token0.transfer(pair.address, input)
@@ -1167,6 +1170,9 @@ describe("Pylon", () => {
         console.log("Pylon Pair Reserve1 after swapping: ", ethers.utils.formatEther(pairRes[1]))
 
 
+        pairResk = await pair.getReserves();
+        console.log("K after swaps: ", ethers.utils.formatEther(pairResk[0].mul(pairResk[1])))
+
 
         await ethers.provider.send("hardhat_mine", ['0x30']);
 
@@ -1186,11 +1192,21 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         console.log("uniptt before burn", ethers.utils.formatEther(ptt));
 
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 before burn: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 before burn: ", ethers.utils.formatEther(pylonRes[1]));
+
+
 
         await pylonInstance.burnAsync(account.address, true);
 
         ptt = await pair.totalSupply();
         console.log("uniptt after burn", ethers.utils.formatEther(ptt));
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after first burn: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after first burn: ", ethers.utils.formatEther(pylonRes[1]));
+
 
         let balancePostBurn = await token1.balanceOf(account.address);
 
@@ -1199,30 +1215,7 @@ describe("Pylon", () => {
         let newVab = await pylonInstance.virtualAnchorBalance();
         let totalAptnew = await poolTokenInstance1.totalSupply();
 
-        console.log("newVab", ethers.utils.formatEther(newVab));
-        console.log("oldVab", ethers.utils.formatEther(oldVab));
-        console.log("newptt", ethers.utils.formatEther(totalAptnew));
-        console.log("oldPtt", ethers.utils.formatEther(totalApt));
 
-
-        //Burn again
-
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-
-        balancePreBurn = await token1.balanceOf(account.address)
-
-        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(100)));
-
-        //We test with burnAsync to avoid reserve distortions
-        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(100));
-
-        await pylonInstance.burnAsync(account.address, true);
-
-        balancePostBurn = await token1.balanceOf(account.address);
-
-        console.log("Received anchor tokens after burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
-
-        //TODO: Add an expect here
 
         //Now we dump the price to trigger slashing (2% or so)
         //We want to withdraw a smallish amount with burnAsync
@@ -1269,43 +1262,289 @@ describe("Pylon", () => {
 
         console.log("Received anchor tokens after second omega burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
 
+        expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from('1058427628698750839'))
 
 
+        //now we dump a bit more to see if it taps into the Anchors
 
-        let blocksToMine = await factoryPylonInstance.muUpdatePeriod(); //random but should do the trick here
-        await ethers.provider.send("hardhat_mine", [blocksToMine.add(1).toHexString()]);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
 
-        // Then we do a mint async100 + small syncMint. Should fail
+        input = token0Amount.div(8);
+        await token0.transfer(pair.address, input)
+        pairRes = await pair.getReserves();
 
-        token0Amount = pairRes[0].div(4);
-        await token0.transfer(pylonInstance.address, token0Amount)
+        outcome = getAmountOut(input, pairRes[0], pairRes[1])
 
-        gammaEMA = await pylonInstance.gammaEMA();
-        thisBlockEMA = await pylonInstance.thisBlockEMA();
-        strikeBlock = await pylonInstance.strikeBlock();
+        await pair.swap(0, outcome, account.address, '0x', overrides)
 
-        console.log("GammaEMA before mint async: ", ethers.utils.formatEther(gammaEMA))
-        console.log("thisblockEMA before mint async: ", ethers.utils.formatEther(thisBlockEMA))
-        console.log("strikeBlock before mint async: ", strikeBlock.toBigInt())
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after dumping: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after dumping: ", ethers.utils.formatEther(pairRes[1]))
 
-        await pylonInstance.mintAsync100(account.address, false);
+        balancePreBurn = await token1.balanceOf(account.address)
 
-        gammaEMA = await pylonInstance.gammaEMA();
-        thisBlockEMA = await pylonInstance.thisBlockEMA();
-        strikeBlock = await pylonInstance.strikeBlock();
+        // aptBalance = await poolTokenInstance1.balanceOf(account.address)
+        //
+        // aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
 
-        //These actually read old values, which is expected
+        //We test with burnAsync to avoid reserve distortions
+        //Supposed to cover about 2% of 1% of balance, should be easily covered
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(100)));
 
-        console.log("GammaEMA after mint async: ", ethers.utils.formatEther(gammaEMA))
-        console.log("thisblockEMA after mint async: ", ethers.utils.formatEther(thisBlockEMA))
-        console.log("strikeBlock after mint async: ", strikeBlock.toBigInt())
-        //But strikeBlock is set in _update() so consumes a strike
-        //Now it reads the mintAsync gamma change and fails any interaction
-        await token0.transfer(pylonInstance.address, token0Amount.div(10000))
-        //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
-        await expect(pylonInstance.mintPoolTokens(account.address, false)).to.be.revertedWith("ZP: FTH")
+        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(100));
+
+        let energyAddress = await pylonInstance.energyAddress()
+
+        let anchorBalance = await token1.balanceOf(energyAddress);
+        console.log("Anchor balance old", ethers.utils.formatEther(anchorBalance))
+
+        await pylonInstance.burnAsync(account.address, true);
+
+        balancePostBurn = await token1.balanceOf(account.address);
+
+        console.log("Received anchor tokens after final omega burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
+
+        let anchorBalanceNew = await token1.balanceOf(energyAddress);
+        console.log("Anchor balance new", ethers.utils.formatEther(anchorBalanceNew))
+
+        expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from('1027765358791556660'))
 
     });
+
+
+    it('Omega test regular burn', async function () {
+        let token0Amount = expandTo18Decimals(1700)
+        let token1Amount = expandTo18Decimals(5300)
+        await addLiquidity(token0Amount, token1Amount)
+
+        let pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 initial: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 initial: ", ethers.utils.formatEther(pairRes[1]))
+
+        // Let's transfer some tokens to the Pylon
+        await token0.transfer(pylonInstance.address, token0Amount.div(100))
+        await token1.transfer(pylonInstance.address, token1Amount.div(100))
+
+        // Let's initialize the Pylon, this should call two sync
+        console.log("token0Amount init: ", ethers.utils.formatEther(token0Amount.div(100)));
+        console.log("token1Amount init: ", ethers.utils.formatEther(token1Amount.div(100)));
+        await pylonInstance.initPylon(account.address)
+
+        let pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
+
+        let ptb = await pair.balanceOf(pylonInstance.address);
+        let ptt = await pair.totalSupply();
+        console.log("ptb: ", ethers.utils.formatEther(ptb));
+        console.log("ptt: ", ethers.utils.formatEther(ptt));
+
+        let pairResIni = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after initPylon: ", ethers.utils.formatEther(pairResIni[0]))
+        console.log("Pylon Pair Reserve1 after initPylon: ", ethers.utils.formatEther(pairResIni[1]))
+
+        // Pylon initialized.
+
+        //We mint some Async first to make sure we send with correct proportions
+
+        let initialPtBalance = await poolTokenInstance1.balanceOf(account.address)
+        //Now we deposit a large amount of Anchors to test Omega
+        //We do it with async 50/50 to make sure we avoid slippage distortions
+
+        //await token0.transfer(pylonInstance.address, token0Amount.div(50))
+        await token1.transfer(pylonInstance.address, token1Amount.div(25))
+
+        console.log("anchors sent for minting: ", ethers.utils.formatEther(token1Amount.div(25)));
+        ptt = await pair.totalSupply();
+        console.log("ptt before async mint", ethers.utils.formatEther(ptt));
+
+
+        // await token1.transfer(pylonInstance.address, token0Amount.div(1000))
+        await pylonInstance.mintPoolTokens(account.address, true);
+
+        ptt = await pair.totalSupply();
+
+        console.log("ptt after async mint", ethers.utils.formatEther(ptt));
+
+        // We now do a few massive swaps to get some fees in + small syncMint to make it stick.
+
+        let pairResk = await pair.getReserves();
+        console.log("K before swaps: ", ethers.utils.formatEther(pairResk[0].mul(pairResk[1])))
+
+        // 25% of pool swap
+        let input = pairRes[0].div(2);
+        await token0.transfer(pair.address, input)
+
+        let balance = await token0.balanceOf(account.address);
+        console.log("preSwap balance token0: ", ethers.utils.formatEther(balance));
+        let balance1 = await token1.balanceOf(account.address);
+        console.log("preSwap balance token1: ", ethers.utils.formatEther(balance1));
+
+        let outcome = getAmountOut(input, pairRes[0], pairRes[1])
+        await pair.swap(0, outcome, account.address, '0x', overrides)
+
+        let balanceNew = await token0.balanceOf(account.address);
+        console.log("postSwap1 balance token0: ", ethers.utils.formatEther(balanceNew));
+        let balance1New = await token1.balanceOf(account.address);
+        console.log("postSwap1 balance token1: ", ethers.utils.formatEther(balance1New));
+
+        //Add some more to pump price
+        input = balance1New.add(token1Amount.div(10)).sub(balance1);
+        await token1.transfer(pair.address, input)
+        pairRes = await pair.getReserves();
+
+        outcome = getAmountOut(input, pairRes[1], pairRes[0])
+
+        await pair.swap(outcome, 0, account.address, '0x', overrides)
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after swapping: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after swapping: ", ethers.utils.formatEther(pairRes[1]))
+
+
+        pairResk = await pair.getReserves();
+        console.log("K after swaps: ", ethers.utils.formatEther(pairResk[0].mul(pairResk[1])))
+
+
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        let balancePreBurn = await token1.balanceOf(account.address)
+
+        let aptBalance = await poolTokenInstance1.balanceOf(account.address)
+        let oldVab = await pylonInstance.virtualAnchorBalance();
+        let totalApt = await poolTokenInstance1.totalSupply();
+
+        aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
+
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(33)));
+
+        //We test with burn
+        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(33));
+
+        ptt = await pair.totalSupply();
+        console.log("uniptt before burn", ethers.utils.formatEther(ptt));
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 before burn: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 before burn: ", ethers.utils.formatEther(pylonRes[1]));
+
+
+
+        await pylonInstance.burn(account.address, true);
+
+        ptt = await pair.totalSupply();
+        console.log("uniptt after burn", ethers.utils.formatEther(ptt));
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after first burn: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after first burn: ", ethers.utils.formatEther(pylonRes[1]));
+
+
+        let balancePostBurn = await token1.balanceOf(account.address);
+
+        console.log("Received anchor tokens after burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
+
+        let newVab = await pylonInstance.virtualAnchorBalance();
+        let totalAptnew = await poolTokenInstance1.totalSupply();
+
+
+
+        //Now we dump the price to trigger slashing (2% or so)
+        //We want to withdraw a smallish amount with burn
+        //The user should receive what he inputted minus fees etc
+
+        //Should be enough?
+        input = token0Amount.div(8);
+        await token0.transfer(pair.address, input)
+        pairRes = await pair.getReserves();
+
+        outcome = getAmountOut(input, pairRes[0], pairRes[1])
+
+        await pair.swap(0, outcome, account.address, '0x', overrides)
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after dumping: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after dumping: ", ethers.utils.formatEther(pairRes[1]))
+
+
+        //Avoid deltaGamma
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        strikeBlock = await pylonInstance.strikeBlock();
+        let block = await ethers.provider.getBlockNumber();
+
+        console.log("strike before burn", strikeBlock);
+        console.log("current block", block);
+
+        balancePreBurn = await token1.balanceOf(account.address)
+
+        // aptBalance = await poolTokenInstance1.balanceOf(account.address)
+        //
+        // aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
+
+        //We test with burnAsync to avoid reserve distortions
+        //Supposed to cover about 2% of 1% of balance, should be easily covered
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(33)));
+
+        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(33));
+
+        await pylonInstance.burn(account.address, true);
+
+        balancePostBurn = await token1.balanceOf(account.address);
+
+        console.log("Received anchor tokens after second omega burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
+
+        expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from('6346697796476775877'))
+
+
+        //now we dump a bit more to see if it taps into the Anchors
+
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        input = token0Amount.div(8);
+        await token0.transfer(pair.address, input)
+        pairRes = await pair.getReserves();
+
+        outcome = getAmountOut(input, pairRes[0], pairRes[1])
+
+        await pair.swap(0, outcome, account.address, '0x', overrides)
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after dumping: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after dumping: ", ethers.utils.formatEther(pairRes[1]))
+
+        balancePreBurn = await token1.balanceOf(account.address)
+
+        // aptBalance = await poolTokenInstance1.balanceOf(account.address)
+        //
+        // aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
+
+        //We test with burnAsync to avoid reserve distortions
+        //Supposed to cover about 2% of 1% of balance, should be easily covered
+        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(33)));
+
+        await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(33));
+
+        let energyAddress = await pylonInstance.energyAddress()
+
+        let anchorBalance = await token1.balanceOf(energyAddress);
+        console.log("Anchor balance old", ethers.utils.formatEther(anchorBalance))
+
+        await pylonInstance.burn(account.address, true);
+
+        balancePostBurn = await token1.balanceOf(account.address);
+
+        console.log("Received anchor tokens after final omega burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
+
+        let anchorBalanceNew = await token1.balanceOf(energyAddress);
+        console.log("Anchor balance new", ethers.utils.formatEther(anchorBalanceNew))
+
+        expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from('1027765358791556660'))
+
+    });
+
+
+
 
     it('Test Creating Pylon With Unbalanced Quantities', async function () {
         let token0Amount = expandTo18Decimals(1700)
