@@ -373,6 +373,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         updateReservesRemovingExcess(balance0, balance1, max0, max1);
 
+        (reservesTranslated0, reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
+
         (uint pylonReserve0, uint pylonReserve1,) = getSyncReserves();
 
         //Counts gamma change and applies strike condition if necessary
@@ -751,51 +753,51 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // The difference is that gives you directly with mint one side
     // TODO: Transfer first then calculate on basis of pool token share how many share we should give to the user
     function mintAsync(address to, bool shouldMintAnchor) external nonReentrant  returns (uint liquidity){
-        notPaused();
-        //Master sync function
-        sync();
-        address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
-
-        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
-        uint amountIn0;
-        uint amountIn1;
-        {
-            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
-
-            amountIn0 = balance0.sub(_reserve0);
-            amountIn1 = balance1.sub(_reserve1);
-
-            (uint feeBps,) = getFeeBps();
-
-            amountIn0 = payFees(amountIn0, feeBps, false);
-            amountIn1 = payFees(amountIn1, feeBps, true);
-
-            //Derives slippage adjusted amount (min of the two sides * 2)
-            (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(amountIn0, amountIn1, shouldMintAnchor, IZirconPoolToken(_poolTokenAddress));
-            liquidity = _liquidity;
-            if (shouldMintAnchor) {
-                virtualAnchorBalance += amount;
-            } else {
-                //Vfb isn't quite as literal as vab about "number of assets supplied"
-                uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-                virtualFloatBalance += liquidity.mul(virtualFloatBalance)/totalPtSupply;
-            }
-
-        }
-
-        notZero(amountIn0);
-        notZero(amountIn1);
-        _safeTransfer(pylonToken.float, pairAddress, amountIn0);
-        _safeTransfer(pylonToken.anchor, pairAddress, amountIn1);
-        IZirconPair(pairAddress).mint(address(this));
-        // uint deltaSupply = pair.totalSupply().sub(_totalSupply);
-        //TODO: Change fee
-        IZirconPoolToken(_poolTokenAddress).mint(to, liquidity);
-
-
-        emit MintAsync(msg.sender, amountIn0, amountIn1);
-        _update();
+//        notPaused();
+//        //Master sync function
+//        sync();
+//        address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
+//
+//        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
+//        uint amountIn0;
+//        uint amountIn1;
+//        {
+//            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
+//            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+//
+//            amountIn0 = balance0.sub(_reserve0);
+//            amountIn1 = balance1.sub(_reserve1);
+//
+//            (uint feeBps,) = getFeeBps();
+//
+//            amountIn0 = payFees(amountIn0, feeBps, false);
+//            amountIn1 = payFees(amountIn1, feeBps, true);
+//
+//            //Derives slippage adjusted amount (min of the two sides * 2)
+//            (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(amountIn0, amountIn1, shouldMintAnchor, IZirconPoolToken(_poolTokenAddress));
+//            liquidity = _liquidity;
+//            if (shouldMintAnchor) {
+//                virtualAnchorBalance += amount;
+//            } else {
+//                //Vfb isn't quite as literal as vab about "number of assets supplied"
+//                uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
+//                virtualFloatBalance += liquidity.mul(virtualFloatBalance)/totalPtSupply;
+//            }
+//
+//        }
+//
+//        notZero(amountIn0);
+//        notZero(amountIn1);
+//        _safeTransfer(pylonToken.float, pairAddress, amountIn0);
+//        _safeTransfer(pylonToken.anchor, pairAddress, amountIn1);
+//        IZirconPair(pairAddress).mint(address(this));
+//        // uint deltaSupply = pair.totalSupply().sub(_totalSupply);
+//        //TODO: Change fee
+//        IZirconPoolToken(_poolTokenAddress).mint(to, liquidity);
+//
+//
+//        emit MintAsync(msg.sender, amountIn0, amountIn1);
+//        _update();
     }
 
 
@@ -911,7 +913,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    function _calculateGamma(uint _virtualAnchorBalance, uint _virtualFloatBalance, uint _pylonReserve0, uint _pylonReserve1, uint _translatedReserve0, uint _translatedReserve1) pure private returns (uint gamma) {
+    function _calculateGamma(uint _virtualAnchorBalance, uint _virtualFloatBalance, uint _pylonReserve0, uint _pylonReserve1, uint _translatedReserve0, uint _translatedReserve1) view private returns (uint gamma) {
 
         uint totalPoolValueFloatPrime = _translatedReserve0.mul(2);
         uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
@@ -926,18 +928,27 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //We chose to start reducing Anchor liability and seek to cover that one instead.
 
 
-        //We find TPV anchor value where it should switch
+        //We find breakeven price where it should switch
 
         uint kTranslated = _translatedReserve1.mul(_translatedReserve0);
-        uint kVirtual = adjustedVfb.mul(adjustedVab);
+        uint kvk = (adjustedVfb.mul(adjustedVab).mul(1e18))/kTranslated;
 
-        uint sqrtk2kv = Math.sqrt(kTranslated.mul(kTranslated) - kVirtual.mul(kTranslated));
+        console.log("kvk", kvk);
 
-        //This ugly pos equation gives us the price at which we should switch between the two formulas.
+        require(kvk <= 1e18, "ZP: KV");
+
+        uint kvFactor = 1e18 + Math.sqrt(uint(1e18) - kvk);
+
+
+
+        //This equation gives us the price at which we should switch between the two formulas.
         //In a basic sense we switch it when TPV = VAB + VFB * Float Price;
-        //The simpler equation is (sqrt(k) -  sqrt(k - kv))^2/vfb^2
-        //But since sqrt is super expensive we use the longer version where we can have just one sqrt
-        uint breakevenPrice = ( ((sqrtk2kv.add(kTranslated)).mul(2)) .sub(kVirtual) ).mul(1e18) / (adjustedVfb.mul(adjustedVfb));
+        //The basic form of the equation is (sqrt(k) -  sqrt(k - kv))^2/vfb^2
+        //But since sqrt is super expensive we optimized to use only one.
+
+        //10**36s cancel each other
+        uint breakevenPrice = kTranslated.mul(kvFactor**2)/(adjustedVfb**2);
+
 
         //We use instant price. Using any kind of twap would screw calculations.
         //To protect against manipulation we block enter-exit cycles after large price changes.
