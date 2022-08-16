@@ -76,7 +76,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
-        hex'b0a16e9eca943d360e2887ca990dbec207c5bc86bfcba074a72a650a7a6e4621' // init code hash
+        hex'e13f8295e6b0eb08e58ebc844f028828d06e8b7a7f6be44ef755552550d89ef7' // init code hash
         ))));
     }
 
@@ -85,7 +85,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'5658e491033be8a43b5e25c5e735ff8b9300c80e5c9f7b76e6b3f35cb5afd098' // init code hash
+        hex'8447c99cdeecf5795d19c0d7ab9f7730774c0cd69e95be0dd12729d39dcce5a7' // init code hash
         ))));
     }
 
@@ -145,8 +145,16 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
-
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
+    }
+
+    function migrateEnergyRevenueFees(address oldEnergy, address newEnergy) external onlyMigrator{
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+
+        uint feeValue0 = IZirconEnergyRevenue(oldEnergy).feeValue0();
+        uint feeValue1 = IZirconEnergyRevenue(oldEnergy).feeValue1();
+        IZirconEnergyRevenue(newEnergy).setFeeValue(feeValue0, feeValue1);
+
     }
 
     function migrateEnergy(address oldEnergy, address newEnergy) external onlyMigrator{

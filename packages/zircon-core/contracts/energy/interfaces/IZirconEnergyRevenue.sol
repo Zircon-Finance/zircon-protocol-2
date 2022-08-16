@@ -5,5 +5,8 @@ interface IZirconEnergyRevenue {
     function calculate(uint sentBalance) external;
     function migrateLiquidity(address newEnergy) external;
     function getBalanceFromPair() external returns (uint);
+    function feeValue1() external returns (uint);
+    function feeValue0() external returns (uint);
     function getFees(address _token, uint _amount, address _to) external;
+    function setFeeValue(uint _feeValue0, uint _feeValue1) external;
 }

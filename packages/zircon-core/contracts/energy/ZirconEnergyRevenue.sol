@@ -13,8 +13,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     uint public reserve;
     address public energyFactory;
-    uint public pylon1Balance;
-    uint public pylon0Balance;
+    uint public feeValue1;
+    uint public feeValue0;
     struct Zircon {
         address pairAddress;
         address floatToken;
@@ -39,22 +39,26 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     constructor() public {
         energyFactory = msg.sender;
-        pylon0Balance = 0;
-        pylon1Balance = 0;
     }
 
-    function initialize(address _pair, address _tokenA, address _tokenB, address energy0, address energy1, address pylon0, address pylon1) external {
-        require(energyFactory == msg.sender, "ZER: Not properly called");
+    function initialize(address _pair, address _tokenA, address _tokenB, address _energy0, address _energy1, address _pylon0, address _pylon1) external {
+        require(energyFactory == msg.sender, "ZER: Not Factory");
         zircon = Zircon(
             _pair,
             _tokenA,
             _tokenB,
-            energy0,
-            energy1,
-            pylon0,
-            pylon1
+            _energy0,
+            _energy1,
+            _pylon0,
+            _pylon1
         );
 
+    }
+
+    function setFeeValue(uint _feeValue0, uint _feeValue1) external {
+        require(energyFactory == msg.sender, "ZER: Not Factory");
+        feeValue1 = _feeValue1;
+        feeValue0 = _feeValue0;
     }
 
     function calculate(uint percentage) external _onlyPair nonReentrant {
@@ -73,8 +77,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             uint112 reserve1 = IZirconPair(zircon.pairAddress).token0() == zircon.floatToken ? _reservePair1 : _reservePair0;
 
             //Increments the contract variable that stores total fees acquired by pair. Multiplies by each Pylon's share
-            pylon0Balance += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
-            pylon1Balance += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
+            feeValue0 += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
+            feeValue1 += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
 
         {
@@ -86,8 +90,6 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));
         }
-
-
     }
 
     function changePylonAddresses(address _pylonAddressA, address _pylonAddressB) external {
@@ -106,14 +108,15 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         _safeTransfer(zircon.floatToken, newEnergy, floatBalance);
     }
 
+
     function getBalanceFromPair() external returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         if(msg.sender == zircon.pylon0) {
-            balance = pylon0Balance;
-            pylon0Balance = 0;
+            balance = feeValue0;
+            feeValue0 = 0;
         } else if(msg.sender == zircon.pylon1) {
-            balance = pylon1Balance;
-            pylon1Balance = 0;
+            balance = feeValue1;
+            feeValue1 = 0;
         }
     }
 

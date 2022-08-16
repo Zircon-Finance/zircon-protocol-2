@@ -213,10 +213,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         energyRevAddress = _energyRev;
     }
 
-    function initMigratedPylon(uint _gamma, uint _vab) external {
+    function initMigratedPylon(uint _gamma, uint _vab, uint _vfb) external {
         onlyFactory(); // sufficient check
         gammaMulDecimals = _gamma;
         virtualAnchorBalance = _vab;
+        virtualFloatBalance = _vfb;
         muMulDecimals = gammaMulDecimals; //Starts as gamma, diversifies over time. Used to calculate fee distribution
         muBlockNumber = block.number; //block height of last mu update
         muOldGamma = gammaMulDecimals; //gamma value at last mu update
@@ -826,7 +827,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Here it is going to be useful to have a Minimum Liquidity
             // If not we can have some problems
 
-            uint totalPoolValueAnchorPrime = translateToPylon(pairReserve1.mul(2), 0);
+//            uint totalPoolValueAnchorPrime = translateToPylon(pairReserve1.mul(2), 0);
 
             uint feeValueAnchor = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair(); //totalPoolValueAnchorPrime.mul(d)/1e18;
             //We convert from anchor to float units

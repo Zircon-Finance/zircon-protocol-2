@@ -72,9 +72,10 @@ contract Migrator {
         address energy = IZirconPylon(pylon).energyAddress();
         uint gamma = IZirconPylon(oldPylon).gammaMulDecimals();
         uint vab = IZirconPylon(oldPylon).virtualAnchorBalance();
+        uint vfb = IZirconPylon(oldPylon).virtualFloatBalance();
 
         migratePylon(oldPylon, pylon, _tokenA, _tokenB, _pairAddress, energy);
-        IZirconPylonFactory(newPylonFactory).startPylon(pylon, gamma, vab);
+        IZirconPylonFactory(newPylonFactory).startPylon(pylon, gamma, vab, vfb);
     }
 
     function migrateEnergyRevenue(address pair, address oldEnergyRev, address _tokenA, address _tokenB, address _pylonFactory, address newEnergyFactory) external onlyOwner{
@@ -89,6 +90,7 @@ contract Migrator {
 
         address newEnergy = IZirconFactory(pairFactory).changeEnergyRevAddress(pair, _tokenA, _tokenB, _pylonFactory);
         IZirconEnergyFactory(energyFactory).migrateEnergyRevenue(oldEnergyRev, newEnergy);
+        IZirconEnergyFactory(newEnergyFactory).migrateEnergyRevenueFees(oldEnergyRev, newEnergy);
     }
 
     function updateFactories(address newEnergyFactory, address newPTFactory, address newPylonFactory, address newPairFactory) external onlyOwner{
