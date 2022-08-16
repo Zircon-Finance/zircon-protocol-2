@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity =0.5.16;
 import '../interfaces/IZirconPylonFactory.sol';
 import '../interfaces/IZirconPTFactory.sol';
 import '../interfaces/IZirconFactory.sol';
@@ -36,7 +36,6 @@ contract Migrator {
     }
 
     function setMigrator(address migrator_) public onlyOwner {
-        require(migrator_ != address(0), 'ZPT: Address zero');
         IZirconPylonFactory(pylonFactory).setMigrator(migrator_);
         IZirconEnergyFactory(energyFactory).setMigrator(migrator_);
         IZirconFactory(pairFactory).setMigrator(migrator_);

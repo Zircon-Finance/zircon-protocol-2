@@ -1,4 +1,4 @@
-pragma solidity >=0.5.16;
+pragma solidity =0.5.16;
 interface IZirconPylon {
     function initialized() external view returns (uint);
     function anchorPoolTokenAddress() external view returns (address);
