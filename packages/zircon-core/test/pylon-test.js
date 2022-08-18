@@ -346,16 +346,45 @@ describe("Pylon", () => {
         //Let's initialize the Pylon, this should call two sync
         console.log("token0Amount init: ", ethers.utils.formatEther(token0Amount.div(100)));
         console.log("token1Amount init: ", ethers.utils.formatEther(token1Amount.div(100)));
+
+
+        //Pylon Op 1
         await pylonInstance.initPylon(account.address)
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 initial: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 initial: ", ethers.utils.formatEther(pairRes[1]))
 
         let pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
 
+
         let ptb = await pair.balanceOf(pylonInstance.address);
         let ptt = await pair.totalSupply();
         console.log("ptb: ", ethers.utils.formatEther(ptb));
         console.log("ptt: ", ethers.utils.formatEther(ptt));
+
+        let kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
+
+        let vab = await pylonInstance.virtualAnchorBalance();
+        let vfb = await pylonInstance.virtualFloatBalance();
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after init: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after init: ", ethers.utils.formatEther(pylonRes[1]));
+
+        let kVirtual = (vfb.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
+
+        console.log("kTranslated after init", ethers.utils.formatEther(kTranslated))
+        console.log("kVirtual after init", ethers.utils.formatEther(kVirtual))
+
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
+
+
 
         let pairResIni = await pair.getReserves();
         console.log("Pylon Pair Reserve0 after initPylon: ", ethers.utils.formatEther(pairResIni[0]))
@@ -372,8 +401,9 @@ describe("Pylon", () => {
 
         //We swap a token and then reverse it to create fees while having the same gamma
 
-        //Swapping 1% of pool
-        let input = pairRes[0].div(100);
+        //Swapping 20% of pool
+        let input = pairRes[0].div(5);
+        let reverseInput = pairRes[1].div(5);
         await token0.transfer(pair.address, input)
 
         let balance = await token0.balanceOf(account.address);
@@ -397,7 +427,7 @@ describe("Pylon", () => {
 
         //Second swap
 
-        input = balance1New.sub(balance1);
+        input = reverseInput;
         console.log("input to second swap: ", ethers.utils.formatEther(input))
         outcome = getAmountOut(input, pairRes[1], pairRes[0]);
         await token1.transfer(pair.address, input);
@@ -418,17 +448,85 @@ describe("Pylon", () => {
 
         expect(kprime).to.gt(k);
 
+        ptb = await pair.balanceOf(pylonInstance.address);
+        ptt = await pair.totalSupply();
+        console.log("ptb: ", ethers.utils.formatEther(ptb));
+        console.log("ptt: ", ethers.utils.formatEther(ptt));
+
+        kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
+
+        vab = await pylonInstance.virtualAnchorBalance();
+        vfb = await pylonInstance.virtualFloatBalance();
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
+
+        kVirtual = (vfb.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
+
+        console.log("kTranslated before", ethers.utils.formatEther(kTranslated))
+        console.log("kVirtual before", ethers.utils.formatEther(kVirtual))
+
         console.log("mu before new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
         console.log("gamma before new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
         console.log("vab before new token: ", ethers.utils.formatEther(await pylonInstance.virtualAnchorBalance()));
 
 
         //Need to mint twice to see results. The first calls mintFee, the second assigns them to the pool
-        await token0.transfer(pylonInstance.address, token0Amount.div(20000))
+
+        await token0.transfer(pylonInstance.address, token0Amount.div(100000000))
+        console.log("Sent token0", ethers.utils.formatEther(token0Amount.div(100000000)))
+        vfb = await pylonInstance.virtualFloatBalance();
+        console.log("Vfb before", ethers.utils.formatEther(vfb));
+
+        vab = await pylonInstance.virtualAnchorBalance();
+        console.log("Vab before", ethers.utils.formatEther(vab));
+
+
+        console.log("gamma before op 2: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
+
         //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
-        pair.swap(outcome, 0, account.address, '0x', overrides)
+        //pair.swap(outcome, 0, account.address, '0x', overrides)
+
+        //Pylon Op 2
 
         pylonInstance.mintPoolTokens(account.address, false)
+
+        vfb = await pylonInstance.virtualFloatBalance();
+        console.log("Vfb after", ethers.utils.formatEther(vfb));
+
+        console.log("mu after first mint: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
+
+        vab = await pylonInstance.virtualAnchorBalance();
+        console.log("Vab after", ethers.utils.formatEther(vab));
+
+        ptb = await pair.balanceOf(pylonInstance.address);
+        ptt = await pair.totalSupply();
+        console.log("ptb: ", ethers.utils.formatEther(ptb));
+        console.log("ptt: ", ethers.utils.formatEther(ptt));
+
+        pairRes = await pair.getReserves();
+        console.log("Pylon Pair Reserve0 after first mint: ", ethers.utils.formatEther(pairRes[0]))
+        console.log("Pylon Pair Reserve1 after first mint: ", ethers.utils.formatEther(pairRes[1]))
+
+        kPrime = pairRes[0].mul(pairRes[1])
+
+        kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
+
+        vab = await pylonInstance.virtualAnchorBalance();
+        vfb = await pylonInstance.virtualFloatBalance();
+
+        pylonRes = await pylonInstance.getSyncReserves();
+        console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
+        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
+
+        kVirtual = (vfb.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
+
+        console.log("kTranslated after", ethers.utils.formatEther(kTranslated))
+        console.log("kVirtual after", ethers.utils.formatEther(kVirtual))
+
+
+
 
         await token0.transfer(pylonInstance.address, token0Amount.div(20000))
         //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
@@ -437,7 +535,7 @@ describe("Pylon", () => {
 
         console.log("mu after new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
         console.log("gamma after new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
-        let vab = await pylonInstance.virtualAnchorBalance();
+        vab = await pylonInstance.virtualAnchorBalance();
         console.log("vab after new token: ", ethers.utils.formatEther(vab));
         console.log(token0.address);
         //We swapped slightly less than 1% of the pool, vab should be increased by

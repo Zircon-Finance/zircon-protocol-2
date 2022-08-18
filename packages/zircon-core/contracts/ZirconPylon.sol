@@ -250,8 +250,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         }
 
-        virtualAnchorBalance = balance1;
-        virtualFloatBalance = balance0;
+        //Reduced by min liq to avoid extreme sensitivity in kvirtual calculations;
+        virtualAnchorBalance = balance1 - MINIMUM_LIQUIDITY;
+        virtualFloatBalance = balance0 - MINIMUM_LIQUIDITY;
 
         //Special call with 0 pylon Sync reserves and total pool value equal to the balances we're initializing with.
         //This should always be 50%
@@ -594,7 +595,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     } else {
         //Vfb isn't quite as literal as vab about "number of assets supplied"
         uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-        virtualFloatBalance += liquidity.mul(virtualFloatBalance)/totalPtSupply;
+        virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;
     }
 
         //Mints zircon pool tokens to user after throwing their assets in the pool
@@ -781,7 +782,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 //            } else {
 //                //Vfb isn't quite as literal as vab about "number of assets supplied"
 //                uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-//                virtualFloatBalance += liquidity.mul(virtualFloatBalance)/totalPtSupply;
+//                virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;;
 //            }
 //
 //        }
@@ -918,6 +919,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint totalPoolValueFloatPrime = _translatedReserve0.mul(2);
         uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
 
+        console.log("sres0, sres1", _pylonReserve0, _pylonReserve1);
+        console.log("res0, res1", _translatedReserve0, _translatedReserve1);
+        console.log("vab, vfb", _virtualAnchorBalance, _virtualFloatBalance);
+
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
         uint adjustedVfb = _virtualFloatBalance.sub(_pylonReserve0);
         //The switching point is important. The point is always when VFB = TPV - ATV (expressed in float terms).
@@ -934,6 +939,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint kvk = (adjustedVfb.mul(adjustedVab).mul(1e18))/kTranslated;
 
         console.log("kvk", kvk);
+
+        //This is our k check. Mathematically kv should never be higher than ktranslated. If it is something's wrong
 
         require(kvk <= 1e18, "ZP: KV");
 
