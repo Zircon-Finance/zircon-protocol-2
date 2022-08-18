@@ -1,4 +1,4 @@
-pragma solidity ^0.5.16;
+pragma solidity =0.5.16;
 import '../interfaces/IZirconPylonFactory.sol';
 import '../interfaces/IZirconFactory.sol';
 import '../energy/interfaces/IZirconEnergyFactory.sol';
