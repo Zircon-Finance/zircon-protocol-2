@@ -101,8 +101,6 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private {
-
-
     uint _kLast = kLast; // gas savings
         if (_kLast != 0) {
             uint rootK = Math.sqrt(uint(_reserve0).mul(_reserve1));

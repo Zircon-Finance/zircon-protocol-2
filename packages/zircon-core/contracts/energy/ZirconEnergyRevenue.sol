@@ -63,6 +63,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
     }
 
+
     function setFeeValue(uint _feeValue0, uint _feeValue1) external {
         require(energyFactory == msg.sender, "ZER: Not Factory");
         feeValue1 = _feeValue1;
@@ -81,12 +82,11 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         uint pylonBalance1 = IUniswapV2ERC20(zircon.pairAddress).balanceOf(zircon.pylon1);
         {
             (uint112 _reservePair0, uint112 _reservePair1,) = IZirconPair(zircon.pairAddress).getReserves();
-            uint112 reserve0 = IZirconPair(zircon.pairAddress).token0() == zircon.floatToken ? _reservePair0 : _reservePair1;
-            uint112 reserve1 = IZirconPair(zircon.pairAddress).token0() == zircon.floatToken ? _reservePair1 : _reservePair0;
 
             //Increments the contract variable that stores total fees acquired by pair. Multiplies by each Pylon's share
-            feeValue0 += percentage.mul(reserve1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
-            feeValue1 += percentage.mul(reserve0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
+
+            feeValue0 += percentage.mul(_reservePair1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
+            feeValue1 += percentage.mul(_reservePair0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
         }
 
         {
@@ -122,6 +122,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         if(msg.sender == zircon.pylon0) {
             balance = feeValue0;
             feeValue0 = 0;
+
         } else if(msg.sender == zircon.pylon1) {
             balance = feeValue1;
             feeValue1 = 0;

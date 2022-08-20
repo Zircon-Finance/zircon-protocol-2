@@ -46,6 +46,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // ***** Variables for calculations *****
     uint public virtualAnchorBalance;
     uint public virtualFloatBalance;
+    uint public lastRootKTranslated;
     //uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Percentage of float over total pool value. Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
     uint public muMulDecimals; // A "permanence" factor that is used to adjust fee redistribution. Stored as mu + 1 because unsigned math
@@ -251,8 +252,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         }
 
-        virtualAnchorBalance = balance1;
-        virtualFloatBalance = balance0;
+        //Reduced by min liq to avoid extreme sensitivity in kvirtual calculations;
+        virtualAnchorBalance = balance1 - MINIMUM_LIQUIDITY;
+        virtualFloatBalance = balance0 - MINIMUM_LIQUIDITY;
 
         //Special call with 0 pylon Sync reserves and total pool value equal to the balances we're initializing with.
         //This should always be 50%
@@ -273,6 +275,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         muMulDecimals = gammaMulDecimals; //Starts as gamma, diversifies over time. Used to calculate fee distribution
         muBlockNumber = block.number; //block height of last mu update
         muOldGamma = gammaMulDecimals; //gamma value at last mu update
+        lastRootKTranslated = Math.sqrt(translateToPylon(_reservePair0, 0).mul(translateToPylon(_reservePair1, 0)));
 
         //Here it updates the state and throws liquidity into the pool if possible
         _update();
@@ -333,6 +336,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // Get Maximum finds the highest amount that can be matched at 50/50
             uint px;
             uint py;
+
+
+
             if (pairReserves0 == 0 && pairReserves1 == 0) {
                 (px, py) = ZirconLibrary._getMaximum(
                     balance0,
@@ -350,6 +356,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
             if(py != 0) _safeTransfer(pylonToken.anchor, pairAddress, py);
             IZirconPair(pairAddress).mint(address(this));
+
+            console.log("ass2");
         }
         // Let's remove the tokens that are above max0 and max1, and donate them to the pool
         // This is for cases where somebody just donates tokens to pylon; tx reverts if this done via core functions
@@ -375,6 +383,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         updateReservesRemovingExcess(balance0, balance1, max0, max1);
 
         (reservesTranslated0, reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
+
+        //Update lastK since we may have added/removed liquidity
+        lastRootKTranslated = Math.sqrt(reservesTranslated0.mul(reservesTranslated1));
+
 
         (uint pylonReserve0, uint pylonReserve1,) = getSyncReserves();
 
@@ -523,6 +535,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
 
+
         //Calculates max tokens to be had in this reserve pool
         uint max = _pairReserveTranslated.mul(maximumPercentageSync) / 100;
         uint freeSpace = 0;
@@ -534,11 +547,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if (_amountIn <= freeSpace) {
                 (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 //Matches tokens to send into pool
+
                 _syncMinting();
+
+                console.log("ass");
 
             return (liquidity, _amountIn);
             }
         }
+
 
         uint amountAsyncToMint = _amountIn.sub(freeSpace);
 
@@ -585,17 +602,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         amountIn = payFees(amountIn, feeBps, isAnchor);
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
 
-
         uint amountOut;
         (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
             isAnchor ? _reserve1 : _reserve0, isAnchor);
+
 
     if(isAnchor) {
         virtualAnchorBalance += amountOut;
     } else {
         //Vfb isn't quite as literal as vab about "number of assets supplied"
         uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-        virtualFloatBalance += liquidity.mul(virtualFloatBalance)/totalPtSupply;
+        virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;
     }
 
         //Mints zircon pool tokens to user after throwing their assets in the pool
@@ -782,7 +799,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 //            } else {
 //                //Vfb isn't quite as literal as vab about "number of assets supplied"
 //                uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-//                virtualFloatBalance += liquidity.mul(virtualFloatBalance)/totalPtSupply;
+//                virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;;
 //            }
 //
 //        }
@@ -812,7 +829,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Then it applies the base formula:
         // Adds fees to virtualFloat and virtualAnchor
         // And then calculates Gamma so that the proportions are correct according to the formula
-        (uint112 pairReserve0, uint112 pairReserve1) = getPairReservesNormalized();
+        (uint pairReserveTranslated0, uint pairReserveTranslated1) = getPairReservesTranslated(0, 0);
         (uint112 pylonReserve0, uint112 pylonReserve1,) = getSyncReserves();
 
         uint oldGamma = gammaMulDecimals;
@@ -821,7 +838,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // So is useless to update any variable because fees on pair haven't changed
         //        uint currentK = uint(pairReserve0).mul(pairReserve1);
         //        uint poolTokensPrime = IZirconPair(pairAddress).totalSupply();
-        if (pairReserve0 != 0 && pairReserve1 != 0) {
+        if (pairReserveTranslated0 != 0 && pairReserveTranslated1 != 0) {
 
             //uint poolTokensPrime = IZirconPair(pairAddress).totalSupply();
             // Here it is going to be useful to have a Minimum Liquidity
@@ -829,33 +846,44 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 //            uint totalPoolValueAnchorPrime = translateToPylon(pairReserve1.mul(2), 0);
 
-            uint feeValueAnchor = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair(); //totalPoolValueAnchorPrime.mul(d)/1e18;
+            //uint feeValueAnchor = IZirconEnergyRevenue(energyRevAddress).getBalanceFromPair(); //totalPoolValueAnchorPrime.mul(d)/1e18;
             //We convert from anchor to float units
-            uint feeValueFloat = feeValueAnchor.mul(pairReserve0)/pairReserve1;
+            //uint feeValueFloat = feeValueAnchor.mul(pairReserveTranslated0)/pairReserveTranslated1;
 
             // Calculating gamma, variable used to calculate tokens to mint and withdrawals
 
             // gamma is supposed to always be an accurate reflection of the float share as a percentage of the totalPoolValue
             // however the virtual anchor balance also includes the syncPool reserve portion, which is completely outside of the pools.
 
-            // Minor note when operating on fractional (anchor withdrawals get slashed if there is no money in energy),
-            //Gamma is higher than it should be compared to float value + anchor value.
-            // This means that anchors get more fees than they "should", which kinda works out because they're at high risk.
-            // It works as an additional incentive to not withdraw.
-
+            //Fees are assigned according to the criteria that deltaK == deltaKVirtual;
+            //They are weighted inversely, with Anchors getting more fees if floats are a large chunk of the pool
+            //FloatFeeFactor is sort of 1-gamma but not really, again it's necessary to keep the Ks humming.
+            //K > kVirtual is the domain of the gamma formula.
+            //Without this condition we can't find the smooth switching point between the two pieces of the formula.
 
             //Mu mostly follows gamma but it's designed to find an equilibrium point different from 50/50
             //More on this in the function itself;
 
-            //We invert fee distribution. Anchor gets proportion equal to gamma (ie mu) so if it's too heavy it gets less
+            //This one overassigns because it still wasn't affected by mintFee
+            //TODO: modify this to use energy rev anyway. Non pylon mints will affect ptt so we can't offset for it here.
+            uint rootKTranslated = Math.sqrt(pairReserveTranslated0.mul(pairReserveTranslated1));
+            uint twoMu = 2 * muMulDecimals;
 
-            virtualAnchorBalance += ((feeValueAnchor.mul(muMulDecimals))/1e18);
-            virtualFloatBalance += ((feeValueFloat.mul(1e18-muMulDecimals))/1e18);
+            uint feeValuePercentage = (rootKTranslated.sub(lastRootKTranslated)).mul(1e18)/(lastRootKTranslated);
+            uint floatFeeFactor = (feeValuePercentage + 2e18 - twoMu).mul(1e18) / (1e18 + twoMu.mul(feeValuePercentage)/1e18);
 
-            gammaMulDecimals = _calculateGamma(virtualAnchorBalance, virtualFloatBalance, pylonReserve0, pylonReserve1, translateToPylon(pairReserve0, 0), translateToPylon(pairReserve1, 0));
+            uint adjustedVfb = virtualFloatBalance.sub(pylonReserve0);
+            uint adjustedVab = virtualAnchorBalance.sub(pylonReserve1);
+
+            virtualAnchorBalance += adjustedVab.mul(twoMu * feeValuePercentage)/1e36;
+            virtualFloatBalance += adjustedVfb.mul(floatFeeFactor * feeValuePercentage)/1e36;
+
+            gammaMulDecimals = _calculateGamma(virtualAnchorBalance, virtualFloatBalance, pylonReserve0, pylonReserve1, pairReserveTranslated0, pairReserveTranslated1);
 
 
             _updateMu();
+
+            lastRootKTranslated = rootKTranslated;
 
             //updateDelta()
 
@@ -908,7 +936,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
             // Sync pool also gets a claim to these
-            /// @notice event no longer has vfb
+            console.log("sync");
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
         }
     }
@@ -918,6 +946,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         uint totalPoolValueFloatPrime = _translatedReserve0.mul(2);
         uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
+
+        console.log("sres0, sres1", _pylonReserve0, _pylonReserve1);
+        console.log("res0, res1", _translatedReserve0, _translatedReserve1);
+        console.log("vab, vfb", _virtualAnchorBalance, _virtualFloatBalance);
 
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
         uint adjustedVfb = _virtualFloatBalance.sub(_pylonReserve0);
@@ -935,6 +967,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint kvk = (adjustedVfb.mul(adjustedVab).mul(1e18))/kTranslated;
 
         console.log("kvk", kvk);
+
+        //This is our k check. Mathematically kv should never be higher than ktranslated. If it is something's wrong
 
         require(kvk <= 1e18, "ZP: KV");
 
