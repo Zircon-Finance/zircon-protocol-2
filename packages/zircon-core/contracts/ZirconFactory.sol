@@ -55,6 +55,7 @@ contract ZirconFactory is IZirconFactory {
         assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
+        require(pair != address(0), 'ZF: PCF');
         address energyRev = createEnergy(pair, token0, token1, _pylonFactory);
         IZirconPair(pair).initialize(token0, token1, energyRev);
         getPair[token0][token1] = pair;
