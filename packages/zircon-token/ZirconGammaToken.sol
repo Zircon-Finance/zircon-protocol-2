@@ -17,8 +17,7 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant RESCUER_ROLE = keccak256("RESCUER_ROLE");
-    bytes32 public constant TAKE_FEE_ROLE = keccak256("TAKE_FEE_ROLE");
-    bytes32 public constant ROUTER_ROLE = keccak256("ROUTER_ROLE");
+
 
     uint256 private _maxSupply = 1000000000 * 10**decimals(); // 1 billion tokens is maximum supply
     uint256 private _initialSupply = 100000 * 10**decimals(); // 100,000 tokens is the initial supply
