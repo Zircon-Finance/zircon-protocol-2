@@ -83,6 +83,106 @@ library ZirconLibrary {
         omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
     }
 
+    function calculateAnchorFactor(bool isLineFormula, bool isAddition, uint amount, uint omega, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+
+        //calculate the anchor liquidity change that would move formula switch to current price
+        uint sqrtKFactor = Math.sqrt(oldKFactor**2 + oldKFactor);
+        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
+
+        //We need to change anchor factor if we're using line formula or if we're adding enough to switch to it
+        if(isLineFormula || (amountThresholdMultiplier >= 1e18 && isAddition)) {
+
+            if(!isLineFormula && (1e18 + (amount.mul(1e18)/adjustedVab)) < amountThresholdMultiplier) {
+                //We return if the addition isn't sufficient to trigger formula switch
+                return oldKFactor;
+            }
+
+            //first of all we need to figure out how much of the anchor liquidity change requires kFactor to follow
+            //This is the entire amount if isLineFormula && adding, min((1-threshold)vab, amount) if isLineFormula && removing
+            //if !isLineFormula it's amount - (threshold - 1)vab
+            uint factorAnchorAmount = isLineFormula ?
+                                            (isAddition?
+                                                amount
+                                            : Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount))
+                                        : amount.sub((amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/1e18);
+
+
+            //If it's the third case we need to increase initial k and vab by the amount that doesn't require changing kFactor
+            //It's as if we're adding liquidity in two tranches
+
+            uint initialK = isLineFormula ?
+                                _reserveTranslated0.mul(_reserveTranslated1) :
+                                (_reserveTranslated0 + (amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1).mul((_reserveTranslated1 + (amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2))
+
+            uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
+
+
+            //omega can only be different than 1 in case we're removing liquidity and it's using the line formula
+            uint liquidityChange = isLineFormula ? factorAnchorAmount.mul(omega)/2e18 : (factorAnchorAmount + amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2e18;
+
+
+            uint kPrime = isAddition ?
+                            (_reserveTranslated0 + (liquidityChange.mul(_reserveTranslated0)/(_reserveTranslated1).mul(_reserveTranslated1 + liquidityChange)
+                           : (_reserveTranslated0 - (liquidityChange.mul(_reserveTranslated0)/(_reserveTranslated1).mul(_reserveTranslated1 - liquidityChange);
+
+
+            //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
+            //This has the effect of keeping the line formula still, moving the switchover point.
+            //Without this, anchor liquidity additions would change value of the float side
+            //Lots of overflow potential, so we split calculations
+            anchorKFactor = kPrime.mul(initialVab)/initialK;
+            anchorKFactor = isAddition ?
+                anchorKFactor.mul(oldKFactor)/(adjustedVab + factorAnchorAmount)
+                : anchorKFactor.mul(oldKFactor)/(adjustedVab - factorAnchorAmount);
+
+
+        } else {
+            //all other cases don't matter, kFactor is unchanged
+            anchorKFactor = oldKFactor;
+        }
+
+    }
+
+
+
+    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+
+        //calculate the anchor liquidity change that would move formula switch to current price
+        uint sqrtKFactor = Math.sqrt(oldKFactor**2 + oldKFactor);
+        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
+
+        //We need to change anchor factor if we're using line formula or if we're adding enough to switch to it
+        if(isLineFormula)) {
+
+            //if we're burning we only care about the threshold liquidity amount
+            uint factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
+
+            uint _ptu = ptu.mul(factorAnchorAmount)/amount; //adjust ptu by the factor contribution
+
+            //omega can only be different than 1 in case we're removing liquidity and it's using the line formula
+            //but it's already embedded in the ptu;
+
+            //we know that ptu is proportional to sqrt(deltaK)
+            //so our kprime is just k - (ptu/ptb * (sqrtK))**2
+            //while kprime/k is simply 1 - ptu**2/ptb**2
+
+
+            uint kRatio = 1e18 - uint(1e18).mul(_ptu**2)/ptb**2;
+
+            //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
+            //This has the effect of keeping the line formula still, moving the switchover point.
+            //Without this, anchor liquidity additions would change value of the float side
+            //Lots of overflow potential, so we split calculations
+            anchorKFactor = kRatio.mul(initialVab)/(adjustedVab - factorAnchorAmount);
+
+        } else {
+            //all other cases don't matter, kFactor is unchanged
+            anchorKFactor = oldKFactor;
+        }
+
+    }
+
+
 
     function absoluteDiff(uint value1, uint value2) pure internal returns (uint abs) {
         if (value1 >= value2) {

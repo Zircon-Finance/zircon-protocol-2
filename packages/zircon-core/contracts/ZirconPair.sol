@@ -99,6 +99,17 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         emit Sync(reserve0, reserve1);
     }
 
+    //Wrapper around mintFee primarily aimed to be called by Pylon
+    //Access control is unnecessary, if anyone calls it they just waste gas compounding fees for us
+    //The wrapper is necessary to make sure the reserves it passes to mintFee are actual
+    function publicMintFee() external lock {
+        (uint112 _reserve0, uint112 _reserve1,) = getReserves();
+
+        _mintFee(_reserve0, _reserve1);
+
+        kLast = uint(reserve0).mul(reserve1); //Reserves don't change from mintFee
+    }
+
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private {
     uint _kLast = kLast; // gas savings

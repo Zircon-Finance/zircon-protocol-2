@@ -47,6 +47,7 @@ interface IZirconPair {
 
     function burnOneSide(address to, bool isReserve0) external returns (uint amount);
     function mintOneSide(address to, bool isReserve0) external returns (uint liquidity, uint amount0, uint amount1);
+    function publicMintFee() external;
     function mint(address to) external returns (uint liquidity);
     function burn(address to) external returns (uint amount0, uint amount1);
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
