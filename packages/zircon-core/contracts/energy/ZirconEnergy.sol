@@ -31,7 +31,13 @@ contract ZirconEnergy is IZirconEnergy {
   address energyFactory;
   uint anchorReserve; //Used to track balances and sync up in case of donations
   bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
+  // **** MODIFIERS *****
+  uint public initialized = 0;
 
+  modifier _initialize() {
+    require(initialized == 1, 'Zircon: FORBIDDEN');
+    _;
+  }
   constructor() public {
     energyFactory = msg.sender;
   }
@@ -41,6 +47,7 @@ contract ZirconEnergy is IZirconEnergy {
   }
 
   function initialize(address _pylon, address _pair, address _token0, address _token1) external {
+    require(initialized == 0, "ZER: AI");
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
     bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
     (address tokenA, address tokenB) = isFloatToken0 ? (_token0, _token1) : (_token1, _token0);
@@ -69,7 +76,7 @@ contract ZirconEnergy is IZirconEnergy {
     require(pylon.pairAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
-  function registerFee() external _onlyPylon {
+  function registerFee() external _onlyPylon _initialize{
     uint balance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
     require(balance >= anchorReserve, "ZE: Anchor not sent");
 
@@ -83,7 +90,7 @@ contract ZirconEnergy is IZirconEnergy {
   }
 
   //Called when tokens are withdrawn to ensure pylon doesn't get bricked
-  function syncReserve() external _onlyPylon {
+  function syncReserve() external _onlyPylon _initialize {
       anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
   }
 
@@ -91,7 +98,7 @@ contract ZirconEnergy is IZirconEnergy {
   //Returns the fee in basis points (0.01% units, needs to be divided by 10000)
   //Uses two piece-wise parabolas. Between 0.45 and 0.55 the fee is very low (minFee).
   //After the cutoff it uses a steeper parabola defined by a max fee at the extremes (very high, up to 1% by default).
-  function getFeeByGamma(uint gammaMulDecimals) external view returns (uint amount) {
+  function getFeeByGamma(uint gammaMulDecimals) _initialize external view returns (uint amount) {
     (uint _minFee, uint _maxFee) = getFee();
     uint _gammaHalf = 5e17;
     uint x = (gammaMulDecimals > _gammaHalf) ? (gammaMulDecimals - _gammaHalf).mul(10) : (_gammaHalf - gammaMulDecimals).mul(10);

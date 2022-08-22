@@ -30,8 +30,13 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FAILED');
     }
+    // **** MODIFIERS *****
+    uint public initialized = 0;
 
-
+    modifier _initialize() {
+        require(initialized == 1, 'Zircon: FORBIDDEN');
+        _;
+    }
     modifier _onlyPair() {
         require(zircon.pairAddress == msg.sender, "ZE: Not Pair");
         _;
@@ -42,6 +47,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
 
     function initialize(address _pair, address _tokenA, address _tokenB, address _energy0, address _energy1, address _pylon0, address _pylon1) external {
+        require(initialized == 0, "ZER: Not Factory");
         require(energyFactory == msg.sender, "ZER: Not Factory");
         zircon = Zircon(
             _pair,
@@ -53,6 +59,8 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             _pylon1
         );
 
+        initialized = 1;
+
     }
 
 
@@ -62,8 +70,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         feeValue0 = _feeValue0;
     }
 
-    function calculate(uint percentage) external _onlyPair nonReentrant {
-
+    function calculate(uint percentage) external _onlyPair nonReentrant _initialize {
         uint balance = IUniswapV2ERC20(zircon.pairAddress).balanceOf(address(this));
         require(balance > reserve, "ZER: Reverted");
 
@@ -110,7 +117,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     }
 
 
-    function getBalanceFromPair() external returns (uint balance) {
+    function getBalanceFromPair() external _initialize returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         if(msg.sender == zircon.pylon0) {
             balance = feeValue0;
