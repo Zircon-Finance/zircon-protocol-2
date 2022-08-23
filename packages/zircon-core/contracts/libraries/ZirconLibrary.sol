@@ -82,12 +82,13 @@ library ZirconLibrary {
         //It's applied to the user's liquidity tokens to avoid changing other core functions.
         //This adjustment is only used for share calculations, the full amount of tokens is removed.
         omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
+        if(omegaMulDecimals > 1e18) {omegaMulDecimals = 1e18;}
     }
 
     function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
 
         //calculate the anchor liquidity change that would move formula switch to current price
-        uint sqrtKFactor = Math.sqrt(oldKFactor**2 + oldKFactor);
+        uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
         uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
 
         //We need to change anchor factor if we're using line formula or if adding liquidity might trigger a switch
@@ -145,16 +146,17 @@ library ZirconLibrary {
 
 
 
-    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) view internal returns (uint anchorKFactor) {
 
         //When burning We need to change anchor factor if we're already in line formula
         //if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
         if(isLineFormula) {
 
             //calculate the anchor liquidity change that would move formula switch to current price
-            uint sqrtKFactor = Math.sqrt(oldKFactor**2 + oldKFactor);
+            uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
             uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
 
+            console.log("atm", amountThresholdMultiplier);
             //if we're burning we only care about the threshold liquidity amount
             uint factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
 
@@ -176,6 +178,7 @@ library ZirconLibrary {
             //Lots of overflow potential, so we split calculations
             anchorKFactor = kRatio.mul(adjustedVab)/(adjustedVab - factorAnchorAmount);
             anchorKFactor = anchorKFactor.mul(oldKFactor)/1e18;
+            console.log("cac");
         } else {
             //all other cases don't matter, kFactor is unchanged
             anchorKFactor = oldKFactor;

@@ -8,7 +8,6 @@ interface IZirconPylon {
     function isFloatReserve0() external view returns (bool);
     function virtualAnchorBalance() external view returns (uint);
     function anchorKFactor() external view returns (uint);
-    function formulaSwitch() external view returns (bool);
     function getSyncReserves() external view returns  (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast);
     // Called once by the factory at time of deployment
     // @_floatPoolToken -> Contains Address Of Float PT

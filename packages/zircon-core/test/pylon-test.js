@@ -374,7 +374,7 @@ describe("Pylon", () => {
         console.log("\nPylon Sync Reserve0 after init: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 after init: ", ethers.utils.formatEther(pylonRes[1]));
 
-        let kVirtual = (vfb.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
+        let kVirtual = (anchorFactor.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
 
         console.log("kTranslated after init", ethers.utils.formatEther(kTranslated))
         console.log("kVirtual after init", ethers.utils.formatEther(kVirtual))
@@ -462,7 +462,7 @@ describe("Pylon", () => {
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
 
-        kVirtual = (vfb.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
+        kVirtual = (anchorFactor.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
 
         console.log("kTranslated before", ethers.utils.formatEther(kTranslated))
         console.log("kVirtual before", ethers.utils.formatEther(kVirtual))
@@ -477,7 +477,7 @@ describe("Pylon", () => {
         await token0.transfer(pylonInstance.address, token0Amount.div(100000000))
         console.log("Sent token0", ethers.utils.formatEther(token0Amount.div(100000000)))
         anchorFactor = await pylonInstance.anchorKFactor();
-        console.log("Vfb before", ethers.utils.formatEther(vfb));
+        console.log("anchorFactor before", ethers.utils.formatEther(anchorFactor));
 
         vab = await pylonInstance.virtualAnchorBalance();
         console.log("Vab before", ethers.utils.formatEther(vab));
@@ -493,7 +493,7 @@ describe("Pylon", () => {
         pylonInstance.mintPoolTokens(account.address, false)
 
         anchorFactor = await pylonInstance.anchorKFactor();
-        console.log("Vfb after", ethers.utils.formatEther(vfb));
+        console.log("anchorFactor after", ethers.utils.formatEther(anchorFactor));
 
         console.log("mu after first mint: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
 
@@ -520,7 +520,7 @@ describe("Pylon", () => {
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
 
-        kVirtual = (vfb.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
+        //kVirtual = (anchorFactor.sub(pylonRes[0])).mul(vab.sub(pylonRes[1]));
 
         console.log("kTranslated after", ethers.utils.formatEther(kTranslated))
         console.log("kVirtual after", ethers.utils.formatEther(kVirtual))
@@ -1476,18 +1476,36 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         console.log("ptt before async mint", ethers.utils.formatEther(ptt));
 
-
-        // await token1.transfer(pylonInstance.address, token0Amount.div(1000))
+        //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
         await pylonInstance.mintPoolTokens(account.address, true);
 
         ptt = await pair.totalSupply();
+        let anchorFactor = await pylonInstance.anchorKFactor();
 
         console.log("ptt after async mint", ethers.utils.formatEther(ptt));
+        console.log("anchorFactor after async mint", ethers.utils.formatEther(anchorFactor));
 
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        //force update
+        await token1.transfer(pylonInstance.address, token0Amount.div(1000))
+        await pylonInstance.mintPoolTokens(account.address, true);
+
+        let gamma = await pylonInstance.gammaMulDecimals();
+
+        console.log("gamma after async mint", ethers.utils.formatEther(gamma));
+
+        let pairResT = await pair.getReserves();
+
+        ptb = await pair.balanceOf(pylonInstance.address);
+        ptt = await pair.totalSupply();
+        console.log("tpv: ", ethers.utils.formatEther(pairResT[1].mul(2).mul(ptb).div(ptt)))
         // We now do a few massive swaps to get some fees in + small syncMint to make it stick.
 
         let pairResk = await pair.getReserves();
         console.log("K before swaps: ", ethers.utils.formatEther(pairResk[0].mul(pairResk[1])))
+        console.log("res0 before swaps: ", ethers.utils.formatEther(pairResk[0]))
+        console.log("res1 before swaps: ", ethers.utils.formatEther(pairResk[1]))
 
         // 25% of pool swap
         let input = pairRes[0].div(2);
@@ -1968,20 +1986,20 @@ describe("Pylon", () => {
         // Time to swap, let's generate some fees
         await token0.transfer(pair.address, expandTo18Decimals(1))
         await pair.swap(0, ethers.BigNumber.from('1662497915624478906'), account.address, '0x', overrides)
-        // Minting tokens is going to trigger a change in the VAB & VFB so let's check
+        // Minting tokens is going to trigger a change in the VAB & anchorFactor so let's check
         const newAmount0 = ethers.BigNumber.from('5000000000000000')
         await token0.transfer(pylonInstance.address, newAmount0)
         await pylonInstance.mintPoolTokens(account.address, false)
 
-        // So here we increase our vab and vfb
+        // So here we increase our vab and anchorFactor
         let vab2 = await pylonInstance.virtualAnchorBalance();
-        // expect(vfb).to.eq(ethers.BigNumber.from('902024227015522550'))
+        // expect(anchorFactor).to.eq(ethers.BigNumber.from('902024227015522550'))
         expect(vab2).to.eq(ethers.BigNumber.from('9090909090909090909'))
         // Let's mint some LP Tokens
-        // no fee changes so vab & vfb should remain the same
+        // no fee changes so vab & anchorFactor should remain the same
         await addLiquidity(expandTo18Decimals(1), expandTo18Decimals(10))
         let vab3 = await pylonInstance.virtualAnchorBalance();
-        // expect(vfb3).to.eq(ethers.BigNumber.from('902024227015522550'))
+        // expect(anchorFactor3).to.eq(ethers.BigNumber.from('902024227015522550'))
         expect(vab3).to.eq(ethers.BigNumber.from('9090909090909090909'))
 
         await token1.transfer(pylonInstance.address, newAmount0)
