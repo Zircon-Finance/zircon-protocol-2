@@ -112,8 +112,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //    event MintAsync100(address sender, uint aIn0, bool isAnchor);
     event Burn(address sender, uint aIn0, bool isAnchor);
     event BurnAsync(address sender, uint aIn0, uint aIn1);
-    event Excess(uint aIn0, bool isAnchor);
-    event FeeBps(uint aIn0, bool applied);
+//    event Excess(uint aIn0, bool isAnchor);
+//    event FeeBps(uint aIn0, bool applied);
 
     // ****** CONSTRUCTOR ******
     constructor() public {
@@ -132,10 +132,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'ZP: TFF');
     }
 
-    function getSyncReserves()  public view returns  (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) {
+    function getSyncReserves()  public view returns  (uint112 _reserve0, uint112 _reserve1) { //, uint32 _blockTimestampLast) {
         _reserve0 = reserve0;
         _reserve1 = reserve1;
-        _blockTimestampLast = blockTimestampLast;
+//        _blockTimestampLast = blockTimestampLast;
     }
 
     /// @notice Private function to get pair reserves normalized on float and anchor
@@ -166,36 +166,36 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
     /// @notice Helper function to calculate slippage-adjusted share of pool
-    function _disincorporateAmount(uint _amountIn, bool isAnchor) private view returns (uint amount0, uint amount1) {
-        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
+    //    function _disincorporateAmount(uint _amountIn, bool isAnchor) private view returns (uint amount0, uint amount1) {
+    //        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
+    //
+    //        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
+    //        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
+    //
+    //        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
+    //        uint amountInWithFee = _amountIn.mul(10000-(IZirconPylonFactory(factoryAddress).liquidityFee()/2 + 1))/10000;
+    //        //Add the amountIn to one of the reserves
+    //        uint sqrtKPrime = isAnchor ?
+    //        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
+    //        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
+    //
+    //        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
+    //
+    //        amount0 = _reservePair0.mul(liqPercentage)/1e18;
+    //        amount1 = _reservePair1.mul(liqPercentage)/1e18;
+    //    }
 
-        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
-        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
-
-        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
-        uint amountInWithFee = _amountIn.mul(10000-(IZirconPylonFactory(factoryAddress).liquidityFee()/2 + 1))/10000;
-        //Add the amountIn to one of the reserves
-        uint sqrtKPrime = isAnchor ?
-        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
-        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
-
-        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
-
-        amount0 = _reservePair0.mul(liqPercentage)/1e18;
-        amount1 = _reservePair1.mul(liqPercentage)/1e18;
-    }
-
-    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, IZirconPoolToken pt) private view returns (uint liquidity, uint amountInAdjusted){
+    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, uint ptTotalSupply) private view returns (uint liquidity, uint amountInAdjusted){
         (uint112 _pairReserve0, uint112 _pairReserve1) = getPairReservesNormalized();
-        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
+        (uint112 _reserve0, uint112 _reserve1) = getSyncReserves(); // gas savings
         //        console.log("u", _pairReserve0,_pairReserve1);
 
         if (shouldMintAnchor) {
             amountInAdjusted = Math.min((amountIn0.mul(_pairReserve1).mul(2))/_pairReserve0, amountIn1.mul(2)); //Adjust AmountIn0 to its value in Anchor tokens
-            liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, pt.totalSupply(), translateToPylon(_pairReserve1, 0), _reserve1, gammaMulDecimals, virtualAnchorBalance);
+            liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, ptTotalSupply, translateToPylon(_pairReserve1, 0), _reserve1, gammaMulDecimals, virtualAnchorBalance);
         }else{
             amountInAdjusted = Math.min((amountIn1.mul(_pairReserve0).mul(2))/_pairReserve1, amountIn0.mul(2)); //Adjust AmountIn1 to its value in Float tokens
-            liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, pt.totalSupply(), translateToPylon(_pairReserve0, 0), _reserve0, gammaMulDecimals, virtualAnchorBalance);
+            liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, ptTotalSupply, translateToPylon(_pairReserve0, 0), _reserve0, gammaMulDecimals, virtualAnchorBalance);
         }
     }
 
@@ -266,8 +266,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (gammaMulDecimals, formulaSwitch) = _calculateGamma(virtualAnchorBalance, anchorKFactor, 0, balance1);
 
         // Time to mint some tokens
-        (anchorLiquidity) = _calculateSyncLiquidity(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
-        (floatLiquidity) = _calculateSyncLiquidity(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
+//        (anchorLiquidity) = _calculateSyncLiquidity(balance1, 0, _reservePair1, anchorPoolTokenAddress, true);
+//        (floatLiquidity) = _calculateSyncLiquidity(balance0, 0, _reservePair0, floatPoolTokenAddress, false);
+
+        IZirconPoolToken(anchorPoolTokenAddress).mint(address(0), MINIMUM_LIQUIDITY);
+        IZirconPoolToken(floatPoolTokenAddress).mint(address(0), MINIMUM_LIQUIDITY);
+
+        anchorLiquidity = balance1.sub(MINIMUM_LIQUIDITY);
+        floatLiquidity = (balance0.mul(1e18)/gammaMulDecimals.mul(2)).sub(MINIMUM_LIQUIDITY);
 
         _syncMinting();
 
@@ -356,7 +362,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //We run the update kFactor function for the anchor portion of liquidity
             //This is only required after initialization
             if(initialized == 1) {
-                (, uint pylonReserve1,) = getSyncReserves();
+                (, uint pylonReserve1) = getSyncReserves();
                 anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, py, anchorKFactor, virtualAnchorBalance.sub(pylonReserve1), reservesTranslated0, reservesTranslated1);
             }
 
@@ -374,9 +380,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //lastPoolTokens = IZirconPair(pairAddress).totalSupply();
         //lastK = uint(_pairReserve0).mul(_pairReserve1);
         //TODO: Seems like uniswap dead weight
-        uint32 blockTimestamp = uint32(block.timestamp % 2**32);
+//        uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         //uint32 timeElapsed = blockTimestamp - blockTimestampLast;
-        blockTimestampLast = blockTimestamp;
+//        blockTimestampLast = blockTimestamp;
 
         // Removing excess reserves from the pool
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
@@ -395,13 +401,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         lastRootKTranslated = Math.sqrt(reservesTranslated0.mul(reservesTranslated1));
 
 
-        (, uint pylonReserve1,) = getSyncReserves();
+        (, uint pylonReserve1) = getSyncReserves();
 
         //Counts gamma change and applies strike condition if necessary
         (uint _newGamma,) = _calculateGamma(virtualAnchorBalance, anchorKFactor, pylonReserve1, reservesTranslated1);
 
-        uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
-        if(ZirconLibrary.absoluteDiff(_newGamma, gammaMulDecimals) >= deltaGammaThreshold) {
+        if(ZirconLibrary.absoluteDiff(_newGamma, gammaMulDecimals) >= IZirconPylonFactory(factoryAddress).deltaGammaThreshold()) {
             //This makes sure that a massive mintAsync can't be exited in the same block
             strikeBlock = block.number;
         }
@@ -422,12 +427,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     function _updateMu() private {
         uint _newBlockHeight = block.number; // t2
-        uint _lastBlockHeight = muBlockNumber; // t1
-        uint muUpdatePeriod = IZirconPylonFactory(factoryAddress).muUpdatePeriod();
+//        uint _lastBlockHeight = muBlockNumber; // t1
+//        uint muUpdatePeriod = IZirconPylonFactory(factoryAddress).muUpdatePeriod();
 
         //We only go ahead with this if a sufficient amount of time passes
         //This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
-        if((_lastBlockHeight - _newBlockHeight) > muUpdatePeriod) { //reasonable to assume it won't subflow
+        if((muBlockNumber - _newBlockHeight) > IZirconPylonFactory(factoryAddress).muUpdatePeriod()) { //reasonable to assume it won't subflow
 
             uint _newGamma = gammaMulDecimals; //y2
             uint _oldGamma = muOldGamma; //y1
@@ -456,10 +461,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 // Due to uint math we can't do this in one line
 
                 //Parameter to tweak the speed at which mu seeks to follow gamma
-                uint muChangeFactor = IZirconPylonFactory(factoryAddress).muChangeFactor();
-
                 if (deltaGammaIsPositive) {
-                    uint deltaMu = (_newGamma - _oldGamma).mul(absoluteGammaDeviation * muChangeFactor)/1e18;
+                    uint deltaMu = (_newGamma - _oldGamma).mul(absoluteGammaDeviation * IZirconPylonFactory(factoryAddress).muChangeFactor())/1e18;
                     if (deltaMu + muMulDecimals <= 1e18) {
                         // Only updates if the result doesn't go above 1.
                         muMulDecimals += deltaMu;
@@ -504,55 +507,59 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @notice Mint Pool Token
     // @_balance -> Balance OF PT
     // @_pylonReserve -> Reserves of PT on Pylon
-    //Internal helper function that calculates the amount of Pylon pool tokens to mint
-    function _calculateSyncLiquidity(
-        uint amountIn,
-        uint _pylonReserve,
-        uint _pairReserveTranslated,
-        address _poolTokenAddress,
-        bool isAnchor) private returns (uint liquidity) {
-        notZero(amountIn);
-        // Taking the fee out in tokens
-        uint pts = IZirconPoolToken(_poolTokenAddress).totalSupply();
-        {
-            uint _gamma = gammaMulDecimals;
-            uint _vab = virtualAnchorBalance;
-            //On pool init, one unit of pool token = one unit of asset
-            //We also create minimum liquidity to avoid division by 0
-            if (pts == 0) {
-                IZirconPoolToken(_poolTokenAddress).mint(address(0), MINIMUM_LIQUIDITY);
-                if (isAnchor) {
-                    liquidity = amountIn.sub(MINIMUM_LIQUIDITY);
-                }else{
-                    liquidity = (amountIn.mul(1e18)/_gamma.mul(2)).sub(MINIMUM_LIQUIDITY);
-                }
-            } else {
-                //Calculates value of the asset vault in relevant units, then compares it with the assets the user supplied
-                liquidity = ZirconLibrary.calculatePTU(isAnchor, amountIn, pts, _pairReserveTranslated, _pylonReserve, _gamma, _vab);
-            }
-        }
-        emit MintSync(msg.sender, amountIn, isAnchor);
-    }
+    // Internal helper function that calculates the amount of Pylon pool tokens to mint
+
+//    function _calculateSyncLiquidity(
+//        uint amountIn,
+//        uint _pylonReserve,
+//        uint _pairReserveTranslated,
+//        address _poolTokenAddress,
+//        bool isAnchor) private returns (uint liquidity) {
+//        notZero(amountIn);
+//        // Taking the fee out in tokens
+//        uint pts = IZirconPoolToken(_poolTokenAddress).totalSupply();
+//        {
+//            uint _gamma = gammaMulDecimals;
+//            uint _vab = virtualAnchorBalance;
+//            //On pool init, one unit of pool token = one unit of asset
+//            //We also create minimum liquidity to avoid division by 0
+//            if (pts == 0) {
+//                IZirconPoolToken(_poolTokenAddress).mint(address(0), MINIMUM_LIQUIDITY);
+//                if (isAnchor) {
+//                    liquidity = amountIn.sub(MINIMUM_LIQUIDITY);
+//                }else{
+//                    liquidity = (amountIn.mul(1e18)/_gamma.mul(2)).sub(MINIMUM_LIQUIDITY);
+//                }
+//            } else {
+//                //Calculates value of the asset vault in relevant units, then compares it with the assets the user supplied
+//                liquidity = ZirconLibrary.calculatePTU(isAnchor, amountIn, pts, _pairReserveTranslated, _pylonReserve, _gamma, _vab);
+//            }
+//        }
+//        emit MintSync(msg.sender, amountIn, isAnchor);
+//    }
 
     // @notice Helper function to see if we can do a mint sync or async
     // @amountSync -> Amount of tokens to mint sync
     // @liquidity -> In case async minting is done is returned the PT Liquidity to mint for the users on the async call, if not 0
     // @amount -> Amount on async if not 0
     function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
-
-        uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
-
-
         //Calculates max tokens to be had in this reserve pool
-        uint max = _pairReserveTranslated.mul(maximumPercentageSync) / 100;
+        uint max = _pairReserveTranslated.mul(IZirconPylonFactory(factoryAddress).maximumPercentageSync()) / 100;
         uint freeSpace = 0;
+
+        uint ptTotalSupply  =  IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).totalSupply();
 
         if (max > _reserve) {
             //Calculates how much liquidity sync pool can accept
             freeSpace = max.sub(_reserve);
             //If amountIn is less than freeSpace, this liquidity is thrown into sync pool only, for future matching.
             if (_amountIn <= freeSpace) {
-                (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+
+                liquidity = ZirconLibrary.calculatePTU(_isAnchor, _amountIn,
+                    ptTotalSupply,
+                    _pairReserveTranslated, _reserve, gammaMulDecimals, virtualAnchorBalance);
+
+//            (liquidity) = _calculateSyncLiquidity(_amountIn, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
                 //Matches tokens to send into pool
 
                 _syncMinting();
@@ -574,7 +581,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // Lets do the sync minting if we have some space for it
         if (freeSpace > 0) {
-            (uint extraLiq) = _calculateSyncLiquidity(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
+            uint extraLiq = ZirconLibrary.calculatePTU(_isAnchor, freeSpace,
+                ptTotalSupply,
+                _pairReserveTranslated, _reserve, gammaMulDecimals, virtualAnchorBalance);
+
+//            (uint extraLiq) = _calculateSyncLiquidity(freeSpace, _reserve, _pairReserveTranslated, _isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress, _isAnchor);
             _syncMinting();
 
             liquidity += extraLiq;
@@ -599,18 +610,16 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         sync();
 
 
-        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
+        (uint112 _reserve0, uint112 _reserve1) = getSyncReserves();
 
         // balance of float/anchor sent to this
-        uint balance = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this));
 
         //Reduces by amount that was in sync reserves
-        uint amountIn = balance.sub(isAnchor ? _reserve1 : _reserve0);
+        uint amountIn = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this)).sub(isAnchor ? _reserve1 : _reserve0);
         notZero(amountIn);
 
-        (uint feeBps,) = getFeeBps();
 
-        amountIn = payFees(amountIn, feeBps, isAnchor);
+        amountIn = payFees(amountIn, getFeeBps(), isAnchor);
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
 
         uint amountOut;
@@ -674,11 +683,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //E.g. Maker's Black Thursday is functionally the same as a lending protocol "hack"
     //Same (sometimes) applies here if you move prices very fast. This fee is designed to make this unprofitable/temporarily lock the protocol.
     //It is also combined with the regular Pylon fee
-    function getFeeBps() private returns (uint feeBps, bool applied) {
+    function getFeeBps() private returns (uint feeBps) {
 
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
         uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
-        uint deltaGammaMinFee = IZirconPylonFactory(factoryAddress).deltaGammaMinFee();
 
         //If either this block's gamma derivative or EMA is higher than threshold we go into the deltaTax mechanism
         if (maxDerivative >= deltaGammaThreshold) {
@@ -703,36 +711,52 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //console.log("DA");
                 //You're a naughty naughty boy
                 //parent if condition forces maxDerivative/dgt to be at least 1, so we can subtract 10000 without worrying
-                feeBps = ((maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + deltaGammaMinFee) //DeltaGamma tax
+                feeBps = ((maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + IZirconPylonFactory(factoryAddress).deltaGammaMinFee()) //DeltaGamma tax
                 .add(IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals)); //Regular Pylon fee
 
                 //Avoids underflow issues downstream
                 require(feeBps < 10000, "ZP: FTH");
-                applied = true;
+                return feeBps;
+//                applied = true;
 
                 //console.log("feeBpss", feeBps);
 
-                emit FeeBps(feeBps, applied);
-                return(feeBps, applied);
+//                emit FeeBps(feeBps, applied);
+//                return(feeBps, applied);
             }
         }
         //Base case where the threshold isn't passed or it's first strike
-        applied = false;
+//        applied = false;
         feeBps = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
         //console.log("feeBps", feeBps);
-        emit FeeBps(feeBps, applied);
+//        emit FeeBps(feeBps, applied);
     }
 
     function calculateLiquidity(uint amountIn, bool isAnchor) view private returns (uint amount, uint liquidity) {
         //Divides amountIn into two slippage-adjusted halves
-        (uint a0, uint a1) = _disincorporateAmount(amountIn, isAnchor);
+        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
+
+        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
+        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
+
+        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
+        uint amountInWithFee = amountIn.mul(10000-(IZirconPylonFactory(factoryAddress).liquidityFee()/2 + 1))/10000;
+        //Add the amountIn to one of the reserves
+        uint sqrtKPrime = isAnchor ?
+        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
+        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
+
+        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
+
+        //        (uint a0, uint a1) = _disincorporateAmount(amountIn, isAnchor);
 
         //Calculates pylon pool tokens by taking the minimum of between each amount*2
         //TODO: Maybe this method overcompensates for slippage?
         (liquidity, amount) = getLiquidityFromPoolTokens(
-            a0, a1,
+            _reservePair0.mul(liqPercentage)/1e18,
+            _reservePair1.mul(liqPercentage)/1e18,
             isAnchor,
-            IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress));
+            IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).totalSupply());
     }
 
 
@@ -788,7 +812,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         sync();
         address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
 
-        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
+        (uint112 _reserve0, uint112 _reserve1) = getSyncReserves(); // gas savings
         uint amountIn0;
         uint amountIn1;
         {
@@ -798,13 +822,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             amountIn0 = balance0.sub(_reserve0);
             amountIn1 = balance1.sub(_reserve1);
 
-            (uint feeBps,) = getFeeBps();
+            uint feeBps = getFeeBps();
 
             amountIn0 = payFees(amountIn0, feeBps, false);
             amountIn1 = payFees(amountIn1, feeBps, true);
 
             //Derives slippage adjusted amount (min of the two sides * 2)
-            (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(amountIn0, amountIn1, shouldMintAnchor, IZirconPoolToken(_poolTokenAddress));
+            (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(amountIn0, amountIn1, shouldMintAnchor, IZirconPoolToken(_poolTokenAddress).totalSupply());
             liquidity = _liquidity;
             if (shouldMintAnchor) {
 
@@ -838,7 +862,41 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         emit MintAsync(msg.sender, amountIn0, amountIn1);
         _update();
     }
+    function _calculateGamma(uint _virtualAnchorBalance, uint anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) pure internal returns (uint gamma, bool isLineFormula) {
 
+        uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
+
+        //        console.log("sres0, sres1", _pylonReserve0, _pylonReserve1);
+        //        console.log("res0, res1", _translatedReserve0, _translatedReserve1);
+        //        console.log("vab, anchork", _virtualAnchorBalance, anchorKFactor);
+
+        uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
+        //The switching point is important. It's defined as reserveAnchor = VAB(aK + sqrt(aK**2 + aK)
+
+        //sadly we can't get rid of sqrt
+
+        if (_translatedReserve1 > adjustedVab.mul(anchorKFactor + Math.sqrt(anchorKFactor * (1e18 + anchorKFactor)))) {
+
+            //Here gamma is simply a variation of tpv - vab
+
+            gamma = 1e18 - ((adjustedVab)*1e18 /  totalPoolValueAnchorPrime);
+            isLineFormula = false;
+        } else {
+
+            //Here we use a "derived virtual float balance" formula
+            //It allows float value to descend linearly to 0.
+            //With derived vfb it's always guaranteed to intersect with the main 2sqrt(kx) formula.
+            //However we need to add an adjustment factor that tracks when anchors deposit liquidity (or get fees)
+            //This is only required when adding liquidity when we're using this formula
+            //This basically holds the slope of the line formula steady, thus changing the intersection point
+
+            gamma = totalPoolValueAnchorPrime.mul(1e18)/(4*adjustedVab);
+            gamma = gamma.mul(1e18)/anchorKFactor;
+            isLineFormula = true;
+
+
+        }
+    }
 
     /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
     function sync() private {
@@ -856,7 +914,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // Adds fees to virtualFloat and virtualAnchor
         // And then calculates Gamma so that the proportions are correct according to the formula
         (uint pairReserveTranslated0, uint pairReserveTranslated1) = getPairReservesTranslated(0, 0);
-        (, uint112 pylonReserve1,) = getSyncReserves();
+        (, uint112 pylonReserve1) = getSyncReserves();
 
         uint oldGamma = gammaMulDecimals;
 
@@ -983,48 +1041,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    function _calculateGamma(uint _virtualAnchorBalance, uint anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) pure private returns (uint gamma, bool isLineFormula) {
 
-        uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
-
-        //        console.log("sres0, sres1", _pylonReserve0, _pylonReserve1);
-        //        console.log("res0, res1", _translatedReserve0, _translatedReserve1);
-        //        console.log("vab, anchork", _virtualAnchorBalance, anchorKFactor);
-
-        uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
-        //The switching point is important. It's defined as reserveAnchor = VAB(aK + sqrt(aK**2 + aK)
-
-        //sadly we can't get rid of sqrt
-        uint sqrtKFactor = Math.sqrt(anchorKFactor * (1e18 + anchorKFactor));
-        uint reserveSwitch = adjustedVab.mul(anchorKFactor + sqrtKFactor);
-
-        if (_translatedReserve1 > reserveSwitch) {
-
-            //Here gamma is simply a variation of tpv - vab
-
-            gamma = 1e18 - ((adjustedVab)*1e18 /  totalPoolValueAnchorPrime);
-            isLineFormula = false;
-        } else {
-
-            //Here we use a "derived virtual float balance" formula
-            //It allows float value to descend linearly to 0.
-            //With derived vfb it's always guaranteed to intersect with the main 2sqrt(kx) formula.
-            //However we need to add an adjustment factor that tracks when anchors deposit liquidity (or get fees)
-            //This is only required when adding liquidity when we're using this formula
-            //This basically holds the slope of the line formula steady, thus changing the intersection point
-
-            gamma = totalPoolValueAnchorPrime.mul(1e18)/(4*adjustedVab);
-            gamma = gamma.mul(1e18)/anchorKFactor;
-            isLineFormula = true;
-
-
-        }
-    }
 
     /// @notice TODO
     function calculateLPTU(bool _isAnchor, uint _liquidity, uint _ptTotalSupply) view private returns (uint claim){
         (uint _reserve0, uint _reserve1) = getPairReservesTranslated(1,1); // gas savings
-        (uint112 _pylonReserve0, uint112 _pylonReserve1,) = getSyncReserves(); // gas savings
+        (uint112 _pylonReserve0, uint112 _pylonReserve1) = getSyncReserves(); // gas savings
         uint pylonShare;
         if (_isAnchor) {
             pylonShare = (IZirconPair(pairAddress).balanceOf(address(this)).mul(virtualAnchorBalance.sub(_pylonReserve1)))/(_reserve1.mul(2));
@@ -1065,7 +1087,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // sends pool tokens directly to pair
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, amountToAdd);
-                remainingPercentage = 0;
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
@@ -1074,8 +1095,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 remainingPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(liquidity);
 
             }
-        } else {
-            remainingPercentage = 0;
         }
     }
 
@@ -1093,10 +1112,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             //TotalAmount is what the user already received, while percentage is what's missing.
             //We divide to arrive to the original amount and diff it with totalAmount to get final number.
-            uint originalAmount = totalAmount.mul(1e18)/percentage;
-            uint amountToTransfer = originalAmount.sub(totalAmount); //percentage is calculated "natively" as a full 1e18
-
-
+            uint amountToTransfer = (totalAmount.mul(1e18)/percentage).sub(totalAmount); //percentage is calculated "natively" as a full 1e18
 
             if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
@@ -1113,93 +1129,93 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @dev sends to the Pair Contract the PTU equivalent to the Anchor|Float Shares
     /// and calls Classic burn
     function burnAsync(address _to, bool _isAnchor) external nonReentrant  returns (uint amount0, uint amount1) {
-//        notPaused();
-//        //Calls master sync function
-//        sync();
-//
-//        //Calculates Pylon pool token balance to burn
-//        IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
-//        uint liquidity = pt.balanceOf(address(this));
-//        notZero(liquidity);
-//        uint ptTotalSupply = pt.totalSupply(); //pylon total supply
-//        uint extraPercentage = 0;
-//
-//        (uint feeBps,) = getFeeBps();
-//        //console.log("fee", feeBps);
-//        //Calculates user's share of Uniswap pool tokens held by Pylon
-//        //Declared here to be used for payburnfees later
-//        uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
-//
-//        {
-//            (uint reserveFloat, uint reserveAnchor,) = getSyncReserves();
-//            (uint pairReserves0, uint pairReserves1) = getPairReservesTranslated(0, 0);
-//            {
-//                //Calculates max liquidity allowed for withdrawal with this method
-//                //Burn async can't touch the sync reserves, so max supply needs to be adjusted.
-//                uint maxPoolTokens = _isAnchor ?
-//                ptTotalSupply - ptTotalSupply.mul(reserveAnchor) / virtualAnchorBalance :
-//                ptTotalSupply - ptTotalSupply.mul(reserveFloat) / (pairReserves0.mul(2).mul(gammaMulDecimals) / 1e18).add(reserveFloat);
-//                require(liquidity < maxPoolTokens, "ZP: E");
-//            }
-//
-//            //console.log("c ptu", ptu);
-//
-//            uint ptuWithFee = ptu.sub(feeBps.mul(ptu)/10000);
-//
-//            if (_isAnchor) {
-//
-//                //If it's an anchor, it needs to compensate for potential slashing
-//                //This function tries to get compensation in the form of pool tokens
-//                //Function sends extra PTs to Pylon if required
-//
-//                //ExtraPercentage defines how much is still needed to be covered by raw anchors.
-//                //ptu returned is the omega-adjusted share
-//
-//                //The ptu returned is adjusted by Omega
-//                (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee); //This one retrieves tokens from ZirconEnergy if available
-//                //console.log("ptu se", IZirconPair(pairAddress).balanceOf(pairAddress));
-//                //console.log("ex%", extraPercentage);
-//
-//                anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
-//                    formulaSwitch,
-//                    virtualAnchorBalance.mul(liquidity)/ptTotalSupply, //we derive amount of anchors burned
-//                    ptuWithFee,
-//                    IZirconPair(pairAddress).balanceOf(address(this)),
-//                    anchorKFactor,
-//                    virtualAnchorBalance.sub(reserveAnchor),
-//                    pairReserves1
-//                );
-//            }
-//
-//            //Sends for burning
-//            _safeTransfer(pairAddress, pairAddress, ptuWithFee);
-//        }
-//        // Burning liquidity and sending to user
-//        // The pool tokens sent to the Pair are slashed by omega
-//        // handleOmega has sent the pool tokens if it had them, so this function retrieves the full share
-//
-//        (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(_to);
-//
-//        //Burn fee after everything to avoid loss of precision to omega identity & burning compensation tokens
-//        payBurnFees(ptu, feeBps);
-//
-//
-//        amount0 = isFloatReserve0 ? amountA : amountB;
-//        amount1 = isFloatReserve0 ? amountB : amountA;
-//        //This one retrieves raw anchor tokens if required for additional compensation
-//        sendSlashedTokensToUser(amount0, amount1, extraPercentage, _to);
-//
-//        //Burns the Zircon pool tokens
-//        pt.burn(address(this), liquidity);
-//
-//        // Updating vab
-//        if(_isAnchor) {
-//            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/ptTotalSupply;
-//        }
-//        //updates variables required for sync()
-//        _update();
-//        // Emiting event on burned async
-//        emit BurnAsync(msg.sender, amount0, amount1);
+        notPaused();
+        //Calls master sync function
+        sync();
+
+        //Calculates Pylon pool token balance to burn
+        IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
+        uint liquidity = pt.balanceOf(address(this));
+        notZero(liquidity);
+        uint ptTotalSupply = pt.totalSupply(); //pylon total supply
+        uint extraPercentage = 0;
+
+        uint feeBps = getFeeBps();
+        //console.log("fee", feeBps);
+        //Calculates user's share of Uniswap pool tokens held by Pylon
+        //Declared here to be used for payburnfees later
+        uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
+
+        {
+            (uint reserveFloat, uint reserveAnchor) = getSyncReserves();
+            (uint pairReserves0, uint pairReserves1) = getPairReservesTranslated(0, 0);
+            {
+                //Calculates max liquidity allowed for withdrawal with this method
+                //Burn async can't touch the sync reserves, so max supply needs to be adjusted.
+                uint maxPoolTokens = _isAnchor ?
+                ptTotalSupply - ptTotalSupply.mul(reserveAnchor) / virtualAnchorBalance :
+                ptTotalSupply - ptTotalSupply.mul(reserveFloat) / (pairReserves0.mul(2).mul(gammaMulDecimals) / 1e18).add(reserveFloat);
+                require(liquidity < maxPoolTokens, "ZP: E");
+            }
+
+            //console.log("c ptu", ptu);
+
+            uint ptuWithFee = ptu.sub(feeBps.mul(ptu)/10000);
+
+            if (_isAnchor) {
+
+                //If it's an anchor, it needs to compensate for potential slashing
+                //This function tries to get compensation in the form of pool tokens
+                //Function sends extra PTs to Pylon if required
+
+                //ExtraPercentage defines how much is still needed to be covered by raw anchors.
+                //ptu returned is the omega-adjusted share
+
+                //The ptu returned is adjusted by Omega
+                (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee); //This one retrieves tokens from ZirconEnergy if available
+                //console.log("ptu se", IZirconPair(pairAddress).balanceOf(pairAddress));
+                //console.log("ex%", extraPercentage);
+
+                anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
+                    formulaSwitch,
+                    virtualAnchorBalance.mul(liquidity)/ptTotalSupply, //we derive amount of anchors burned
+                    ptuWithFee,
+                    IZirconPair(pairAddress).balanceOf(address(this)),
+                    anchorKFactor,
+                    virtualAnchorBalance.sub(reserveAnchor),
+                    pairReserves1
+                );
+            }
+
+            //Sends for burning
+            _safeTransfer(pairAddress, pairAddress, ptuWithFee);
+        }
+        // Burning liquidity and sending to user
+        // The pool tokens sent to the Pair are slashed by omega
+        // handleOmega has sent the pool tokens if it had them, so this function retrieves the full share
+
+        (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(_to);
+
+        //Burn fee after everything to avoid loss of precision to omega identity & burning compensation tokens
+        payBurnFees(ptu, feeBps);
+
+
+        amount0 = isFloatReserve0 ? amountA : amountB;
+        amount1 = isFloatReserve0 ? amountB : amountA;
+        //This one retrieves raw anchor tokens if required for additional compensation
+        sendSlashedTokensToUser(amount0, amount1, extraPercentage, _to);
+
+        //Burns the Zircon pool tokens
+        pt.burn(address(this), liquidity);
+
+        // Updating vab
+        if(_isAnchor) {
+            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/ptTotalSupply;
+        }
+        //updates variables required for sync()
+        _update();
+        // Emiting event on burned async
+        emit BurnAsync(msg.sender, amount0, amount1);
     }
 
     /// @notice Function That handles the amount of reserves in Float Anchor Shares
@@ -1209,12 +1225,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // variables declaration
         uint _gamma = gammaMulDecimals;
         uint _vab = virtualAnchorBalance;
-        (uint _reserve0,) = getPairReservesTranslated(0,0); // gas savings
-        (uint112 _pylonReserve0, uint112 _pylonReserve1,) = getSyncReserves();
+        (uint _reserve0, uint _reserve1) = getPairReservesTranslated(0,0); // gas savings
+        (uint112 _pylonReserve0, uint112 _pylonReserve1) = getSyncReserves();
 
         //Calculates maxPTs that can be serviced through Pylon Reserves
         uint pylonReserve = isAnchor ? _pylonReserve1 : _pylonReserve0;
-        uint reserve = isAnchor ? reserve1 : _reserve0;
+        uint reserve = isAnchor ? _reserve1 : _reserve0;
         reservePT = ZirconLibrary.calculatePTU(isAnchor, pylonReserve, _totalSupply, reserve, pylonReserve, _gamma, _vab);
         amount = ZirconLibrary.calculatePTUToAmount(isAnchor, Math.min(reservePT, _liquidity), _totalSupply,reserve, pylonReserve, _gamma, _vab);
     }
@@ -1225,7 +1241,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
     /// Also note that a dump of 60% only generates about 10% of slashing.
     function handleOmegaSlashing(uint ptu) private returns (uint retPtu, uint extraPercentage){
-        (, uint reserveAnchor,) = getSyncReserves();
+        (, uint reserveAnchor) = getSyncReserves();
         (, uint pairReserves1)  = getPairReservesTranslated(0,0);
         //console.log("om inputs g, tvpa", gammaMulDecimals, pairReserves1.mul(2));
         //console.log("vab, res", virtualAnchorBalance, reserveAnchor);
@@ -1266,7 +1282,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
             //console.log("burn liq, amount", liquidity, _amount);
 
-            (uint feeBps,) = getFeeBps();
+            uint feeBps = getFeeBps();
 
             //This is a reserve extraction
             //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
@@ -1286,7 +1302,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                     (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee);
                     uint anchorPtSupply = _totalSupply; //stack too deep avoidance
 
-                    (,uint reserveAnchor,) = getSyncReserves();
+                    (,uint reserveAnchor) = getSyncReserves();
                     (, uint reservesTranslated1) = getPairReservesTranslated(0, 0);
 
                     anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(

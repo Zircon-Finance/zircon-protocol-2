@@ -9,5 +9,4 @@ interface IZirconEnergy {
     function registerFee() external;
     function syncReserve() external;
     function migrateLiquidity(address newEnergy) external;
-
 }
