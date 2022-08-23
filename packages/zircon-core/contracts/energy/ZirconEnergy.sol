@@ -60,6 +60,9 @@ contract ZirconEnergy is IZirconEnergy {
     // Approving pylon to use anchor tokens
     IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
     IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+
+    initialized = 1;
+
   }
 
   // ****** HELPER FUNCTIONS *****
