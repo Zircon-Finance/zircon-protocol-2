@@ -368,7 +368,7 @@ describe("Pylon", () => {
         let kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
 
         let vab = await pylonInstance.virtualAnchorBalance();
-        let vfb = await pylonInstance.virtualFloatBalance();
+        let anchorFactor = await pylonInstance.anchorKFactor();
 
         pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after init: ", ethers.utils.formatEther(pylonRes[0]));
@@ -456,7 +456,7 @@ describe("Pylon", () => {
         kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
 
         vab = await pylonInstance.virtualAnchorBalance();
-        vfb = await pylonInstance.virtualFloatBalance();
+        anchorFactor = await pylonInstance.anchorKFactor();
 
         pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
@@ -476,7 +476,7 @@ describe("Pylon", () => {
 
         await token0.transfer(pylonInstance.address, token0Amount.div(100000000))
         console.log("Sent token0", ethers.utils.formatEther(token0Amount.div(100000000)))
-        vfb = await pylonInstance.virtualFloatBalance();
+        anchorFactor = await pylonInstance.anchorKFactor();
         console.log("Vfb before", ethers.utils.formatEther(vfb));
 
         vab = await pylonInstance.virtualAnchorBalance();
@@ -492,7 +492,7 @@ describe("Pylon", () => {
 
         pylonInstance.mintPoolTokens(account.address, false)
 
-        vfb = await pylonInstance.virtualFloatBalance();
+        anchorFactor = await pylonInstance.anchorKFactor();
         console.log("Vfb after", ethers.utils.formatEther(vfb));
 
         console.log("mu after first mint: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
@@ -514,7 +514,7 @@ describe("Pylon", () => {
         kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
 
         vab = await pylonInstance.virtualAnchorBalance();
-        vfb = await pylonInstance.virtualFloatBalance();
+        anchorFactor = await pylonInstance.anchorKFactor();
 
         pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
