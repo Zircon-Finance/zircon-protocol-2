@@ -11,8 +11,8 @@ library ZirconLibrary {
 
     // Same Function as Uniswap Library, used here for incompatible solidity versions
     function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
-        require(amountIn > 0, 'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT');
-        require(reserveIn > 0 && reserveOut > 0, 'UniswapV2Library: INSUFFICIENT_LIQUIDITY');
+        require(amountIn > 0, 'UV2: IIA');
+        require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
         uint amountInWithFee = amountIn.mul(10000-fee);
         uint numerator = amountInWithFee.mul(reserveOut);
         uint denominator = reserveIn.mul(10000).add(amountInWithFee);
@@ -145,7 +145,7 @@ library ZirconLibrary {
 
 
 
-    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
 
         //When burning We need to change anchor factor if we're already in line formula
         //if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
