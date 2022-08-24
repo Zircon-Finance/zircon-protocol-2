@@ -76,7 +76,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
-        hex'ee3d4cdb1b859e9b41d7abd080a06954c356046f280c4512788dcd092f5e8840' // init code hash
+        hex'1bd1241f235faa478e7c7d7c08243f12c043c1ed8f106e2b82090e6250f4e962' // init code hash
         ))));
     }
 
@@ -85,7 +85,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'd4e68deebe40d3fb2e560d68d4418bb56a7f3b14bcd61f93fe0cfa7db3d143b8' // init code hash
+        hex'f6dd8bd6b90b9d552c0fc13b7dc4dabc9d176ef0e27e7d46ce5b357159fb7952' // init code hash
         ))));
     }
 

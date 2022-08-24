@@ -784,60 +784,60 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // The difference is that gives you directly with mint one side
     // TODO: Transfer first then calculate on basis of pool token share how many share we should give to the user
     function mintAsync(address to, bool shouldMintAnchor) external nonReentrant  returns (uint liquidity){
-//        notPaused();
-//        //Master sync function
-//        sync();
-//        address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
-//
-//        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
-//        uint amountIn0;
-//        uint amountIn1;
-//        {
-//            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-//            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
-//
-//            amountIn0 = balance0.sub(_reserve0);
-//            amountIn1 = balance1.sub(_reserve1);
-//
-//            (uint feeBps,) = getFeeBps();
-//
-//            amountIn0 = payFees(amountIn0, feeBps, false);
-//            amountIn1 = payFees(amountIn1, feeBps, true);
-//
-//            //Derives slippage adjusted amount (min of the two sides * 2)
-//            (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(amountIn0, amountIn1, shouldMintAnchor, IZirconPoolToken(_poolTokenAddress));
-//            liquidity = _liquidity;
-//            if (shouldMintAnchor) {
-//
-//                //We need to track anchor liquidity additions to make sure float value doesn't change from it
-//                //This function calculates/updates this adjustment factor
-//
-//                (uint pairReserveTranslated0, uint pairReserveTranslated1) = getPairReservesTranslated(0, 0);
-//                anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, amount, anchorKFactor, virtualAnchorBalance.sub(_reserve1), pairReserveTranslated0, pairReserveTranslated1);
-//
-//                virtualAnchorBalance += amount;
-//
-//            }
-//            //            else {
-//            //                //Vfb isn't quite as literal as vab about "number of assets supplied"
-//            //                uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-//            //                virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;
-//            //            }
-//
-//        }
-//
-//        notZero(amountIn0);
-//        notZero(amountIn1);
-//        _safeTransfer(pylonToken.float, pairAddress, amountIn0);
-//        _safeTransfer(pylonToken.anchor, pairAddress, amountIn1);
-//        IZirconPair(pairAddress).mint(address(this));
-//        // uint deltaSupply = pair.totalSupply().sub(_totalSupply);
-//        //TODO: Change fee
-//        IZirconPoolToken(_poolTokenAddress).mint(to, liquidity);
-//
-//
-//        emit MintAsync(msg.sender, amountIn0, amountIn1);
-//        _update();
+        notPaused();
+        //Master sync function
+        sync();
+        address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
+
+        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves(); // gas savings
+        uint amountIn0;
+        uint amountIn1;
+        {
+            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
+            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+
+            amountIn0 = balance0.sub(_reserve0);
+            amountIn1 = balance1.sub(_reserve1);
+
+            (uint feeBps,) = getFeeBps();
+
+            amountIn0 = payFees(amountIn0, feeBps, false);
+            amountIn1 = payFees(amountIn1, feeBps, true);
+
+            //Derives slippage adjusted amount (min of the two sides * 2)
+            (uint _liquidity, uint amount) = getLiquidityFromPoolTokens(amountIn0, amountIn1, shouldMintAnchor, IZirconPoolToken(_poolTokenAddress));
+            liquidity = _liquidity;
+            if (shouldMintAnchor) {
+
+                //We need to track anchor liquidity additions to make sure float value doesn't change from it
+                //This function calculates/updates this adjustment factor
+
+                (uint pairReserveTranslated0, uint pairReserveTranslated1) = getPairReservesTranslated(0, 0);
+                anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, amount, anchorKFactor, virtualAnchorBalance.sub(_reserve1), pairReserveTranslated0, pairReserveTranslated1);
+
+                virtualAnchorBalance += amount;
+
+            }
+            //            else {
+            //                //Vfb isn't quite as literal as vab about "number of assets supplied"
+            //                uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
+            //                virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;
+            //            }
+
+        }
+
+        notZero(amountIn0);
+        notZero(amountIn1);
+        _safeTransfer(pylonToken.float, pairAddress, amountIn0);
+        _safeTransfer(pylonToken.anchor, pairAddress, amountIn1);
+        IZirconPair(pairAddress).mint(address(this));
+        // uint deltaSupply = pair.totalSupply().sub(_totalSupply);
+        //TODO: Change fee
+        IZirconPoolToken(_poolTokenAddress).mint(to, liquidity);
+
+
+        emit MintAsync(msg.sender, amountIn0, amountIn1);
+        _update();
     }
 
 
@@ -898,24 +898,26 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 uint _reserveTranslated1 = pairReserveTranslated1;
 
                 console.log("rk lr", rootKTranslated, lastRootKTranslated);
-            uint feeValuePercentageAnchor = (rootKTranslated.sub(lastRootKTranslated)).mul(muMulDecimals) / (lastRootKTranslated);
+                uint feeValuePercentageAnchor = (rootKTranslated.sub(lastRootKTranslated)).mul(muMulDecimals) / (lastRootKTranslated);
 
+                if(feeValuePercentageAnchor != 0) {
+                    feeToAnchor = 2*pairReserveTranslated1.mul(feeValuePercentageAnchor)/1e18;
 
-                feeToAnchor = 2*pairReserveTranslated1.mul(feeValuePercentageAnchor)/1e18;
+                    uint adjustedVab = virtualAnchorBalance.sub(pylonReserve1);
 
-                uint adjustedVab = virtualAnchorBalance.sub(pylonReserve1);
+                    //we calculate anchor factor here by treating fees as an addition of liquidity
+                    //however since the current k already includes this addition, we need to pass it down adjusted reserve values
+                    //we also only consider the part of fees going into the pool
 
-                //we calculate anchor factor here by treating fees as an addition of liquidity
-                //however since the current k already includes this addition, we need to pass it down adjusted reserve values
-                //we also only consider the part of fees going into the pool
+                    anchorKFactor = ZirconLibrary.calculateAnchorFactor(
+                        formulaSwitch,
+                        feeToAnchor.mul(adjustedVab) / virtualAnchorBalance,
+                        anchorKFactor,
+                        virtualAnchorBalance.sub(pylonReserve1),
+                        _reserveTranslated0.mul(1e18 - feeValuePercentageAnchor) / 1e18,
+                        _reserveTranslated1.mul(1e18 - feeValuePercentageAnchor) / 1e18);
+                }
 
-                anchorKFactor = ZirconLibrary.calculateAnchorFactor(
-                    formulaSwitch,
-                    feeToAnchor.mul(adjustedVab) / virtualAnchorBalance,
-                    anchorKFactor,
-                    virtualAnchorBalance.sub(pylonReserve1),
-                    _reserveTranslated0.mul(1e18 - feeValuePercentageAnchor) / 1e18,
-                    _reserveTranslated1.mul(1e18 - feeValuePercentageAnchor) / 1e18);
             }
 
 
@@ -987,15 +989,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    function _calculateGamma(uint _virtualAnchorBalance, uint anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) view private returns (uint gamma, bool isLineFormula) {
+    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) view private returns (uint gamma, bool isLineFormula) {
 
         uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
 
         //        console.log("sres0, sres1", _pylonReserve0, _pylonReserve1);
         //        console.log("res0, res1", _translatedReserve0, _translatedReserve1);
         //        console.log("vab, anchork", _virtualAnchorBalance, anchorKFactor);
-
-        console.log("vab, res", _virtualAnchorBalance, _pylonReserve1);
 
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
 
@@ -1004,8 +1004,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         //sadly we can't get rid of sqrt
         //kFactor is guarded against overflow during assignment;
-        uint sqrtKFactor = Math.sqrt((anchorKFactor**2/1e18 - anchorKFactor) * 1e18);
-        uint reserveSwitch = adjustedVab.mul(anchorKFactor + sqrtKFactor);
+        uint sqrtKFactor = Math.sqrt((_anchorKFactor**2/1e18 - _anchorKFactor) * 1e18);
+        uint reserveSwitch = adjustedVab.mul(_anchorKFactor - sqrtKFactor)/1e18;
 
         if (_translatedReserve1 > reserveSwitch) {
 
@@ -1023,11 +1023,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //This basically holds the slope of the line formula steady, thus changing the intersection point
 
             gamma = totalPoolValueAnchorPrime.mul(1e18)/(4*adjustedVab);
-            gamma = gamma.mul(1e18)/anchorKFactor;
+            gamma = gamma.mul(1e18)/_anchorKFactor;
             isLineFormula = true;
 
 
         }
+        console.log("isLine", isLineFormula);
     }
 
     /// @notice TODO
@@ -1123,93 +1124,93 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @dev sends to the Pair Contract the PTU equivalent to the Anchor|Float Shares
     /// and calls Classic burn
     function burnAsync(address _to, bool _isAnchor) external nonReentrant  returns (uint amount0, uint amount1) {
-//        notPaused();
-//        //Calls master sync function
-//        sync();
-//
-//        //Calculates Pylon pool token balance to burn
-//        IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
-//        uint liquidity = pt.balanceOf(address(this));
-//        notZero(liquidity);
-//        uint ptTotalSupply = pt.totalSupply(); //pylon total supply
-//        uint extraPercentage = 0;
-//
-//        (uint feeBps,) = getFeeBps();
-//        //console.log("fee", feeBps);
-//        //Calculates user's share of Uniswap pool tokens held by Pylon
-//        //Declared here to be used for payburnfees later
-//        uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
-//
-//        {
-//            (uint reserveFloat, uint reserveAnchor,) = getSyncReserves();
-//            (uint pairReserves0, uint pairReserves1) = getPairReservesTranslated(0, 0);
-//            {
-//                //Calculates max liquidity allowed for withdrawal with this method
-//                //Burn async can't touch the sync reserves, so max supply needs to be adjusted.
-//                uint maxPoolTokens = _isAnchor ?
-//                ptTotalSupply - ptTotalSupply.mul(reserveAnchor) / virtualAnchorBalance :
-//                ptTotalSupply - ptTotalSupply.mul(reserveFloat) / (pairReserves0.mul(2).mul(gammaMulDecimals) / 1e18).add(reserveFloat);
-//                require(liquidity < maxPoolTokens, "ZP: E");
-//            }
-//
-//            //console.log("c ptu", ptu);
-//
-//            uint ptuWithFee = ptu.sub(feeBps.mul(ptu)/10000);
-//
-//            if (_isAnchor) {
-//
-//                //If it's an anchor, it needs to compensate for potential slashing
-//                //This function tries to get compensation in the form of pool tokens
-//                //Function sends extra PTs to Pylon if required
-//
-//                //ExtraPercentage defines how much is still needed to be covered by raw anchors.
-//                //ptu returned is the omega-adjusted share
-//
-//                //The ptu returned is adjusted by Omega
-//                (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee); //This one retrieves tokens from ZirconEnergy if available
-//                //console.log("ptu se", IZirconPair(pairAddress).balanceOf(pairAddress));
-//                //console.log("ex%", extraPercentage);
-//
-//                anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
-//                    formulaSwitch,
-//                    virtualAnchorBalance.mul(liquidity)/ptTotalSupply, //we derive amount of anchors burned
-//                    ptuWithFee,
-//                    IZirconPair(pairAddress).balanceOf(address(this)),
-//                    anchorKFactor,
-//                    virtualAnchorBalance.sub(reserveAnchor),
-//                    pairReserves1
-//                );
-//            }
-//
-//            //Sends for burning
-//            _safeTransfer(pairAddress, pairAddress, ptuWithFee);
-//        }
-//        // Burning liquidity and sending to user
-//        // The pool tokens sent to the Pair are slashed by omega
-//        // handleOmega has sent the pool tokens if it had them, so this function retrieves the full share
-//
-//        (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(_to);
-//
-//        //Burn fee after everything to avoid loss of precision to omega identity & burning compensation tokens
-//        payBurnFees(ptu, feeBps);
-//
-//
-//        amount0 = isFloatReserve0 ? amountA : amountB;
-//        amount1 = isFloatReserve0 ? amountB : amountA;
-//        //This one retrieves raw anchor tokens if required for additional compensation
-//        sendSlashedTokensToUser(amount0, amount1, extraPercentage, _to);
-//
-//        //Burns the Zircon pool tokens
-//        pt.burn(address(this), liquidity);
-//
-//        // Updating vab
-//        if(_isAnchor) {
-//            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/ptTotalSupply;
-//        }
-//        //updates variables required for sync()
-//        _update();
-//        // Emiting event on burned async
-//        emit BurnAsync(msg.sender, amount0, amount1);
+        notPaused();
+        //Calls master sync function
+        sync();
+
+        //Calculates Pylon pool token balance to burn
+        IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
+        uint liquidity = pt.balanceOf(address(this));
+        notZero(liquidity);
+        uint ptTotalSupply = pt.totalSupply(); //pylon total supply
+        uint extraPercentage = 0;
+
+        (uint feeBps,) = getFeeBps();
+        //console.log("fee", feeBps);
+        //Calculates user's share of Uniswap pool tokens held by Pylon
+        //Declared here to be used for payburnfees later
+        uint ptu = calculateLPTU(_isAnchor, liquidity, ptTotalSupply);
+
+        {
+            (uint reserveFloat, uint reserveAnchor,) = getSyncReserves();
+            (uint pairReserves0, uint pairReserves1) = getPairReservesTranslated(0, 0);
+            {
+                //Calculates max liquidity allowed for withdrawal with this method
+                //Burn async can't touch the sync reserves, so max supply needs to be adjusted.
+                uint maxPoolTokens = _isAnchor ?
+                ptTotalSupply - ptTotalSupply.mul(reserveAnchor) / virtualAnchorBalance :
+                ptTotalSupply - ptTotalSupply.mul(reserveFloat) / (pairReserves0.mul(2).mul(gammaMulDecimals) / 1e18).add(reserveFloat);
+                require(liquidity < maxPoolTokens, "ZP: E");
+            }
+
+            //console.log("c ptu", ptu);
+
+            uint ptuWithFee = ptu.sub(feeBps.mul(ptu)/10000);
+
+            if (_isAnchor) {
+
+                //If it's an anchor, it needs to compensate for potential slashing
+                //This function tries to get compensation in the form of pool tokens
+                //Function sends extra PTs to Pylon if required
+
+                //ExtraPercentage defines how much is still needed to be covered by raw anchors.
+                //ptu returned is the omega-adjusted share
+
+                //The ptu returned is adjusted by Omega
+                (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee); //This one retrieves tokens from ZirconEnergy if available
+                //console.log("ptu se", IZirconPair(pairAddress).balanceOf(pairAddress));
+                //console.log("ex%", extraPercentage);
+
+                anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
+                    formulaSwitch,
+                    virtualAnchorBalance.mul(liquidity)/ptTotalSupply, //we derive amount of anchors burned
+                    ptuWithFee,
+                    IZirconPair(pairAddress).balanceOf(address(this)),
+                    anchorKFactor,
+                    virtualAnchorBalance.sub(reserveAnchor),
+                    pairReserves1
+                );
+            }
+
+            //Sends for burning
+            _safeTransfer(pairAddress, pairAddress, ptuWithFee);
+        }
+        // Burning liquidity and sending to user
+        // The pool tokens sent to the Pair are slashed by omega
+        // handleOmega has sent the pool tokens if it had them, so this function retrieves the full share
+
+        (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(_to);
+
+        //Burn fee after everything to avoid loss of precision to omega identity & burning compensation tokens
+        payBurnFees(ptu, feeBps);
+
+
+        amount0 = isFloatReserve0 ? amountA : amountB;
+        amount1 = isFloatReserve0 ? amountB : amountA;
+        //This one retrieves raw anchor tokens if required for additional compensation
+        sendSlashedTokensToUser(amount0, amount1, extraPercentage, _to);
+
+        //Burns the Zircon pool tokens
+        pt.burn(address(this), liquidity);
+
+        // Updating vab
+        if(_isAnchor) {
+            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/ptTotalSupply;
+        }
+        //updates variables required for sync()
+        _update();
+        // Emiting event on burned async
+        emit BurnAsync(msg.sender, amount0, amount1);
     }
 
     /// @notice Function That handles the amount of reserves in Float Anchor Shares
@@ -1257,86 +1258,86 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // Fees here are
     //TODO: Add payBurnFees fix from burnAsync
     function burn(address _to, bool _isAnchor) external nonReentrant  returns (uint amount){
-        notPaused();
-        sync();
-        // Selecting the Pool Token class on basis of the requested tranch to burn
-        IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
-        // Let's get how much liquidity was sent to burn
-        // Outside of scope to be used for vab/vfb adjustment later
-        uint liquidity = pt.balanceOf(address(this));
-
-        notZero(liquidity);
-        uint _totalSupply = pt.totalSupply();
-        {
-            address to = _to;
-            bool isAnchor = _isAnchor;
-            address _pairAddress = pairAddress;
-
-            // Here we calculate max PTU to extract from sync reserve + amount in reserves
-            (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
-            //console.log("burn liq, amount", liquidity, _amount);
-
-            (uint feeBps,) = getFeeBps();
-
-            //This is a reserve extraction
-            //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
-            uint returnAmount = _amount.sub(_amount.mul(feeBps)/10000);
-            _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, returnAmount);
-
-
-            //In case the reserves weren't able to pay for everything
-            if (reservePT < liquidity) {
-                uint _liquidityAdjusted = liquidity.sub(reservePT);
-                uint ptu = calculateLPTU(isAnchor, _liquidityAdjusted, _totalSupply);
-
-                //Two vars since we can't pay fees until omega calculations are done
-                uint ptuWithFee = ptu.sub(ptu.mul(feeBps)/10000);
-                uint extraPercentage = 0;
-                if (isAnchor) {
-                    (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee);
-                    uint anchorPtSupply = _totalSupply; //stack too deep avoidance
-
-                    (,uint reserveAnchor,) = getSyncReserves();
-                    (, uint reservesTranslated1) = getPairReservesTranslated(0, 0);
-
-                    anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
-                        formulaSwitch,
-                        virtualAnchorBalance * (_liquidityAdjusted)/anchorPtSupply, //unchecked here since they are checked in other places
-                        ptuWithFee,
-                        IZirconPair(pairAddress).balanceOf(address(this)),
-                        anchorKFactor,
-                        virtualAnchorBalance.sub(reserveAnchor),
-                        reservesTranslated1
-                    );
-
-                }
-                //Shifting this to the bottom since we can't pay fees until slashing is done.
-                payFees(_amount, feeBps, isAnchor);
-
-
-                _safeTransfer(_pairAddress, _pairAddress, ptuWithFee);
-                //bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
-                uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to, isFloatReserve0 != isAnchor);  // XOR
-
-
-                returnAmount += sentAmount;
-
-                sendSlashedTokensToUser(isFloatReserve0 != isAnchor ? sentAmount : 0, isFloatReserve0 != isAnchor ? 0 : sentAmount, extraPercentage, to);
-
-                payBurnFees(ptu, feeBps);
-                //Bool combines choice of anchor or float with which token is which in the pool
-            }
-
-
-            pt.burn(address(this), liquidity); //Should burn unadjusted amount ofc
-            amount = returnAmount;
-        }
-
-        if(_isAnchor) {
-            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_totalSupply;
-        }
-        _update();
-        emit Burn(msg.sender, amount, _isAnchor);
+//        notPaused();
+//        sync();
+//        // Selecting the Pool Token class on basis of the requested tranch to burn
+//        IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
+//        // Let's get how much liquidity was sent to burn
+//        // Outside of scope to be used for vab/vfb adjustment later
+//        uint liquidity = pt.balanceOf(address(this));
+//
+//        notZero(liquidity);
+//        uint _totalSupply = pt.totalSupply();
+//        {
+//            address to = _to;
+//            bool isAnchor = _isAnchor;
+//            address _pairAddress = pairAddress;
+//
+//            // Here we calculate max PTU to extract from sync reserve + amount in reserves
+//            (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
+//            //console.log("burn liq, amount", liquidity, _amount);
+//
+//            (uint feeBps,) = getFeeBps();
+//
+//            //This is a reserve extraction
+//            //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
+//            uint returnAmount = _amount.sub(_amount.mul(feeBps)/10000);
+//            _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, returnAmount);
+//
+//
+//            //In case the reserves weren't able to pay for everything
+//            if (reservePT < liquidity) {
+//                uint _liquidityAdjusted = liquidity.sub(reservePT);
+//                uint ptu = calculateLPTU(isAnchor, _liquidityAdjusted, _totalSupply);
+//
+//                //Two vars since we can't pay fees until omega calculations are done
+//                uint ptuWithFee = ptu.sub(ptu.mul(feeBps)/10000);
+//                uint extraPercentage = 0;
+//                if (isAnchor) {
+//                    (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee);
+//                    uint anchorPtSupply = _totalSupply; //stack too deep avoidance
+//
+//                    (,uint reserveAnchor,) = getSyncReserves();
+//                    (, uint reservesTranslated1) = getPairReservesTranslated(0, 0);
+//
+//                    anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
+//                        formulaSwitch,
+//                        virtualAnchorBalance * (_liquidityAdjusted)/anchorPtSupply, //unchecked here since they are checked in other places
+//                        ptuWithFee,
+//                        IZirconPair(pairAddress).balanceOf(address(this)),
+//                        anchorKFactor,
+//                        virtualAnchorBalance.sub(reserveAnchor),
+//                        reservesTranslated1
+//                    );
+//
+//                }
+//                //Shifting this to the bottom since we can't pay fees until slashing is done.
+//                payFees(_amount, feeBps, isAnchor);
+//
+//
+//                _safeTransfer(_pairAddress, _pairAddress, ptuWithFee);
+//                //bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
+//                uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to, isFloatReserve0 != isAnchor);  // XOR
+//
+//
+//                returnAmount += sentAmount;
+//
+//                sendSlashedTokensToUser(isFloatReserve0 != isAnchor ? sentAmount : 0, isFloatReserve0 != isAnchor ? 0 : sentAmount, extraPercentage, to);
+//
+//                payBurnFees(ptu, feeBps);
+//                //Bool combines choice of anchor or float with which token is which in the pool
+//            }
+//
+//
+//            pt.burn(address(this), liquidity); //Should burn unadjusted amount ofc
+//            amount = returnAmount;
+//        }
+//
+//        if(_isAnchor) {
+//            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_totalSupply;
+//        }
+//        _update();
+//        emit Burn(msg.sender, amount, _isAnchor);
     }
 
     function migrateLiquidity(address newPylon) external{

@@ -77,19 +77,22 @@ library ZirconLibrary {
         }
     }
 
-    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) pure internal returns (uint omegaMulDecimals) {
+    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) view internal returns (uint omegaMulDecimals) {
         //Omega is the "survival factor" i.e how much of the anchor balance survives slashing and can be withdrawn.
         //It's applied to the user's liquidity tokens to avoid changing other core functions.
         //This adjustment is only used for share calculations, the full amount of tokens is removed.
         omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
+        console.log("om", omegaMulDecimals);
         if(omegaMulDecimals > 1e18) {omegaMulDecimals = 1e18;}
     }
 
-    function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+    function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) view internal returns (uint anchorKFactor) {
 
         //calculate the anchor liquidity change that would move formula switch to current price
         uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
-        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
+        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor - sqrtKFactor));
+
+        //console.log("atm", amountThresholdMultiplier);
 
         //We need to change anchor factor if we're using line formula or if adding liquidity might trigger a switch
         if(isLineFormula || amountThresholdMultiplier >= 1e18) {
@@ -102,11 +105,13 @@ library ZirconLibrary {
             //first of all we need to figure out how much of the anchor liquidity change requires kFactor to follow
             //This is the entire amount if isLineFormula && adding and if !isLineFormula it's amount - (threshold - 1)vab
             //in other words it's only the liquidity added above the threshold
-            //We're only going to reach this part if the liquidity does exceed the threshold
-            uint factorAnchorAmount = isLineFormula
-                                        ? amount
-                                        : amount.sub((amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/1e18);
+            //We're only going to reach this part of the code if the liquidity does exceed the threshold
+//            uint factorAnchorAmount = isLineFormula
+//                                        ? amount
+//                                        : amount.sub((amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/1e18);
 
+
+            console.log("amt, a", amountThresholdMultiplier, amount);
 
             //If it's the second case we need to increase initial k and vab by the amount that doesn't require changing kFactor
             //It's as if we're adding liquidity in two tranches
@@ -116,17 +121,12 @@ library ZirconLibrary {
 
             uint initialK = isLineFormula
                                 ? _reserveTranslated0.mul(_reserveTranslated1)
-                                : (_reserveTranslated0 + (amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1).mul((_reserveTranslated1 + (amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2));
+                                : (_reserveTranslated0 + ((amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)).mul((_reserveTranslated1 + (amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2));
 
             uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
 
 
-            uint liquidityChange = isLineFormula
-                                        ? factorAnchorAmount/2
-                                        : (factorAnchorAmount + (amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/2e18);
-
-
-            uint kPrime = (_reserveTranslated0 + (liquidityChange.mul(_reserveTranslated0)/(_reserveTranslated1))).mul(_reserveTranslated1 + liquidityChange);
+            uint kPrime = (_reserveTranslated0 + (amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + amount/2);
 
 
 
@@ -135,7 +135,7 @@ library ZirconLibrary {
             //Without this, anchor liquidity additions would change value of the float side
             //Lots of overflow potential, so we split calculations
             anchorKFactor = kPrime.mul(initialVab)/initialK;
-            anchorKFactor = anchorKFactor.mul(oldKFactor)/(adjustedVab + factorAnchorAmount);
+            anchorKFactor = anchorKFactor.mul(oldKFactor)/(adjustedVab + amount);
 
         } else {
             //all other cases don't matter, kFactor is unchanged
@@ -150,15 +150,23 @@ library ZirconLibrary {
 
         //When burning We need to change anchor factor if we're already in line formula
         //if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
-        if(isLineFormula) {
+        if(isLineFormula || oldKFactor > 1e18) {
 
-            //calculate the anchor liquidity change that would move formula switch to current price
-            uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
-            uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
+            uint factorAnchorAmount = amount;
 
-            console.log("atm", amountThresholdMultiplier);
-            //if we're burning we only care about the threshold liquidity amount
-            uint factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
+
+            //This splits between the cases where you're removing liquidity while in line formula
+            //Or if some was added while in lineFormula and now we need to bring back to balance
+            if(isLineFormula) {
+                //calculate the anchor liquidity change that would move formula switch to current price
+                uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
+                uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor - sqrtKFactor));
+
+
+                //if we're burning we only care about the threshold liquidity amount
+                factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
+
+            }
 
             uint _ptu = ptu.mul(factorAnchorAmount)/amount; //adjust ptu by the factor contribution
 
@@ -170,7 +178,8 @@ library ZirconLibrary {
             //while kprime/k is simply 1 - ptu**2/ptb**2
 
 
-            uint kRatio = 1e18 - uint(1e18).mul(_ptu**2)/ptb**2;
+            uint kRatio = ((1e18 - uint(1e18).mul(_ptu)/ptb)**2)/1e18;
+            console.log("kr, vbp,", kRatio, (adjustedVab).mul(1e18)/(adjustedVab - factorAnchorAmount));
 
             //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
             //This has the effect of keeping the line formula still, moving the switchover point.
@@ -178,6 +187,11 @@ library ZirconLibrary {
             //Lots of overflow potential, so we split calculations
             anchorKFactor = kRatio.mul(adjustedVab)/(adjustedVab - factorAnchorAmount);
             anchorKFactor = anchorKFactor.mul(oldKFactor)/1e18;
+
+            //Changing anchor liquidity while above the threshold shouldn't affect kFactor beyond compensating for previous increases
+            if(!isLineFormula && anchorKFactor < 1e18) {
+                anchorKFactor = 1e18;
+            }
             console.log("cac");
         } else {
             //all other cases don't matter, kFactor is unchanged
