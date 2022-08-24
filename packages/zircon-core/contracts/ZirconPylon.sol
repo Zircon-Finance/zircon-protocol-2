@@ -1152,6 +1152,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
         uint feeBps = getFeeBps();
+
+
+        //We disable the strike protection for burns
+        require(strikeBlock != block.number);
         //console.log("fee", feeBps);
         //Calculates user's share of Uniswap pool tokens held by Pylon
         //Declared here to be used for payburnfees later
