@@ -11,10 +11,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     mapping(address => mapping(address => address)) public getPylon;
     address[] public allPylons;
     address public factory;
-    address public ptFactory;
+    address private ptFactory;
     address public energyFactory;
-    address public feeToSetter;
-    address public migrator;
+    address private feeToSetter;
+    address private migrator;
     bool public paused;
 
     uint public maximumPercentageSync;

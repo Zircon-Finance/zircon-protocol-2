@@ -3,21 +3,20 @@ pragma solidity =0.5.16;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 library ZirconLibrary {
     using SafeMath for uint256;
-    uint public constant MINIMUM_LIQUIDITY = 10**3;
 
     // Same Function as Uniswap Library, used here for incompatible solidity versions
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
-        require(amountIn > 0, 'UV2: IIA');
-        require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
-        uint amountInWithFee = amountIn.mul(10000-fee);
-        uint numerator = amountInWithFee.mul(reserveOut);
-        uint denominator = reserveIn.mul(10000).add(amountInWithFee);
-        amountOut = numerator / denominator;
-    }
+//        function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
+//            require(amountIn > 0, 'UV2: IIA');
+//            require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
+//            uint amountInWithFee = amountIn.mul(10000-fee);
+//            uint numerator = amountInWithFee.mul(reserveOut);
+//            uint denominator = reserveIn.mul(10000).add(amountInWithFee);
+//            amountOut = numerator / denominator;
+//        }
 
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
@@ -59,8 +58,7 @@ library ZirconLibrary {
             liquidity = _amount.mul(_totalSupply)/_vab;
         }else {
             uint numerator = _amount.mul(_totalSupply);
-            uint resTranslated = _reserve.mul(_gamma).mul(2)/1e18;
-            uint denominator = (_reservePylon.add(resTranslated));
+            uint denominator = (_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18));
             liquidity = (numerator/denominator);
         }
     }
@@ -69,20 +67,20 @@ library ZirconLibrary {
     // @_ptuAmount is the quantity to convert
     // @_totalSupply is the supply of the pt of the tranches
     // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
-    function calculatePTUToAmount(bool _isAnchor, uint _ptuAmount, uint _totalSupply, uint _reserve0, uint _reservePylon0, uint _gamma, uint _vab) pure internal returns (uint amount) {
-        if (_isAnchor) {
-            amount = _vab.mul(_ptuAmount)/_totalSupply;
-        } else {
-            amount = (((_reserve0.mul(_gamma).mul(2)/1e18).add(_reservePylon0)).mul(_ptuAmount))/_totalSupply;
-        }
-    }
+//    function calculatePTUToAmount(bool _isAnchor, uint _ptuAmount, uint _totalSupply, uint _reserve0, uint _reservePylon0, uint _gamma, uint _vab) pure internal returns (uint amount) {
+//        if (_isAnchor) {
+//            amount = _vab.mul(_ptuAmount)/_totalSupply;
+//        } else {
+//            amount = (((_reserve0.mul(_gamma).mul(2)/1e18).add(_reservePylon0)).mul(_ptuAmount))/_totalSupply;
+//        }
+//    }
 
-    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) pure internal returns (uint omegaMulDecimals) {
-        //Omega is the "survival factor" i.e how much of the anchor balance survives slashing and can be withdrawn.
-        //It's applied to the user's liquidity tokens to avoid changing other core functions.
-        //This adjustment is only used for share calculations, the full amount of tokens is removed.
-        omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
-    }
+//    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) pure internal returns (uint omegaMulDecimals) {
+//        //Omega is the "survival factor" i.e how much of the anchor balance survives slashing and can be withdrawn.
+//        //It's applied to the user's liquidity tokens to avoid changing other core functions.
+//        //This adjustment is only used for share calculations, the full amount of tokens is removed.
+//        omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
+//    }
 
     function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
 
@@ -147,37 +145,36 @@ library ZirconLibrary {
 
     function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
 
-        //When burning We need to change anchor factor if we're already in line formula
-        //if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
+        // When burning We need to change anchor factor if we're already in line formula
+        // if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
         if(isLineFormula) {
 
-            //calculate the anchor liquidity change that would move formula switch to current price
+            // calculate the anchor liquidity change that would move formula switch to current price
             uint sqrtKFactor = Math.sqrt(oldKFactor**2 + oldKFactor);
             uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(oldKFactor + sqrtKFactor));
 
-            //if we're burning we only care about the threshold liquidity amount
+            // if we're burning we only care about the threshold liquidity amount
             uint factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
 
             uint _ptu = ptu.mul(factorAnchorAmount)/amount; //adjust ptu by the factor contribution
 
-            //omega can only be different than 1 in case we're removing liquidity and it's using the line formula
-            //but it's already embedded in the ptu;
+            // omega can only be different than 1 in case we're removing liquidity and it's using the line formula
+            // but it's already embedded in the ptu;
 
-            //we know that ptu is proportional to sqrt(deltaK)
-            //so our kprime is just k - (ptu/ptb * (sqrtK))**2
-            //while kprime/k is simply 1 - ptu**2/ptb**2
-
+            // we know that ptu is proportional to sqrt(deltaK)
+            // so our Kprime is just k - (ptu/ptb * (sqrtK))**2
+            // while Kprime/k is simply 1 - ptu**2/ptb**2
 
             uint kRatio = 1e18 - uint(1e18).mul(_ptu**2)/ptb**2;
 
-            //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
-            //This has the effect of keeping the line formula still, moving the switchover point.
-            //Without this, anchor liquidity additions would change value of the float side
-            //Lots of overflow potential, so we split calculations
+            // AnchorKFactor is simply the ratio between change in k and change in vab (almost always different than 1)
+            // This has the effect of keeping the line formula still, moving the switchover point.
+            // Without this, anchor liquidity additions would change value of the float side
+            // Lots of overflow potential, so we split calculations
             anchorKFactor = kRatio.mul(adjustedVab)/(adjustedVab - factorAnchorAmount);
             anchorKFactor = anchorKFactor.mul(oldKFactor)/1e18;
         } else {
-            //all other cases don't matter, kFactor is unchanged
+            // all other cases don't matter, kFactor is unchanged
             anchorKFactor = oldKFactor;
         }
 

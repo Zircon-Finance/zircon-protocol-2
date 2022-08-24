@@ -196,6 +196,15 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         emit Mint(msg.sender, amount0, amount1);
     }
 
+    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
+        require(amountIn > 0, 'UV2: IIA');
+        require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
+        uint amountInWithFee = amountIn.mul(10000-fee);
+        uint numerator = amountInWithFee.mul(reserveOut);
+        uint denominator = reserveIn.mul(10000).add(amountInWithFee);
+        amountOut = numerator / denominator;
+    }
+
     // this low-level function should be called from a contract which performs important safety checks
     // TODO: Test this function
     // TODO: maybe allow burning both sides to one
@@ -215,11 +224,11 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
         if (isReserve0) {
-            amount0 += ZirconLibrary.getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0, _liquidityFee);
+            amount0 += getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0, _liquidityFee);
             amount = amount0;
             require(amount < balance0, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
         }else{
-            amount1 += ZirconLibrary.getAmountOut(amount0, _reserve0 - amount0, _reserve1 - amount1, _liquidityFee);
+            amount1 += getAmountOut(amount0, _reserve0 - amount0, _reserve1 - amount1, _liquidityFee);
             amount = amount1;
             require(amount < balance1, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
         }
