@@ -47,7 +47,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     uint public virtualAnchorBalance;
     //uint public virtualFloatBalance;
     bool private formulaSwitch;
-    uint private anchorKFactor; //A multiplier used to adjust FTV when anchor liquidity is added
+    uint public anchorKFactor; //A multiplier used to adjust FTV when anchor liquidity is added
 
     uint private lastRootKTranslated;
     //uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
@@ -301,17 +301,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @max0 & @max1 -> The maximum that we can save on the reserves
     // If we have any excess reserves we donate them to the pool
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private {
-        uint ptl = 0;
+
         if (max0 < newReserve0) {
             _safeTransfer(pylonToken.float, pairAddress, newReserve0.sub(max0));
-            (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
+            IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
             reserve0 = max0;
         } else {
             reserve0 = uint112(newReserve0);
         }
         if (max1 < newReserve1) {
             _safeTransfer(pylonToken.anchor, pairAddress, newReserve1.sub(max1));
-            (ptl,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
+            IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
             reserve1 = max1;
         }else{
             reserve1 = uint112(newReserve1);
@@ -405,6 +405,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
         (, uint pylonReserve1) = getSyncReserves();
+
+        //console.log("ass");
 
         //Counts gamma change and applies strike condition if necessary
         (uint _newGamma,) = _calculateGamma(virtualAnchorBalance, anchorKFactor, pylonReserve1, reservesTranslated1);
@@ -638,7 +640,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // Swapping every time is not ideal for gas, but it will be changed if we ever deploy to a chain like ETH
     // We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, uint feeBps, bool isAnchor) private returns (uint amountOut){
-        uint fee = amountIn.mul(feeBps)/10000;
+        uint fee = amountIn * feeBps/10000;
         // TODO: This should never go above the balance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
@@ -653,18 +655,19 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             IZirconPair(pairAddress).swap(isFloatReserve0 ? 0 : amountSwapped, isFloatReserve0 ? amountSwapped : 0, energyAddress, "");
         }
         IZirconEnergy(energyAddress).registerFee();
-        amountOut =  amountIn.sub(fee);
+        amountOut =  amountIn - fee;
     }
 
     /// @notice private function that sends to pair the LP tokens
     /// Burns them spayFeesending it to the energy address
     function payBurnFees(uint amountIn, uint feeBps) private returns (uint amountOut) {
-        uint fee = amountIn.mul(feeBps)/10000;
+        uint fee = amountIn * feeBps/10000;
+        //feeBps guaranteed to be less than 10000
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
         IZirconEnergy(energyAddress).registerFee();
 
-        amountOut = amountIn.sub(fee);
+        amountOut = amountIn - fee;
     }
 
     //Calculates fee in basis points. Applies anti-flash loan protection mechanism
@@ -912,7 +915,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
 //                console.log("rk lr", rootKTranslated, lastRootKTranslated);
->>>>>>> a4e1602866f05d56e298b3e5e7717d41f60128a8
                 uint feeValuePercentageAnchor = (rootKTranslated.sub(lastRootKTranslated)).mul(muMulDecimals) / (lastRootKTranslated);
 
                 if(feeValuePercentageAnchor != 0) {
@@ -1004,7 +1006,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) view private returns (uint gamma, bool isLineFormula) {
+    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) pure private returns (uint gamma, bool isLineFormula) {
 
         uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
 
@@ -1018,9 +1020,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //The switching point is important. It's defined as reserveAnchor = VAB(aK + sqrt(aK**2 + aK)
 
         //sadly we can't get rid of sqrt
-        //kFactor is guarded against overflow during assignment;
-        uint sqrtKFactor = Math.sqrt((_anchorKFactor**2/1e18 - _anchorKFactor) * 1e18);
-        uint reserveSwitch = adjustedVab.mul(_anchorKFactor - sqrtKFactor)/1e18;
+        //kFactor is guaranteed to be more than one by its assigning functions;
+        uint sqrtKFactor = Math.sqrt((_anchorKFactor**2/1e18 - _anchorKFactor)* 1e18);
+        //console.log("sqrk, ak", sqrtKFactor, _anchorKFactor);
+        uint vabMultiplier = sqrtKFactor < _anchorKFactor
+                                ? _anchorKFactor - sqrtKFactor
+                                : _anchorKFactor + sqrtKFactor;
+
+        uint reserveSwitch = adjustedVab.mul(vabMultiplier)/1e18;
 
         if (_translatedReserve1 > reserveSwitch) {
 
@@ -1041,7 +1048,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             gamma = gamma.mul(1e18)/_anchorKFactor;
             isLineFormula = true;
         }
-        console.log("isLine", isLineFormula);
+        //console.log("isLine", isLineFormula);
     }
 
 
@@ -1357,7 +1364,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //Bool combines choice of anchor or float with which token is which in the pool
             }
 
-
             pt.burn(address(this), liquidity); //Should burn unadjusted amount ofc
             amount = returnAmount;
         }
@@ -1365,6 +1371,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if(_isAnchor) {
             virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_totalSupply;
         }
+
         _update();
         emit Burn(msg.sender, amount, _isAnchor);
     }
