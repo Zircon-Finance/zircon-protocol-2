@@ -64,16 +64,18 @@ contract Migrator {
         require(_tokenA != address(0), 'ZPT: Address zero');
         require(_tokenB != address(0), 'ZPT: Address zero');
 
-        address anchorAddress = IZirconPylon(oldPylon).anchorPoolTokenAddress();
-        address floatAddress = IZirconPylon(oldPylon).floatPoolTokenAddress();
+        address anchorAddress = IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenB); // IZirconPylon(oldPylon).anchorPoolTokenAddress();
+        address floatAddress = IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenA); //IZirconPylon(oldPylon).floatPoolTokenAddress();
 
         address pylon = IZirconPylonFactory(newPylonFactory).addPylonCustomPT(_pairAddress, _tokenA, _tokenB, floatAddress, anchorAddress);
-        address energy = IZirconPylon(pylon).energyAddress();
+        address energy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB); //IZirconPylon(pylon).energyAddress();
         uint gamma = IZirconPylon(oldPylon).gammaMulDecimals();
         uint vab = IZirconPylon(oldPylon).virtualAnchorBalance();
+        uint akf = IZirconPylon(oldPylon).anchorKFactor();
+        bool fs = IZirconPylon(oldPylon).formulaSwitch();
 
         migratePylon(oldPylon, pylon, _tokenA, _tokenB, _pairAddress, energy);
-        IZirconPylonFactory(newPylonFactory).startPylon(pylon, gamma, vab);
+        IZirconPylonFactory(newPylonFactory).startPylon(pylon, gamma, vab, akf, fs);
     }
 
     function migrateEnergyRevenue(address pair, address oldEnergyRev, address _tokenA, address _tokenB, address _pylonFactory, address newEnergyFactory) external onlyOwner{

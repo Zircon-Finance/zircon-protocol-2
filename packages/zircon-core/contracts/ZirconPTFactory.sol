@@ -4,6 +4,8 @@ import './ZirconPoolToken.sol';
 import './interfaces/IZirconPTFactory.sol';
 
 contract ZirconPTFactory is IZirconPTFactory {
+    mapping(address => mapping(address => address)) public getPoolToken;
+
     address public migrator;
     address public feeToSetter;
 
@@ -40,6 +42,8 @@ contract ZirconPTFactory is IZirconPTFactory {
         assembly {
             poolToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
+
+        getPoolToken[pylonAddress][_token] = poolToken;
     }
 
     function changePylonAddress(address oldPylon, address tokenA, address tokenB, address newPylon, address pylonFactory) external  _onlyMigrator {
@@ -60,6 +64,10 @@ contract ZirconPTFactory is IZirconPTFactory {
 
         ZirconPoolToken(poolTokenA).changePylonAddress(newPylon);
         ZirconPoolToken(poolTokenB).changePylonAddress(newPylon);
+
+        getPoolToken[newPylon][tokenA] = poolTokenA;
+        getPoolToken[newPylon][tokenB] = poolTokenB;
+
     }
 
     function setMigrator(address _migrator) external _onlyMigrator {

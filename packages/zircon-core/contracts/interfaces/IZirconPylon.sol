@@ -1,21 +1,21 @@
 pragma solidity =0.5.16;
 interface IZirconPylon {
     function initialized() external view returns (uint);
-    function anchorPoolTokenAddress() external view returns (address);
-    function floatPoolTokenAddress() external view returns (address);
-    function energyAddress() external view returns (address);
+//    function anchorPoolTokenAddress() external view returns (address);
+//    function floatPoolTokenAddress() external view returns (address);
+//    function energyAddress() external view returns (address);
     function gammaMulDecimals() external view returns (uint);
     function isFloatReserve0() external view returns (bool);
     function virtualAnchorBalance() external view returns (uint);
-//    function anchorKFactor() external view returns (uint);
-//    function formulaSwitch() external view returns (bool);
+    function anchorKFactor() external view returns (uint);
+    function formulaSwitch() external view returns (bool);
     function getSyncReserves() external view returns  (uint112 _reserve0, uint112 _reserve1);
     // Called once by the factory at time of deployment
     // @_floatPoolToken -> Contains Address Of Float PT
     // @_anchorPoolToken -> Contains Address Of Anchor PT
     // @token0 -> Float token
     // @token1 -> Anchor token
-    function initMigratedPylon(uint _gamma, uint _vab) external;
+    function initMigratedPylon(uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external;
     function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external;
     // On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon
