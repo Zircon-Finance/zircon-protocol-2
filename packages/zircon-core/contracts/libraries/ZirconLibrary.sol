@@ -61,25 +61,6 @@ library ZirconLibrary {
         }
     }
 
-    // @notice This function converts pool token share, specifying which tranches with @isAnchor, to token amount
-    // @_ptuAmount is the quantity to convert
-    // @_totalSupply is the supply of the pt of the tranches
-    // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
-//    function calculatePTUToAmount(bool _isAnchor, uint _ptuAmount, uint _totalSupply, uint _reserve0, uint _reservePylon0, uint _gamma, uint _vab) pure internal returns (uint amount) {
-//        if (_isAnchor) {
-//            amount = _vab.mul(_ptuAmount)/_totalSupply;
-//        } else {
-//            amount = (((_reserve0.mul(_gamma).mul(2)/1e18).add(_reservePylon0)).mul(_ptuAmount))/_totalSupply;
-//        }
-//    }
-
-//    function slashLiabilityOmega(uint tpvAnchorTranslated, uint anchorReserve, uint gammaMulDecimals, uint virtualAnchorBalance) pure internal returns (uint omegaMulDecimals) {
-//        //Omega is the "survival factor" i.e how much of the anchor balance survives slashing and can be withdrawn.
-//        //It's applied to the user's liquidity tokens to avoid changing other core functions.
-//        //This adjustment is only used for share calculations, the full amount of tokens is removed.
-//        omegaMulDecimals = ((1e18 - gammaMulDecimals).mul(tpvAnchorTranslated))/(virtualAnchorBalance.sub(anchorReserve));
-//    }
-
 
     function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
 
@@ -101,16 +82,11 @@ library ZirconLibrary {
 
             //stack too deep
             uint _amount = amount;
-            //first of all we need to figure out how much of the anchor liquidity change requires kFactor to follow
+            //first of all we need to figure out how much   of the anchor liquidity change requires kFactor to follow
             //This is the entire amount if isLineFormula && adding and if !isLineFormula it's amount - (threshold - 1)vab
             //in other words it's only the liquidity added above the threshold
             //We're only going to reach this part of the code if the liquidity does exceed the threshold
-//            uint factorAnchorAmount = isLineFormula
-//                                        ? amount
-//                                        : amount.sub((amountThresholdMultiplier.sub(1e18)).mul(adjustedVab)/1e18);
 
-
-            //console.log("amt, a", amountThresholdMultiplier, amount);
 
             //If it's the second case we need to increase initial k and vab by the amount that doesn't require changing kFactor
             //It's as if we're adding liquidity in two tranches
