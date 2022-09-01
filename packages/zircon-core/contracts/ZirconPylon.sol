@@ -1021,29 +1021,29 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice TODO
     // Burn Async send both tokens 50-50
     // Liquidity has to be sent before
-    function sendSlashing(uint omegaMulDecimals, uint liquidity) private returns(uint remainingPercentage){
-        if (omegaMulDecimals < 1e18) {
-            //finds amount to cover
-            uint amountToAdd = liquidity.mul(1e18-omegaMulDecimals)/1e18;
-            // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
-            //finds how much we can cover
-            uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
-
-
-            if (amountToAdd < energyPTBalance) {
-                // Sending PT tokens to Pair because burn one side is going to be called after
-                // sends pool tokens directly to pair
-                _safeTransferFrom(pairAddress, energyAddress, pairAddress, amountToAdd);
-            } else {
-                // Sending PT tokens to Pair because burn one side is going to be called after
-                // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
-
-                _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
-                remainingPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(liquidity);
-
-            }
-        }
-    }
+//    function sendSlashing(uint omegaMulDecimals, uint liquidity) private returns(uint remainingPercentage){
+//        if (omegaMulDecimals < 1e18) {
+//            //finds amount to cover
+//            uint amountToAdd = liquidity.mul(1e18-omegaMulDecimals)/1e18;
+//            // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
+//            //finds how much we can cover
+//            uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
+//
+//
+//            if (amountToAdd < energyPTBalance) {
+//                // Sending PT tokens to Pair because burn one side is going to be called after
+//                // sends pool tokens directly to pair
+//                _safeTransferFrom(pairAddress, energyAddress, pairAddress, amountToAdd);
+//            } else {
+//                // Sending PT tokens to Pair because burn one side is going to be called after
+//                // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
+//
+//                _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
+//                remainingPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(liquidity);
+//
+//            }
+//        }
+//    }
 
     /// @notice function that sends tokens to Pair to be burned after
     /// this function must be called only before a burn takes place, if not it'll give away tokens
@@ -1209,12 +1209,35 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         (, uint reserveAnchor) = getSyncReserves();
         (, uint pairReserves1)  = getPairReservesTranslated(0,0);
 
-        uint omegaMulDecimals = Math.max(1e18, (1e18 - gammaMulDecimals).mul(pairReserves1.mul(2)))/(virtualAnchorBalance.sub(reserveAnchor));
+        uint omegaMulDecimals = Math.min(1e18, (1e18 - gammaMulDecimals).mul(pairReserves1.mul(2)))/(virtualAnchorBalance.sub(reserveAnchor));
 
         //Send slashing should send the extra PTUs to Uniswap.
         //When burn calls the uniswap burn it will also give users the compensation
-        (extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
         retPtu = omegaMulDecimals.mul(ptu)/1e18;
+
+        if (omegaMulDecimals < 1e18) {
+            //finds amount to cover
+            uint amountToAdd = ptu.mul(1e18-omegaMulDecimals)/1e18;
+            // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
+            //finds how much we can cover
+            uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
+
+
+            if (amountToAdd < energyPTBalance) {
+                // Sending PT tokens to Pair because burn one side is going to be called after
+                // sends pool tokens directly to pair
+                _safeTransferFrom(pairAddress, energyAddress, pairAddress, amountToAdd);
+            } else {
+                // Sending PT tokens to Pair because burn one side is going to be called after
+                // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
+
+                _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
+                extraPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(ptu);
+
+            }
+        }
+
+        //(extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
     }
 
     // @notice Burn send liquidity back to user burning Pool tokens

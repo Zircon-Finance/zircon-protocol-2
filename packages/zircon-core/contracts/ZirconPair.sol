@@ -123,15 +123,14 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
                 uint liquidityPercentage = numerator / denominator;
 
                 if (liquidityPercentage > 0) {
-//                    console.log("C ore: liqPercentage", liquidityPercentage);
+                    //                    console.log("C ore: liqPercentage", liquidityPercentage);
                     _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
-                    _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
+                    //                    _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
                     uint totalPercentage = ((rootK.sub(rootKLast)).mul(1e18))/rootKLast;
                     IZirconEnergyRevenue(energyRevenueAddress).calculate(totalPercentage.sub(liquidityPercentage));
                 }
             }
         }
-
     }
 
     // this low-level function should be called from a contract which performs important safety checks
