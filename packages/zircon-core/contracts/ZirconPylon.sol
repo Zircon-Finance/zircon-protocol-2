@@ -547,7 +547,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if(_isAnchor) {
             uint _reservePylon = _reserve; //stack too deep shit
             (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
-            anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, amountOut, anchorKFactor, virtualAnchorBalance.sub(_reservePylon), _reservePairTranslated0, _reservePairTranslated1);
+            anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, _amountOut, anchorKFactor, virtualAnchorBalance.sub(_reservePylon), _reservePairTranslated0, _reservePairTranslated1);
         }
         //Amount Out
         amountOut += _amountOut;
