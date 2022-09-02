@@ -504,13 +504,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
         //Calculates max tokens to be had in this reserve pool
         uint max = _pairReserveTranslated.mul(IZirconPylonFactory(factoryAddress).maximumPercentageSync()) / 100;
+        console.log("max", max);
         uint freeSpace = 0;
+        console.log("after sf", IUniswapV2ERC20(_isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this)));
 
         uint ptTotalSupply  =  IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).totalSupply();
-
         if (max > _reserve) {
             //Calculates how much liquidity sync pool can accept
-            freeSpace = max.sub(_reserve);
+            freeSpace = max - _reserve;
             //If amountIn is less than freeSpace, this liquidity is thrown into sync pool only, for future matching.
             if (_amountIn <= freeSpace) {
 
