@@ -290,7 +290,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // This function matches the Sync pool and sends liquidity into pair if possible
 
     // Sends pylonReserves to pool if there is a match
-    function _syncMinting(uint maximumPercentageSync) private returns(uint px, uint py) {
+    function _syncMinting(uint maximumPercentageSync) private {
         // Let's take the current balances
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
@@ -311,8 +311,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if (balance0 > max0 && balance1 > max1) {
             (uint pairReserves0, uint pairReserves1) = getPairReservesNormalized();
             // Get Maximum finds the highest amount that can be matched at 50/50
-            //uint px;
-            //uint py;
+            uint px;
+            uint py;
 
             if (pairReserves0 == 0 && pairReserves1 == 0) {
                 (px, py) = ZirconLibrary._getMaximum(
@@ -511,9 +511,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         uint ptTotalSupply  =  IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).totalSupply();
 
-        uint floatMinted;
-        uint anchorMinted;
-
         if (max > _reserve) {
             //Calculates how much liquidity sync pool can accept
             freeSpace = max - _reserve;
@@ -522,11 +519,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             if(freeSpace > 0) {
             //if (_amountIn <= freeSpace) {
 
-                liquidity = ZirconLibrary.calculatePTU(_isAnchor, _amountIn,
+                liquidity = ZirconLibrary.calculatePTU(_isAnchor, Math.min(freeSpace, _amountIn),
                     ptTotalSupply,
                     _pairReserveTranslated, _reserve, gammaMulDecimals, virtualAnchorBalance);
 
-                (floatMinted, anchorMinted) = _syncMinting(maxP);
+                 _syncMinting(maxP);
 
                 if(_amountIn <= freeSpace) {
                     return (liquidity, _amountIn);
@@ -542,7 +539,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountAsyncToMint = _amountIn - freeSpace;
 
         //Reduce by amount that actually was minted into the pair
-        amountAsyncToMint = amountAsyncToMint.sub(_isAnchor ? anchorMinted : floatMinted);
 
 
         //Calculates pylon pool tokens and amount it considers to have entered pool (slippage adjusted)
@@ -556,11 +552,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, amountOut, anchorKFactor, virtualAnchorBalance.sub(_reservePylon), _reservePairTranslated0, _reservePairTranslated1);
         }
 
+//        amountAsyncToMint = amountAsyncToMint.sub(_isAnchor ? anchorMinted : floatMinted);
 
         // sending the async minting part to the pair
         //Uses raw amount since mintOneSide compensates for slippage by itself
-        _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
-        IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 != _isAnchor); //Xor to pick the right reserve
+//        _safeTransfer(_isAnchor ? pylonToken.anchor : pylonToken.float, pairAddress, amountAsyncToMint);
+//        IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0 != _isAnchor); //Xor to pick the right reserve
     }
 
     // @notice External Function called to mint pool Token

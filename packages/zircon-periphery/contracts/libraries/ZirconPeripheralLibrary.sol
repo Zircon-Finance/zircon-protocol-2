@@ -13,7 +13,7 @@ library ZirconPeripheralLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'bdcdc586cabeba4c42dbd5eac34bb43251be2d31517fd05fe8ea01298a6a6747' // init code hash
+                hex'32c6d0c4f1e1262b141cb71809e7653935cb3b2fad844693b615baefad22ae54' // init code hash
             ))));
     }
 

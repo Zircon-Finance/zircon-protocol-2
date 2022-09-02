@@ -1,0 +1,3330 @@
+{
+  "1287": [
+    {
+      "name": "moonbase",
+      "chainId": "1287",
+      "contracts": {
+        "FeeToSetter": {
+          "address": "0x8797f7D56c7878523C00E9F2e76F3E8FbcD585BB",
+          "abi": [
+            {
+              "inputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "factory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "energyRev",
+                  "type": "address"
+                }
+              ],
+              "name": "getFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "factory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "energyFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pylonFactory_",
+                  "type": "address"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pylonFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "dynamicRatio",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setDynamicRatio",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFeePercentageEnergy",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFeePercentageRev",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "feeToSetter_",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_maximumPercentageSync",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaTreshold",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaMinFee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_muUpdatePeriod",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_muChangeFactor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_EMASamples",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "insurancePerMille",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setInsurancePerMille",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "liquidityFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setLiquidityFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint112",
+                  "name": "minFee",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "uint112",
+                  "name": "maxFee",
+                  "type": "uint112"
+                }
+              ],
+              "name": "setMinMaxFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner_",
+                  "type": "address"
+                }
+              ],
+              "name": "setOwner",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "name": "setPaused",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "Migrator": {
+          "address": "0xe5aB293c17EE8EdAE7a3a7a6D587373b3cEf1552",
+          "abi": [
+            {
+              "inputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "energyFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "ptFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pylonFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pairFactory_",
+                  "type": "address"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "oldEnergyRev",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergyFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "migrateEnergyRevenue",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pairFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "ptFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pylonFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner_",
+                  "type": "address"
+                }
+              ],
+              "name": "setOwner",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "oldPylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newPylonFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "startNewPylon",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "oldEnergy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergyRev",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newPylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "updateEnergyOnPylon",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newEnergyFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newPTFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newPylonFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newPairFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "updateFactories",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "WETH": {
+          "address": "0xa963210593d7977f6770694a5fC44958e97cCc25",
+          "abi": [
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "src",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "guy",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "Approval",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "dst",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "Deposit",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "src",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "dst",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "Transfer",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "src",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "Withdrawal",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "allowance",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "guy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "approve",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "balanceOf",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "decimals",
+              "outputs": [
+                {
+                  "internalType": "uint8",
+                  "name": "",
+                  "type": "uint8"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "deposit",
+              "outputs": [],
+              "stateMutability": "payable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "name",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "symbol",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "totalSupply",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "dst",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "transfer",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "src",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "dst",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "transferFrom",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "wad",
+                  "type": "uint256"
+                }
+              ],
+              "name": "withdraw",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "stateMutability": "payable",
+              "type": "receive"
+            }
+          ]
+        },
+        "ZirconEnergyFactory": {
+          "address": "0x1AAB17248c6dD141522Dcb8AdA16A3543bb4ca4D",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "tokenA",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "tokenB",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "EnergyCreated",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allEnergies",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allEnergiesLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allEnergiesRevenue",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allEnergiesRevenueLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pair",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "createEnergy",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pair",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "createEnergyRev",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyRevenueCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "feePercentageEnergy",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "feePercentageRev",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "feeToSetter",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getEnergy",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getEnergyRevenue",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "energyRev",
+                  "type": "address"
+                }
+              ],
+              "name": "getFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "getMinMaxFee",
+              "outputs": [
+                {
+                  "internalType": "uint112",
+                  "name": "minFee",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "uint112",
+                  "name": "maxFee",
+                  "type": "uint112"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "insurancePerMille",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "oldEnergy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergy",
+                  "type": "address"
+                }
+              ],
+              "name": "migrateEnergy",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergy",
+                  "type": "address"
+                }
+              ],
+              "name": "migrateEnergyLiquidity",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "oldEnergy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergy",
+                  "type": "address"
+                }
+              ],
+              "name": "migrateEnergyRevenue",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "oldEnergy",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergy",
+                  "type": "address"
+                }
+              ],
+              "name": "migrateEnergyRevenueFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "migrator",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint112",
+                  "name": "_minPylonFee",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "uint112",
+                  "name": "_maxPylonFee",
+                  "type": "uint112"
+                }
+              ],
+              "name": "setFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFeePercentageEnergy",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFeePercentageRev",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_insurancePerMille",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setInsurancePerMille",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "name": "setMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "ZirconFactory": {
+          "address": "0xA9B23583b0cbB7d10CC8Ca7C7A92E2D2d403e359",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_energyFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token0",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "PairCreated",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allPairs",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allPairsLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_newEnergyFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "changeEnergyFactoryAddress",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "changeEnergyRevAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "newEnergy",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "createPair",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "dynamicRatio",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "feeToSetter",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getPair",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "liquidityFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "migrator",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pairCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_dynamicRatio",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setDynamicRatio",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_liquidityFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setLiquidityFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "name": "setMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "ZirconPTFactory": {
+          "address": "0x9843B3aF3Eb41f30F4Cc4803F65Ce1c71F7947a8",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "feeToSetter_",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "oldPylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newPylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "changePylonAddress",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pylonAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "createPTAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "poolToken",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "feeToSetter",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "getCreationBytecode",
+              "outputs": [
+                {
+                  "internalType": "bytes",
+                  "name": "",
+                  "type": "bytes"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "getInitHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getPoolToken",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "migrator",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "name": "setMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        },
+        "ZirconPylonFactory": {
+          "address": "0xd047E2db5F74276D6656557ccC908d569d64438A",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_energyFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_ptFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token0",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "poolToken0",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "poolToken1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pylon",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                }
+              ],
+              "name": "PylonCreated",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "EMASamples",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "addPylon",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "pylonAddress",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "floatPTAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "anchorPTAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "addPylonCustomPT",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "pylonAddress",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allPylons",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allPylonsLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_newEnergyRev",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "changeEnergyAddress",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_newEnergyFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "changeEnergyFactoryAddress",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "deltaGammaMinFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "deltaGammaThreshold",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "factory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getPylon",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "liquidityFee",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "maximumPercentageSync",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_oldPylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_newPylon",
+                  "type": "address"
+                }
+              ],
+              "name": "migrateLiquidity",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "muChangeFactor",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "muUpdatePeriod",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "paused",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_feeToSetter",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_maximumPercentageSync",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaThreshold",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaMinFee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_muUpdatePeriod",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_muChangeFactor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_EMASamples",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_liquidityFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setLiquidityFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_migrator",
+                  "type": "address"
+                }
+              ],
+              "name": "setMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "bool",
+                  "name": "_paused",
+                  "type": "bool"
+                }
+              ],
+              "name": "setPaused",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_gamma",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_vab",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_anchorKFactor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "_formulaSwitch",
+                  "type": "bool"
+                }
+              ],
+              "name": "startPylon",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "31337": [
+    {
+      "name": "localhost",
+      "chainId": "31337",
+      "contracts": {
+        "ZirconEnergyFactory": {
+          "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+          "abi": [
+            {
+              "inputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "tokenA",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "tokenB",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "EnergyCreated",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allEnergies",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allEnergiesLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allEnergiesRevenue",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allEnergiesRevenueLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylon",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pair",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "createEnergy",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pair",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "createEnergyRev",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "energy",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyRevenueCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getEnergy",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getEnergyRevenue",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ]
+        },
+        "ZirconFactory": {
+          "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_energyFactory",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token0",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "PairCreated",
+              "type": "event"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allPairs",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allPairsLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "tokenB",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_pylonFactory",
+                  "type": "address"
+                }
+              ],
+              "name": "createPair",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getPair",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "migrator",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pairCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            }
+          ]
+        },
+        "ZirconPylonFactory": {
+          "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+          "abi": [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_factory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_energyFactory",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token0",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "token1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "poolToken0",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "poolToken1",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pylon",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "pair",
+                  "type": "address"
+                }
+              ],
+              "name": "PylonCreated",
+              "type": "event"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pairAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "addPylon",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "pylonAddress",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "name": "allPylons",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "allPylonsLength",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "dynamicFeePercentage",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "factory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "getPylon",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "maximumPercentageSync",
+              "outputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "",
+                  "type": "uint256"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pylonCodeHash",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "pure",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
