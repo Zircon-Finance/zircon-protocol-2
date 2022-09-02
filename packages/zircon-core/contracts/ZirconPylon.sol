@@ -11,7 +11,7 @@ import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****
@@ -503,7 +503,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @amountSync -> Amount of tokens to mint sync
     // @liquidity -> In case async minting is done is returned the PT Liquidity to mint for the users on the async call, if not 0
     // @amount -> Amount on async if not 0
-    function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, uint _reserveOther, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
+    function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint liquidity, uint amountOut) {
         //Calculates max tokens to be had in this reserve pool
         uint maxP = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         uint max = _pairReserveTranslated.mul(maxP) / 100;
@@ -523,9 +523,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                     ptTotalSupply,
                     _pairReserveTranslated, _reserve, gammaMulDecimals, virtualAnchorBalance);
 
-                 _syncMinting(maxP);
 
                 if(_amountIn <= freeSpace) {
+                    _syncMinting(maxP);
                     return (liquidity, _amountIn);
                 } else {
                     amountOut += freeSpace;
@@ -543,16 +543,21 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         //Calculates pylon pool tokens and amount it considers to have entered pool (slippage adjusted)
         (uint _amountOut, uint _liquidity) = calculateLiquidity(amountAsyncToMint, _isAnchor);
-        amountOut += _amountOut;
-        liquidity += _liquidity;
 
         if(_isAnchor) {
             uint _reservePylon = _reserve; //stack too deep shit
             (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
             anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, amountOut, anchorKFactor, virtualAnchorBalance.sub(_reservePylon), _reservePairTranslated0, _reservePairTranslated1);
         }
+        //Amount Out
+        amountOut += _amountOut;
+        liquidity += _liquidity;
+        if (freeSpace > 0) {
+            //If there was free space, we mint the liquidity into the sync pool
+            _syncMinting(maxP);
+        }
 
-//        amountAsyncToMint = amountAsyncToMint.sub(_isAnchor ? anchorMinted : floatMinted);
+        //        amountAsyncToMint = amountAsyncToMint.sub(_isAnchor ? anchorMinted : floatMinted);
 
         // sending the async minting part to the pair
         //Uses raw amount since mintOneSide compensates for slippage by itself
@@ -577,20 +582,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         amountIn = payFees(amountIn, getFeeBps(), isAnchor);
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
-
         uint amountOut;
         //amountIn, pairReserveTranslated, reserveToken, reserveOther
         (liquidity, amountOut) = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
-            isAnchor ? _reserve1 : _reserve0, isAnchor ? _reserve0 : _reserve1, isAnchor);
-
+            isAnchor ? _reserve1 : _reserve0, isAnchor);
         if(isAnchor) {
             virtualAnchorBalance += amountOut;
         }
-        //    else {
-        //        //Vfb isn't quite as literal as vab about "number of assets supplied"
-        //        uint totalPtSupply = IZirconPoolToken(floatPoolTokenAddress).totalSupply();
-        //        virtualFloatBalance += virtualFloatBalance.mul(liquidity)/totalPtSupply;
-        //    }
 
         // Mints zircon pool tokens to user after throwing their assets in the pool
         IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(_to, liquidity);

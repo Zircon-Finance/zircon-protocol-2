@@ -113,11 +113,11 @@ describe("Pylon", () => {
     }
     //Let's try to calculate some cases for pylon
     const mintTestCases = [
-        [5, 10, '4625004224854010', '4749990617651023','149366287386702675','99999999999999000', false],
-        [10, 5, '4749999999999999', '4624999999999999','99999999999999000', '149366473384710075', true],
-        [5, 10, '2374999999999999', '9249999999999997','49999999999999000', '149871228594744003', true],
-        [10, 10, '9250004224858901', '4749995308820878','199613087934954011', '99999999999999000', false],
-        [1000, 1000, '475000000000000000', '925000000000000000','9999999999999999000', '19961318139684423590', true],
+        [5, 10, '4762509926821186', '4749990617651023','149366287386702675','99999999999999000', false],
+        [10, 5, '4749999999999999', '4762499999999999','99999999999999000', '149366473384710075', true],
+        [5, 10, '2374999999999999', '9525000000000000','49999999999999000', '149871228594744003', true],
+        [10, 10, '9525009926820697', '4749995308820878','199613087934954011', '99999999999999000', false],
+        [1000, 1000, '475000000000000000', '952500000000000000','9999999999999999000', '19961318139684423590', true],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : expandTo18Decimals(n))))
     mintTestCases.forEach((mintCase, i) => {
         it(`mintPylon:${i}`, async () => {
@@ -199,7 +199,7 @@ describe("Pylon", () => {
     it('Mint Burn Cycle test', async function () {
 
         const mintCase = [
-            [expandTo18Decimals(10), expandTo18Decimals(5), '4749999999999999', '4624999999999999','99999999999999000', '149366473384710075', true],]
+            [expandTo18Decimals(10), expandTo18Decimals(5), '4749999999999999', '4762499999999999','99999999999999000', '149366473384710075', true],]
 
         const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor] = mintCase[0]
         // Add some liquidity to the Pair...
@@ -544,7 +544,7 @@ describe("Pylon", () => {
         console.log(token0.address);
         //We swapped slightly less than 1% of the pool, vab should be increased by
         // 50% (gamma) * 1% (swap amount) * 0.3% (fee) * 1% (pylon ownership) * 5/6 (mintfee)
-        expect(vab).to.eq(ethers.BigNumber.from("53018752091848823934"));
+        expect(vab).to.eq(ethers.BigNumber.from("53023441697777674904"));
 
 
     });
@@ -676,7 +676,7 @@ describe("Pylon", () => {
         console.log("Swap2 vab after new token: ", ethers.utils.formatEther(vab));
 
         //Gamma moved by 5% to 0.45, we expect mu to change by 5%* 5%*3 = 0.0075 (ish)
-        expect(mu).to.eq(ethers.BigNumber.from("408323314367608614"));
+        expect(mu).to.eq(ethers.BigNumber.from("408323597837450529"));
 
 
     });
@@ -763,7 +763,7 @@ describe("Pylon", () => {
         console.log("thisblockEMA after: ", ethers.utils.formatEther(thisBlockEMA))
         console.log("strikeBlock after: ", strikeBlock.toBigInt())
 
-        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99032085975935834"));
+        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99031756753173652"));
         expect(strikeBlock).to.eq(blockNumber);
 
         // Advance time to reset this block ema. GammaEMA should also bleed to zero
@@ -2293,7 +2293,7 @@ describe("Pylon", () => {
         await expect(pylonInstance.mintPoolTokens(account.address, true))
             .to.emit(pylonInstance, 'MintAT')
             .to.emit(pylonInstance, 'PylonUpdate')
-            .withArgs(ethers.BigNumber.from('10076934486322270359'), ethers.BigNumber.from('22946586211658746538'))
+            .withArgs(ethers.BigNumber.from('10076934486719759897'), ethers.BigNumber.from('22946586211658746538'))
 
         pylonRes2 = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after second mint: ", ethers.utils.formatEther(pylonRes2[0]));
@@ -2356,7 +2356,7 @@ describe("Pylon", () => {
 
 
     const syncTestCase = [
-        [2, 5, 10, '42045640295561429', '43181405676534741','963174865358283656','909090909090908090', false],
+        [2, 5, 10, '43295890992529249', '43181405676534741','963174865358283656','909090909090908090', false],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : expandTo18Decimals(n))))
     syncTestCase.forEach((mintCase, i) => {
         it(`syncPylon`, async () => {
