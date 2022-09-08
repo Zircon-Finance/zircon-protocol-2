@@ -44,6 +44,7 @@ contract ZirconPTFactory is IZirconPTFactory {
         }
 
         getPoolToken[pylonAddress][_token] = poolToken;
+
     }
 
     function changePylonAddress(address oldPylon, address tokenA, address tokenB, address newPylon, address pylonFactory) external  _onlyMigrator {

@@ -6,8 +6,10 @@ import "@zircon/core/contracts/interfaces/IZirconPair.sol";
 import "@zircon/core/contracts/interfaces/IZirconPylonFactory.sol";
 import "@zircon/core/contracts/interfaces/IZirconFactory.sol";
 import "@zircon/core/contracts/interfaces/IZirconPoolToken.sol";
+import "@zircon/core/contracts/interfaces/IZirconPTFactory.sol";
 import "./libraries/ZirconPeripheralLibrary.sol";
 import "./libraries/UniswapV2Library.sol";
+import "hardhat/console.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 
@@ -15,6 +17,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
 
     address public immutable override factory;
     address public immutable override pylonFactory;
+    address public immutable override ptFactory;
     address public immutable override WETH;
     bytes4 private constant DEPOSIT = bytes4(keccak256(bytes('routerDeposit(uint256)')));
 
@@ -24,10 +27,11 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     }
 
     // **** Constructor ****
-    constructor(address _factory, address _pylonFactory, address _WETH) public {
+    constructor(address _factory, address _pylonFactory, address _ptFactory, address _WETH) public {
         factory = _factory;
         WETH = _WETH;
         pylonFactory = _pylonFactory;
+        ptFactory = _ptFactory;
     }
 
     receive() external payable {
@@ -129,8 +133,12 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         // Initialize Pylon & Pair
         address tokenA = isAnchor ? WETH : token;
         address tokenB = isAnchor ? token : WETH;
+        console.log("initializing...");
         (, address pylon) = _initializePylon(tokenA, tokenB);
-        amountA = isAnchor ? msg.value : amountDesiredToken;
+        console.log("deinitializing...");
+
+
+    amountA = isAnchor ? msg.value : amountDesiredToken;
         amountB = isAnchor ? amountDesiredToken : msg.value;
 
         // Transfering tokens to Pylon
@@ -359,8 +367,9 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         uint deadline
     ) virtual override ensure(deadline)  public returns (uint amount){
         address pylon = _getPylon(tokenA, tokenB);
-        IZirconPoolToken(shouldReceiveAnchor ? IZirconPylon(pylon).anchorPoolTokenAddress() :
-            IZirconPylon(pylon).floatPoolTokenAddress()).transferFrom(msg.sender, pylon, liquidity); // send liquidity to pylon
+        address poolToken = IZirconPTFactory(ptFactory).getPoolToken(pylon, shouldReceiveAnchor ? tokenB : tokenA);
+
+        IZirconPoolToken(poolToken).transferFrom(msg.sender, pylon, liquidity); // send liquidity to pylon
         (amount) = IZirconPylon(pylon).burn(to, shouldReceiveAnchor);
         require(amount >= amountMin, 'UniswapV2Router: INSUFFICIENT_AMOUNT');
     }
@@ -400,10 +409,10 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         address to,
         uint deadline
     ) virtual override ensure(deadline)  public returns (uint amountA, uint amountB){
-
-
         address pylon = _getPylon(tokenA, tokenB);
-        IZirconPoolToken(isAnchor ? IZirconPylon(pylon).anchorPoolTokenAddress() : IZirconPylon(pylon).floatPoolTokenAddress()).transferFrom(msg.sender, pylon, liquidity); // send liquidity to pair
+        address poolToken = IZirconPTFactory(ptFactory).getPoolToken(pylon, isAnchor ? tokenB : tokenA);
+
+        IZirconPoolToken(poolToken).transferFrom(msg.sender, pylon, liquidity); // send liquidity to pair
         (amountA, amountB) = IZirconPylon(pylon).burnAsync(to, isAnchor);
 
 

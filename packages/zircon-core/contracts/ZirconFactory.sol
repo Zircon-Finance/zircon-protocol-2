@@ -14,7 +14,6 @@ contract ZirconFactory is IZirconFactory {
     uint public dynamicRatio;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
-
     modifier _onlyMigrator {
         require(msg.sender == migrator, 'ZPT: FORBIDDEN');
         _;

@@ -13,7 +13,7 @@ library ZirconPeripheralLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'32c6d0c4f1e1262b141cb71809e7653935cb3b2fad844693b615baefad22ae54' // init code hash
+                hex'9c43b2576e12d44d8c5615a799d29898386b06dfb2d315f89ee64d44bdc034b2' // init code hash
             ))));
     }
 
@@ -27,7 +27,7 @@ library ZirconPeripheralLibrary {
 
     // fetches and gets Reserves
     function getSyncReserves(address factory, address tokenA, address tokenB, address pair) internal view returns (uint112 reserveF, uint112 reserveA) {
-        (reserveF, reserveA,) = IZirconPylon(pylonFor(factory, tokenA, tokenB, pair)).getSyncReserves();
+        (reserveF, reserveA) = IZirconPylon(pylonFor(factory, tokenA, tokenB, pair)).getSyncReserves();
     }
 
 

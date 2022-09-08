@@ -5,6 +5,7 @@ interface IZirconPylonRouter {
     function factory() external pure returns (address);
     function WETH() external pure returns (address);
     function pylonFactory() external pure returns (address);
+    function ptFactory() external pure returns (address);
 
     function init(
         address tokenA,
@@ -27,37 +28,42 @@ interface IZirconPylonRouter {
         address tokenA,
         address tokenB,
         uint amountDesired,
+        uint minLiquidity,
         bool isAnchor,
         address to,
-        address pool,
+        address farm,
         uint deadline
     ) external returns (uint amount, uint liquidity);
 
     function addSyncLiquidityETH(
         address token,
         bool isAnchor,
+        uint minLiquidity,
         address to,
         address pool,
         uint deadline
     ) external payable returns (uint liquidity);
 
-    function addAsyncLiquidity100(
-        address tokenA,
-        address tokenB,
-        uint amountDesired,
-        bool isAnchor,
-        address to,
-        address pool,
-        uint deadline
-    ) external returns (uint liquidity);
-
-    function addAsyncLiquidity100ETH(
-        address token,
-        bool isAnchor,
-        address to,
-        address pool,
-        uint deadline
-    ) external payable returns (uint liquidity);
+//    function addAsyncLiquidity100(
+//        address tokenA,
+//        address tokenB,
+//        uint amountDesired,
+//        uint minLiquidity,
+//    bool isAnchor,
+//        address to,
+//        address pool,
+//        uint deadline
+//    ) external returns (uint liquidity);
+//
+//    function addAsyncLiquidity100ETH(
+//        address token,
+//        bool isAnchor,
+//        uint minLiquidity,
+//
+//    address to,
+//        address pool,
+//        uint deadline
+//    ) external payable returns (uint liquidity);
 
     function addAsyncLiquidity(
         address tokenA,

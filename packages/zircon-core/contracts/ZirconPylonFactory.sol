@@ -20,7 +20,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public maximumPercentageSync;
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
-    uint public liquidityFee;
+//    uint public liquidityFee;
     uint public EMASamples;
 
     uint public muUpdatePeriod;
@@ -42,7 +42,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
         muChangeFactor = 3; //Increases absolute gamma deviation factor to speed up mu change
-        liquidityFee = 30;
+//        liquidityFee = 30;
         paused = false;
     }
 
@@ -152,10 +152,10 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         onlyFeeToSetter();
         paused = _paused;
     }
-    function setLiquidityFee(uint _liquidityFee) external {
-        onlyFeeToSetter();
-        liquidityFee = _liquidityFee;
-    }
+//    function setLiquidityFee(uint _liquidityFee) external {
+//        onlyFeeToSetter();
+//        liquidityFee = _liquidityFee;
+//    }
 
     function changeEnergyFactoryAddress(address _newEnergyFactory) external {
         onlyMigrator();

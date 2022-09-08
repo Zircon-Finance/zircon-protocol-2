@@ -98,6 +98,10 @@ contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
         }
     }
 
+    function modifyRewards(address token, uint amount) onlyOwner external {
+        IERC20(token).safeTransfer(owner(), amount);
+    }
+
     /*
     *   @notice Mints amount of tokens to the owner
     *   @param _amount: of tokens to mint

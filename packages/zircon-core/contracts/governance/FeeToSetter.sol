@@ -58,7 +58,7 @@ contract FeeToSetter {
 
     function setLiquidityFee(uint liquidityFee) external onlyOwner {
         IZirconFactory(factory).setLiquidityFee(liquidityFee);
-        IZirconPylonFactory(pylonFactory).setLiquidityFee(liquidityFee);
+//        IZirconPylonFactory(pylonFactory).setLiquidityFee(liquidityFee);
     }
 
     function setDynamicRatio(uint dynamicRatio) external onlyOwner {

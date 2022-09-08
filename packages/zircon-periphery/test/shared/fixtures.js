@@ -65,8 +65,8 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
     let pylonInstance = await pylonContract.attach(pylonAddress);
 
     // Pool Tokens Instances
-    let poolAddress0 = await pylonInstance.floatPoolTokenAddress();
-    let poolAddress1 = await pylonInstance.anchorPoolTokenAddress();
+    let poolAddress0 = await ptFactoryInstance.getPoolToken(pylonAddress, token0.address);
+    let poolAddress1 = await ptFactoryInstance.getPoolToken(pylonAddress, token1.address);
     let poolTokenContract = await ethers.getContractFactory(zirconPoolToken['abi'], zirconPoolToken['bytecode'])
     let poolTokenInstance0 = poolTokenContract.attach(poolAddress0);
     let poolTokenInstance1 = poolTokenContract.attach(poolAddress1);
@@ -95,7 +95,7 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         },
     });
 
-    let routerInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, WETHInstance.address)
+    let routerInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, ptFactoryInstance.address, WETHInstance.address)
     await psionicFactoryInstance.updatePylonRouter(routerInstance.address);
     console.log(await psionicFactoryInstance.PYLON_ROUTER())
 
@@ -126,6 +126,7 @@ exports.coreFixtures = async function coreFixtures(address, signer) {
         anchorFarm,
         floatFarm,
         psionicFactoryInstance,
-        psionicFarmInit
+        psionicFarmInit,
+        ptFactoryInstance
     }
 }

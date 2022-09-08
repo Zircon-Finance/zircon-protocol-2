@@ -93,7 +93,41 @@ describe("Psionic Farm Factory", () => {
         await expect(psionicFarm.deposit(
             expandTo18Decimals(100)
         )).to.be.revertedWith('The factory is paused')
- 
+    });
 
+    it('should increase', async function () {
+        await psionicFactory.switchPause()
+
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
+
+        await expect(psionicFarm.deposit(
+            expandTo18Decimals(100)
+        )).to.be.revertedWith('The factory is paused')
+    });
+
+    it('should get out in emergency case', async function () {
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
+        let balancePReDeposit = await tk2.balanceOf(account.address)
+        await expect(psionicFarm.deposit(
+            expandTo18Decimals(100)
+        )).to.emit(psionicFarm, 'Deposit')
+            .withArgs(account.address, expandTo18Decimals(100));
+        await psionicFarm.emergencyWithdraw()
+        expect(balancePReDeposit).to.equal(await tk2.balanceOf(account.address))
+    });
+
+    it('should pick reward tokens in emergency case', async function () {
+        await tk2.approve(psionicFarm.address, ethers.constants.MaxUint256)
+        let balancePReDeposit = await tk0.balanceOf(account.address)
+        let balancePReDeposit2 = await tk1.balanceOf(account.address)
+        await psionicFarm.closingFarm()
+        await expect(balancePReDeposit.add(expandTo18Decimals(10))).to.equal(await tk0.balanceOf(account.address))
+        await expect(balancePReDeposit2.add(expandTo18Decimals(20))).to.equal(await tk1.balanceOf(account.address))
+    });
+
+    it('should modify rewards over vault', async function () {
+        let balancePReDeposit = await tk0.balanceOf(account.address)
+        await psionicVault.modifyRewards(tk0.address, expandTo18Decimals(5))
+        await expect(balancePReDeposit.add(expandTo18Decimals(5))).to.equal(await tk0.balanceOf(account.address))
     });
 })

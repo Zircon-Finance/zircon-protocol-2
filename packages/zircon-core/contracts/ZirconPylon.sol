@@ -6,6 +6,7 @@ import "./libraries/SafeMath.sol";
 //import "./libraries/UQ112x112.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./interfaces/IZirconPylonFactory.sol";
+import "./interfaces/IZirconFactory.sol";
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
@@ -547,7 +548,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if(_isAnchor) {
             uint _reservePylon = _reserve; //stack too deep shit
             (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
-            anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, amountOut, anchorKFactor, virtualAnchorBalance.sub(_reservePylon), _reservePairTranslated0, _reservePairTranslated1);
+            anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, _amountOut, anchorKFactor, virtualAnchorBalance.sub(_reservePylon), _reservePairTranslated0, _reservePairTranslated1);
         }
         //Amount Out
         amountOut += _amountOut;
@@ -612,7 +613,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             _safeTransfer(pylonToken.float, pairAddress, fee);
             (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
 
-            uint amountInWithFee = fee.mul(10000-IZirconPylonFactory(factoryAddress).liquidityFee());
+            uint amountInWithFee = fee.mul(10000-IZirconFactory(pairFactoryAddress).liquidityFee());
             uint amountSwapped = amountInWithFee.mul(_reservePair1) / _reservePair0.mul(10000).add(amountInWithFee);
 
 //            uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, );
@@ -693,7 +694,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
 
         uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
-        uint amountInWithFee = amountIn.mul(10000-(IZirconPylonFactory(factoryAddress).liquidityFee()/2 + 1))/10000;
+        uint amountInWithFee = amountIn.mul(10000-(IZirconFactory(pairFactoryAddress).liquidityFee()/2 + 1))/10000;
         //Add the amountIn to one of the reserves
         uint sqrtKPrime = isAnchor ?
         Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
@@ -1285,7 +1286,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 uint extraPercentage = 0;
                 if (isAnchor) {
                     (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee);
-                    //console.log("ptuafterO", ptuWithFee);
+
                     uint anchorPtSupply = _totalSupply; //stack too deep avoidance
 
                     (,uint reserveAnchor) = getSyncReserves();

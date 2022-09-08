@@ -114,9 +114,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
             numberBlocksForUserLimit = _numberBlocksForUserLimit;
         }
 
-//        uint256 decimalsRewardToken = uint256(rewardToken.decimals());
-//        require(decimalsRewardToken < 30, "Must be inferior to 30");
-
         PRECISION_FACTOR = uint256(10**12);
 
         // Set the lastRewardBlock as the startBlock
@@ -204,7 +201,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @notice Withdraw staked tokens without caring about rewards rewards
      * @dev Needs to be for emergency.
      */
-    function emergencyWithdraw() external  nonReentrant notPaused{
+    function emergencyWithdraw() external nonReentrant notPaused {
         UserInfo storage user = userInfo[msg.sender];
         uint256 amountToTransfer = user.amount;
         user.amount = 0;
@@ -220,9 +217,11 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     /*
      * @notice Stop rewards
      * @dev Only callable by owner. Needs to be for emergency.
+     * This breaks everything so is a closing farm!
+     * if you want to reduce tokens use modify from Vault
      */
-    function emergencyRewardWithdraw(uint256 _amount) external onlyOwner {
-        _sendTokens(_amount, address(msg.sender));
+    function closingFarm() external onlyOwner {
+        _sendTokens(psionicVault.balanceOf(address(this)), address(msg.sender));
     }
 
     /**

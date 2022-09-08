@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity =0.5.16;
+pragma solidity >=0.5.16;
 
 interface IZirconPair {
     event Approval(address indexed owner, address indexed spender, uint value);
@@ -51,7 +51,7 @@ interface IZirconPair {
     function mint(address to) external returns (uint liquidity);
     function burn(address to) external returns (uint amount0, uint amount1);
     function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
+//    function skim(address to) external;
     function sync() external;
 
     function tryLock() external;

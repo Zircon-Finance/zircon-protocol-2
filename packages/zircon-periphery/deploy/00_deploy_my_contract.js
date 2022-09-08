@@ -1,6 +1,7 @@
 const CORE_DEPLOYED = require('../external_contracts/core_contracts.json')
 const FARMING_DEPLOYED = require('../external_contracts/farming_contracts.json')
 const { ethers, waffle } = require('hardhat');
+const psionicFarmFactory = require('../core_contracts/abi/PsionicFarmFactory.json')
 
 module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
@@ -35,11 +36,11 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let pylonRouter = await deploy('ZirconPylonRouter', {
         from: deployer,
         libraries: {ZirconPeripheralLibrary: peripheralLibrary.address},
-        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"], wrappedInstance.address],
+        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"],coreContracts["ZirconPTFactory"]["address"], wrappedInstance.address],
         log: true
     });
 
-    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], farmingContracts["PsionicFarmFactory"]['bytecode'])
+    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
     const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
     await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
 };

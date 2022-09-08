@@ -307,12 +307,12 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     }
 
     // force balances to match reserves
-    function skim(address to)  external lock {
-        address _token0 = token0; // gas savings
-        address _token1 = token1; // gas savings
-        _safeTransfer(_token0, to, IUniswapV2ERC20(_token0).balanceOf(address(this)).sub(reserve0));
-        _safeTransfer(_token1, to, IUniswapV2ERC20(_token1).balanceOf(address(this)).sub(reserve1));
-    }
+//    function skim(address to)  external lock {
+//        address _token0 = token0; // gas savings
+//        address _token1 = token1; // gas savings
+//        _safeTransfer(_token0, to, IUniswapV2ERC20(_token0).balanceOf(address(this)).sub(reserve0));
+//        _safeTransfer(_token1, to, IUniswapV2ERC20(_token1).balanceOf(address(this)).sub(reserve1));
+//    }
 
     // force reserves to match balances
     function sync() external lock {
