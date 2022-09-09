@@ -5,7 +5,7 @@
       "chainId": "1287",
       "contracts": {
         "FeeToSetter": {
-          "address": "0x0160255c8cb510F20aE0920D8a6964eC8540cf70",
+          "address": "0xbCea98Df85045F2Fcf5310fE4237ca95C9C24622",
           "abi": [
             {
               "inputs": [],
@@ -311,7 +311,7 @@
           ]
         },
         "Migrator": {
-          "address": "0x6517069C0c404C11B24b03F3F9DDe99e0f24b4e6",
+          "address": "0x49675A06F3D243583ecDD55C7FAf26F9b4aD9200",
           "abi": [
             {
               "inputs": [],
@@ -896,7 +896,7 @@
           ]
         },
         "ZirconEnergyFactory": {
-          "address": "0x6F99e230588A9298e3E51b4375782245A1a5dbBA",
+          "address": "0xe2522E34d2eDAbEd507A8b975ae8d7bf4CBe40ff",
           "abi": [
             {
               "inputs": [
@@ -1486,7 +1486,7 @@
           ]
         },
         "ZirconFactory": {
-          "address": "0x9944e7fAE3a2E67879683432e000CD0F5E9ddd7b",
+          "address": "0xeEec0dEaC43918612319C24774923f04F8A6f284",
           "abi": [
             {
               "inputs": [
@@ -1838,7 +1838,7 @@
           ]
         },
         "ZirconPTFactory": {
-          "address": "0x17Bad2Ac1027F1ac3b563a506fCBD0C62c952a54",
+          "address": "0x3EbB4d256C123D9bBccabcfB4cBd0c89A569F867",
           "abi": [
             {
               "inputs": [
@@ -2049,7 +2049,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0xf2606d63431B44eaE3f81f9e7feE8E048d0f92f7",
+          "address": "0x19040fC4c40863F0af606e21E6d1CEef80958858",
           "abi": [
             {
               "inputs": [
@@ -2394,21 +2394,6 @@
             {
               "constant": true,
               "inputs": [],
-              "name": "liquidityFee",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "payable": false,
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "constant": true,
-              "inputs": [],
               "name": "maximumPercentageSync",
               "outputs": [
                 {
@@ -2536,21 +2521,6 @@
                 }
               ],
               "name": "setFees",
-              "outputs": [],
-              "payable": false,
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "constant": false,
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "_liquidityFee",
-                  "type": "uint256"
-                }
-              ],
-              "name": "setLiquidityFee",
               "outputs": [],
               "payable": false,
               "stateMutability": "nonpayable",
