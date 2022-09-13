@@ -83,7 +83,7 @@ module.exports = {
     },
     moonbase: {
       url: 'https://rpc.testnet.moonbeam.network',
-      accounts: [privateKey],
+      accounts: [privateKeyDev],
       chainId: 1287,
     },
     dev: {
@@ -92,11 +92,16 @@ module.exports = {
       network_id: '5777',
       chainId: 1281,
     },
+    moonriver: {
+      url: 'https://moonriver.public.blastapi.io',
+      accounts: [privateKey],
+      chainId: 1285,
+    },
   },
   solidity: {
     compilers: [
       {
-        version: '0.8.4',
+        version: '0.8.9',
         settings: {
           optimizer: {
             enabled: true,

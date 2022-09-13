@@ -40,7 +40,6 @@ function generateReal(accounts) {
                     hex2buf(abiCoder.encode(['uint256'], [Number(v.amount.toFixed(0))])),
                 ]) }, v);
         })
-        .slice(0, 100);
     const tree = new MerkleTree(leaves.map((l) => buf2hex(l.buf)), soliditySha3);
     const leavesWithProof = leaves.map((l) => {
         return {
@@ -52,9 +51,9 @@ function generateReal(accounts) {
     });
     const merkleRoot = tree.root;
     if (process.env.REAL === 'true') {
-        fs.writeFile('data/proofs.json', JSON.stringify({ merkleRoot, leaves: leavesWithProof }, null, 2), () => { });
+        fs.writeFile('data/proofs.json', JSON.stringify({ merkleRoot }, null, 2), () => { });
     }
-    return 'module.exports = ' + JSON.stringify({ merkleRoot, leavesWithProof }, null, 2);
+    return 'module.exports = ' + JSON.stringify({ merkleRoot }, null, 2);
 }
 
 module.exports = { generate, generateReal }

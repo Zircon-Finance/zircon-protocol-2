@@ -9,7 +9,9 @@
     "test": "hardhat test:finally",
     "test:real": "npm run pretest && REAL=true hardhat test:finally",
     "deploy:ropsten": "hardhat run --network ropsten launch/deploy.js",
-    "deploy:mainnet": "hardhat run --network mainnet launch/deploy.js"
+    "deploy:mainnet": "hardhat run --network mainnet launch/deploy.js",
+    "deploy:moonbase": "npx hardhat --network moonbase deploy --reset",
+    "deploy:moonriver": "npx hardhat --network moonriver deploy --reset"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
@@ -28,7 +30,7 @@
     "chai": "^4.3.0",
     "chai-as-promised": "^7.1.1",
     "ethers": "^5.0.32",
-    "hardhat": "^2.1.2",
+    "hardhat": "^2.6.8",
     "mocha": "^8.3.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3",

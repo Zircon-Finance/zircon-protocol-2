@@ -41,7 +41,7 @@ async function deploy() {
 
     let farmAddress = await masterInstance.callStatic.deployPool(
         "0x1826ea1a8967445d2F6Ea0C4374011aA3a427A61",
-        ["0xf09315342E6Fa7F602c5223A85534747dcbe3c17", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
+        ["0xD909178CC99d318e4D46e7E66a972955859670E1", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
         bNumber,
         bNumber + 10000,
         0,
@@ -50,7 +50,7 @@ async function deploy() {
 
     await masterInstance.deployPool(
         "0x1826ea1a8967445d2F6Ea0C4374011aA3a427A61",
-        ["0xf09315342E6Fa7F602c5223A85534747dcbe3c17", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
+        ["0xD909178CC99d318e4D46e7E66a972955859670E1", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
         bNumber,
         bNumber + 10000,
         0,
@@ -59,7 +59,7 @@ async function deploy() {
 
     await masterInstance.deployPool(
         "0x6430E849699AFd0F948A9156e31Ec4E0aEDA596a",
-        ["0xf09315342E6Fa7F602c5223A85534747dcbe3c17", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
+        ["0xD909178CC99d318e4D46e7E66a972955859670E1"],
         bNumber,
         bNumber + 10000,
         0,
@@ -68,29 +68,30 @@ async function deploy() {
 
     let farmAddress2 = await masterInstance.callStatic.deployPool(
         "0x6430E849699AFd0F948A9156e31Ec4E0aEDA596a",
-        ["0xf09315342E6Fa7F602c5223A85534747dcbe3c17", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
+        ["0xD909178CC99d318e4D46e7E66a972955859670E1"],
         bNumber,
         bNumber + 10000,
         0,
         0,
         "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
-    // await masterInstance.deployPool(
-    //     "0xC8D67ef36391ae8C08928ca5BFD6d8cF02C077B8",
-    //     ["0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
-    //     bNumber,
-    //     bNumber + 10000,
-    //     0,
-    //     0,
-    //     "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
 
-    // let farmAddress3 = await masterInstance.callStatic.deployPool(
-    //     "0x0d176f03892811101c1e38cda0E060c721928AFB",
-    //     ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
-    //     bNumber,
-    //     bNumber + 10000,
-    //     0,
-    //     0,
-    //     "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+    await masterInstance.deployPool(
+        "0x0996Ad15Ae0436384c920deD146c736934eD9850",
+        ["0x08B40414525687731C23F430CEBb424b332b3d35"],
+        bNumber,
+        bNumber + 10000,
+        0,
+        0,
+        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+
+    let farmAddress3 = await masterInstance.callStatic.deployPool(
+        "0x0996Ad15Ae0436384c920deD146c736934eD9850",
+        ["0x08B40414525687731C23F430CEBb424b332b3d35"],
+        bNumber,
+        bNumber + 10000,
+        0,
+        0,
+        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     // await masterInstance.deployPool(
     //     "0x0d176f03892811101c1e38cda0E060c721928AFB",
     //     ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
@@ -120,7 +121,7 @@ async function deploy() {
     // await zInstance.transferOwnership(masterInstance.address)
 
     // await zInstance.mint(masterInstance.address, 100)
-    console.log("1")
+    // console.log("1")
     // const farmingInstance = await ethers.getContractFactory('PsionicFarmInitializable');
     // let farm = farmingInstance.attach(farmAddress)
     // let farm2 = farmingInstance.attach(farmAddress2)
@@ -130,7 +131,7 @@ async function deploy() {
 
     console.log(farmAddress)
     console.log(farmAddress2)
-    // console.log(vaultAddress)
+    console.log(farmAddress3)
     // console.log(vaultAddress2)
     // console.log(farmAddress3)
     // console.log(farmAddress4)

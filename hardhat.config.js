@@ -28,8 +28,13 @@ module.exports = {
     hardhat: {},
     moonbase: {
       url: 'https://rpc.testnet.moonbeam.network',
-      accounts: [privateKey],
+      accounts: [privateKeyDev],
       chainId: 1287,
+    },
+    moonriver: {
+      url: 'https://moonriver.public.blastapi.io',
+      accounts: [privateKey],
+      chainId: 1285,
     },
     dev: {
       url: 'http://127.0.0.1:7545',

@@ -36,7 +36,8 @@
     "hardhat-watcher": "^2.1.1"
   },
   "scripts": {
-    "deploy": "npx hardhat --network moonbase deploy --reset",
+    "deploy:moonbase": "npx hardhat --network moonbase deploy --reset",
+    "deploy:moonriver": "npx hardhat --network moonriver deploy --reset",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "ctest": "npx hardhat compile && npm test",

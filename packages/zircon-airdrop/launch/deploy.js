@@ -30,7 +30,7 @@ async function deployAirdrop(creator,tokenAddress,merkleRoot,start_time, end_tim
     return airdrop;
 }
 
-// WARNING: only testnet 
+// WARNING: only testnet
 async function deployAirdropTest(creator,merkleRoot,start_time, end_time) {
     const GambAirdrop = await ethers.getContractFactory('Airdrop', creator);
     const TestTokenA = await ethers.getContractFactory('TestTokenA')
@@ -52,10 +52,10 @@ async function deployAirdropTest(creator,merkleRoot,start_time, end_time) {
 
 async function main() {
     const [deployer] = await ethers.getSigners();
-    
-    // // WARNING: only testnet 
+    console.log(deployer)
+    // // WARNING: only testnet
     const airdrop = await deployAirdropTest(deployer, merkleRoot, START_TIME, END_TIME);
-    
+
     // const airdrop = await deployAirdrop(deployer,YOUR_TOKEN_AIRDROP, merkleRoot, START_TIME, END_TIME);
 
     console.table({

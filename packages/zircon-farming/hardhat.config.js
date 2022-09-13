@@ -53,7 +53,7 @@ module.exports = {
     hardhat: {},
     moonbase: {
       url: 'https://rpc.testnet.moonbeam.network',
-      accounts: [privateKey],
+      accounts: [privateKeyDev],
       chainId: 1287,
     },
     dev: {
@@ -61,6 +61,11 @@ module.exports = {
       accounts: [privateKeyDev],
       network_id: '5777',
       chainId: 1281,
+    },
+    moonriver: {
+      url: 'https://moonriver.public.blastapi.io',
+      accounts: [privateKey],
+      chainId: 1285,
     },
   },
   solidity: {
