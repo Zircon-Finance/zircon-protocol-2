@@ -80,6 +80,12 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
         _unpause();
     }
 
+    // we're not bitcoin, you never know
+    function modifyMaxSupply(uint256 newMaxSupply) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(newMaxSupply > _maxSupply, "ERC20: max supply cannot be decreased");
+        _maxSupply = newMaxSupply;
+    }
+
     function mint(address to, uint256 amount) public onlyRole(MINTER_ROLE) {
         require(totalSupply() + amount <= _maxSupply, "ERC20: cannot mint more tokens, cap exceeded");
         _mint(to, amount);
