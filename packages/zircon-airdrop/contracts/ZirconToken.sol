@@ -22,7 +22,6 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
     uint256 private _maxSupply = 1000000000 * 10**decimals(); // 1 billion tokens is maximum supply
     uint256 private _initialSupply = 100000 * 10**decimals(); // 100,000 tokens is the initial supply
 
-    address private _trustedForwarder;
 
     // Control support for EIP-2771 Meta Transactions
     bool public metaTxnsEnabled = false;
@@ -31,22 +30,22 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
     event MetaTxnsEnabled(address indexed caller);
     event MetaTxnsDisabled(address indexed caller);
 
-    constructor(address trustedForwarder) ERC20("Zircon Gamma Token", "ZRG") ERC20Permit("Zircon Gamma Token") {
+    constructor() ERC20("Zircon Gamma Token", "ZRG") ERC20Permit("Zircon Gamma Token") {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(PAUSER_ROLE, msg.sender);
         _setupRole(MINTER_ROLE, msg.sender);
         _setupRole(RESCUER_ROLE, msg.sender);
 
-        _trustedForwarder = trustedForwarder;
+//        _trustedForwarder = trustedForwarder;
 
         _mint(msg.sender, _initialSupply);
     }
 
-    function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
-        return forwarder == _trustedForwarder;
-    }
+//    function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
+//        return forwarder == _trustedForwarder;
+//    }
 
-//    function msg.sender internal view override returns (address sender) {
+//    function msgsender() internal view override returns (address sender) {
 //        if (isTrustedForwarder(msg.sender)) {
 //            // The assembly code is more direct than the Solidity version using `abi.decode`.
 //            assembly {
@@ -70,6 +69,10 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
      */
     function maxSupply() public view returns (uint256) {
         return _maxSupply;
+    }
+
+    function modifyMaxSupply() public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _maxSupply = _maxSupply.add(1000000000 * 10**decimals());
     }
 
     function pause() public onlyRole(PAUSER_ROLE) {

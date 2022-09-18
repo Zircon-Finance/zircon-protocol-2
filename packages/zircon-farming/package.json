@@ -29,7 +29,8 @@
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",
-    "testScript": "npx hardhat run --network moonbase scripts/deploy-script.js"
+    "deployPools:moonbase": "npx hardhat run --network moonbase scripts/deploy-script.js",
+    "deployPools:moonriver": "npx hardhat run --network moonriver scripts/deploy-script.js"
   },
   "files": [
     "artifacts",

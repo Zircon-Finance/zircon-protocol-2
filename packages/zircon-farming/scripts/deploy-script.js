@@ -37,61 +37,61 @@ async function deploy() {
 
     const bNumber = await ethers.provider.getBlockNumber()
     const farming = await ethers.getContractFactory('PsionicFarmFactory');
-    const masterInstance = farming.attach("0x931dEA8C13472452c77065B6eB087E87A16a1BFe")
+    const masterInstance = farming.attach("0x97b2aE105DAFb7DC8a73c93e5f56d3f095D0DCF3")
 
     let farmAddress = await masterInstance.callStatic.deployPool(
-        "0x1826ea1a8967445d2F6Ea0C4374011aA3a427A61",
-        ["0xD909178CC99d318e4D46e7E66a972955859670E1", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
+        "0xa22451B59d48eB0Ab6A7350A68c2Ceb542FceEd8",
+        ["0x98878B06940aE243284CA214f92Bb71a2b032B8A", "0x3516a7588C2E6FFA66C9507eF51853eb85d76e5B"],
         bNumber,
         bNumber + 10000,
         0,
         0,
-        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+        "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
 
     await masterInstance.deployPool(
-        "0x1826ea1a8967445d2F6Ea0C4374011aA3a427A61",
-        ["0xD909178CC99d318e4D46e7E66a972955859670E1", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29"],
+        "0xa22451B59d48eB0Ab6A7350A68c2Ceb542FceEd8",
+        ["0x98878B06940aE243284CA214f92Bb71a2b032B8A", "0x3516a7588C2E6FFA66C9507eF51853eb85d76e5B"],
         bNumber,
         bNumber + 10000,
         0,
         0,
-        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+        "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
 
-    await masterInstance.deployPool(
-        "0x6430E849699AFd0F948A9156e31Ec4E0aEDA596a",
-        ["0xD909178CC99d318e4D46e7E66a972955859670E1"],
-        bNumber,
-        bNumber + 10000,
-        0,
-        0,
-        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
-
-    let farmAddress2 = await masterInstance.callStatic.deployPool(
-        "0x6430E849699AFd0F948A9156e31Ec4E0aEDA596a",
-        ["0xD909178CC99d318e4D46e7E66a972955859670E1"],
-        bNumber,
-        bNumber + 10000,
-        0,
-        0,
-        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
-
-    await masterInstance.deployPool(
-        "0x0996Ad15Ae0436384c920deD146c736934eD9850",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35"],
-        bNumber,
-        bNumber + 10000,
-        0,
-        0,
-        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
-
-    let farmAddress3 = await masterInstance.callStatic.deployPool(
-        "0x0996Ad15Ae0436384c920deD146c736934eD9850",
-        ["0x08B40414525687731C23F430CEBb424b332b3d35"],
-        bNumber,
-        bNumber + 10000,
-        0,
-        0,
-        "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+    // await masterInstance.deployPool(
+    //     "0x6430E849699AFd0F948A9156e31Ec4E0aEDA596a",
+    //     ["0xD909178CC99d318e4D46e7E66a972955859670E1"],
+    //     bNumber,
+    //     bNumber + 10000,
+    //     0,
+    //     0,
+    //     "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+    //
+    // let farmAddress2 = await masterInstance.callStatic.deployPool(
+    //     "0x6430E849699AFd0F948A9156e31Ec4E0aEDA596a",
+    //     ["0xD909178CC99d318e4D46e7E66a972955859670E1"],
+    //     bNumber,
+    //     bNumber + 10000,
+    //     0,
+    //     0,
+    //     "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+    //
+    // await masterInstance.deployPool(
+    //     "0x0996Ad15Ae0436384c920deD146c736934eD9850",
+    //     ["0x08B40414525687731C23F430CEBb424b332b3d35"],
+    //     bNumber,
+    //     bNumber + 10000,
+    //     0,
+    //     0,
+    //     "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
+    //
+    // let farmAddress3 = await masterInstance.callStatic.deployPool(
+    //     "0x0996Ad15Ae0436384c920deD146c736934eD9850",
+    //     ["0x08B40414525687731C23F430CEBb424b332b3d35"],
+    //     bNumber,
+    //     bNumber + 10000,
+    //     0,
+    //     0,
+    //     "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161")
     // await masterInstance.deployPool(
     //     "0x0d176f03892811101c1e38cda0E060c721928AFB",
     //     ["0x1FC56B105c4F0A1a8038c2b429932B122f6B631f", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5"],
@@ -130,8 +130,8 @@ async function deploy() {
     // const vaultAddress2 = await farm2.psionicVault()
 
     console.log(farmAddress)
-    console.log(farmAddress2)
-    console.log(farmAddress3)
+    // console.log(farmAddress2)
+    // console.log(farmAddress3)
     // console.log(vaultAddress2)
     // console.log(farmAddress3)
     // console.log(farmAddress4)
