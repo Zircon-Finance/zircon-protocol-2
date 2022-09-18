@@ -5,7 +5,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/libraries/Token.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/libraries/Token.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,7 +35,8 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;
   }
 }</component>
   <component name="RunManager">
@@ -100,6 +103,9 @@
       <workItem from="1658240232254" duration="35624000" />
       <workItem from="1660559056053" duration="70741000" />
       <workItem from="1661889265368" duration="11776000" />
+      <workItem from="1662400283220" duration="1576000" />
+      <workItem from="1663009201634" duration="8726000" />
+      <workItem from="1663363040392" duration="25585000" />
     </task>
     <servers />
   </component>
