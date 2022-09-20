@@ -12,7 +12,7 @@ import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****
@@ -543,9 +543,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         //Reduce by amount that actually was minted into the pair
 
-
         //Calculates pylon pool tokens and amount it considers to have entered pool (slippage adjusted)
-        uint _amountOut = calculateLiquidity(amountAsyncToMint);
+        uint _amountOut = calculateLiquidity(amountAsyncToMint, _isAnchor);
 
         if(_isAnchor) {
             //uint _reservePylon = _reserve; //stack too deep shit
@@ -610,16 +609,22 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         }
 
+
+
         (uint newGamma, uint reserveToSwitch) = _update();
 
         if(!isAnchor) {
             //we calculate new derived vfb. All minting operations should be done, which means we can just calculate it
             //this is possible since we derive everything for float from anchor data
+            //we apply some extra slippage to account for some edge cases where this doesn't do it on its own.
+            uint slippagePercentage = amountOut.mul(1e18)/amountIn;
             (uint _pairTranslated0,) = getPairReservesTranslated(0, 0);
             (uint112 _reserveSync0,) = getSyncReserves();
 
             uint newDerVfb = _reserveSync0.add(_pairTranslated0.mul(2 * newGamma)/1e18);
-            liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb).sub(1e18) )/1e18; //one overflow check sufficient
+            //new var for stack too deep
+            uint _liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb).sub(1e18) )/1e18; //one overflow check sufficient
+            liquidity = _liquidity.mul(slippagePercentage)/1e18;
 
         }
 
@@ -638,6 +643,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // We care about amassing Anchor assets, holding pool tokens isn't ideal.
     function payFees(uint amountIn, uint feeBps, bool isAnchor) private returns (uint amountOut){
         uint fee = amountIn * feeBps/10000;
+        if(fee == 0) {
+            return(amountIn);
+        }
         // TODO: This should never go above the balance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
@@ -646,7 +654,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
 
             uint amountInWithFee = fee.mul(10000-IZirconFactory(pairFactoryAddress).liquidityFee());
-            uint amountSwapped = amountInWithFee.mul(_reservePair1) / _reservePair0.mul(10000).add(amountInWithFee);
+            uint amountSwapped = amountInWithFee.mul(_reservePair1) / (_reservePair0.mul(10000).add(amountInWithFee));
 
 //            uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, );
             IZirconPair(pairAddress).swap(isFloatReserve0 ? 0 : amountSwapped, isFloatReserve0 ? amountSwapped : 0, energyAddress, "");
@@ -719,7 +727,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
     //only required for anchors now
-    function calculateLiquidity(uint amountIn) view private returns (uint amount) {
+    function calculateLiquidity(uint amountIn, bool isAnchor) view private returns (uint amount) {
         //Divides amountIn into two slippage-adjusted halves
         (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
 
@@ -729,13 +737,15 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
         uint amountInWithFee = amountIn.mul(10000-(IZirconFactory(pairFactoryAddress).liquidityFee()/2 + 1))/10000;
         //Add the amountIn to one of the reserves
-        uint sqrtKPrime = true ? //TODO: Simplify this after we're sure we don't need it for floats
+        uint sqrtKPrime = isAnchor ?
         Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
         : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
 
         uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
 
-        amount = _reservePair1.mul(2 * liqPercentage)/1e18;
+        amount = isAnchor
+                 ? _reservePair1.mul(2 * liqPercentage)/1e18
+                 : _reservePair0.mul(2 * liqPercentage)/1e18;
 
 //        //Calculates pylon pool tokens by taking the minimum of between each amount*2
 //        (liquidity, amount) = getLiquidityFromPoolTokens(

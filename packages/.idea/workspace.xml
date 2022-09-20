@@ -2,15 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/zircon-token/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zircon-token/deploy/00_deploy_my_contract.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zircon-token/hardhat.config.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zircon-token/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-airdrop/contracts/ZirconToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-airdrop/contracts/ZirconToken.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-farming/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-token/ZirconGammaToken.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-token/contracts/ZirconGammaToken.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +103,7 @@
       <workItem from="1661889265368" duration="11776000" />
       <workItem from="1662400283220" duration="1576000" />
       <workItem from="1663009201634" duration="8726000" />
-      <workItem from="1663363040392" duration="25878000" />
+      <workItem from="1663363040392" duration="37742000" />
     </task>
     <servers />
   </component>
