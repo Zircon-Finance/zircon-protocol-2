@@ -30,6 +30,7 @@
     "mocha": "*"
   },
   "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^3.1.0",
     "@openzeppelin/contracts": "2.5.0",
     "@uniswap/lib": "^4.0.1-alpha",
     "@uniswap/v2-core": "^1.0.1",
@@ -46,6 +47,6 @@
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",
     "bytecode": "npx hardhat run scripts/get-bytecodes.js",
-    "testScript": "npx hardhat run --network moonbase scripts/add-pair.js"
+    "testScript": "npx hardhat run --network moonbase scripts/migrate.js"
   }
 }

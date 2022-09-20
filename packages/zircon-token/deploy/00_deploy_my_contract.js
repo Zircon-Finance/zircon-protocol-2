@@ -1,7 +1,4 @@
-const CORE_DEPLOYED = require('../external_contracts/core_contracts.json')
-const FARMING_DEPLOYED = require('../external_contracts/farming_contracts.json')
 const { ethers, waffle } = require('hardhat');
-const psionicFarmFactory = require('../core_contracts/abi/PsionicFarmFactory.json')
 
 
 const WETH_ADDRESS = {
@@ -11,8 +8,8 @@ const WETH_ADDRESS = {
 
 module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
-    let coreContracts = CORE_DEPLOYED[chainId][0].contracts
-    let farmingContracts = FARMING_DEPLOYED[chainId][0].contracts
+    // let coreContracts = CORE_DEPLOYED[chainId][0].contracts
+    // let farmingContracts = FARMING_DEPLOYED[chainId][0].contracts
 
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
@@ -24,9 +21,9 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     // });
 
     /// Deploy Factory
-    let multicall = await deploy('Multicall', {
+    let gamma = await deploy('ZirconGammaToken', {
         from: deployer,
-        args: [],
+        args: ["0x0000000000000000000000000000000000000000"],
         log: true
     });
 

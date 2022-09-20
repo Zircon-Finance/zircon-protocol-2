@@ -4,7 +4,7 @@ import '../interfaces/IZirconPTFactory.sol';
 import '../interfaces/IZirconFactory.sol';
 import '../interfaces/IZirconPylon.sol';
 import '../energy/interfaces/IZirconEnergyFactory.sol';
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 // this contract serves as feeToSetter, allowing owner to manage fees in the context of a specific feeTo implementation
 

@@ -5,7 +5,7 @@
       "chainId": "1285",
       "contracts": {
         "Migrator": {
-          "address": "0x3413B287b0B75D9111Ebcc220d624E84AA5c00e8",
+          "address": "0x9AEF9098af9d1E2d78FCd9B928C946a7f23307d3",
           "abi": [
             {
               "inputs": [],
@@ -301,7 +301,7 @@
           ]
         },
         "FeeToSetter": {
-          "address": "0xa1428f71616254E9c2E80946bb0C0F1948E808Db",
+          "address": "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce",
           "abi": [
             {
               "inputs": [],
@@ -607,7 +607,7 @@
           ]
         },
         "ZirconEnergyFactory": {
-          "address": "0x1F580724b4b2a95c00b144fB2eBeCd41a15eBA74",
+          "address": "0x168C95536C77Be5400EED2AEEE21ef64D9c8CA2E",
           "abi": [
             {
               "inputs": [
@@ -1197,7 +1197,7 @@
           ]
         },
         "ZirconPTFactory": {
-          "address": "0xBC67EB3617d3Bc07ACfB282DE32495baA49531df",
+          "address": "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54",
           "abi": [
             {
               "inputs": [
@@ -1408,7 +1408,7 @@
           ]
         },
         "ZirconFactory": {
-          "address": "0x98340c9a7AA3A32A5780c726f7A61fd3828d1775",
+          "address": "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd",
           "abi": [
             {
               "inputs": [
@@ -1760,7 +1760,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0xDe75D76c7471FF2f5363433222412F6cDAC0eF1c",
+          "address": "0x1153550210Bbef5b74890b242F37Ae24E1F41440",
           "abi": [
             {
               "inputs": [
@@ -3204,7 +3204,7 @@
           ]
         },
         "ZirconEnergyFactory": {
-          "address": "0xe2522E34d2eDAbEd507A8b975ae8d7bf4CBe40ff",
+          "address": "0x625ad88bb31E7119E963F2C718C9419c23Cd6F10",
           "abi": [
             {
               "inputs": [
@@ -4357,7 +4357,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0x19040fC4c40863F0af606e21E6d1CEef80958858",
+          "address": "0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89",
           "abi": [
             {
               "inputs": [

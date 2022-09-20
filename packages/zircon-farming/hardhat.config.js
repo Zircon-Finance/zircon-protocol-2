@@ -6,6 +6,7 @@ require('solidity-docgen');
 require('hardhat-deploy');
 require('hardhat-abi-exporter');
 require("hardhat-gas-reporter");
+require("@nomiclabs/hardhat-etherscan");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -19,6 +20,7 @@ require("hardhat-gas-reporter");
 
 const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
+const moonriverAPI = process.env.API_KEY;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -48,6 +50,21 @@ module.exports = {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
     },
+  },
+  etherscan: {
+    apiKey: {
+      moonriver: moonriverAPI
+    },
+    customChains: [
+      {
+        network: "moonriver",
+        chainId: 1285,
+        urls: {
+          apiURL: "https://api-moonriver.moonscan.io/api",
+          browserURL: "https://moonriver.moonscan.io/"
+        }
+      }
+    ]
   },
   networks: {
     hardhat: {},

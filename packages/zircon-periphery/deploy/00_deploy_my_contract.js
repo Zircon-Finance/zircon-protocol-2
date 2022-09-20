@@ -24,37 +24,37 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     // });
 
     /// Deploy Factory
-    let multicall = await deploy('Multicall', {
+    // let multicall = await deploy('Multicall', {
+    //     from: deployer,
+    //     args: [],
+    //     log: true
+    // });
+
+
+ let router = await deploy('ZirconRouter', {
         from: deployer,
-        args: [],
+        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"], WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 
 
- // let router = await deploy('ZirconRouter', {
- //        from: deployer,
- //        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"], WETH_ADDRESS[chainId.toString()]],
- //        log: true
- //    });
- //
- //
- //    /// Deploy Peripheral Lib
- //    let peripheralLibrary = await deploy('ZirconPeripheralLibrary', {
- //        from: deployer,
- //        args: null,
- //        log: true
- //    });
- //
- //    /// Deploy Pylon Router
- //    let pylonRouter = await deploy('ZirconPylonRouter', {
- //        from: deployer,
- //        libraries: {ZirconPeripheralLibrary: peripheralLibrary.address},
- //        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"],coreContracts["ZirconPTFactory"]["address"], WETH_ADDRESS[chainId.toString()]],
- //        log: true
- //    });
- //
- //    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
- //    const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
- //    await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
+    /// Deploy Peripheral Lib
+    let peripheralLibrary = await deploy('ZirconPeripheralLibrary', {
+        from: deployer,
+        args: null,
+        log: true
+    });
+
+    /// Deploy Pylon Router
+    let pylonRouter = await deploy('ZirconPylonRouter', {
+        from: deployer,
+        libraries: {ZirconPeripheralLibrary: peripheralLibrary.address},
+        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"],coreContracts["ZirconPTFactory"]["address"], WETH_ADDRESS[chainId.toString()]],
+        log: true
+    });
+
+    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
+    const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
+    await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
 };
 module.exports.tags = ['ZirconPeripheral'];

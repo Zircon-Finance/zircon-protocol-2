@@ -4,6 +4,7 @@ require('hardhat-contract-sizer');
 require("hardhat-dependency-compiler");
 require('solidity-docgen');
 require('hardhat-deploy');
+require("@nomiclabs/hardhat-etherscan");
 require('hardhat-abi-exporter');
 const { ethers } = require('ethers');
 const { generate, generateReal } = require('./src/generate');
@@ -39,6 +40,7 @@ task("test:finally", "Test after data prepared")
 
 const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
+const moonriverAPI = process.env.API_KEY;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -69,6 +71,21 @@ module.exports = {
       default: 0, // here this will by default take the first account as deployer
     },
   },
+  etherscan: {
+    apiKey: {
+      moonriver: moonriverAPI
+    },
+    customChains: [
+      {
+        network: "moonriver",
+        chainId: 1285,
+        urls: {
+          apiURL: "https://api-moonriver.moonscan.io/api",
+          browserURL: "https://moonriver.moonscan.io/"
+        }
+      }
+    ]
+  },
   networks: {
     hardhat: {
       /* if using ganache + truffle, to handle self-generated accounts,
@@ -81,6 +98,7 @@ module.exports = {
         }
       })
     },
+
     moonbase: {
       url: 'https://rpc.testnet.moonbeam.network',
       accounts: [privateKeyDev],

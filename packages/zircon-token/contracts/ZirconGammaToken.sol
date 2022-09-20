@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
-contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
+contract ZirconGammaToken is ERC20, ERC20Permit, Pausable, AccessControl {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
@@ -20,7 +20,7 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
 
 
     uint256 private _maxSupply = 1000000000 * 10**decimals(); // 1 billion tokens is maximum supply
-    uint256 private _initialSupply = 100000 * 10**decimals(); // 100,000 tokens is the initial supply
+    uint256 private _initialSupply = 25000000 * 10**decimals(); // 100,000 tokens is the initial supply
 
     address private _trustedForwarder;
 
@@ -39,11 +39,15 @@ contract ZirconToken is ERC20, ERC20Permit, Pausable, AccessControl {
 
         _trustedForwarder = trustedForwarder;
 
-        _mint(_msgSender(), _initialSupply);
+        _mint(0x5026cf4f0d1Cd0028b5F6C91efc53e09Eb190519, _initialSupply); // Multig SIG Bootstrap share
     }
 
     function isTrustedForwarder(address forwarder) public view virtual returns (bool) {
         return forwarder == _trustedForwarder;
+    }
+
+    function setTrustedForwarder(address forwarder) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _trustedForwarder = forwarder;
     }
 
     function _msgSender() internal view override returns (address sender) {

@@ -6,6 +6,8 @@ require('solidity-docgen');
 require('hardhat-deploy');
 require('hardhat-abi-exporter');
 require("hardhat-gas-reporter");
+require("@nomiclabs/hardhat-etherscan");
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 // task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -18,6 +20,7 @@ require("hardhat-gas-reporter");
 
 const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
+const moonriverAPI = process.env.API_KEY;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -40,6 +43,21 @@ module.exports = {
   //     '@zircon/periphery/contracts/WETH.sol',
   //   ],
   // },
+  etherscan: {
+    apiKey: {
+      moonriver: moonriverAPI
+    },
+    customChains: [
+      {
+        network: "moonriver",
+        chainId: 1285,
+        urls: {
+          apiURL: "https://api-moonriver.moonscan.io/api",
+          browserURL: "https://moonriver.moonscan.io/"
+        }
+      }
+    ]
+  },
   abiExporter: {
     path: '../zircon-periphery/core_contracts/abi',
     runOnCompile: true,
@@ -51,7 +69,7 @@ module.exports = {
   networks: {
     hardhat: {},
     moonbase: {
-      url: 'https://rpc.testnet.moonbeam.network',
+      url: 'https://moonbase-alpha.blastapi.io/02c84726-5104-4c91-9697-0ac7efe2b0f6',
       accounts: [privateKeyDev],
       chainId: 1287,
     },
