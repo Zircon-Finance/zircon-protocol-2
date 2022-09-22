@@ -68,7 +68,8 @@ library ZirconLibrary {
         uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
         uint vabFactor = sqrtKFactor < oldKFactor ? oldKFactor - sqrtKFactor : oldKFactor + sqrtKFactor;
 
-        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(vabFactor));
+        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e18)/adjustedVab;
+        amountThresholdMultiplier = amountThresholdMultiplier * 1e18 / vabFactor;
 
         //console.log("atm", amountThresholdMultiplier);
 
@@ -94,14 +95,21 @@ library ZirconLibrary {
             //We're splitting anchor amount to halves in anchor and float tokens that are thrown in reserves.
             //It's important that we pass down slippage adjusted values
 
-            uint initialK = isLineFormula
-                                ? _reserveTranslated0.mul(_reserveTranslated1)
-                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)).mul((_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2));
+            //splitting to avoid overflow chance
+            uint initialHalfK = isLineFormula
+                                ? _reserveTranslated0
+                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1));
+
+            uint initialTailK = isLineFormula
+                                ? _reserveTranslated1
+                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2);
 
             uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
 
 
-            uint kPrime = (_reserveTranslated0 + (_amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + _amount/2);
+            //divide by halfK to start working through 1e18s
+            uint kPrime = (_reserveTranslated0 + (_amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + _amount/2)
+                            / initialHalfK;
 
 
 
@@ -109,7 +117,7 @@ library ZirconLibrary {
             //This has the effect of keeping the line formula still, moving the switchover point.
             //Without this, anchor liquidity additions would change value of the float side
             //Lots of overflow potential, so we split calculations
-            anchorKFactor = kPrime.mul(initialVab)/initialK;
+            anchorKFactor = kPrime.mul(initialVab)/initialTailK;
             anchorKFactor = anchorKFactor.mul(oldKFactor)/(adjustedVab + _amount);
 
             //in principle this should never happen when adding liquidity, but better safe than sorry
@@ -141,7 +149,9 @@ library ZirconLibrary {
                 uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
 
                 uint vabFactor = sqrtKFactor < oldKFactor ? oldKFactor - sqrtKFactor : oldKFactor + sqrtKFactor;
-                uint amountThresholdMultiplier = _reserveTranslated1.mul(1e36)/(adjustedVab.mul(vabFactor));
+                uint amountThresholdMultiplier = _reserveTranslated1.mul(1e18)/(adjustedVab);
+
+                amountThresholdMultiplier = (amountThresholdMultiplier * 1e18)/vabFactor;
 
                 //if we're burning we only care about the threshold liquidity amount
                 factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
