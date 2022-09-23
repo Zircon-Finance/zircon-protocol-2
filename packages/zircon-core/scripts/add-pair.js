@@ -24,18 +24,18 @@ async function addPair() {
     // let peripheralLibrary = await (await ethers.getContractFactory('ZirconPeripheralLibrary')).attach("")
     // deploy tokens
     let factory = await ethers.getContractFactory('ZirconFactory');
-    let factoryInstance = await factory.attach("0xC325D108cb7270c55dde8668Bd34997C10739847");
+    let factoryInstance = await factory.attach("0xeEec0dEaC43918612319C24774923f04F8A6f284");
 
     // let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
     // let factoryEnergyInstance = await factoryEnergy.deploy();
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
-    let factoryPylonInstance = await factoryPylon.attach("0x5ff31403A412e982Bd1eE870ca1c98490FfAc894");
+    let factoryPylonInstance = await factoryPylon.attach("0xd38cA30Fb56a9f0c1B447A8A588d9E355Ba8DDbA");
 
     // Deploy Tokens
     let tok0 = await ethers.getContractFactory('Token');
-    let tk0 = await tok0.attach("0x53bF3fA280d8fa915F503f182fE602cd310EB39D");
+    let tk0 = await tok0.attach("0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85");
     let tok1 = await ethers.getContractFactory('Token');
-    let tk1 = await tok1.attach("0xf5dd274285dC9243187b7a201239531e75fEAaa4");
+    let tk1 = await tok1.attach("0xe75F9ae61926FF1d27d16403C938b4cd15c756d5");
 
     //await factoryInstance.createPair(tk0.address, tk1.address);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
@@ -56,7 +56,7 @@ async function addPair() {
     // let pRouterInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, wethInstance.address)
 }
 
-eaTest()
+addPair()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

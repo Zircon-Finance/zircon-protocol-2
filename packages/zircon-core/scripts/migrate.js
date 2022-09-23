@@ -1,16 +1,17 @@
-const FEE_TO_SETTER_ADDRESS = "0xbCea98Df85045F2Fcf5310fE4237ca95C9C24622";
-const MIGRATOR_ADDRESS = "0x49675A06F3D243583ecDD55C7FAf26F9b4aD9200";
-const ENERGY_FACTORY = "0xe2522E34d2eDAbEd507A8b975ae8d7bf4CBe40ff";
-const PYLON_FACTORY = "0x19040fC4c40863F0af606e21E6d1CEef80958858";
-const FACTORY = "0xeEec0dEaC43918612319C24774923f04F8A6f284";
-const PT_FACTORY = "0x3EbB4d256C123D9bBccabcfB4cBd0c89A569F867";
+const FEE_TO_SETTER_ADDRESS = "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce";
+const MIGRATOR_ADDRESS = "0x9AEF9098af9d1E2d78FCd9B928C946a7f23307d3";
+const ENERGY_FACTORY = "0x168C95536C77Be5400EED2AEEE21ef64D9c8CA2E";
+const PYLON_FACTORY = "0x1153550210Bbef5b74890b242F37Ae24E1F41440";
+const FACTORY = "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd";
+const PT_FACTORY = "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54";
 
-const PAIRS = [
-    {
-        token0: "0x37822de108AFFdd5cDCFDaAa2E32756Da284DB85",
-        token1: "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5",
-    },
-]
+
+const checkPylon = async () => {
+    let factoryEnergy = await ethers.getContractFactory('ZirconPTFactory');
+    let factoryInstance = factoryEnergy.attach(PT_FACTORY);
+    let pt = await factoryInstance.getPoolToken("0x5587F7eEE3bc874d4c236315D9E6fdbd1F981A00", "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5")
+    console.log("pt", pt)
+}
 
 const migration = async (pylonAddress, newPylonFactory, pairAddress, token0, token1, energyFactAddress, energyRev, migrator, energyInstance) => {
 
@@ -48,21 +49,38 @@ const migration = async (pylonAddress, newPylonFactory, pairAddress, token0, tok
 const migratePylon2 = async () => {
     // MIGRATOR
     let migratorContract = await ethers.getContractFactory("Migrator")
-    let migrator = migratorContract.attach(MIGRATOR_ADDRESS)
-
-    // Updating Factory with new addresses
-    await migrator.updateFactories(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
-
-
-    // OLD ENERGY
+    let migrator = migratorContract.attach("0x49675A06F3D243583ecDD55C7FAf26F9b4aD9200")
+    let migrator2 = migratorContract.attach("0x0F604e7205d7D27b86de410c74330c77afFa4226")
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
     let energyInstance = factoryEnergy.attach(ENERGY_FACTORY);
+    let ayuda = await energyInstance.migrator()
+    console.log("ayuda", ayuda)
 
-    var fs = require('fs');
-    var obj = JSON.parse(fs.readFileSync('myjsonfile.json', 'utf8'));
-    for (var i = obj.length-9; i >= 0; i--) {
-        await migration(obj[i].pylonAddress, obj[i].newPylonFactory, obj[i].pairAddress, obj[i].token0, obj[i].token1, obj[i].energyFactAddress, obj[i].energyRev, migrator, energyInstance)
-    }
+    // 0x49675A06F3D243583ecDD55C7FAf26F9b4aD9200 ENERGY_FACTORY ->
+    // 0x0F604e7205d7D27b86de410c74330c77afFa4226 "0x162a6d7EB51E000ebcc8Af76e4255C2dABfFE760"
+    // 0x0F604e7205d7D27b86de410c74330c77afFa4226 FACTORY
+    // 0x0F604e7205d7D27b86de410c74330c77afFa4226 "0x6eC3bE502A4465321E643e1b5A6184FCD393a319"
+    // 0x0F604e7205d7D27b86de410c74330c77afFa4226 PT_FACTORY
+    // 0x0F604e7205d7D27b86de410c74330c77afFa4226 "0xEc5f493D3ca6F156d0cF5DbdABfBE16411D669FF"
+
+    // "0x6eC3bE502A4465321E643e1b5A6184FCD393a319"
+    // "0xEc5f493D3ca6F156d0cF5DbdABfBE16411D669FF"
+    await migrator.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
+    // // MIGRATOR
+    await migrator.setMigrator(migrator2.address)
+    // Updating Factory with new addresses
+    // await migrator2.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
+
+}
+
+
+const addingPylon = async () => {
+    // MIGRATOR
+    let pylonFactory = await ethers.getContractFactory("ZirconPylonFactory")
+
+    // Updating Factory with new addresses
+    // await migrator2.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
+
 }
 
 const migratePylon = async () => {
@@ -73,7 +91,7 @@ const migratePylon = async () => {
 
 
     // Updating Factory with new addresses
-    await migrator.updateFactories(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
+    await migrator.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
 
     // OLD ENERGY
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
@@ -81,7 +99,7 @@ const migratePylon = async () => {
     // NEW ENERGY 0x625ad88bb31E7119E963F2C718C9419c23Cd6F10
     // NEW PYLON FACTORY 0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89
     // NEW ENERGY
-    let energyInstance2 = factoryEnergy.attach("0x625ad88bb31E7119E963F2C718C9419c23Cd6F10")//await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS, MIGRATOR_ADDRESS);
+    let energyInstance2 = factoryEnergy.attach("0xaD42184437c8558087b2B096aCbA3184F7279F7E")//await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS, MIGRATOR_ADDRESS);
     console.log("NEW ENERGY", energyInstance2.address)
     await energyInstance2.deployed();
 
@@ -99,14 +117,14 @@ const migratePylon = async () => {
     // NEW PYLON FACTORY
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
 
-    let newFactoryPylonInstance = factoryPylon.attach("0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89")
+    let newFactoryPylonInstance = factoryPylon.attach("0xbd8899A46622E381Be2Efb270FC984fa863d9d50")
 
-        // await factoryPylon.deploy(
-        // FACTORY,
-        // energyInstance2.address,
-        // PT_FACTORY,
-        // FEE_TO_SETTER_ADDRESS,
-        // MIGRATOR_ADDRESS);
+    // await factoryPylon.deploy(
+    // FACTORY,
+    // energyInstance2.address,
+    // PT_FACTORY,
+    // FEE_TO_SETTER_ADDRESS,
+    // MIGRATOR_ADDRESS);
     // await newFactoryPylonInstance.deployed();
 
     console.log("NEW PYLON FACTORY", newFactoryPylonInstance.address)
@@ -117,108 +135,65 @@ const migratePylon = async () => {
         // console.log("Migrating...", pylonAddress, newFactoryPylonInstance.address, pair.address, token0, token1, energyFactAddress, energyRev)
         // return {pylonAddress, newPylonFactory: newFactoryPylonInstance.address, pairAddress: pair.address, token0, token1, energyFactAddress, energyRev}
         let oldEnergyRev = await pair.energyRevenueAddress()
-        await migrator.startNewPylon(pylonAddress, newFactoryPylonInstance.address, pair.address, token0, token1)
+        let checkAdd = await newFactoryPylonInstance.getPylon(token0, token1)
+        if (checkAdd === "0x0000000000000000000000000000000000000000") {
+            await migrator.startNewPylon(pylonAddress, newFactoryPylonInstance.address, pair.address, token0, token1)
 
-        let newPylonAddress;
-        while (true) {
-            newPylonAddress = await newFactoryPylonInstance.getPylon(token0, token1)
-            if (newPylonAddress !== "0x0000000000000000000000000000000000000000") {
-                break
-            }else{
-                await new Promise(r => setTimeout(r, 1000));
+            let newPylonAddress;
+            while (true) {
+                newPylonAddress = await newFactoryPylonInstance.getPylon(token0, token1)
+                if (newPylonAddress !== "0x0000000000000000000000000000000000000000") {
+                    break
+                } else {
+                    await new Promise(r => setTimeout(r, 1000));
+                }
             }
+            console.log("newPylonAddress", newPylonAddress)
+
+            // Migrating energy revenue
+            await migrator.migrateEnergyRevenue(pair.address, oldEnergyRev, token0, token1, newFactoryPylonInstance.address, energyInstance2.address)
+            console.log("migrateEnergyRevenue")
+
+            // Getting new energy
+            let energyAddress = await energyInstance.getEnergy(token0, token1)
+            console.log("energyAddress")
+
+            // Updating energy
+            await migrator.updateEnergyOnPylon(energyAddress, await pair.energyRevenueAddress(), newPylonAddress, pair.address, token0, token1, newFactoryPylonInstance.address)
+            console.log("finish migrations")
         }
-        console.log("newPylonAddress", newPylonAddress)
-
-        // Migrating energy revenue
-        await migrator.migrateEnergyRevenue(pair.address, oldEnergyRev, token0, token1, newFactoryPylonInstance.address, energyInstance2.address)
-        console.log("migrateEnergyRevenue")
-
-        // Getting new energy
-        let energyAddress = await energyInstance.getEnergy(token0, token1)
-        console.log("energyAddress")
-
-        // Updating energy
-        await migrator.updateEnergyOnPylon(energyAddress, await pair.energyRevenueAddress(), newPylonAddress, pair.address, token0, token1, newFactoryPylonInstance.address)
-        console.log("finish migrations")
     }
+
+
 
     let pairsToMigrate = []
-    for (let i = 18; i < allPairs; i++) {
-        let pairAddress = await zFactory.allPairs(i)
-        let pairContract = await ethers.getContractFactory("ZirconPair")
-        let pair = pairContract.attach(pairAddress)
+    // for (let i = 0; i < allPairs; i++) {
+    let pairAddress = await zFactory.getPair("0x3516a7588C2E6FFA66C9507eF51853eb85d76e5B", "0x98878B06940aE243284CA214f92Bb71a2b032B8A") //await zFactory.allPairs(i)
+    let pairContract = await ethers.getContractFactory("ZirconPair")
+    let pair = pairContract.attach(pairAddress)
 
-        let token0 = await pair.token0()
-        let token1 = await pair.token1()
-        let pylonAddress = await pylonInstance.getPylon(token0, token1)
-        let pylonAddress2 = await pylonInstance.getPylon(token1, token0)
-        if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
-            console.log("Migrating pair", i)
-            pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
-        }
-        if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
-            console.log("Migrating pair 2", i)
-            pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
-        }
+    let token0 = await pair.token0()
+    let token1 = await pair.token1()
+    let pylonAddress = await pylonInstance.getPylon(token0, token1)
+    let pylonAddress2 = await pylonInstance.getPylon(token1, token0)
+    if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
+        console.log("Migrating pair", token0, token1, pylonAddress)
+        pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
     }
+    if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
+        console.log("Migrating pair 2", token0, token1, pylonAddress2)
+        pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
+    }
+// }
 
-    var fs = require('fs');
-    fs.writeFile('myjsonfile.json', JSON.stringify(pairsToMigrate), 'utf8', ()=>{});
+// var fs = require('fs');
+// fs.writeFile('myjsonfile.json', JSON.stringify(pairsToMigrate), 'utf8', ()=>{});
 
-    // Updating Factory with new addresses
-    // await migrator.updateFactories(energyInstance2.address, PT_FACTORY, PYLON_FACTORY, FACTORY)
+// Updating Factory with new addresses
+// await migrator.updateFactories(energyInstance2.address, PT_FACTORY, newFactoryPylonInstance.address, FACTORY)
 }
 
-const main = async () => {
-    // FACTORY
-    let zFacatoryContract = await ethers.getContractFactory("ZirconFactory")
-    let zFactory = zFacatoryContract.attach(FACTORY)
 
-    // Getting all the pairs
-    let allPairs = await zFactory.allPairsLength()
-
-    // Checking if pylon exist
-    let pylonFactory = await ethers.getContractFactory("ZirconPylonFactory")
-    let pylonInstance = pylonFactory.attach(PYLON_FACTORY)
-
-    for (let i = 0; i < allPairs; i++) {
-        let pairAddress = await zFactory.allPairs(i)
-        let pairContract = await ethers.getContractFactory("ZirconPair")
-        let pair = pairContract.attach(pairAddress)
-        let token0 = await pair.token0()
-        let token1 = await pair.token1()
-
-        let pylonAddress = await pylonInstance.getPylon(await pair.token0(), await pair.token1())
-        let pylonAddress2 = await pylonInstance.getPylon(await pair.token1(), await pair.token0())
-        if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
-            console.log("Migrating pair", i)
-            //await migratePylon()
-            // FACTORY
-            let ptFactory = await ethers.getContractFactory("ZirconPTFactory")
-            let ptInstance = ptFactory.attach(PT_FACTORY)
-
-            let anchorAddress = await ptInstance.getPoolToken(pylonAddress, token1); // IZirconPylon(oldPylon).anchorPoolTokenAddress();
-            let floatAddress = await ptInstance.getPoolToken(pylonAddress, token0); //IZirconPylon(oldPylon).floatPoolTokenAddress();
-            console.log("anchorAddress", anchorAddress)
-            console.log("floatAddress", floatAddress)
-
-            // let pylon = IZirconPylonFactory(newPylonFactory).addPylonCustomPT(_pairAddress, _tokenA, _tokenB, floatAddress, anchorAddress);
-            // let energy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB); //IZirconPylon(pylon).energyAddress();
-            //
-            // let gamma = IZirconPylon(oldPylon).gammaMulDecimals();
-            // let vab = IZirconPylon(oldPylon).virtualAnchorBalance();
-            // let akf = IZirconPylon(oldPylon).anchorKFactor();
-            // let fs = IZirconPylon(oldPylon).formulaSwitch();
-
-        }
-        if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
-            console.log("Migrating pair 2", i)
-            //await migratePylon()
-        }
-        await new Promise(r => setTimeout(r, 1000));
-    }
-}
 
 migratePylon()
     .then(() => process.exit(0))
