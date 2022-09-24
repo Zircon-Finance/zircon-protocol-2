@@ -81,13 +81,11 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon) {
-//       console.log("pylonFor", tokenA, tokenB);
-//       console.log("pylonFor", pair, pylonFactory);
         pylon = address(uint(keccak256(abi.encodePacked(
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'ace75e8cf11d1b796a5e2c8eb8bfc0918303678784b6fdab5f655189266299ea' // init code hash
+        hex'484eb00f9f8451acfbbd5f734211298661ebb41289479d51fb8b4db60b0060d1' // init code hash
         ))));
     }
 

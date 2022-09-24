@@ -1,6 +1,7 @@
 const { ethers } = require('hardhat');
 
 // Get Bytecodes
+
 async function getBytecodes() {
 
     let pairContract = await ethers.getContractFactory("ZirconPair");

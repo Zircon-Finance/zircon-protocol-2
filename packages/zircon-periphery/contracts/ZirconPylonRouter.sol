@@ -9,7 +9,7 @@ import "@zircon/core/contracts/interfaces/IZirconPoolToken.sol";
 import "@zircon/core/contracts/interfaces/IZirconPTFactory.sol";
 import "./libraries/ZirconPeripheralLibrary.sol";
 import "./libraries/UniswapV2Library.sol";
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import "@uniswap/lib/contracts/libraries/TransferHelper.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 
@@ -133,9 +133,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         // Initialize Pylon & Pair
         address tokenA = isAnchor ? WETH : token;
         address tokenB = isAnchor ? token : WETH;
-        console.log("initializing...");
         (, address pylon) = _initializePylon(tokenA, tokenB);
-        console.log("deinitializing...");
 
 
     amountA = isAnchor ? msg.value : amountDesiredToken;

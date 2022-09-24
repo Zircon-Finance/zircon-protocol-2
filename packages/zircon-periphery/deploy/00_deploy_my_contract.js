@@ -33,7 +33,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
 
  let router = await deploy('ZirconRouter', {
         from: deployer,
-        args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x9505eE7cc8c9479d1d771F6Ae0f7a750908Ef005", WETH_ADDRESS[chainId.toString()]],
+        args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548", WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 
@@ -51,7 +51,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let pylonRouter = await deploy('ZirconPylonRouter', {
         from: deployer,
         libraries: {ZirconPeripheralLibrary: peripheralLibrary.address},
-        args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd","0x9505eE7cc8c9479d1d771F6Ae0f7a750908Ef005","0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", WETH_ADDRESS[chainId.toString()]],
+        args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd","0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548","0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 

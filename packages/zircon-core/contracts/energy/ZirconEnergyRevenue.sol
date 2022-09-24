@@ -4,7 +4,7 @@ import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 
 contract ZirconEnergyRevenue is ReentrancyGuard  {

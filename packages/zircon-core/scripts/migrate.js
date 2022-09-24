@@ -1,5 +1,5 @@
 const FEE_TO_SETTER_ADDRESS = "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce";
-const MIGRATOR_ADDRESS = "0xd59b742283F8018f6414c8DF4eE2627999b764F3";
+const MIGRATOR_ADDRESS = "0x6B722a4835055BE4DEcFb28646D5C2D9dFE43eFd";
 const ENERGY_FACTORY = "0x168C95536C77Be5400EED2AEEE21ef64D9c8CA2E";
 const PYLON_FACTORY = "0x1153550210Bbef5b74890b242F37Ae24E1F41440";
 const FACTORY = "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd";
@@ -100,7 +100,7 @@ const migratePylon = async () => {
     // NEW ENERGY 0x625ad88bb31E7119E963F2C718C9419c23Cd6F10
     // NEW PYLON FACTORY 0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89
     // NEW ENERGY
-    let energyInstance2 = factoryEnergy.attach("0x6Ac364E604B84c69e8CACa9eDD127B8b8E03AF7a")//await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS, MIGRATOR_ADDRESS);
+    let energyInstance2 = factoryEnergy.attach("0x49e15A5ea67FD7ebe70EB539a51abf1919282De8")//await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS, MIGRATOR_ADDRESS);
     console.log("NEW ENERGY", energyInstance2.address)
     // await energyInstance2.deployed();
 
@@ -113,12 +113,12 @@ const migratePylon = async () => {
     let zFactory = zFacatoryContract.attach(FACTORY)
 
     // Getting all the pairs
-    let allPairs = await zFactory.allPairsLength()
+    let allPairsLength = await zFactory.allPairsLength()
 
     // NEW PYLON FACTORY
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
 
-    let newFactoryPylonInstance = factoryPylon.attach("0xfE931Bf51d7767507C9611D7ABfa2747219A8D9F")
+    let newFactoryPylonInstance = factoryPylon.attach("0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548")
 
     // await factoryPylon.deploy(
     // FACTORY,
@@ -137,8 +137,8 @@ const migratePylon = async () => {
         // return {pylonAddress, newPylonFactory: newFactoryPylonInstance.address, pairAddress: pair.address, token0, token1, energyFactAddress, energyRev}
         let oldEnergyRev = await pair.energyRevenueAddress()
         let checkAdd = await newFactoryPylonInstance.getPylon(token0, token1)
-        if (checkAdd !== "0x0000000000000000000000000000000000000000") {
-            // await migrator.startNewPylon(pylonAddress, newFactoryPylonInstance.address, pair.address, token0, token1)
+        if (checkAdd === "0x0000000000000000000000000000000000000000") {
+            await migrator.migrate(newFactoryPylonInstance.address, energyInstance2.address, token0, token1);
 
             let newPylonAddress;
             while (true) {
@@ -149,22 +149,7 @@ const migratePylon = async () => {
                     await new Promise(r => setTimeout(r, 1000));
                 }
             }
-            let energyRev = await energyInstance.getEnergyRevenue(token0, token1)
-            // let zPylon = await ethers.getContractFactory("ZirconPylon")
-            // let newPylon = await zPylon.attach(newPylonAddress)
-            console.log("energyRev::", energyRev)
-
-            // Migrating energy revenue
-            await migrator.migrateEnergyRevenue(pair.address, oldEnergyRev, token0, token1, newFactoryPylonInstance.address, energyInstance2.address)
-            console.log("migrateEnergyRevenue")
-
-            // Getting new energy
-            let energyAddress = await energyInstance.getEnergy(token0, token1)
-            console.log("energyAddress")
-
-            // Updating energy
-            await migrator.updateEnergyOnPylon(energyAddress, await pair.energyRevenueAddress(), newPylonAddress, pair.address, token0, token1, newFactoryPylonInstance.address)
-            console.log("finish migrations")
+            console.log("Migrated::::New Pylon address", newPylonAddress)
         }else{
             console.log("Already migrated")
         }
@@ -172,10 +157,10 @@ const migratePylon = async () => {
 
 
 
-    let pairs = [ "0x6fc9651f45B262AE6338a701D563Ab118B1eC0Ce"]//, "0x2d28AA28fA1E5e6bF121CF688309Bf3faAAe3C70"]
+    // let pairs = [ "0x2d28AA28fA1E5e6bF121CF688309Bf3faAAe3C70", "0x900f1Ec5819FA087d368877cD03B265Bf1802667"]//, "0x2d28AA28fA1E5e6bF121CF688309Bf3faAAe3C70"]
     let pairsToMigrate = []
-    for (let i = 0; i < pairs.length; i++) {
-        let pairAddress = await zFactory.getPair(pairs[i], "0x98878B06940aE243284CA214f92Bb71a2b032B8A") //await zFactory.allPairs(i)
+    for (let i = 0; i < allPairsLength; i++) {
+        let pairAddress = await zFactory.allPairs(i)
         let pairContract = await ethers.getContractFactory("ZirconPair")
         let pair = pairContract.attach(pairAddress)
         console.log("pair", pair.address)

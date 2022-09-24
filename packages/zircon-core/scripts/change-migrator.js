@@ -8,10 +8,14 @@ const PT_FACTORY = "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54";
 async function migrateMigrator() {
     // Deploy Pylon Router
     let migratorFactory = await ethers.getContractFactory('Migrator');
-    let newMigrator = migratorFactory.attach("0xd59b742283F8018f6414c8DF4eE2627999b764F3")
-    await newMigrator.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
+    // let oldMigrator = migratorFactory.attach("0xd59b742283F8018f6414c8DF4eE2627999b764F3")
 
+    let newMigrator = migratorFactory.attach("0x6B722a4835055BE4DEcFb28646D5C2D9dFE43eFd")
+    // await newMigrator.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
     await newMigrator.changeEnergyFactoryAddress(ENERGY_FACTORY)
+
+    // await oldMigrator.setMigrator(newMigrator.address)
+
 
 }
 
