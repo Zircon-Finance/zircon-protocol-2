@@ -153,18 +153,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
 
-    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, uint pairReserveTR0, uint ) private view returns (uint amountInAdjusted){
-        (uint _pairReserveTR0, uint _pairReserveTR1) = getPairReservesTranslated(0,0);
-        (uint112 _reserve0, uint112 _reserve1) = getSyncReserves(); // gas savings
-
-        if (shouldMintAnchor) {
-            amountInAdjusted = Math.min((amountIn0.mul(_pairReserveTR1).mul(2))/_pairReserveTR0, amountIn1.mul(2)); //Adjust AmountIn0 to its value in Anchor tokens
-            //liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, ptTotalSupply, _pairReserveTR1, _reserve1, gammaMulDecimals, virtualAnchorBalance);
-        }else{
-            amountInAdjusted = Math.min((amountIn1.mul(_pairReserveTR0).mul(2))/_pairReserveTR1, amountIn0.mul(2)); //Adjust AmountIn1 to its value in Float tokens
-            //liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, ptTotalSupply, _pairReserveTR0, _reserve0, gammaMulDecimals, virtualAnchorBalance);
-        }
-    }
+//    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, uint pairReserveTR0, uint ) private view returns (uint amountInAdjusted){
+//        (uint _pairReserveTR0, uint _pairReserveTR1) = getPairReservesTranslated(0,0);
+////        (, uint112 _reserve1) = getSyncReserves(); // gas savings
+//
+//        if (shouldMintAnchor) {
+//            amountInAdjusted = Math.min((amountIn0.mul(_pairReserveTR1).mul(2))/_pairReserveTR0, amountIn1.mul(2)); //Adjust AmountIn0 to its value in Anchor tokens
+//            //liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, ptTotalSupply, _pairReserveTR1, _reserve1, gammaMulDecimals, virtualAnchorBalance);
+//        }else{
+//            amountInAdjusted = Math.min((amountIn1.mul(_pairReserveTR0).mul(2))/_pairReserveTR1, amountIn0.mul(2)); //Adjust AmountIn1 to its value in Float tokens
+//            //liquidity = ZirconLibrary.calculatePTU(shouldMintAnchor, amountInAdjusted, ptTotalSupply, _pairReserveTR0, _reserve0, gammaMulDecimals, virtualAnchorBalance);
+//        }
+//    }
 
     // ***** INIT ******
     // @notice Called once by the factory at time of deployment
@@ -611,7 +611,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
 
 
-        (uint newGamma, uint reserveToSwitch) = _update();
+        (uint newGamma, ) = _update();
 
         if(!isAnchor) {
             //we calculate new derived vfb. All minting operations should be done, which means we can just calculate it

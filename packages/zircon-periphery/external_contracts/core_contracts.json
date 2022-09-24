@@ -5,7 +5,7 @@
       "chainId": "1285",
       "contracts": {
         "ZirconEnergyFactory": {
-          "address": "0xaD42184437c8558087b2B096aCbA3184F7279F7E",
+          "address": "0x6Ac364E604B84c69e8CACa9eDD127B8b8E03AF7a",
           "abi": [
             {
               "inputs": [
@@ -595,7 +595,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0xbd8899A46622E381Be2Efb270FC984fa863d9d50",
+          "address": "0xfE931Bf51d7767507C9611D7ABfa2747219A8D9F",
           "abi": [
             {
               "inputs": [

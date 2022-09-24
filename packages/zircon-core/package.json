@@ -48,6 +48,10 @@
     "ctest": "npx hardhat compile && npm test",
     "bytecode": "npx hardhat run scripts/get-bytecodes.js",
     "migrate:moonbase": "npx hardhat run --network moonbase scripts/migrate.js",
-    "migrate:moonriver": "npx hardhat run --network moonriver scripts/migrate.js"
+    "migrate:moonriver": "npx hardhat run --network moonriver scripts/migrate.js",
+    "pause:moonriver": "npx hardhat run --network moonriver scripts/pause.js",
+    "pause:moonbase": "npx hardhat run --network moonbase scripts/pause.js",
+    "changeMigrator:moonriver": "npx hardhat run --network moonriver scripts/change-migrator.js",
+    "changeMigrator:moonbase": "npx hardhat run --network moonbase scripts/change-migrator.js"
   }
 }
