@@ -943,24 +943,30 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 uint _reserveTranslated0 = pairReserveTranslated0;
                 uint _reserveTranslated1 = pairReserveTranslated1;
 
-                uint feeValuePercentageAnchor = (rootKTranslated.sub(lastRootKTranslated)).mul(muMulDecimals) / (lastRootKTranslated);
 
-                if(feeValuePercentageAnchor != 0) {
-                    feeToAnchor = 2*pairReserveTranslated1.mul(feeValuePercentageAnchor)/1e18;
 
-                    uint adjustedVab = virtualAnchorBalance.sub(pylonReserve1);
+                if(rootKTranslated > lastRootKTranslated) {
+                    uint feeValuePercentageAnchor = (rootKTranslated - lastRootKTranslated).mul(muMulDecimals) / lastRootKTranslated;
+                    //fees might be tiny and get canceled due to mu
 
-                    //we calculate anchor factor here by treating fees as an addition of liquidity
-                    //however since the current k already includes this addition, we need to pass it down adjusted reserve values
-                    //we also only consider the part of fees going into the pool
+                    if(feeValuePercentageAnchor > 0) {
+                        feeToAnchor = 2*pairReserveTranslated1.mul(feeValuePercentageAnchor)/1e18;
 
-                    anchorKFactor = ZirconLibrary.calculateAnchorFactor(
-                        formulaSwitch,
-                        feeToAnchor.mul(adjustedVab) / virtualAnchorBalance,
-                        anchorKFactor,
-                        virtualAnchorBalance.sub(pylonReserve1),
-                        _reserveTranslated0.mul(1e18 - feeValuePercentageAnchor) / 1e18,
-                        _reserveTranslated1.mul(1e18 - feeValuePercentageAnchor) / 1e18);
+                        uint adjustedVab = virtualAnchorBalance.sub(pylonReserve1);
+
+                        //we calculate anchor factor here by treating fees as an addition of liquidity
+                        //however since the current k already includes this addition, we need to pass it down adjusted reserve values
+                        //we also only consider the part of fees going into the pool
+
+                        anchorKFactor = ZirconLibrary.calculateAnchorFactor(
+                            formulaSwitch,
+                            feeToAnchor.mul(adjustedVab) / virtualAnchorBalance,
+                            anchorKFactor,
+                            virtualAnchorBalance.sub(pylonReserve1),
+                            _reserveTranslated0.mul(1e18 - feeValuePercentageAnchor) / 1e18,
+                            _reserveTranslated1.mul(1e18 - feeValuePercentageAnchor) / 1e18);
+                    }
+
                 }
 
             }
