@@ -339,8 +339,8 @@ contract ZirconPylonRouter is IZirconPylonRouter {
              address _token = token;
              bool _isAnchor = isAnchor;
 
-         address pylon = _getPylon(_isAnchor ? WETH : _token, _isAnchor ?  _token : WETH);
-            TransferHelper.safeTransferFrom(_isAnchor ? _token : WETH, msg.sender, pylon, _isAnchor ? amountB : amountA);
+            address pylon = _getPylon(_isAnchor ? WETH : _token, _isAnchor ?  _token : WETH);
+            TransferHelper.safeTransferFrom(_token, msg.sender, pylon, _isAnchor ? amountB : amountA);
             IWETH(WETH).deposit{value: _isAnchor ? amountA : amountB}();
             assert(IWETH(WETH).transfer(pylon, _isAnchor ? amountA : amountB));
             liquidity = IZirconPylon(pylon).mintAsync(to, shouldReceiveAnchor);

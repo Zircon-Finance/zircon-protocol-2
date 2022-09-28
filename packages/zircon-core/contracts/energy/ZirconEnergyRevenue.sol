@@ -116,7 +116,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         _safeTransfer(zircon.floatToken, newEnergy, floatBalance);
     }
 
-
+    // Balances From Pair
     function getBalanceFromPair() external _initialize returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         if(msg.sender == zircon.pylon0) {
@@ -128,6 +128,11 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             feeValue1 = 0;
         }
     }
+
+
+
+
+
 
     function getFees(address _token, uint _amount, address _to) external {
         require(msg.sender == energyFactory, "ZER: Not properly called");

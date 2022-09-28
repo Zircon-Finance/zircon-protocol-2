@@ -83,6 +83,7 @@ module.exports = {
       url: 'https://moonriver.public.blastapi.io',
       accounts: [privateKey],
       chainId: 1285,
+      blockGasLimit: 100000000429720 // whatever you want here
     },
   },
   solidity: {

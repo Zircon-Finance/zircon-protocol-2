@@ -16,6 +16,8 @@ contract Migrator {
     address public ptFactory;
     address public pylonFactory;
     address public pairFactory;
+    event log(address a, address b);
+
     modifier onlyOwner {
         require(msg.sender == owner, 'ZPT: FORBIDDEN');
         _;
@@ -55,14 +57,16 @@ contract Migrator {
         // Obtaining old addresses from the old factories
         address pair = IZirconFactory(pairFactory).getPair(_tokenA, _tokenB);
         address oldPylon = IZirconPylonFactory(pylonFactory).getPylon(_tokenA, _tokenB);
-
+        emit log(pair, oldPylon);
         // Obtaining old PT addresses from the pt factory
         address anchorAddress = IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenB);
         address floatAddress = IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenA);
+        emit log(anchorAddress, floatAddress);
 
         // Obtaining Old Energies Address
         address oldEnergyRev = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
         address oldEnergy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB);
+        emit log(oldEnergyRev, oldEnergy);
 
         // Migrating Factory to new Energy Factory
         IZirconFactory(pairFactory).changeEnergyFactoryAddress(newEnergyFactory);

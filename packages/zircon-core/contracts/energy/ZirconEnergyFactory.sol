@@ -21,6 +21,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         uint112 maxPylonFee;
     }
     Fee private fee;
+    event CREATE_ENERGY(address a, address b, address c, address d);
 
     event EnergyCreated(address indexed pair, address indexed energy, address tokenA, address tokenB, uint);
 
@@ -76,24 +77,22 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
-        hex'f7f47583f133c1e04059755d96b165532bef2114faae8e068f21ffd8fe846bd0' // init code hash
+        hex'db790b35d21b538081ccf0c02da0ae1d9ce9fd592e3c67350e3dba5199ca37c3' // init code hash
         ))));
     }
 
     function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon) {
-//       console.log("pylonFor", tokenA, tokenB);
-//       console.log("pylonFor", pair, pylonFactory);
         pylon = address(uint(keccak256(abi.encodePacked(
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'fae1f1b4ee3269f58fd5fa5fed780e8bce73cdeba0349534f56b7214b6c42315' // init code hash
+        hex'b151c7d70ffa90abb006545e19beb173ca34e31d32fa9a565619dbd91c8229e5' // init code hash
         ))));
     }
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
-        require(_pair != address(0), 'ZE: ZERO_ADDRESS');
+        require(_pair != address(0), 'ZE: ZERO_ADDRESS0');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
         require(getEnergyRevenue[token0][token1] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(ZirconEnergyRevenue).creationCode;
@@ -118,8 +117,9 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
 
     function createEnergy(address _pylon, address _pair, address _tokenA, address _tokenB) external returns (address energy) {
+        emit CREATE_ENERGY(_pylon, _pair, _tokenA, _tokenB);
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
-        require(_pylon != address(0) && _pair != address(0), 'ZE: ZERO_ADDRESS');
+        require(_pylon != address(0) && _pair != address(0), 'ZE: ZERO_ADDRESS1');
         require(getEnergy[_tokenA][_tokenB] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(ZirconEnergy).creationCode;
         require(bytecode.length != 0, "Create2: bytecode length is zero");
@@ -135,7 +135,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function migrateEnergyLiquidity(address pair, address token, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS2');
         address energy = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 address(this),
@@ -146,12 +146,12 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS3');
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
     }
 
     function migrateEnergyRevenueFees(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS4');
 
         uint feeValue0 = IZirconEnergyRevenue(oldEnergy).feeValue0();
         uint feeValue1 = IZirconEnergyRevenue(oldEnergy).feeValue1();
@@ -160,7 +160,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function migrateEnergy(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS5');
 
         IZirconEnergy(oldEnergy).migrateLiquidity(newEnergy);
     }

@@ -54,6 +54,8 @@
     "changeMigrator:moonriver": "npx hardhat run --network moonriver scripts/change-migrator.js",
     "changeMigrator:moonbase": "npx hardhat run --network moonbase scripts/change-migrator.js",
     "check:moonriver": "npx hardhat run --network moonriver scripts/help.js",
-    "check:moonbase": "npx hardhat run --network moonbase scripts/help.js"
+    "check:moonbase": "npx hardhat run --network moonbase scripts/help.js",
+    "fees:moonbase": "npx hardhat run --network moonbase scripts/change-fees.js",
+    "fees:moonriver": "npx hardhat run --network moonriver scripts/change-fees.js"
   }
 }

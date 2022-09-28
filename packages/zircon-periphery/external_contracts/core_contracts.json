@@ -5,7 +5,7 @@
       "chainId": "1285",
       "contracts": {
         "ZirconEnergyFactory": {
-          "address": "0x49e15A5ea67FD7ebe70EB539a51abf1919282De8",
+          "address": "0xB7adc6C137c6cCE6a6a20c76AE29984eaa224bEd",
           "abi": [
             {
               "inputs": [
@@ -23,6 +23,37 @@
               "payable": false,
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "a",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "b",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "c",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "d",
+                  "type": "address"
+                }
+              ],
+              "name": "CREATE_ENERGY",
+              "type": "event"
             },
             {
               "anonymous": false,
@@ -595,7 +626,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548",
+          "address": "0x76652a802B48BC7a6e2a77CdA93AF4B90a7E99B0",
           "abi": [
             {
               "inputs": [

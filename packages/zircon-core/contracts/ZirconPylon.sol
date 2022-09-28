@@ -808,9 +808,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         sync();
         address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
 
-
-
-
         (uint112 _reserve0, uint112 _reserve1) = getSyncReserves(); // gas savings
         uint amountIn0;
         uint amountIn1;

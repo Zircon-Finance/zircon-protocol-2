@@ -1,7 +1,7 @@
 const FEE_TO_SETTER_ADDRESS = "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce";
-const MIGRATOR_ADDRESS = "0x6B722a4835055BE4DEcFb28646D5C2D9dFE43eFd";
-const ENERGY_FACTORY = "0x168C95536C77Be5400EED2AEEE21ef64D9c8CA2E";
-const PYLON_FACTORY = "0x1153550210Bbef5b74890b242F37Ae24E1F41440";
+const MIGRATOR_ADDRESS = "0x7276DCC889c92234B0d2D2562DD9fD0E94d24248";
+const ENERGY_FACTORY = "0x49e15A5ea67FD7ebe70EB539a51abf1919282De8";
+const PYLON_FACTORY = "0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548";
 const FACTORY = "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd";
 const PT_FACTORY = "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54";
 
@@ -92,7 +92,7 @@ const migratePylon = async () => {
 
 
     // Updating Factory with new addresses
-    await migrator.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
+    // await migrator.initialize(ENERGY_FACTORY, PT_FACTORY, PYLON_FACTORY, FACTORY)
 
     // OLD ENERGY
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
@@ -100,8 +100,9 @@ const migratePylon = async () => {
     // NEW ENERGY 0x625ad88bb31E7119E963F2C718C9419c23Cd6F10
     // NEW PYLON FACTORY 0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89
     // NEW ENERGY
-    let energyInstance2 = factoryEnergy.attach("0x49e15A5ea67FD7ebe70EB539a51abf1919282De8")//await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS, MIGRATOR_ADDRESS);
+    let energyInstance2 = factoryEnergy.attach("0xB7adc6C137c6cCE6a6a20c76AE29984eaa224bEd")//await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS, MIGRATOR_ADDRESS);
     console.log("NEW ENERGY", energyInstance2.address)
+    //
     // await energyInstance2.deployed();
 
     // OLD PYLON FACTORY
@@ -117,8 +118,8 @@ const migratePylon = async () => {
 
     // NEW PYLON FACTORY
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
-
-    let newFactoryPylonInstance = factoryPylon.attach("0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548")
+    //
+    let newFactoryPylonInstance = factoryPylon.attach("0x76652a802B48BC7a6e2a77CdA93AF4B90a7E99B0")
 
     // await factoryPylon.deploy(
     // FACTORY,

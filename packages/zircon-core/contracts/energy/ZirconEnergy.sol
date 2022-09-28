@@ -16,7 +16,6 @@ contract ZirconEnergy is IZirconEnergy {
   Zircon Energy is the protocol-wide accumulator of revenue.
   Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
 */
-
   using SafeMath for uint112;
   using SafeMath for uint256;
 
