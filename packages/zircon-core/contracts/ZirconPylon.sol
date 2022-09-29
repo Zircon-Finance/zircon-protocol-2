@@ -513,34 +513,24 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint freeSpace = 0;
 
         //uint ptTotalSupply  =  IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).totalSupply();
-
         if (max > _reserve) {
             //Calculates how much liquidity sync pool can accept
             freeSpace = max - _reserve;
             //If amountIn is less than freeSpace, this liquidity is thrown into sync pool only, for future matching.
-
             if(freeSpace > 0) {
-            //if (_amountIn <= freeSpace) {
-
-//                liquidity = ZirconLibrary.calculatePTU(_isAnchor, Math.min(freeSpace, _amountIn),
-//                    ptTotalSupply,
-//                    _pairReserveTranslated, _reserve, gammaMulDecimals, virtualAnchorBalance);
-
-
                 if(_amountIn <= freeSpace) {
                     _syncMinting(maxP);
                     return (_amountIn);
                 } else {
                     amountOut += freeSpace;
                 }
-
             }
         }
+        require(_amountIn < freeSpace, "ZT: B");
 
         //Now we do the Async part
         //already guaranteed less than amountIn
         uint amountAsyncToMint = _amountIn - freeSpace;
-
         //Reduce by amount that actually was minted into the pair
 
         //Calculates pylon pool tokens and amount it considers to have entered pool (slippage adjusted)

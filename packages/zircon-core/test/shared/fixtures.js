@@ -69,8 +69,8 @@ exports.coreFixtures = async function coreFixtures(address) {
     let poolTokenInstance1 = poolToken2.attach(poolAddress1);
     console.log("hello", poolTokenInstance0.address, poolTokenInstance1.address)
 
-    await feeToSetterInstance.setFeePercentageEnergy(0)
-    await feeToSetterInstance.setFeePercentageRev(0)
+    // await feeToSetterInstance.setFeePercentageEnergy(20)
+    // await feeToSetterInstance.setFeePercentageRev(20)
 
     return {
         factoryInstance,

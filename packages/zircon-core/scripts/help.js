@@ -4,16 +4,19 @@
 
 async function check() {
     // Deploy Pylon Router
-    // let pylonFactory = await ethers.getContractFactory('ZirconEnergyFactory');
-    // let ft1 = pylonFactory.attach("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd")
+    let pylonFactory = await ethers.getContractFactory('ZirconEnergyFactory');
+    let ft1 = pylonFactory.attach("0x49e15A5ea67FD7ebe70EB539a51abf1919282De8")
     // let ft2 = pylonFactory.attach("0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54")
-    // console.log("ft1", await ft1.migrator(), await ft2.migrator())
+    let energyRev = await ft1.getEnergyRevenue("0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878b06940ae243284ca214f92bb71a2b032b8a")
+    let energy = await ft1.getEnergy("0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878b06940ae243284ca214f92bb71a2b032b8a")
+    console.log("ft1", energy, energyRev)
 
+    // address oldEnergyRev = IZirconEnergyFactory(energyFactory).getEnergyRevenue(_tokenA, _tokenB);
+    // address oldEnergy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB);
 
-
-    let migrator = await ethers.getContractFactory('Migrator');
-    let migratorInstance = migrator.attach("0x6B722a4835055BE4DEcFb28646D5C2D9dFE43eFd")
-    console.log("ft1",await migratorInstance.energyFactory(), await migratorInstance.ptFactory(),  await migratorInstance.pylonFactory(), await migratorInstance.pairFactory())
+    // let migrator = await ethers.getContractFactory('Migrator');
+    // let migratorInstance = migrator.attach("0x6B722a4835055BE4DEcFb28646D5C2D9dFE43eFd")
+    // console.log("ft1",await migratorInstance.energyFactory(), await migratorInstance.ptFactory(),  await migratorInstance.pylonFactory(), await migratorInstance.pairFactory())
 
     // let vab = await ft.virtualAnchorBalance()
     // let fs = await ft.formulaSwitch()

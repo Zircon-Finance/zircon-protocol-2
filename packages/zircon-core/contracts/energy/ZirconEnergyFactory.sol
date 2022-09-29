@@ -38,6 +38,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         insurancePerMille = 100;
         feePercentageRev = 20;
+        feePercentageEnergy = 20;
         feeToSetter = _feeToSetter;
         migrator = _migrator;
     }
@@ -77,7 +78,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
-        hex'db790b35d21b538081ccf0c02da0ae1d9ce9fd592e3c67350e3dba5199ca37c3' // init code hash
+        hex'84094a8c499a452daa59ae770b1346985ed66efe9fd5b2ccad3b954df90b037b' // init code hash
         ))));
     }
 
@@ -86,7 +87,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'b151c7d70ffa90abb006545e19beb173ca34e31d32fa9a565619dbd91c8229e5' // init code hash
+        hex'256931b0fcc273c3d9b4d19392144c0cc20ea445722bf40ceee19374201fb8c6' // init code hash
         ))));
     }
 
