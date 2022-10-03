@@ -38,6 +38,22 @@ contract Migrator {
         pairFactory = pairFactory_;
     }
 
+    function setPylonMigrator(address migrator_) public onlyOwner {
+        IZirconPylonFactory(pylonFactory).setMigrator(migrator_);
+    }
+
+    function setEnergyMigrator(address migrator_) public onlyOwner {
+        IZirconEnergyFactory(energyFactory).setMigrator(migrator_);
+    }
+
+    function setFactoryMigrator(address migrator_) public onlyOwner {
+        IZirconFactory(pairFactory).setMigrator(migrator_);
+    }
+
+    function setPTMigrator(address migrator_) public onlyOwner {
+        IZirconPTFactory(pairFactory).setMigrator(migrator_);
+    }
+
     function setMigrator(address migrator_) public onlyOwner {
         IZirconPylonFactory(pylonFactory).setMigrator(migrator_);
         IZirconEnergyFactory(energyFactory).setMigrator(migrator_);

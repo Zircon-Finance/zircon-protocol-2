@@ -5,7 +5,7 @@
       "chainId": "1285",
       "contracts": {
         "ZirconEnergyFactory": {
-          "address": "0xB7adc6C137c6cCE6a6a20c76AE29984eaa224bEd",
+          "address": "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8",
           "abi": [
             {
               "inputs": [
@@ -626,7 +626,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0x76652a802B48BC7a6e2a77CdA93AF4B90a7E99B0",
+          "address": "0x3dA19d8f9f1208f844edE1b6Ac6caF2c14a318bD",
           "abi": [
             {
               "inputs": [
@@ -1485,13 +1485,28 @@
           ]
         },
         "Migrator": {
-          "address": "0x0F604e7205d7D27b86de410c74330c77afFa4226",
+          "address": "0xec89E7389Cfa95A801f8ddC18dA92C1165280971",
           "abi": [
             {
               "inputs": [],
               "payable": false,
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newEnergyFactoryAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "changeEnergyFactoryAddress",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
             },
             {
               "constant": true,
@@ -1543,12 +1558,12 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "pair",
+                  "name": "newPylonFactory",
                   "type": "address"
                 },
                 {
                   "internalType": "address",
-                  "name": "oldEnergyRev",
+                  "name": "newEnergyFactory",
                   "type": "address"
                 },
                 {
@@ -1563,16 +1578,11 @@
                 },
                 {
                   "internalType": "address",
-                  "name": "_pylonFactory",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newEnergyFactory",
+                  "name": "_genesisPylonFactory",
                   "type": "address"
                 }
               ],
-              "name": "migrateEnergyRevenue",
+              "name": "migrate",
               "outputs": [],
               "payable": false,
               "stateMutability": "nonpayable",
@@ -1647,6 +1657,36 @@
                   "type": "address"
                 }
               ],
+              "name": "setEnergyMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setFactoryMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
               "name": "setMigrator",
               "outputs": [],
               "payable": false,
@@ -1673,31 +1713,11 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "oldPylon",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newPylonFactory",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_pairAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_tokenA",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_tokenB",
+                  "name": "migrator_",
                   "type": "address"
                 }
               ],
-              "name": "startNewPylon",
+              "name": "setPTMigrator",
               "outputs": [],
               "payable": false,
               "stateMutability": "nonpayable",
@@ -1708,71 +1728,11 @@
               "inputs": [
                 {
                   "internalType": "address",
-                  "name": "oldEnergy",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newEnergyRev",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_pylonAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_pairAddress",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_tokenA",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "_tokenB",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newPylonFactory",
+                  "name": "migrator_",
                   "type": "address"
                 }
               ],
-              "name": "updateEnergyOnPylon",
-              "outputs": [],
-              "payable": false,
-              "stateMutability": "nonpayable",
-              "type": "function"
-            },
-            {
-              "constant": false,
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "newEnergyFactory",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newPTFactory",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newPylonFactory",
-                  "type": "address"
-                },
-                {
-                  "internalType": "address",
-                  "name": "newPairFactory",
-                  "type": "address"
-                }
-              ],
-              "name": "updateFactories",
+              "name": "setPylonMigrator",
               "outputs": [],
               "payable": false,
               "stateMutability": "nonpayable",
@@ -2070,7 +2030,7 @@
           ]
         },
         "ZirconEnergyFactory": {
-          "address": "0x162a6d7EB51E000ebcc8Af76e4255C2dABfFE760",
+          "address": "0x9A747f8cF3A9aD39B7A5770B694160A56c86a592",
           "abi": [
             {
               "inputs": [
@@ -2088,6 +2048,37 @@
               "payable": false,
               "stateMutability": "nonpayable",
               "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "a",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "b",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "c",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "address",
+                  "name": "d",
+                  "type": "address"
+                }
+              ],
+              "name": "CREATE_ENERGY",
+              "type": "event"
             },
             {
               "anonymous": false,
@@ -2660,7 +2651,7 @@
           ]
         },
         "ZirconFactory": {
-          "address": "0xEc5f493D3ca6F156d0cF5DbdABfBE16411D669FF",
+          "address": "0x6D934416741C25aA2C87Fe9D35757a41820a046d",
           "abi": [
             {
               "inputs": [
@@ -3012,7 +3003,7 @@
           ]
         },
         "ZirconPTFactory": {
-          "address": "0x6eC3bE502A4465321E643e1b5A6184FCD393a319",
+          "address": "0x3d08bCe361b45c33fddFD27f39bF9f5f24006EF1",
           "abi": [
             {
               "inputs": [
@@ -3223,7 +3214,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0xd38cA30Fb56a9f0c1B447A8A588d9E355Ba8DDbA",
+          "address": "0xE41d18e55372A4e55bC0647186A322B84a5EE1C7",
           "abi": [
             {
               "inputs": [

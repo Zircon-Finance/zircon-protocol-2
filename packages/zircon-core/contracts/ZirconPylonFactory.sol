@@ -20,7 +20,6 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public maximumPercentageSync;
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
-//    uint public liquidityFee;
     uint public EMASamples;
 
     uint public muUpdatePeriod;
