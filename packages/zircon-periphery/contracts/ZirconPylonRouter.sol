@@ -56,11 +56,11 @@ contract ZirconPylonRouter is IZirconPylonRouter {
 
 
     function _getAmounts(uint amountDesiredToken, uint amountDesiredETH, bool isAnchor, address tokenA, address tokenB) internal view returns (uint amountA, uint amountB){
-        amountA =  !isAnchor ? amountDesiredToken : amountDesiredETH;
-        amountB = !isAnchor ?  amountDesiredETH : amountDesiredToken;
+        uint atA =  !isAnchor ? amountDesiredToken : amountDesiredETH;
+        uint atB = !isAnchor ?  amountDesiredETH : amountDesiredToken;
         //        uint aminA = !isAnchor ? amountTokenMin : amountETHMin;
         //        uint aminB = !isAnchor ?  amountETHMin : amountTokenMin;
-        //        (amountA, amountB) = _addAsyncLiquidity(tokenA, tokenB, atA, atB, aminA, aminB);
+        (amountA, amountB) = _addAsyncLiquidity(tokenA, tokenB, atA, atB);
     }
 
     // Transfers both tokens to pylon
@@ -275,9 +275,7 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         address tokenA,
         address tokenB,
         uint amountADesired,
-        uint amountBDesired,
-        uint amountAMin,
-        uint amountBMin
+        uint amountBDesired
     ) internal virtual _addLiquidityChecks(tokenA, tokenB) view returns (uint amountA, uint amountB) {
         // create the pair if it doesn't exist yet
         (uint reserveA, uint reserveB) = UniswapV2Library.getReserves(factory, tokenA, tokenB);
@@ -286,12 +284,10 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         } else {
             uint amountBOptimal = UniswapV2Library.quote(amountADesired, reserveA, reserveB);
             if (amountBOptimal <= amountBDesired) {
-                require(amountBOptimal >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
                 (amountA, amountB) = (amountADesired, amountBOptimal);
             } else {
                 uint amountAOptimal = UniswapV2Library.quote(amountBDesired, reserveB, reserveA);
                 assert(amountAOptimal <= amountADesired);
-                require(amountAOptimal >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
                 (amountA, amountB) = (amountAOptimal, amountBDesired);
             }
         }
@@ -301,15 +297,15 @@ contract ZirconPylonRouter is IZirconPylonRouter {
     function addAsyncLiquidity(
         address tokenA,
         address tokenB,
-        uint amountA,
-        uint amountB,
+        uint amountADesired,
+        uint amountBDesired,
         uint minLiquidity,
         bool isAnchor,
         address to,
         address farm,
         uint deadline
     ) virtual override ensure(deadline)  external returns (uint liquidity){
-        //        (amountA, amountB) = _addAsyncLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+        (uint amountA, uint amountB) = _addAsyncLiquidity(tokenA, tokenB, amountADesired, amountBDesired);
         address pylon = _transferAsync(tokenA, tokenB, amountA, amountB);
         liquidity = IZirconPylon(pylon).mintAsync(to, isAnchor);
         require(liquidity >= minLiquidity, "ZPR: Not enough liquidity");

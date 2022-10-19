@@ -76,7 +76,7 @@ contract ZirconDrop is ReentrancyGuard, Ownable, Pausable {
     function claim(uint256 index, uint256 amount, bytes32[] calldata merkleProof) external nonReentrant whenNotPaused {
         require(!if_claimed(index), "Already Claimed");
         require(block.timestamp > info.start_time, "Not Started");
-        require(block.timestamp < info.end_time && (block.timestamp - info.start_time) / 86400 < 5, "Expired");
+        require(block.timestamp < info.end_time, "Expired");
         bytes32 leaf = keccak256(abi.encodePacked(index, msg.sender, amount));
         require(MerkleProof.verify(merkleProof, merkleRoot, leaf), 'Not Verified');
         amount *= (10 ** 18);                                                               // 18 decimals

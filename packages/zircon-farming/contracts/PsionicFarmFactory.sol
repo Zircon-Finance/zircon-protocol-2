@@ -30,7 +30,7 @@ contract PsionicFarmFactory is Ownable {
     }
 
     /*
-     * @notice Deploy the pool
+     * @notice Deploy the pool, and initialize vault with
      * @param _stakedToken: staked token address
      * @param _rewardToken: reward token address
      * @param _rewardPerBlock: reward per block (in rewardToken)
@@ -85,7 +85,7 @@ contract PsionicFarmFactory is Ownable {
             _numberBlocksForUserLimit,
             _admin
         );
-
+        // @TODO: ADD VAULT TO THIS EVENT
         emit NewPsionicFarmContract(psionicFarmAddress);
     }
 }

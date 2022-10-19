@@ -21,7 +21,7 @@ const migratePylons = async () => {
 
 
     // Updating Factory with new addresses
-    await migrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])
+    // await migrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])
 
     // OLD ENERGY
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
@@ -71,7 +71,7 @@ const migratePylons = async () => {
         let oldEnergyRev = await pair.energyRevenueAddress()
         let checkAdd = await newFactoryPylonInstance.getPylon(token0, token1)
         if (checkAdd === "0x0000000000000000000000000000000000000000") {
-            await migrator.migrate(newFactoryPylonInstance.address, energyInstance2.address, token0, token1, genesisPylonAddress === "0x0000000000000000000000000000000000000000" ? PYLON_FACTORY[chainId] : GENESIS_PYLON_FACTORY[chainId]);
+            // await migrator.migrate(newFactoryPylonInstance.address, energyInstance2.address, token0, token1, genesisPylonAddress === "0x0000000000000000000000000000000000000000" ? PYLON_FACTORY[chainId] : GENESIS_PYLON_FACTORY[chainId]);
 
             let newPylonAddress;
             // Loop let's wait here a bit to see that pylon is created before moving to the next one
@@ -95,22 +95,22 @@ const migratePylons = async () => {
         let pairAddress = await zFactory.allPairs(i)
         let pairContract = await ethers.getContractFactory("ZirconPair")
         let pair = pairContract.attach(pairAddress)
-        console.log("pair", pair.address)
+        // console.log("pair", pair.address)
 
         let token0 = await pair.token0()
         let token1 = await pair.token1()
-        let pylonAddress = await pylonInstance.getPylon(token0, token1)
-        let pylonAddress2 = await pylonInstance.getPylon(token1, token0)
+        let pylonAddress = await newFactoryPylonInstance.getPylon(token0, token1)
+        let pylonAddress2 = await newFactoryPylonInstance.getPylon(token1, token0)
 
         let genesisPylonAddress = await genesisPylonInstance.getPylon(token0, token1)
         let genesisPylonAddress2 = await genesisPylonInstance.getPylon(token1, token0)
-        if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
-            console.log("Migrating pair", token0, token1, pylonAddress, genesisPylonAddress)
-            pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
+        if (genesisPylonAddress !== "0x0000000000000000000000000000000000000000") {
+            console.log(pylonAddress)
+            // pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
         }
-        if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
-            console.log("Migrating pair 2", token0, token1, pylonAddress2, genesisPylonAddress2)
-            pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
+        if (genesisPylonAddress2 !== "0x0000000000000000000000000000000000000000") {
+            console.log(pylonAddress2)
+            // pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
         }
     }
 
