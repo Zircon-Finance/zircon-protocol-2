@@ -13,6 +13,7 @@ async function changeFees() {
     await ft.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8", "0x3dA19d8f9f1208f844edE1b6Ac6caF2c14a318bD")
     //await ft.setFees(30, BigNumber.from("40000000000000000") , 100, 240, 3, 2);
     await ft.setMinMaxFee(2, 100);
+
 }
 
 changeFees()

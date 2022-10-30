@@ -3,7 +3,6 @@ import './libraries/Math.sol';
 import './interfaces/IZirconPair.sol';
 import './interfaces/IZirconPoolToken.sol';
 import "./libraries/SafeMath.sol";
-//import "./libraries/UQ112x112.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./interfaces/IZirconPylonFactory.sol";
 import "./interfaces/IZirconFactory.sol";
@@ -12,7 +11,6 @@ import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-//import "hardhat/console.sol";
 
 contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****

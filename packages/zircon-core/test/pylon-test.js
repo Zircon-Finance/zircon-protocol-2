@@ -115,6 +115,7 @@ describe("Pylon", () => {
         console.log("END VALUES")
     }
     //Let's try to calculate some cases for pylon
+<<<<<<< HEAD
     const mintTestCases = [
         [5, 10, '4762509926821186', '4749990617651023','149673941687823837','99999999999999000', false],
         [10, 5, '4749999999999999', '4762499999999999','99999999999999009', '149366473384710076', true],
@@ -3222,6 +3223,7 @@ describe("Pylon", () => {
 
 
     it('AnchorK Test', async function () {
+
         let token0Amount = expandTo18Decimals(1700)
         let token1Amount = expandTo18Decimals(5300)
         await addLiquidity(token0Amount, token1Amount)
@@ -3244,6 +3246,7 @@ describe("Pylon", () => {
         console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
 
         let ptb = await pair.balanceOf(pylonInstance.address);
+<<<<<<< HEAD
         let ptt = await pair.totalSupply();
         console.log("ptb: ", ethers.utils.formatEther(ptb));
         console.log("ptt: ", ethers.utils.formatEther(ptt));
@@ -3923,6 +3926,7 @@ describe("Pylon", () => {
 
         derVfb = tpv.mul(gamma).mul(pairResT[0]).div(pairResT[1]).div(ethers.BigNumber.from('1000000000000000000'));
 
+<<<<<<< HEAD
         pylonRes = await pylonInstance.getSyncReserves();
 
         derVfb = derVfb.add(pylonRes[0]);

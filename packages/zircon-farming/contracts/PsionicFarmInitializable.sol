@@ -18,33 +18,31 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     }
 
     // The address of the psionic factory
-    address public  immutable PSIONIC_FACTORY;
+    address public immutable PSIONIC_FACTORY;
 
     // Whether a limit is set for users
-    bool public  userLimit;
+    bool public userLimit;
 
     // Whether it is initialized
-    bool public  isInitialized;
+    bool public isInitialized;
 
     // Accrued token per share
-    uint256 public  accTokenPerShare;
+    uint256 public accTokenPerShare;
 
     // The block number when CAKE mining ends.
-    uint256 public  bonusEndBlock;
+    uint256 public bonusEndBlock;
 
     // The block number when CAKE mining starts.
-    uint256 public  startBlock;
+    uint256 public startBlock;
 
     // The block number of the last pool update
-    uint256 public  lastRewardBlock;
+    uint256 public lastRewardBlock;
 
     // The pool limit (0 if none)
     uint256 public  poolLimitPerUser;
 
     // Block numbers available for user limit (after start block)
     uint256 public  numberBlocksForUserLimit;
-
-
 
     // The precision factor
     uint256 public  PRECISION_FACTOR;
@@ -133,8 +131,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
         require(!userLimit || ((_amount + user.amount) <= poolLimitPerUser), "Deposit: Amount above limit");
 
         _updatePool();
-//        require(user.amount > (user.rewardDebt * PRECISION_FACTOR) / accTokenPerShare,"Not enough user balance");
-
 
         if (user.amount > 0) {
             uint256 pending = (user.amount * accTokenPerShare) / PRECISION_FACTOR - user.rewardDebt;
@@ -274,7 +270,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
      * @param _startBlock: the new start block
      * @param _bonusEndBlock: the new end block
      */
-    function updateStartAndEndBlocks(uint256 _startBlock, uint256 _bonusEndBlock) external  onlyOwner {
+    function updateStartAndEndBlocks(uint256 _startBlock, uint256 _bonusEndBlock) external onlyOwner {
         require(block.number < startBlock, "Pool has started");
         require(_startBlock < _bonusEndBlock, "New startBlock must be lower than new endBlock");
         require(block.number < _startBlock, "New startBlock must be higher than current block");

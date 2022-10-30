@@ -34,7 +34,12 @@
     "deployPools:moonriver": "npx hardhat run --network moonriver scripts/deploy-script.js",
     "update:moonbase": "npx hardhat run --network moonbase scripts/updatePylon.js",
     "update:moonriver": "npx hardhat run --network moonriver scripts/updatePylon.js",
+<<<<<<< HEAD
     "addFarm:moonriver": "npx hardhat run --network moonriver scripts/updateFarm.js"
+=======
+    "check:moonbase": "npx hardhat run --network moonbase scripts/check.js",
+    "check:moonriver": "npx hardhat run --network moonriver scripts/check.js"
+>>>>>>> 483617c71d899cc702a0f4eb9367b79ea002b266
   },
   "files": [
     "artifacts",
