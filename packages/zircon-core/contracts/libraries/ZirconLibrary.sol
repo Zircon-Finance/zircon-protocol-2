@@ -62,6 +62,61 @@ library ZirconLibrary {
     }
 
 
+    //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
+    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) view internal returns (uint anchorKFactor) {
+
+        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
+        //kprime/amount + ftv, 1e18 final result
+        uint _anchorK = (_reserveTranslated0 + (amount * _reserveTranslated0/(2*_reserveTranslated1)))   .mul(_reserveTranslated1 + (amount/2))
+                            /(amount + ftv);
+
+        //ftv/halfK
+        _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
+        _anchorK = _anchorK.mul(oldKFactor)/(_reserveTranslated0);
+
+        //We don't accept increases of anchorK when adding Float
+        if(_anchorK > oldKFactor) {
+            return oldKFactor;
+        }
+        //Can't let anchorK go below 1
+        if(_anchorK < 1e18) {
+            return 1e18;
+        }
+
+        anchorKFactor = _anchorK;
+    }
+
+    //This should increase kFactor when removing float. Ignores if formula decreases it
+    //We use ptu to derive change in K, reserve1 and gamma for FTV
+    function anchorFactorFloatBurn(uint amount, uint oldKFactor, uint ptu, uint ptb, uint _reserveTranslated1, uint _gamma) view internal returns (uint anchorKFactor) {
+
+
+
+        // we know that ptu is proportional to sqrt(deltaK)
+        // so our Kprime is just k - (ptu/ptb * (sqrtK))**2
+        // while Kprime/k is simply 1 - ptu**2/ptb**2
+
+
+        uint kRatio = ((1e18 - uint(1e18).mul(ptu)/ptb)**2)/1e18;
+
+        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
+        //kprime/amount + ftv, 1e18 final result
+        uint _anchorK = kRatio.mul(ftv)/(ftv - amount);
+
+        _anchorK = oldKFactor.mul(_anchorK)/1e18;
+
+        //We don't accept reductions of anchorK when removing Float
+        //This can only happen with large changes in liquidity
+        if(_anchorK < oldKFactor) {
+            return oldKFactor;
+        }
+        //No reason this should ever be below 1
+        require(_anchorK >= 1e18, "ZL: AK");
+
+        anchorKFactor = _anchorK;
+    }
+
+
     function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
 
         //calculate the anchor liquidity change that would move formula switch to current price
@@ -98,11 +153,11 @@ library ZirconLibrary {
             //splitting to avoid overflow chance
             uint initialHalfK = isLineFormula
                                 ? _reserveTranslated0
-                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1));
+                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
 
             uint initialTailK = isLineFormula
                                 ? _reserveTranslated1
-                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2);
+                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18);
 
             uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
 
