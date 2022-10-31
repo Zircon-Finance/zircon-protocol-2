@@ -6,6 +6,7 @@ async function check() {
     // await psionicInstance.updatePylonRouter("0x385CC0c86DEf4dea78F6b3f0dBbfa3FB12FfecB5")
     // let router = await psionicInstance.PYLON_ROUTER()
     console.log("End Block: ", (await psionicInstance.bonusEndBlock()).toString())
+   
 }
 
 check()

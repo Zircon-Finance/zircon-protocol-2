@@ -68,7 +68,7 @@ contract Migrator {
         owner = owner_;
     }
 
-    function migrate(address newPylonFactory, address newEnergyFactory, address _tokenA, address _tokenB, address _genesisPylonFactory) external onlyOwner {
+    function migrate(address newPylonFactory, address newEnergyFactory, address _tokenA, address _tokenB) external onlyOwner {
 
         // Obtaining old addresses from the old factories
         address pair = IZirconFactory(pairFactory).getPair(_tokenA, _tokenB);
@@ -91,7 +91,8 @@ contract Migrator {
         }
 
         // Creating New Pylon with old PT Tokens
-        address newPylonAddress = IZirconPylonFactory(newPylonFactory).addPylonCustomPT(pair, _tokenA, _tokenB, IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenA), IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenB));
+        address poolTokenA = IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenA);
+        address newPylonAddress = IZirconPylonFactory(newPylonFactory).addPylonCustomPT(pair, _tokenA, _tokenB, poolTokenA, IZirconPTFactory(ptFactory).getPoolToken(oldPylon, _tokenB));
         require(newPylonAddress != address(0), 'Pylon does not exist');
 
         // Getting New Energy
@@ -102,8 +103,9 @@ contract Migrator {
         {
             // Genesis pylon and Genesis Factory are required because PT are created with the first pylon
             // so in second migrations we cannot use the Pylon from which we are migrating
-            address genesisPylon = IZirconPylonFactory(_genesisPylonFactory).getPylon(_tokenA, _tokenB);
-            IZirconPTFactory(ptFactory).changePylonAddress(genesisPylon, _tokenA, _tokenB, newPylonAddress, _genesisPylonFactory);
+            address genesisPylonFactory = IZirconPoolToken(poolTokenA).pylonFactory();
+            address genesisPylon = IZirconPylonFactory(genesisPylonFactory).getPylon(_tokenA, _tokenB);
+            IZirconPTFactory(ptFactory).changePylonAddress(genesisPylon, _tokenA, _tokenB, newPylonAddress, genesisPylonFactory);
         }
 
         // Migrating Pylon Liquidity

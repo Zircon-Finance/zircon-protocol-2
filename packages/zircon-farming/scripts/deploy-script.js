@@ -58,6 +58,16 @@ async function deploy() {
     const bNumber = await ethers.provider.getBlockNumber()
     const farming = await ethers.getContractFactory('PsionicFarmFactory');
     const masterInstance = farming.attach("0x97b2aE105DAFb7DC8a73c93e5f56d3f095D0DCF3")
+
+
+    // ZRG - MOVR
+    await deployFarm(masterInstance, bNumber, "0x6E9685c324Cdf126e5BF08F54573120A9c19E061", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
+    await deployFarm(masterInstance, bNumber, "0x17Bd5A512ac2906C89C37B3b863D69e418fBdaAa", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
+
+
+    // MOONBASE
+    // await deployFarm(masterInstance, bNumber, "0x6b5c798dda380bf9bd33bfcf087b09ad9253e50b", ["0xed13b028697febd70f34cf9a9e280a8f1e98fd29"])
+
     // // ZRG - MOVR
     // await deployFarm(masterInstance, bNumber, "0x770AA7074297E465E823bf2F45194e926aF0D05d", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
     // await deployFarm(masterInstance, bNumber, "0xBB57187c7883d25a64a08640905376f4CeF6C1ef", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
