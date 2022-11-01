@@ -4,9 +4,6 @@
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -126,7 +123,7 @@
       <workItem from="1666975088275" duration="633000" />
       <workItem from="1667133709400" duration="8494000" />
       <workItem from="1667158158480" duration="4306000" />
-      <workItem from="1667211150047" duration="21853000" />
+      <workItem from="1667211150047" duration="28190000" />
     </task>
     <servers />
   </component>
