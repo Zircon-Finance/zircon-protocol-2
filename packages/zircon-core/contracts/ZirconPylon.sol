@@ -1434,9 +1434,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                         reservesTranslated1,
                         gammaMulDecimals
                     );
+                }else{
+                    // only anchor functionality
+                    sendSlashedTokensToUser(sentAmount, 0, extraPercentage, _to);
                 }
-
-                sendSlashedTokensToUser(isFloatReserve0 != isAnchor ? sentAmount : 0, isFloatReserve0 != isAnchor ? 0 : sentAmount, extraPercentage, _to);
 
                 payBurnFees(ptu, feeBps);
                 // Bool combines choice of anchor or float with which token is which in the pool
