@@ -618,7 +618,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint newDerVfb = _reserveSync0.add(_pairTranslated0.mul(2 * newGamma)/1e18);
             //new var for stack too deep
             require(newDerVfb > derivedVfb, "ZP: VFB");
-            uint _liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb).sub(1e18) )/1e18; //one overflow check sufficient
+
+            console.log("newv, oldv", newDerVfb, derivedVfb);
+            //Safety check in case we're giving too many tokens
+            require((newDerVfb - derivedVfb) <= amountIn, "ZP: VFB2");
+
+            uint _liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb) - 1e18 )/1e18; //one overflow check sufficient
             liquidity = _liquidity.mul(slippagePercentage)/1e18;
 
         }
@@ -850,10 +855,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 virtualAnchorBalance += amount;
 
             } else {
-
+                //Amount always has to be expressed in anchor units
                 //uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) returns (uint anchorKFactor) {
                     anchorKFactor = ZirconLibrary.anchorFactorFloatAdd(
-                        amount,
+                        amount * pairReserveTranslated1/pairReserveTranslated0,
                         anchorKFactor,
                         pairReserveTranslated0,
                         pairReserveTranslated1,
@@ -882,6 +887,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             uint newDerVfb = _reserveSync0.add(_pairTranslated0.mul(2 * newGamma)/1e18);
             require(newDerVfb > derivedVfb, "ZP: VFB");
+
+            //Safety check in case we're giving too many tokens
+            console.log("as newv, oldv", newDerVfb, derivedVfb);
+            require((newDerVfb - derivedVfb) <= amountIn0 * 2, "ZP: VFB2");
             liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb) - 1e18 )/1e18; //one overflow check sufficient
 
         }
@@ -1239,6 +1248,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         address to = _to; //stack too deep
 
         (, uint _pairReserves1) = getPairReservesTranslated(0, 0);
+        //we save ptb here for the float anchorK calculation
+        uint ptb = IZirconPair(pairAddress).balanceOf(address(this));
 
         (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(to);
 
@@ -1255,7 +1266,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 amount1 * 2,
                 anchorKFactor,
                 ptuWithFee,
-                IZirconPair(pairAddress).balanceOf(address(this)),
+                ptb,
                 _pairReserves1,
                 gammaMulDecimals
             );
@@ -1367,7 +1378,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         notZero(liquidity);
         uint _totalSupply = pt.totalSupply();
         {
-            address to = _to;
+            //address to = _to;
             bool isAnchor = _isAnchor;
             address _pairAddress = pairAddress;
 
@@ -1379,8 +1390,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //This is a reserve extraction
             //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
             uint returnAmount = _amount - (_amount * feeBps)/10000;
-            _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to, returnAmount);
+            _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, _to, returnAmount);
 
+            address to_ = _to;
 
             //In case the reserves weren't able to pay for everything
             if (reservePT < liquidity) {
@@ -1390,7 +1402,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 //Two vars since we can't pay fees until omega calculations are done
                 uint ptuWithFee = ptu - (ptu * feeBps)/10000;
                 uint extraPercentage = 0;
-                (, uint reservesTranslated1) = getPairReservesTranslated(0, 0);
+                (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(0, 0);
+
+
+                uint ptb = IZirconPair(pairAddress).balanceOf(address(this));
                 if(isAnchor) {
                     (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee);
 
@@ -1403,34 +1418,36 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                         formulaSwitch,
                         virtualAnchorBalance * (_liquidityAdjusted)/anchorPtSupply, //unchecked here since they are checked in other places
                         ptuWithFee,
-                        IZirconPair(pairAddress).balanceOf(address(this)),
+                        ptb,
                         anchorKFactor,
                         virtualAnchorBalance - reserveAnchor,
                         reservesTranslated1
                     );
 
                 }
+                bool isAnchor_ = isAnchor;
                 //Shifting this to the bottom since we can't pay fees until slashing is done.
-                payFees(_amount, feeBps, isAnchor);
+                payFees(_amount, feeBps, isAnchor_);
 
 
                 _safeTransfer(_pairAddress, _pairAddress, ptuWithFee);
+                //address to_ = _to; //stack too deep
                 //bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
-                uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to, isFloatReserve0 != isAnchor);  // XOR
+                uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to_, isFloatReserve0 != isAnchor_);  // XOR
 
 
 
-                address _to = to; //stack too deep
+
 
                 returnAmount += sentAmount;
 
                 //Float-based anchorK adjustment
-                if(!isAnchor) {
+                if(!isAnchor_) {
                     anchorKFactor = ZirconLibrary.anchorFactorFloatBurn(
-                        sentAmount,
+                        sentAmount.mul(reservesTranslated1)/reservesTranslated0,
                         anchorKFactor,
                         ptuWithFee,
-                        IZirconPair(pairAddress).balanceOf(address(this)),
+                        ptb,
                         reservesTranslated1,
                         gammaMulDecimals
                     );

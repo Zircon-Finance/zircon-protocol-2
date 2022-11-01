@@ -3,7 +3,7 @@ pragma solidity =0.5.16;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 library ZirconLibrary {
     using SafeMath for uint256;
@@ -74,6 +74,9 @@ library ZirconLibrary {
         _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
         _anchorK = _anchorK.mul(oldKFactor)/(_reserveTranslated0);
 
+
+        //console.log("aKFl", _anchorK);
+
         //We don't accept increases of anchorK when adding Float
         if(_anchorK > oldKFactor) {
             return oldKFactor;
@@ -104,6 +107,8 @@ library ZirconLibrary {
         uint _anchorK = kRatio.mul(ftv)/(ftv - amount);
 
         _anchorK = oldKFactor.mul(_anchorK)/1e18;
+
+        //console.log("akFR", _anchorK);
 
         //We don't accept reductions of anchorK when removing Float
         //This can only happen with large changes in liquidity
