@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity =0.5.16;
+pragma solidity ^0.8.0;
+pragma abicoder v2;
 // import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
 //import './ZirconPoolToken.sol';
 import './ZirconPylon.sol';
@@ -8,25 +9,25 @@ import "./interfaces/IZirconPTFactory.sol";
 import './energy/interfaces/IZirconEnergyFactory.sol';
 
 contract ZirconPylonFactory is IZirconPylonFactory {
-    mapping(address => mapping(address => address)) public getPylon;
-    address[] public allPylons;
-    address public factory;
+    mapping(address => mapping(address => address)) public override getPylon;
+    address[] public override allPylons;
+    address public override factory;
     address private ptFactory;
-    address public energyFactory;
+    address public override energyFactory;
     address private feeToSetter;
     address private migrator;
-    bool public paused;
+    bool public override paused;
 
-    uint public maximumPercentageSync;
-    uint public deltaGammaThreshold;
-    uint public deltaGammaMinFee;
-    uint public EMASamples;
+    uint public override maximumPercentageSync;
+    uint public override deltaGammaThreshold;
+    uint public override deltaGammaMinFee;
+    uint public override EMASamples;
 
-    uint public muUpdatePeriod;
-    uint public muChangeFactor;
+    uint public override muUpdatePeriod;
+    uint public override muChangeFactor;
     event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
 
-    constructor(address _factory, address _energyFactory, address _ptFactory, address _feeToSetter, address _migrator) public {
+    constructor(address _factory, address _energyFactory, address _ptFactory, address _feeToSetter, address _migrator) {
         factory = _factory;
         energyFactory = _energyFactory;
         ptFactory = _ptFactory;
@@ -54,7 +55,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         require(msg.sender == migrator, 'ZPT: F');
     }
 
-    function allPylonsLength() external view returns (uint) {
+    function allPylonsLength() external override view returns (uint) {
         return allPylons.length;
     }
 
@@ -69,7 +70,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     }
 
     // @notice Function to help with the migrartion of the pylons
-    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external  returns (address pylonAddress)  {
+    function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external override  returns (address pylonAddress)  {
         onlyMigrator();
         require(_tokenA != _tokenB, 'ZF: IA');
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
@@ -93,7 +94,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
 
     // Adding PYLON
     // First Token is always the Float and the second one is the Anchor
-    function addPylon(address _pairAddress, address _tokenA, address _tokenB) external returns (address pylonAddress) {
+    function addPylon(address _pairAddress, address _tokenA, address _tokenB) external override returns (address pylonAddress) {
         require(_tokenA != _tokenB, 'ZF: IA');
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
 
@@ -107,7 +108,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
     }
 
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external {
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external override {
         onlyFeeToSetter();
         maximumPercentageSync = _maximumPercentageSync;
         deltaGammaThreshold = _deltaGammaThreshold;
@@ -117,28 +118,28 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         EMASamples = _EMASamples;
     }
 
-    function setMigrator(address _migrator) external  {
+    function setMigrator(address _migrator) external override  {
         onlyMigrator();
         migrator = _migrator;
     }
 
-    function setFeeToSetter(address _feeToSetter) external {
+    function setFeeToSetter(address _feeToSetter) external override {
         onlyFeeToSetter();
         feeToSetter = _feeToSetter;
     }
 
-    function migrateLiquidity(address _oldPylon, address _newPylon) external {
+    function migrateLiquidity(address _oldPylon, address _newPylon) external override {
         onlyMigrator();
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
     }
 
-    function startPylon(address _pylon, uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external {
+    function startPylon(address _pylon, uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external override {
         onlyMigrator();
         ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _anchorKFactor, _formulaSwitch);
     }
 
 
-    function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external returns (address energy){
+    function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external override returns (address energy){
         onlyMigrator();
         energy = IZirconEnergyFactory(energyFactory).getEnergy(_tokenA, _tokenB);
         if (energy == address(0)) {
@@ -147,16 +148,16 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         ZirconPylon(_pylonAddress).changeEnergyAddress(energy, _newEnergyRev);
     }
 
-    function setPaused(bool _paused) external {
+    function setPaused(bool _paused) external override {
         onlyFeeToSetter();
         paused = _paused;
     }
-//    function setLiquidityFee(uint _liquidityFee) external {
+//    function setLiquidityFee(uint _liquidityFee) external override {
 //        onlyFeeToSetter();
 //        liquidityFee = _liquidityFee;
 //    }
 
-    function changeEnergyFactoryAddress(address _newEnergyFactory) external {
+    function changeEnergyFactoryAddress(address _newEnergyFactory) external override {
         onlyMigrator();
         energyFactory = _newEnergyFactory;
     }

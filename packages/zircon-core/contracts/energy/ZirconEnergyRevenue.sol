@@ -1,15 +1,16 @@
-pragma solidity =0.5.16;
+pragma solidity ^0.8.0;
+pragma abicoder v2;
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import "./libraries/SafeMath.sol";
+//import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 //import "hardhat/console.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 
 contract ZirconEnergyRevenue is ReentrancyGuard  {
-    using SafeMath for uint112;
-    using SafeMath for uint256;
+//    using SafeMath for uint112;
+//    using SafeMath for uint256;
 
     uint public reserve;
     address public energyFactory;
@@ -42,7 +43,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         _;
     }
 
-    constructor() public {
+    constructor(){
         energyFactory = msg.sender;
     }
 
@@ -85,18 +86,18 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
             //Increments the contract variable that stores total fees acquired by pair. Multiplies by each Pylon's share
 
-            feeValue0 += percentage.mul(_reservePair1).mul(2).mul(pylonBalance0)/totalSupply.mul(1e18);
-            feeValue1 += percentage.mul(_reservePair0).mul(2).mul(pylonBalance1)/totalSupply.mul(1e18);
+            feeValue0 += percentage * (_reservePair1) * (2) * (pylonBalance0)/(totalSupply * 1e18);
+            feeValue1 += percentage * (_reservePair0) * (2) * (pylonBalance1)/(totalSupply * 1e18);
         }
 
         {
             uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageRev();
-            uint amount = balance.sub(reserve);
-            uint pylon0Liq = (amount.mul(pylonBalance0)/totalSupply).mul(100 - feePercentageForRev)/(100);
-            uint pylon1Liq = (amount.mul(pylonBalance1)/totalSupply).mul(100 - feePercentageForRev)/(100);
+            uint amount = balance - (reserve);
+            uint pylon0Liq = (amount * (pylonBalance0)/totalSupply) * (100 - feePercentageForRev)/(100);
+            uint pylon1Liq = (amount * (pylonBalance1)/totalSupply) * (100 - feePercentageForRev)/(100);
             _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
             _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
-            reserve = balance.sub(pylon0Liq.add(pylon1Liq));
+            reserve = balance - (pylon0Liq + pylon1Liq);
         }
     }
 
@@ -140,7 +141,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
 
         if(_token == zircon.pairAddress) {
             require(_amount <= reserve, "ZER: Reverted");
-            reserve = reserve.sub(_amount);
+            reserve = reserve - _amount;
         }
 
         _safeTransfer(_token, _to, _amount);

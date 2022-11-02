@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity =0.5.16;
+pragma solidity ^0.8.0;
+pragma abicoder v2;
 import "./ZirconEnergy.sol";
 import "./ZirconEnergyRevenue.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 import "./interfaces/IZirconEnergyRevenue.sol";
 
 contract ZirconEnergyFactory is IZirconEnergyFactory{
-    mapping(address => mapping(address => address)) public getEnergy;
-    mapping(address => mapping(address => address)) public getEnergyRevenue;
-    address[] public allEnergies;
-    address[] public allEnergiesRevenue;
-    address public feeToSetter;
-    address public migrator;
-    uint public insurancePerMille;
+    mapping(address => mapping(address => address)) public override getEnergy;
+    mapping(address => mapping(address => address)) public override getEnergyRevenue;
+    address[] public override allEnergies;
+    address[] public override allEnergiesRevenue;
+    address public override feeToSetter;
+    address public override migrator;
+    uint public override insurancePerMille;
 
-    uint public feePercentageRev;
-    uint public feePercentageEnergy;
+    uint public override feePercentageRev;
+    uint public override feePercentageEnergy;
     struct Fee {
         uint112 minPylonFee;
         uint112 maxPylonFee;
@@ -34,7 +35,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         _;
     }
 
-    constructor(address _feeToSetter, address _migrator) public {
+    constructor(address _feeToSetter, address _migrator) {
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         insurancePerMille = 100;
         feePercentageRev = 20;
@@ -43,21 +44,21 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         migrator = _migrator;
     }
 
-    function getMinMaxFee() external view returns (uint112 minFee, uint112 maxFee) {
+    function getMinMaxFee() external override view returns (uint112 minFee, uint112 maxFee) {
         minFee = fee.minPylonFee;
         maxFee = fee.maxPylonFee;
     }
 
-    function setFee(uint112 _minPylonFee, uint112 _maxPylonFee) external onlyFeeToSetter {
+    function setFee(uint112 _minPylonFee, uint112 _maxPylonFee) external override onlyFeeToSetter {
         fee.minPylonFee = _minPylonFee;
         fee.maxPylonFee = _maxPylonFee;
     }
 
-    function setInsurancePerMille(uint _insurancePerMille) external onlyFeeToSetter {
+    function setInsurancePerMille(uint _insurancePerMille) external override onlyFeeToSetter {
         insurancePerMille = _insurancePerMille;
     }
 
-    function allEnergiesLength() external view returns (uint) {
+    function allEnergiesLength() external override view returns (uint) {
         return allEnergies.length;
     }
 
@@ -65,33 +66,33 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         return allEnergiesRevenue.length;
     }
 
-    function energyCodeHash() public pure returns (bytes32) {
+    function energyCodeHash() public returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
-    function energyRevenueCodeHash() public pure returns (bytes32) {
+    function energyRevenueCodeHash() public returns (bytes32) {
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
     function energyFor(address token, address pair) view internal returns (address energy) {
-        energy = address(uint(keccak256(abi.encodePacked(
+        energy = address(uint160(uint(keccak256(abi.encodePacked(
         hex'ff',
         address(this),
         keccak256(abi.encodePacked(pair, token)),
         hex'86a07d7f5bb5f35df142398e44c5e27616023286f604f815fc34d6024dca1797' // init code hash
-        ))));
+        )))));
     }
 
     function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon) {
-        pylon = address(uint(keccak256(abi.encodePacked(
+        pylon = address(uint160(uint(keccak256(abi.encodePacked(
         hex'ff',
         pylonFactory,
         keccak256(abi.encodePacked(tokenA, tokenB, pair)),
         hex'12c6eec7c160ed02a663a9adbe2d40580f08e018f4d5837228c670d5fad627f0' // init code hash
-        ))));
+        )))));
     }
 
-    function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
+    function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external override returns (address energy) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
         require(_pair != address(0), 'ZE: ZERO_ADDRESS0');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
@@ -117,7 +118,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
 
-    function createEnergy(address _pylon, address _pair, address _tokenA, address _tokenB) external returns (address energy) {
+    function createEnergy(address _pylon, address _pair, address _tokenA, address _tokenB) external override returns (address energy) {
         emit CREATE_ENERGY(_pylon, _pair, _tokenA, _tokenB);
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
         require(_pylon != address(0) && _pair != address(0), 'ZE: ZERO_ADDRESS1');
@@ -135,23 +136,23 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         emit EnergyCreated(_pair, energy, _tokenA, _tokenB, allEnergies.length);
     }
 
-    function migrateEnergyLiquidity(address pair, address token, address newEnergy) external onlyMigrator{
+    function migrateEnergyLiquidity(address pair, address token, address newEnergy) external override onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS2');
-        address energy = address(uint(keccak256(abi.encodePacked(
+        address energy = address(uint160(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 address(this),
                 keccak256(abi.encodePacked(pair, token)),
                 energyCodeHash() // init code hash
-            ))));
+            )))));
         IZirconEnergy(energy).migrateLiquidity(newEnergy);
     }
 
-    function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
+    function migrateEnergyRevenue(address oldEnergy, address newEnergy) external override onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS3');
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
     }
 
-    function migrateEnergyRevenueFees(address oldEnergy, address newEnergy) external onlyMigrator{
+    function migrateEnergyRevenueFees(address oldEnergy, address newEnergy) external override onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS4');
 
         uint feeValue0 = IZirconEnergyRevenue(oldEnergy).feeValue0();
@@ -160,32 +161,32 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
     }
 
-    function migrateEnergy(address oldEnergy, address newEnergy) external onlyMigrator{
+    function migrateEnergy(address oldEnergy, address newEnergy) external override onlyMigrator{
         require(newEnergy != address(0), 'ZE: ZERO_ADDRESS5');
 
         IZirconEnergy(oldEnergy).migrateLiquidity(newEnergy);
     }
 
-    function setFeePercentageRev(uint _fee) external onlyFeeToSetter {
+    function setFeePercentageRev(uint _fee) external override onlyFeeToSetter {
         require(_fee <= 100, 'ZE: FEE_TOO_HIGH');
         require(_fee >= 0, 'ZE: FEE_TOO_LOW');
         feePercentageRev = _fee;
     }
 
-    function setFeePercentageEnergy(uint _fee) external onlyFeeToSetter {
+    function setFeePercentageEnergy(uint _fee) external override onlyFeeToSetter {
         require(_fee <= 100, 'ZE: FEE_TOO_HIGH');
         require(_fee >= 0, 'ZE: FEE_TOO_LOW');
         feePercentageEnergy = _fee;
     }
 
-    function setFeeToSetter(address _feeToSetter) external onlyFeeToSetter {
+    function setFeeToSetter(address _feeToSetter) external override onlyFeeToSetter {
         feeToSetter = _feeToSetter;
     }
 
-    function setMigrator(address _migrator) external onlyMigrator {
+    function setMigrator(address _migrator) external override onlyMigrator {
         migrator = _migrator;
     }
-    function getFees(address _token, uint _amount, address _to, address energyRev) external onlyFeeToSetter {
+    function getFees(address _token, uint _amount, address _to, address energyRev) external override onlyFeeToSetter {
 
         require(_amount != 0, "Operations: Cannot recover zero balance");
 

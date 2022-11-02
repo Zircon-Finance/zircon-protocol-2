@@ -14,7 +14,6 @@ interface IZirconPylonFactory {
     function getPylon(address tokenA, address tokenB) external view returns (address pair);
     function factory() external view returns (address);
     function energyFactory() external view returns (address);
-    event PylonCreated(address indexed token0, address indexed token1, address poolToken0, address poolToken1, address pylon, address pair);
     function allPylonsLength() external view returns (uint);
     function paused() external view returns (bool);
 //    function setLiquidityFee(uint _liquidityFee) external;

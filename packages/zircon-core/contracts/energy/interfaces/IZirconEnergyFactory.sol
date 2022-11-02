@@ -1,16 +1,18 @@
-pragma solidity =0.5.16;
+pragma solidity >=0.5.16;
 
 interface IZirconEnergyFactory {
 
     // Variables
     function allEnergies(uint p) external view returns (address);
+    function allEnergiesRevenue(uint p) external view returns (address);
     function insurancePerMille() external view returns (uint);
     function feePercentageRev() external view returns (uint);
     function feePercentageEnergy() external view returns (uint);
     function getEnergy(address _tokenA, address _tokenB) external view returns (address energy);
     function getEnergyRevenue(address _tokenA, address _tokenB) external view returns (address energy);
     function allEnergiesLength() external view returns (uint);
-    function feeToSetter() external pure returns (address);
+    function feeToSetter() external view returns (address);
+    function migrator() external view returns (address);
     function setMigrator(address _migrator) external;
     function setFeeToSetter(address _feeToSetter) external;
     function setInsurancePerMille(uint _insurancePerMille) external;

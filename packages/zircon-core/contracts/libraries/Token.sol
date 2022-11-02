@@ -1,20 +1,9 @@
-pragma solidity =0.5.16;
+pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol';
-import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
-import '@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol';
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract Token is ERC20Detailed, ERC20Mintable {
-
-    uint256 public MINTED_AMOUNT = 5 ether;
-
-    constructor(string memory _name, string memory _symbol, uint8 decimals) ERC20Detailed(_name, _symbol, decimals) public {
-        _mint(msg.sender, 1000000000000000000000000);
+contract GLDToken is ERC20 {
+    constructor(uint256 initialSupply) ERC20("Gold", "GLD") {
+        _mint(msg.sender, initialSupply);
     }
-
-    function mintTokens() public {
-        // Mints the defined amount of tokens for the caller
-        _mint(msg.sender, MINTED_AMOUNT);
-    }
-
 }

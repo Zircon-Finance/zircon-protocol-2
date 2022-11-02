@@ -1,20 +1,20 @@
-pragma solidity =0.5.16;
-
-import "./SafeMath.sol";
+pragma solidity ^0.8.0;
+pragma abicoder v2;
+//import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
 import "hardhat/console.sol";
 
 library ZirconLibrary {
-    using SafeMath for uint256;
+//    using SafeMath for uint256;
 
     // Same Function as Uniswap Library, used here for incompatible solidity versions
 //        function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
 //            require(amountIn > 0, 'UV2: IIA');
 //            require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
-//            uint amountInWithFee = amountIn.mul(10000-fee);
-//            uint numerator = amountInWithFee.mul(reserveOut);
-//            uint denominator = reserveIn.mul(10000).add(amountInWithFee);
+//            uint amountInWithFee = amountIn*(10000-fee);
+//            uint numerator = amountInWithFee*(reserveOut);
+//            uint denominator = reserveIn*(10000)+(amountInWithFee);
 //            amountOut = numerator / denominator;
 //        }
 
@@ -24,11 +24,11 @@ library ZirconLibrary {
     function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
 
         //Expresses b1 in units of reserve0
-        uint px = _reserve0.mul(_b1)/_reserve1;
+        uint px = _reserve0*(_b1)/_reserve1;
 
         if (px > _b0) {
             maxX = _b0;
-            maxY = _b0.mul(_reserve1)/_reserve0; //b0 in units of reserve1
+            maxY = _b0*(_reserve1)/_reserve0; //b0 in units of reserve1
         } else {
             maxX = px; //max is b1 but in reserve0 units
             maxY = _b1;
@@ -37,15 +37,15 @@ library ZirconLibrary {
 //    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
 //
 //        //Expresses b1 in units of reserve0
-//        uint px = ts.mul(_b0)/_reserve0;
-//        uint py = ts.mul(_b1)/_reserve1;
+//        uint px = ts*(_b0)/_reserve0;
+//        uint py = ts*(_b1)/_reserve1;
 //        console.log("px: ", px, py);
 //        if (px > py) {
-//            maxX = py.mul(_reserve0)/ts;
+//            maxX = py*(_reserve0)/ts;
 //            maxY = _b1; //b0 in units of reserve1
 //        } else {
 //            maxX = _b0; //max is b1 but in reserve0 units
-//            maxY = px.mul(_reserve1)/ts;
+//            maxY = px*(_reserve1)/ts;
 //        }
 //    }
 
@@ -55,9 +55,9 @@ library ZirconLibrary {
     // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
     function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure internal returns (uint liquidity){
         if (_isAnchor) {
-            liquidity = _amount.mul(_totalSupply)/_vab;
+            liquidity = _amount*(_totalSupply)/_vab;
         }else {
-            liquidity = ((_amount.mul(_totalSupply))/(_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18)));
+            liquidity = ((_amount*(_totalSupply))/(_reservePylon+(_reserve*(_gamma)*(2)/1e18)));
         }
     }
 
@@ -65,14 +65,14 @@ library ZirconLibrary {
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
     function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) view internal returns (uint anchorKFactor) {
 
-        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
+        uint ftv = _reserveTranslated1*(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
-        uint _anchorK = (_reserveTranslated0 + (amount * _reserveTranslated0/(2*_reserveTranslated1)))   .mul(_reserveTranslated1 + (amount/2))
+        uint _anchorK = (_reserveTranslated0 + (amount * _reserveTranslated0/(2*_reserveTranslated1)))   *(_reserveTranslated1 + (amount/2))
                             /(amount + ftv);
 
         //ftv/halfK
-        _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
-        _anchorK = _anchorK.mul(oldKFactor)/(_reserveTranslated0);
+        _anchorK = _anchorK*(ftv)/(_reserveTranslated1);
+        _anchorK = _anchorK*(oldKFactor)/(_reserveTranslated0);
 
 
         //console.log("aKFl", _anchorK);
@@ -100,13 +100,13 @@ library ZirconLibrary {
         // while Kprime/k is simply 1 - ptu**2/ptb**2
 
 
-        uint kRatio = ((1e18 - uint(1e18).mul(ptu)/ptb)**2)/1e18;
+        uint kRatio = ((1e18 - uint(1e18)*(ptu)/ptb)**2)/1e18;
 
-        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
+        uint ftv = _reserveTranslated1*(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
-        uint _anchorK = kRatio.mul(ftv)/(ftv - amount);
+        uint _anchorK = kRatio*(ftv)/(ftv - amount);
 
-        _anchorK = oldKFactor.mul(_anchorK)/1e18;
+        _anchorK = oldKFactor*(_anchorK)/1e18;
 
         //console.log("akFR", _anchorK);
 
@@ -128,7 +128,7 @@ library ZirconLibrary {
         uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
         uint vabFactor = sqrtKFactor < oldKFactor ? oldKFactor - sqrtKFactor : oldKFactor + sqrtKFactor;
 
-        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e18)/adjustedVab;
+        uint amountThresholdMultiplier = _reserveTranslated1*(1e18)/adjustedVab;
         amountThresholdMultiplier = amountThresholdMultiplier * 1e18 / vabFactor;
 
         //console.log("atm", amountThresholdMultiplier);
@@ -136,7 +136,7 @@ library ZirconLibrary {
         //We need to change anchor factor if we're using line formula or if adding liquidity might trigger a switch
         if(isLineFormula || amountThresholdMultiplier >= 1e18) {
 
-            if(!isLineFormula && (1e18 + (amount.mul(1e18)/adjustedVab)) < amountThresholdMultiplier) {
+            if(!isLineFormula && (1e18 + (amount*(1e18)/adjustedVab)) < amountThresholdMultiplier) {
                 //We return kFactor unchanged if the addition isn't sufficient to trigger formula switch
                 return oldKFactor;
             }
@@ -158,17 +158,17 @@ library ZirconLibrary {
             //splitting to avoid overflow chance
             uint initialHalfK = isLineFormula
                                 ? _reserveTranslated0
-                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
+                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18)*(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
 
             uint initialTailK = isLineFormula
                                 ? _reserveTranslated1
-                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18);
+                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18)*(adjustedVab)/2e18);
 
-            uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
+            uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier)*(adjustedVab)/1e18;
 
 
             //divide by halfK to start working through 1e18s
-            uint kPrime = (_reserveTranslated0 + (_amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + _amount/2)
+            uint kPrime = (_reserveTranslated0 + (_amount*(_reserveTranslated0)/(2*_reserveTranslated1)))*(_reserveTranslated1 + _amount/2)
                             / initialHalfK;
 
 
@@ -177,8 +177,8 @@ library ZirconLibrary {
             //This has the effect of keeping the line formula still, moving the switchover point.
             //Without this, anchor liquidity additions would change value of the float side
             //Lots of overflow potential, so we split calculations
-            anchorKFactor = kPrime.mul(initialVab)/initialTailK;
-            anchorKFactor = anchorKFactor.mul(oldKFactor)/(adjustedVab + _amount);
+            anchorKFactor = kPrime*(initialVab)/initialTailK;
+            anchorKFactor = anchorKFactor*(oldKFactor)/(adjustedVab + _amount);
 
             //in principle this should never happen when adding liquidity, but better safe than sorry
             if(anchorKFactor < 1e18) {
@@ -209,15 +209,15 @@ library ZirconLibrary {
                 uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
 
                 uint vabFactor = sqrtKFactor < oldKFactor ? oldKFactor - sqrtKFactor : oldKFactor + sqrtKFactor;
-                uint amountThresholdMultiplier = _reserveTranslated1.mul(1e18)/(adjustedVab);
+                uint amountThresholdMultiplier = _reserveTranslated1*(1e18)/(adjustedVab);
 
                 amountThresholdMultiplier = (amountThresholdMultiplier * 1e18)/vabFactor;
 
                 //if we're burning we only care about the threshold liquidity amount
-                factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
+                factorAnchorAmount = Math.min((uint(1e18)-(amountThresholdMultiplier))*(adjustedVab)/1e18, amount);
 
             }
-            uint _ptu = ptu.mul(factorAnchorAmount)/amount; //adjust ptu by the factor contribution
+            uint _ptu = ptu*(factorAnchorAmount)/amount; //adjust ptu by the factor contribution
 
             // omega can only be different than 1 in case we're removing liquidity and it's using the line formula
             // but it's already embedded in the ptu;
@@ -228,15 +228,15 @@ library ZirconLibrary {
 
 
 
-            uint kRatio = ((1e18 - uint(1e18).mul(_ptu)/ptb)**2)/1e18;
-            //console.log("kr, vbp,", kRatio, (adjustedVab).mul(1e18)/(adjustedVab - factorAnchorAmount));
+            uint kRatio = ((1e18 - uint(1e18)*(_ptu)/ptb)**2)/1e18;
+            //console.log("kr, vbp,", kRatio, (adjustedVab)*(1e18)/(adjustedVab - factorAnchorAmount));
 
             //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
             //This has the effect of keeping the line formula still, moving the switchover point.
             //Without this, anchor liquidity additions would change value of the float side
             //Lots of overflow potential, so we split calculations
-            anchorKFactor = kRatio.mul(adjustedVab)/(adjustedVab.sub(factorAnchorAmount));
-            anchorKFactor = anchorKFactor.mul(oldKFactor)/1e18;
+            anchorKFactor = kRatio*(adjustedVab)/(adjustedVab-(factorAnchorAmount));
+            anchorKFactor = anchorKFactor*(oldKFactor)/1e18;
 
             //Anchor factor can never be below 1
             if(anchorKFactor < 1e18) {
@@ -254,9 +254,9 @@ library ZirconLibrary {
 
     function absoluteDiff(uint value1, uint value2) pure internal returns (uint abs) {
         if (value1 >= value2) {
-            abs = value1.sub(value2);
+            abs = value1-(value2);
         } else {
-            abs = value2.sub(value1);
+            abs = value2-(value1);
         }
     }
 
