@@ -12,7 +12,8 @@ import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import "./energy/interfaces/IZirconEnergyRevenue.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
+//import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // **** Libraries ****
@@ -210,8 +211,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //1.277 kb
     function initPylon(address _to) external override nonReentrant returns (uint floatLiquidity, uint anchorLiquidity) {
         require(initialized == 0 && !IZirconPylonFactory(factoryAddress).paused(), 'Z: P');
-        uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-        uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+        uint balance0 = IERC20(pylonToken.float).balanceOf(address(this));
+        uint balance1 = IERC20(pylonToken.anchor).balanceOf(address(this));
         notZero(balance0);
         notZero(balance1);
 
@@ -299,8 +300,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //0.786kb
     function _syncMinting(uint maximumPercentageSync) private {
         // Let's take the current balances
-        uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-        uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+        uint balance0 = IERC20(pylonToken.float).balanceOf(address(this));
+        uint balance1 = IERC20(pylonToken.anchor).balanceOf(address(this));
 
         // Intializing the variables
         // Getting pair reserves and updating variables before minting
@@ -363,8 +364,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         // blockTimestampLast = blockTimestamp;
 
         // Removing excess reserves from the pool
-        uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-        uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+        uint balance0 = IERC20(pylonToken.float).balanceOf(address(this));
+        uint balance1 = IERC20(pylonToken.anchor).balanceOf(address(this));
 
         (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(balance0, balance1);
         uint maximumPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
@@ -584,7 +585,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         // balance of float/anchor sent to this
         // Reduces by amount that was in sync reserves
-        uint amountIn = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this))-(isAnchor ? _reserve1 : _reserve0);
+        uint amountIn = IERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this))-(isAnchor ? _reserve1 : _reserve0);
         notZero(amountIn);
 
         amountIn = payFees(amountIn, getFeeBps(), isAnchor);
@@ -818,9 +819,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     ////        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
     ////        uint amountIn;
     ////        if (isAnchor) {
-    ////            amountIn = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this))-(_reserve1);
+    ////            amountIn = IERC20(pylonToken.anchor).balanceOf(address(this))-(_reserve1);
     ////        }else{
-    ////            amountIn = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this))-(_reserve0);
+    ////            amountIn = IERC20(pylonToken.float).balanceOf(address(this))-(_reserve0);
     ////        }
     ////        notZero(amountIn);
     ////
@@ -862,8 +863,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountIn1;
         uint derivedVfb;
         {
-            uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
-            uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
+            uint balance0 = IERC20(pylonToken.float).balanceOf(address(this));
+            uint balance1 = IERC20(pylonToken.anchor).balanceOf(address(this));
 
             amountIn0 = balance0-(_reserve0);
             amountIn1 = balance1-(_reserve1);
@@ -1177,9 +1178,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //        if (omegaMulDecimals < 1e18) {
     //            //finds amount to cover
     //            uint amountToAdd = liquidity*(1e18-omegaMulDecimals)/1e18;
-    //            // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
+    //            // uint energyAnchorBalance = IERC20(pylonToken.anchor).balanceOf(energyAddress);
     //            //finds how much we can cover
-    //            uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
+    //            uint energyPTBalance = IERC20(pairAddress).balanceOf(energyAddress);
     //
     //
     //            if (amountToAdd < energyPTBalance) {
@@ -1215,10 +1216,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             uint originalAmount = totalAmount*(1e18)/(1e18 - percentage);
             uint amountToTransfer = originalAmount-(totalAmount); // Percentage is calculated "natively" as a full 1e18
 
-            if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
+            if(IERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
             }else{
-                _safeTransferFrom(pylonToken.anchor, energyAddress, _to, IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress));
+                _safeTransferFrom(pylonToken.anchor, energyAddress, _to, IERC20(pylonToken.anchor).balanceOf(energyAddress));
             }
             IZirconEnergy(energyAddress).syncReserve();
 
@@ -1391,9 +1392,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         if (omegaMulDecimals < 1e18) {
             //finds amount to cover
             uint amountToAdd = ptu * (1e18-omegaMulDecimals)/1e18; //already checked
-            // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
+            // uint energyAnchorBalance = IERC20(pylonToken.anchor).balanceOf(energyAddress);
             // finds how much we can cover
-            uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
+            uint energyPTBalance = IERC20(pairAddress).balanceOf(energyAddress);
 
 
             if (amountToAdd < energyPTBalance) {
@@ -1529,8 +1530,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     function migrateLiquidity(address newPylon) external override{
         onlyFactory();
         _safeTransfer(pairAddress, newPylon , IZirconPair(pairAddress).balanceOf(address(this)));
-        _safeTransfer(pylonToken.anchor, newPylon, IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this)));
-        _safeTransfer(pylonToken.float, newPylon, IUniswapV2ERC20(pylonToken.float).balanceOf(address(this)));
+        _safeTransfer(pylonToken.anchor, newPylon, IERC20(pylonToken.anchor).balanceOf(address(this)));
+        _safeTransfer(pylonToken.float, newPylon, IERC20(pylonToken.float).balanceOf(address(this)));
     }
 
     function changeEnergyAddress(address _energyAddress, address _energyRevAddress) external override {
