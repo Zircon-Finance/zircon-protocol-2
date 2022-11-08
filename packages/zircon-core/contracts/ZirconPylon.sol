@@ -1219,7 +1219,6 @@ contract ZirconPylon is IZirconPylon {
                 totalAmount += floatAmount * res1/res0;
             }
 
-            console.log("totalAmount", totalAmount);
 
             // TotalAmount is what the user already received, while percentage is what's missing.
             // We divide to arrive to the original amount and diff it with totalAmount to get final number.
@@ -1227,7 +1226,6 @@ contract ZirconPylon is IZirconPylon {
             // ;ta/(1-p) - ta = ta*p/(1-p)
             uint amountToTransfer = totalAmount.mul(percentage)/(1e18 - percentage);
             uint eBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
-            console.log("amountToTransfer", amountToTransfer);
 
             amount = eBalance > amountToTransfer ? amountToTransfer : eBalance;
             _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
@@ -1333,7 +1331,6 @@ contract ZirconPylon is IZirconPylon {
             );
         }
         // This one retrieves raw anchor tokens if required for additional compensation
-        console.log("extraPercentage1", extraPercentage);
         amount1 += sendSlashedTokensToUser(amount0, amount1, extraPercentage, to);
 
         // Burns the Zircon pool tokens
