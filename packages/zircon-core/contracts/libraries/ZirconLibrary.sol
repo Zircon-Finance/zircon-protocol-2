@@ -3,25 +3,14 @@ pragma solidity =0.5.16;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-import "hardhat/console.sol";
 
 library ZirconLibrary {
     using SafeMath for uint256;
 
-    // Same Function as Uniswap Library, used here for incompatible solidity versions
-//        function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
-//            require(amountIn > 0, 'UV2: IIA');
-//            require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
-//            uint amountInWithFee = amountIn.mul(10000-fee);
-//            uint numerator = amountInWithFee.mul(reserveOut);
-//            uint denominator = reserveIn.mul(10000).add(amountInWithFee);
-//            amountOut = numerator / denominator;
-//        }
-
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
     // @b0, @b1 the balances to calculate
-    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
+    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure public returns (uint maxX, uint maxY)  {
 
         //Expresses b1 in units of reserve0
         uint px = _reserve0.mul(_b1)/_reserve1;
@@ -34,26 +23,12 @@ library ZirconLibrary {
             maxY = _b1;
         }
     }
-//    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
-//
-//        //Expresses b1 in units of reserve0
-//        uint px = ts.mul(_b0)/_reserve0;
-//        uint py = ts.mul(_b1)/_reserve1;
-//        console.log("px: ", px, py);
-//        if (px > py) {
-//            maxX = py.mul(_reserve0)/ts;
-//            maxY = _b1; //b0 in units of reserve1
-//        } else {
-//            maxX = _b0; //max is b1 but in reserve0 units
-//            maxY = px.mul(_reserve1)/ts;
-//        }
-//    }
 
     // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
     // @_amount is the quantity to convert
     // @_totalSupply is the supply of the pt's tranch
     // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
-    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure internal returns (uint liquidity){
+    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure public returns (uint liquidity){
         if (_isAnchor) {
             liquidity = _amount.mul(_totalSupply)/_vab;
         }else {
@@ -63,7 +38,7 @@ library ZirconLibrary {
 
 
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
-    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) view internal returns (uint anchorKFactor) {
+    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) view public returns (uint anchorKFactor) {
 
         uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
@@ -74,13 +49,11 @@ library ZirconLibrary {
         _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
         _anchorK = _anchorK.mul(oldKFactor)/(_reserveTranslated0);
 
-
-        //console.log("aKFl", _anchorK);
-
         //We don't accept increases of anchorK when adding Float
         if(_anchorK > oldKFactor) {
             return oldKFactor;
         }
+
         //Can't let anchorK go below 1
         if(_anchorK < 1e18) {
             return 1e18;
@@ -91,14 +64,10 @@ library ZirconLibrary {
 
     //This should increase kFactor when removing float. Ignores if formula decreases it
     //We use ptu to derive change in K, reserve1 and gamma for FTV
-    function anchorFactorFloatBurn(uint amount, uint oldKFactor, uint ptu, uint ptb, uint _reserveTranslated1, uint _gamma) view internal returns (uint anchorKFactor) {
-
-
-
+    function anchorFactorFloatBurn(uint amount, uint oldKFactor, uint ptu, uint ptb, uint _reserveTranslated1, uint _gamma) view public returns (uint anchorKFactor) {
         // we know that ptu is proportional to sqrt(deltaK)
         // so our Kprime is just k - (ptu/ptb * (sqrtK))**2
         // while Kprime/k is simply 1 - ptu**2/ptb**2
-
 
         uint kRatio = ((1e18 - uint(1e18).mul(ptu)/ptb)**2)/1e18;
 
@@ -122,7 +91,7 @@ library ZirconLibrary {
     }
 
 
-    function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+    function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure public returns (uint anchorKFactor) {
 
         //calculate the anchor liquidity change that would move formula switch to current price
         uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
@@ -194,7 +163,7 @@ library ZirconLibrary {
 
 
 
-    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) pure internal returns (uint anchorKFactor) {
+    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) pure public returns (uint anchorKFactor) {
 
         //When burning We need to change anchor factor if we're already in line formula
         //if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
@@ -252,7 +221,7 @@ library ZirconLibrary {
 
 
 
-    function absoluteDiff(uint value1, uint value2) pure internal returns (uint abs) {
+    function absoluteDiff(uint value1, uint value2) pure public returns (uint abs) {
         if (value1 >= value2) {
             abs = value1.sub(value2);
         } else {

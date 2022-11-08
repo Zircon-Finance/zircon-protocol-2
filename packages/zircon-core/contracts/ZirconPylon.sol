@@ -1,22 +1,21 @@
 pragma solidity =0.5.16;
-import './libraries/Math.sol';
+//import './libraries/Math.sol';
 import './interfaces/IZirconPair.sol';
 import './interfaces/IZirconPoolToken.sol';
-import "./libraries/SafeMath.sol";
+//import "./libraries/SafeMath.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./interfaces/IZirconPylonFactory.sol";
 import "./interfaces/IZirconFactory.sol";
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
-import "./energy/interfaces/IZirconEnergyRevenue.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
+import 'hardhat/console.sol';
 
-contract ZirconPylon is IZirconPylon, ReentrancyGuard {
+contract ZirconPylon is IZirconPylon {
     // **** Libraries ****
     using SafeMath for uint112;
     using SafeMath for uint256;
-    //    using UQ112x112 for uint224;
+    // using UQ112x112 for uint224;
 
     // **** STRUCTS *****
     struct PylonToken {
@@ -25,6 +24,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
     PylonToken private pylonToken;
     // ***** GLOBAL VARIABLES ******
+    bool private _notEntered;
 
     // ***** The address of the other components ******
     address private pairAddress;
@@ -66,17 +66,19 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     uint112 private reserve0;// uses single storage slot, accessible via getReserves (always anchor)
     uint112 private reserve1;// us es single storage slot, accessible via getReserves (always float)
-    //    uint32 private blockTimestampLast; // uses single storage slot, accessible via getReserves
 
+    // uint32 private blockTimestampLast; // uses single storage slot, accessible via getReserves
     // global variable used for testing
-    //uint private testMultiplier = 1e16;
+    // uint private testMultiplier = 1e16;
 
     // **** MODIFIERS *****
     uint public initialized = 0;
 
     /// using functions instead of modifiers to save some space
-    function notPaused() internal view {
+    function reentrancyAndPauseCheck() internal {
         require(initialized == 1 && !IZirconPylonFactory(factoryAddress).paused(), 'Z: P');
+        require(_notEntered, "Z: R");
+        _notEntered = true;
     }
     function onlyFactory() internal view{
         require(msg.sender == factoryAddress, 'Z: F'); // sufficient check
@@ -173,7 +175,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @_anchorPoolTokenAddress -> Contains Address Of Anchor PT
     // @floatToken -> Float token
     // @anchorToken -> Anchor token
-    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external nonReentrant {
+    function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external {
         onlyFactory();
         floatPoolTokenAddress = _floatPoolTokenAddress;
         anchorPoolTokenAddress = _anchorPoolTokenAddress;
@@ -197,18 +199,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         muBlockNumber = block.number; //block height of last mu update
         muOldGamma = gammaMulDecimals; //gamma value at last mu update
 
-        if (_vab != 0 ) {
-            _update();
-        }
+        if (_vab != 0 ) {_update();}
         initialized = 1;
     }
 
     // @notice On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon
     // And the second one is when initialize the pylon with a pair already existing
-    //1.277 kb
-    function initPylon(address _to) external nonReentrant returns (uint floatLiquidity, uint anchorLiquidity) {
-        require(initialized == 0 && !IZirconPylonFactory(factoryAddress).paused(), 'Z: P');
+    // 1.277 kb
+    function initPylon(address _to) external returns (uint floatLiquidity, uint anchorLiquidity) {
+        require(initialized == 0 && !IZirconPylonFactory(factoryAddress).paused() && _notEntered);
+        _notEntered = true;
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
         uint balance1 = IUniswapV2ERC20(pylonToken.anchor).balanceOf(address(this));
         notZero(balance0);
@@ -253,16 +254,17 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         IZirconPoolToken(anchorPoolTokenAddress).mint(_to, anchorLiquidity);
         IZirconPoolToken(floatPoolTokenAddress).mint(_to, floatLiquidity);
 
-        muMulDecimals = gammaMulDecimals; //Starts as gamma, diversifies over time. Used to calculate fee distribution
-        muBlockNumber = block.number; //block height of last mu update
-        muOldGamma = gammaMulDecimals; //gamma value at last mu update
+        muMulDecimals = gammaMulDecimals; // Starts as gamma, diversifies over time. Used to calculate fee distribution
+        muBlockNumber = block.number; // block height of last mu update
+        muOldGamma = gammaMulDecimals; // gamma value at last mu update
 
-        //(uint _pairReserveTR0, uint _pairReserveTR1) = getPairReservesTranslated(0,0);
-        //lastRootKTranslated = Math.sqrt(_pairReserveTR0.mul(_pairReserveTR1));
+        // (uint _pairReserveTR0, uint _pairReserveTR1) = getPairReservesTranslated(0,0);
+        // lastRootKTranslated = Math.sqrt(_pairReserveTR0.mul(_pairReserveTR1));
 
         //Here it updates the state and throws liquidity into the pool if possible
         _update();
         initialized = 1;
+        _notEntered = false;
     }
     // ***** EXCESS RESERVES ******
 
@@ -270,7 +272,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @balance0 & @balance1 -> The New Balances After A Sync Update
     // @max0 & @max1 -> The maximum that we can save on the reserves
     // If we have any excess reserves we donate them to the pool
-    //0.614 kb
+    // 0.614 kb
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private {
 
         if (max0 < newReserve0) {
@@ -295,7 +297,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // This function matches the Sync pool and sends liquidity into pair if possible
 
     // Sends pylonReserves to pool if there is a match
-    //0.786kb
+    // 0.786kb
     function _syncMinting(uint maximumPercentageSync) private {
         // Let's take the current balances
         uint balance0 = IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
@@ -332,13 +334,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                     balance0.sub(max0), balance1.sub(max1));
             }
 
-            //We run the update kFactor function for the anchor portion of liquidity
-            //This is only required after initialization
-            //Actually unnecessary, commented
-//            if(initialized == 1) {
-//                (, uint pylonReserve1) = getSyncReserves();
-//                anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, py, anchorKFactor, virtualAnchorBalance.sub(pylonReserve1), reservesTranslated0, reservesTranslated1);
-//            }
+            // We run the update kFactor function for the anchor portion of liquidity
+            // This is only required after initialization
+            // Actually unnecessary, commented
+            // if(initialized == 1) {
+            // (, uint pylonReserve1) = getSyncReserves();
+            // anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, py, anchorKFactor, virtualAnchorBalance.sub(pylonReserve1), reservesTranslated0, reservesTranslated1);
+            // }
 
             // Transferring tokens to pair and minting
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
@@ -404,7 +406,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// When moving outside it grows/reduces at a rate equal to deltagamma
     /// When moving inside the change rate is reduced by its closeness to the halfway point (changes very little if gamma is 50%)
 
-    //0.52kb
+    /// 0.52kb
     function _updateMu() private {
         uint _newBlockHeight = block.number; // t2
         //        uint _lastBlockHeight = muBlockNumber; // t1
@@ -514,7 +516,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // @amountSync -> Amount of tokens to mint sync
     // @liquidity -> In case async minting is done is returned the PT Liquidity to mint for the users on the async call, if not 0
     // @amount -> Amount on async if not 0
-    //>0.172
+    // >0.172
     function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint amountOut) {
         //Calculates max tokens to be had in this reserve pool
         uint maxP = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
@@ -573,9 +575,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // TODO: recheck in dump scenario if sync pool can be blocked
     // aka syncMint
     //1.381 kb
-    function mintPoolTokens(address _to, bool isAnchor) nonReentrant external returns (uint liquidity) {
+    function mintPoolTokens(address _to, bool isAnchor) external returns (uint liquidity) {
         //Master sync function
-        notPaused();
+        reentrancyAndPauseCheck();
         sync();
         (uint112 _reserve0, uint112 _reserve1) = getSyncReserves();
 
@@ -647,7 +649,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             require(newFloatLiquidity > floatLiquidityOwned, "ZP: VFB");
 
-            console.log("newv, oldv", newFloatLiquidity, floatLiquidityOwned);
+//            console.log("newv, oldv", newFloatLiquidity, floatLiquidityOwned);
             //Safety check in case we're giving too many tokens
             require((newFloatLiquidity - floatLiquidityOwned) <= amountIn, "ZP: VFB2");
 
@@ -666,13 +668,13 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 //            require((newDerVfb - derivedVfb) <= amountIn, "ZP: VFB2");
 //
 //            uint _liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb) - 1e18 )/1e18; //one overflow check sufficient
-            liquidity = _liquidity.mul(slippagePercentage)/1e18;
+//            liquidity = _liquidity.mul(slippagePercentage)/1e18;
 
         }
 
         // Mints zircon pool tokens to user after throwing their assets in the pool
         IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(_to, liquidity);
-
+        _notEntered = false;
 
     }
 
@@ -702,6 +704,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //            uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, );
             IZirconPair(pairAddress).swap(isFloatReserve0 ? 0 : amountSwapped, isFloatReserve0 ? amountSwapped : 0, energyAddress, "");
         }
+//        energyAddress.delegatecall(abi.encodeWithSignature("registerFee()"));
         IZirconEnergy(energyAddress).registerFee();
         amountOut =  amountIn - fee;
     }
@@ -716,6 +719,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         //feeBps guaranteed to be less than 10000
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
+//        energyAddress.delegatecall(abi.encodeWithSignature("registerFee()"));
+
         IZirconEnergy(energyAddress).registerFee();
 
         amountOut = amountIn - fee;
@@ -732,6 +737,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         uint maxDerivative = Math.max(gammaEMA, thisBlockEMA);
         uint deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+//        energyAddress.delegatecall(abi.encodeWithSignature("getFeeByGamma(uint256)", gammaMulDecimals));
+        //TODO: data returned
+
         feeBps = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
         // If either this block's gamma derivative or EMA is higher than threshold we go into the deltaTax mechanism
         if (maxDerivative >= deltaGammaThreshold) {
@@ -806,14 +814,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     // @notice Mint Async 100 lets you invest in one liquidity
     // The difference with Sync Liquidity is that it goes directly to the Pool
-    //    function mintAsync100(address to, bool isAnchor) nonReentrant  external returns (uint liquidity) {
+    //    function mintAsync100(address to, bool isAnchor)  external returns (uint liquidity) {
     //
     //        uint x = 5e18;
     //        uint sqrtx = Math.sqrt(5e18);
     //
     //
     //
-    ////        notPaused();
+    ////        reentrancyAndPauseCheck();
     ////        sync();
     ////        (uint112 _reserve0, uint112 _reserve1,) = getSyncReserves();
     ////        uint amountIn;
@@ -851,8 +859,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     // The difference is that gives you directly with mint one side
     // TODO: Transfer first then calculate on basis of pool token share how many share we should give to the user
     //2.522 kb
-    function mintAsync(address to, bool shouldMintAnchor) external nonReentrant  returns (uint liquidity){
-        notPaused();
+    function mintAsync(address to, bool shouldMintAnchor) external  returns (uint liquidity){
+        reentrancyAndPauseCheck();
         //Master sync function
         sync();
         address _poolTokenAddress = shouldMintAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress;
@@ -936,7 +944,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             require(newDerVfb > derivedVfb, "ZP: VFB");
 
             //Safety check in case we're giving too many tokens
-            console.log("as newv, oldv", newDerVfb, derivedVfb);
+//            console.log("as newv, oldv", newDerVfb, derivedVfb);
             require((newDerVfb - derivedVfb) <= amountIn0 * 2, "ZP: VFB2");
             liquidity = ptTotalSupply.mul( ((newDerVfb * 1e18)/derivedVfb) - 1e18 )/1e18; //one overflow check sufficient
 
@@ -945,15 +953,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         IZirconPoolToken(_poolTokenAddress).mint(to, liquidity);
 
         emit MintAsync(msg.sender, amountIn0, amountIn1);
+        _notEntered = false;
+
     }
 
 
-    //1.384
+    // 1.384
     /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
     function sync() private {
 
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) {
+
             IZirconPair(pairAddress).tryLock();
         }
 
@@ -1194,34 +1205,34 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     //                remainingPercentage = (amountToAdd.sub(energyPTBalance).mul(1e18))/(liquidity);
     //
     //            }
-    //        }
+    //        }TFF
     //    }
 
     /// @notice function that sends tokens to Pair to be burned after
-    //0.505kb
+    /// 0.505kb
     /// this function must be called only before a burn takes place, if not it'll give away tokens
-    function sendSlashedTokensToUser(uint anchorAmount, uint floatAmount, uint percentage, address _to) private {
-
+    function sendSlashedTokensToUser(uint floatAmount, uint anchorAmount, uint percentage, address _to) private returns (uint amount) {
         if(percentage != 0) {
             uint totalAmount = anchorAmount;
-            if ( floatAmount > 0 ) {
+            if (floatAmount > 0) {
                 (uint res0, uint res1) = getPairReservesNormalized();
-
                 totalAmount += floatAmount * res1/res0;
             }
 
+            console.log("totalAmount", totalAmount);
+
             // TotalAmount is what the user already received, while percentage is what's missing.
             // We divide to arrive to the original amount and diff it with totalAmount to get final number.
-            uint originalAmount = totalAmount.mul(1e18)/(1e18 - percentage);
-            uint amountToTransfer = originalAmount.sub(totalAmount); // Percentage is calculated "natively" as a full 1e18
+            // Percentage is calculated "natively" as a full 1e18
+            // ;ta/(1-p) - ta = ta*p/(1-p)
+            uint amountToTransfer = totalAmount.mul(percentage)/(1e18 - percentage);
+            uint eBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
+            console.log("amountToTransfer", amountToTransfer);
 
-            if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
-                _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
-            }else{
-                _safeTransferFrom(pylonToken.anchor, energyAddress, _to, IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress));
-            }
+            amount = eBalance > amountToTransfer ? amountToTransfer : eBalance;
+            _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
+
             IZirconEnergy(energyAddress).syncReserve();
-
         }
     }
 
@@ -1229,9 +1240,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice Burn Async let's you burn your anchor|float shares giving you back both tokens
     /// @dev sends to the Pair Contract the PTU equivalent to the Anchor|Float Shares
     /// and calls Classic burn
-    //1.42
-    function burnAsync(address _to, bool _isAnchor) external nonReentrant  returns (uint amount0, uint amount1) {
-        notPaused();
+    // 1.42
+    function burnAsync(address _to, bool _isAnchor) external  returns (uint amount0, uint amount1) {
+        reentrancyAndPauseCheck();
         //Calls master sync function
         sync();
         //Calculates Pylon pool token balance to burn
@@ -1241,10 +1252,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint ptTotalSupply = pt.totalSupply(); // pylon total supply
         uint extraPercentage = 0;
 
-
         uint feeBps = getFeeBps();
-
-
         // We disable the strike protection for burns
         // require(strikeBlock != block.number, "Z: P");
 
@@ -1291,6 +1299,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             // Sends for burning
             _safeTransfer(pairAddress, pairAddress, ptuWithFee);
+            _notEntered = false;
+
         }
         // Burning liquidity and sending to user
         // The pool tokens sent to the Pair are slashed by omega
@@ -1322,10 +1332,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                 gammaMulDecimals
             );
         }
-        //This one retrieves raw anchor tokens if required for additional compensation
-        sendSlashedTokensToUser(amount0, amount1, extraPercentage, to);
+        // This one retrieves raw anchor tokens if required for additional compensation
+        console.log("extraPercentage1", extraPercentage);
+        amount1 += sendSlashedTokensToUser(amount0, amount1, extraPercentage, to);
 
-        //Burns the Zircon pool tokens
+        // Burns the Zircon pool tokens
         pt.burn(address(this), liquidity);
 
         // Updating vab
@@ -1343,7 +1354,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// @notice Function That handles the amount of reserves in Float Anchor Shares
     /// and the amount of the minimum from liquidity and reserves
     /// @dev Helper function for burn
-    //0.323kb
+    // 0.323kb
     function burnPylonReserves(bool isAnchor, uint _totalSupply, uint _liquidity) view private returns (uint reservePT, uint amount) {
         // variables declaration
 
@@ -1377,10 +1388,10 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// If it's below 50%, it begins to go below 1 and thus slash any withdrawal.
     /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
     /// Also note that a dump of 60% only generates about 10% of slashing.
-    //0.39kb
+    // 0.39kb
     function handleOmegaSlashing(uint ptu) private returns (uint retPtu, uint extraPercentage){
         (, uint reserveAnchor) = getSyncReserves();
-        (, uint pairReserves1)  = getPairReservesTranslated(0,0);
+        (, uint pairReserves1) = getPairReservesTranslated(0,0);
 
         uint omegaMulDecimals = Math.min(1e18, (1e18 - gammaMulDecimals).mul(pairReserves1 * 2)/(virtualAnchorBalance - reserveAnchor));
 
@@ -1394,8 +1405,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             // uint energyAnchorBalance = IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress);
             // finds how much we can cover
             uint energyPTBalance = IUniswapV2ERC20(pairAddress).balanceOf(energyAddress);
-
-
             if (amountToAdd < energyPTBalance) {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // sends pool tokens directly to pair
@@ -1403,24 +1412,20 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             } else {
                 // Sending PT tokens to Pair because burn one side is going to be called after
                 // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
-
                 _safeTransferFrom(pairAddress, energyAddress, pairAddress, energyPTBalance);
                 extraPercentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
-
             }
         }
-
-        //(extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
+        // (extraPercentage) = sendSlashing(omegaMulDecimals, ptu);
     }
 
     // @notice Burn send liquidity back to user burning Pool tokens
     // The function first uses the reserves of the Pylon
     // If not enough reserves it burns The Pool Tokens of the pylon
     // Fees here are
-    //1.55kb
-    function burn(address _to, bool _isAnchor) external nonReentrant  returns (uint amount){
-
-        notPaused();
+    // 1.55kb
+    function burn(address _to, bool _isAnchor) external returns (uint amount){
+        reentrancyAndPauseCheck();
         sync();
         // Selecting the Pool Token class on basis of the requested tranch to burn
         IZirconPoolToken pt = IZirconPoolToken(_isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress);
@@ -1469,7 +1474,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                     anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
                         formulaSwitch,
-                        virtualAnchorBalance * (_liquidityAdjusted)/anchorPtSupply, //unchecked here since they are checked in other places
+                        virtualAnchorBalance * (_liquidityAdjusted)/anchorPtSupply, // unchecked here since they are checked in other places
                         ptuWithFee,
                         ptb,
                         anchorKFactor,
@@ -1479,22 +1484,18 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 }
                 bool isAnchor_ = isAnchor;
-                //Shifting this to the bottom since we can't pay fees until slashing is done.
+                // Shifting this to the bottom since we can't pay fees until slashing is done.
                 payFees(_amount, feeBps, isAnchor_);
 
 
                 _safeTransfer(_pairAddress, _pairAddress, ptuWithFee);
-                //address to_ = _to; //stack too deep
-                //bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
+                // address to_ = _to; //stack too deep
+                // bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
                 uint sentAmount = IZirconPair(_pairAddress).burnOneSide(to_, isFloatReserve0 != isAnchor_);  // XOR
-
-
-
-
 
                 returnAmount += sentAmount;
 
-                //Float-based anchorK adjustment
+                // Float-based anchorK adjustment
                 if(!isAnchor_) {
                     anchorKFactor = ZirconLibrary.anchorFactorFloatBurn(
                         sentAmount.mul(reservesTranslated1)/reservesTranslated0,
@@ -1506,14 +1507,14 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
                     );
                 }else{
                     // only anchor functionality
-                    sendSlashedTokensToUser(sentAmount, 0, extraPercentage, to_);
+                    returnAmount += sendSlashedTokensToUser(0, sentAmount, extraPercentage, to_);
                 }
 
                 payBurnFees(ptu, feeBps);
                 // Bool combines choice of anchor or float with which token is which in the pool
             }
 
-            pt.burn(address(this), liquidity); //Should burn unadjusted amount ofc
+            pt.burn(address(this), liquidity); // Should burn unadjusted amount ofc
             amount = returnAmount;
         }
 
@@ -1523,9 +1524,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         _update();
         emit Burn(msg.sender, amount, _isAnchor);
+        _notEntered = false;
+
     }
 
-    //0.287kb
+    // 0.287kb
     function migrateLiquidity(address newPylon) external{
         onlyFactory();
         _safeTransfer(pairAddress, newPylon , IZirconPair(pairAddress).balanceOf(address(this)));

@@ -17,7 +17,7 @@ library ZirconPeripheralLibrary {
             ))));
     }
 
-    function isInitialized(address factory, address tokenA, address tokenB, address pair) view external returns (bool initialized){
+    function isInitialized(address factory, address tokenA, address tokenB, address pair) view internal returns (bool initialized){
         initialized = IZirconPylon(pylonFor(factory, tokenA, tokenB, pair)).initialized() == 1;
     }
 
@@ -33,7 +33,7 @@ library ZirconPeripheralLibrary {
 
     // TODO: Change this
     // fetches and sorts the reserves for a pair
-    function maximumSync(uint reserve, uint reservePylon, uint syncPercentage, uint maxBase, uint ptt, uint ptb) external pure returns (uint maximum) {
+    function maximumSync(uint reserve, uint reservePylon, uint syncPercentage, uint maxBase, uint ptt, uint ptb) internal pure returns (uint maximum) {
         uint pairReserveTranslated = translate(reserve, ptt, ptb);
         maximum = (pairReserveTranslated == 0 || reservePylon > pairReserveTranslated) ? maxBase :
         (pairReserveTranslated.mul(syncPercentage)/100).sub(reservePylon);
