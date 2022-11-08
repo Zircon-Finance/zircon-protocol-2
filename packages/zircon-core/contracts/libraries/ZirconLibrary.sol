@@ -3,38 +3,23 @@ pragma solidity =0.5.16;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-
+import "hardhat/console.sol";
 library ZirconLibrary {
     using SafeMath for uint256;
 
-    // This function takes two variables and look at the maximum possible with the ration given by the reserves
-    // @pR0, @pR1 the pair reserves
-    // @b0, @b1 the balances to calculate
-    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure public returns (uint maxX, uint maxY)  {
-
-        //Expresses b1 in units of reserve0
-        uint px = _reserve0.mul(_b1)/_reserve1;
-
-        if (px > _b0) {
-            maxX = _b0;
-            maxY = _b0.mul(_reserve1)/_reserve0; //b0 in units of reserve1
-        } else {
-            maxX = px; //max is b1 but in reserve0 units
-            maxY = _b1;
-        }
-    }
 
     // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
     // @_amount is the quantity to convert
     // @_totalSupply is the supply of the pt's tranch
     // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
-    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure public returns (uint liquidity){
-        if (_isAnchor) {
-            liquidity = _amount.mul(_totalSupply)/_vab;
-        }else {
-            liquidity = ((_amount.mul(_totalSupply))/(_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18)));
-        }
-    }
+    // @deprecated TBD
+//    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure public returns (uint liquidity){
+//        if (_isAnchor) {
+//            liquidity = _amount.mul(_totalSupply)/_vab;
+//        }else {
+//            liquidity = ((_amount.mul(_totalSupply))/(_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18)));
+//        }
+//    }
 
 
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
@@ -221,13 +206,8 @@ library ZirconLibrary {
 
 
 
-    function absoluteDiff(uint value1, uint value2) pure public returns (uint abs) {
-        if (value1 >= value2) {
-            abs = value1.sub(value2);
-        } else {
-            abs = value2.sub(value1);
-        }
-    }
+
+
 
 
 
