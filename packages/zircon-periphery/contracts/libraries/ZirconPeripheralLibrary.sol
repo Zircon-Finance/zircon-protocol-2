@@ -8,14 +8,19 @@ library ZirconPeripheralLibrary {
     using SafeMath for uint256;
     // calculates the CREATE2 address for a pair without making any external calls
     //TODO: Update init code hash with Zircon Pylon code hash
-    function pylonFor(address factory, address tokenA, address tokenB, address pair) internal pure returns (address pylon) {
-        pylon = address(uint(keccak256(abi.encodePacked(
-                hex'ff',
-                factory,
-                keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'afaf6286555f731e9581935e0bb62d3fec24c96b73c638aa7b5a8b9fbc595e39' // init code hash
-            ))));
-    }
+
+
+    // DO NOT CHANGE THIS FUNCTION WILL BE UPDATED BY 'yarn bytecode' inside zircon-core
+    function pylonFor(address pylonFactory, address tokenA, address tokenB, address pair) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'36ee3b65596697d2575b1a7c8321880f2b1dd152ff1b5e74101a287c6e521b2e'))));}
+
+//    function pylonFor(address factory, address tokenA, address tokenB, address pair) internal pure returns (address pylon) {
+//        pylon = address(uint(keccak256(abi.encodePacked(
+//                hex'ff',
+//                factory,
+//                keccak256(abi.encodePacked(tokenA, tokenB, pair)),
+//                hex'afaf6286555f731e9581935e0bb62d3fec24c96b73c638aa7b5a8b9fbc595e39' // init code hash
+//            ))));
+//    }
 
     function isInitialized(address factory, address tokenA, address tokenB, address pair) view internal returns (bool initialized){
         initialized = IZirconPylon(pylonFor(factory, tokenA, tokenB, pair)).initialized() == 1;
