@@ -3,7 +3,7 @@ const { ethers } = require('hardhat');
 const assert = require("assert");
 const {BigNumber} = require("ethers");
 const {expandTo18Decimals} = require("./shared/utils");
-const {coreFixtures} = require("./shared/fixtures");
+const {coreFixtures, librarySetup} = require("./shared/fixtures");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
@@ -11,7 +11,7 @@ const TEST_ADDRESSES = [
 let factoryPylonInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
-    pair, feeToSetter, factoryEnergyInstance;
+    pair, feeToSetter, factoryEnergyInstance, library;
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const overrides = {
@@ -31,11 +31,15 @@ async function getOutputAmount(input, inputReserves, outputReserves) {
 }
 
 // TODO: See case where we have a big dump
+
 describe("Energy", () => {
+    before(async () => {
+        library = await librarySetup()
+    })
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
-        let fixtures = await coreFixtures(deployerAddress)
+        let fixtures = await coreFixtures(deployerAddress, library)
         factoryInstance = fixtures.factoryInstance
         token0 = fixtures.token0
         token1 = fixtures.token1
@@ -46,6 +50,7 @@ describe("Energy", () => {
         factoryPylonInstance = fixtures.factoryPylonInstance
         feeToSetter = fixtures.feeToSetterInstance
         factoryEnergyInstance = fixtures.factoryEnergyInstance
+        zirconPylonLibrary = fixtures.zirconPylonLibrary
     });
     const init = async (token0Amount, token1Amount) => {
         // Let's initialize the Pool, inserting some liquidity in it
@@ -56,6 +61,26 @@ describe("Energy", () => {
         //Let's initialize the Pylon, this should call two sync
         await pylonInstance.initPylon(account.address)
     }
+
+    it("Should verify that the contract address are correct", async () => {
+        let energy0Address = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
+        // let energy1Address = await factoryEnergyInstance.getEnergy(token1.address, token0.address);
+        let energyRevAddress = await factoryEnergyInstance.getEnergyRevenue(token0.address, token1.address);
+
+        let energyRevAddressPair = await pair.energyRevenueAddress();
+        expect(energyRevAddress).to.equal(energyRevAddressPair);
+
+        let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
+        let zirconEnergyRevenue = await zEnergyRev.attach(energyRevAddress);
+        let information = await zirconEnergyRevenue.zircon();
+        console.log("Energy Address: ", information);
+
+        expect(information.energy0).to.equal(energy0Address);
+        // expect(information.energy1).to.equal(energy1Address);
+
+        expect(information.pylon0).to.equal(pylonInstance.address);
+
+    });
 
     it('should send tokens to energy', async function () {
         let energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
@@ -123,7 +148,11 @@ describe("Energy", () => {
         await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
         let pylonAddress = await factoryPylonInstance.getPylon(token1.address, token0.address)
 
-        let zPylon = await ethers.getContractFactory('ZirconPylon')
+        let zPylon = await ethers.getContractFactory('ZirconPylon', {
+            libraries: {
+                ZirconLibrary: zirconPylonLibrary.address
+            }
+        })
         let newPylonInstance = await zPylon.attach(pylonAddress);
         // Let's transfer some tokens to the Pylon
         await token0.transfer(newPylonInstance.address, expandTo18Decimals(17))
@@ -336,7 +365,11 @@ describe("Energy", () => {
         await init(expandTo18Decimals(100), expandTo18Decimals(10))
         await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
         let pylonAddress = await factoryPylonInstance.getPylon(token1.address, token0.address)
-        let zPylon = await ethers.getContractFactory('ZirconPylon')
+        let zPylon = await ethers.getContractFactory('ZirconPylon', {
+            libraries: {
+                ZirconLibrary: zirconPylonLibrary.address
+            }
+        })
         pylonInstance = await zPylon.attach(pylonAddress);
         let t = token0
         token0 = token1

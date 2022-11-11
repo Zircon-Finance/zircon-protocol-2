@@ -58,8 +58,8 @@ contract ZirconEnergy is IZirconEnergy {
       tokenB
     );
     // Approving pylon to use anchor tokens
-    IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-    IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+    //    IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+    //    IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
 
     initialized = 1;
 
@@ -94,7 +94,7 @@ contract ZirconEnergy is IZirconEnergy {
 
   //Called when tokens are withdrawn to ensure pylon doesn't get bricked
   function syncReserve() external _onlyPylon _initialize {
-      anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+    anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
   }
 
 
@@ -124,6 +124,77 @@ contract ZirconEnergy is IZirconEnergy {
   }
 
 
+  function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
+    require(amountIn > 0, 'UV2: IIA');
+    require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
+    uint amountInWithFee = amountIn.mul(10000-fee);
+    uint numerator = amountInWithFee.mul(reserveOut);
+    uint denominator = reserveIn.mul(10000).add(amountInWithFee);
+    amountOut = numerator / denominator;
+  }
+
+
+  /// @notice Omega is the slashing factor. It's always equal to 1 if pool has gamma above 50%
+  /// If it's below 50%, it begins to go below 1 and thus slash any withdrawal.
+  /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
+  /// Also note that a dump of 60% only generates about 10% of slashing.
+  // 0.39kb
+  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint gammaMulDecimals, uint fee, bool isFloatReserve0, address _to) external returns (uint retPTU, uint amount){
+    // Send slashing should send the extra PTUs to Uniswap.
+    // When burn calls the uniswap burn it will also give users the compensation
+    retPTU = omegaMulDecimals.mul(ptu)/1e18;
+
+    if (omegaMulDecimals < 1e18) {
+      //finds amount to cover
+      uint amountToAdd = ptu * (1e18-omegaMulDecimals)/1e18; // already checked
+
+      // finds how much we can cover
+      uint energyPTBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this));
+      if (amountToAdd < energyPTBalance) {
+        // Sending PT tokens to Pair because burn one side is going to be called after
+        // sends pool tokens directly to pair
+        _safeTransfer(pylon.pairAddress, pylon.pairAddress, amountToAdd);
+      } else {
+        // Sending PT tokens to Pair because burn one side is going to be called after
+        // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
+        _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
+        uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
+        {
+          uint _fee = fee;
+          uint _ptu = ptu;
+          bool _isFloatReserve0 = isFloatReserve0;
+          uint ts = IZirconPair(pylon.pairAddress).totalSupply();
+          (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
+
+          uint liquidity = _ptu + energyPTBalance;
+
+          uint amount0 = liquidity.mul(_isFloatReserve0 ? reserve0 : reserve1) / ts;
+          uint amount1 = liquidity.mul(_isFloatReserve0 ? reserve1 : reserve0) / ts;
+          // sends pool tokens directly to pair
+
+          uint totalAmount = amount1 + getAmountOut(amount0, reserve0, reserve1, _fee);
+
+          amount = totalAmount.mul(percentage)/(1e18 - percentage);
+
+        }
+
+
+
+        // TotalAmount is what the user already received, while percentage is what's missing.
+        // We divide to arrive to the original amount and diff it with totalAmount to get final number.
+        // Percentage is calculated "natively" as a full 1e18
+        // ta/(1-p) - ta = ta*p/(1-p)
+
+        uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+
+        amount = eBalance > amount ? amount : eBalance;
+        _safeTransfer(pylon.anchorToken, _to, amount);
+
+        // updating the reserves of energy
+        anchorReserve = eBalance-amount;
+      }
+    }
+  }
 
 
 }

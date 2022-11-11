@@ -1,7 +1,15 @@
 const { ethers } = require('hardhat');
 const {expandTo18Decimals} = require("./utils");
+const updateBytecode = require("../../scripts/update-bytecode");
 
-exports.coreFixtures = async function coreFixtures(address) {
+exports.librarySetup = async function librarySetup() {
+    // Deploying Library
+    let library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
+    await updateBytecode(library.address, true);
+    return library;
+}
+
+exports.coreFixtures = async function coreFixtures(address, library) {
 
     // Deploy feeToSetter contract
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
@@ -30,7 +38,6 @@ exports.coreFixtures = async function coreFixtures(address) {
     let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address, feeToSetterInstance.address);
 
     // Deploying Pylon Factory
-    let library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory', {
         libraries: {
             ZirconLibrary: library.address,
@@ -58,6 +65,7 @@ exports.coreFixtures = async function coreFixtures(address) {
     // Creating Pylon
     await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
     let pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
+
     console.log("Lib:Address", library.address)
     let zPylon = await ethers.getContractFactory('ZirconPylon', {
         libraries: {
@@ -67,7 +75,6 @@ exports.coreFixtures = async function coreFixtures(address) {
     let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
     let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
     let pylonInstance = await zPylon.attach(pylonAddress);
-    console.log("pylon", pylonInstance.address);
     let energyContract = await ethers.getContractFactory('ZirconEnergy')
 
     // Configuring Pool Tokens Anchor And Float
@@ -93,7 +100,8 @@ exports.coreFixtures = async function coreFixtures(address) {
         migratorInstance,
         factoryEnergyInstance,
         ptFactoryInstance,
-        feeToSetterInstance
+        feeToSetterInstance,
+        zirconPylonLibrary: library,
     }
 }
 

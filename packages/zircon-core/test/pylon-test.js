@@ -14,7 +14,7 @@
 // let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
 //     pylonInstance, poolTokenInstance0, poolTokenInstance1,
 //     factoryInstance, deployerAddress, account2, account,
-//     pair;
+//     pair, library;
 //
 // const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 // const overrides = {
@@ -29,10 +29,13 @@
 //
 //
 // describe("Pylon", () => {
+//      before(async () => {
+//          library = await librarySetup()
+//      })
 //     beforeEach(async () => {
 //         [account, account2] = await ethers.getSigners();
 //         deployerAddress = account.address;
-//         let fixtures = await coreFixtures(deployerAddress)
+//         let fixtures = await coreFixtures(deployerAddress, library)
 //         factoryInstance = fixtures.factoryInstance
 //         token0 = fixtures.token0
 //         token1 = fixtures.token1
