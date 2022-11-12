@@ -1,16 +1,19 @@
 const { ethers } = require('hardhat');
 const {expandTo18Decimals} = require("./utils");
-const updateBytecode = require("../../scripts/update-bytecode");
+const {LIB_ADDRESS} = require("../../scripts/constants");
 
 exports.librarySetup = async function librarySetup() {
     // Deploying Library
+    console.log("WTF")
     let library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
-    await updateBytecode(library.address, true);
+    if (library.address !== LIB_ADDRESS[31337]) {
+        console.error("UPDATE LIBRARY ADDRESS ON get-bytecodes.js", library.address)
+        throw new Error()
+    }
     return library;
 }
 
 exports.coreFixtures = async function coreFixtures(address, library) {
-
     // Deploy feeToSetter contract
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
     let feeToSetterInstance = await feeToSetter.deploy();

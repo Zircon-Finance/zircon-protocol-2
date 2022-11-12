@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity =0.5.16;
 
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 //import '../libraries/Math.sol';
-
 import "./libraries/SafeMath.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 import "../interfaces/IZirconPair.sol";
@@ -155,6 +154,7 @@ contract ZirconEnergy is IZirconEnergy {
         // sends pool tokens directly to pair
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, amountToAdd);
       } else {
+        console.log("sending PTS");
         // Sending PT tokens to Pair because burn one side is going to be called after
         // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
@@ -171,19 +171,14 @@ contract ZirconEnergy is IZirconEnergy {
           uint amount0 = liquidity.mul(_isFloatReserve0 ? reserve0 : reserve1) / ts;
           uint amount1 = liquidity.mul(_isFloatReserve0 ? reserve1 : reserve0) / ts;
           // sends pool tokens directly to pair
-
           uint totalAmount = amount1 + getAmountOut(amount0, reserve0, reserve1, _fee);
 
+          // TotalAmount is what the user already received, while percentage is what's missing.
+          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
+          // Percentage is calculated "natively" as a full 1e18
+          // ta/(1-p) - ta = ta*p/(1-p)
           amount = totalAmount.mul(percentage)/(1e18 - percentage);
-
         }
-
-
-
-        // TotalAmount is what the user already received, while percentage is what's missing.
-        // We divide to arrive to the original amount and diff it with totalAmount to get final number.
-        // Percentage is calculated "natively" as a full 1e18
-        // ta/(1-p) - ta = ta*p/(1-p)
 
         uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
 
@@ -192,6 +187,8 @@ contract ZirconEnergy is IZirconEnergy {
 
         // updating the reserves of energy
         anchorReserve = eBalance-amount;
+
+
       }
     }
   }

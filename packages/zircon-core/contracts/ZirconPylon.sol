@@ -159,7 +159,7 @@ contract ZirconPylon is IZirconPylon {
 
     //    function getLiquidityFromPoolTokens(uint amountIn0, uint amountIn1,  bool shouldMintAnchor, uint pairReserveTR0, uint ) private view returns (uint amountInAdjusted){
     //        (uint _pairReserveTR0, uint _pairReserveTR1) = getPairReservesTranslated(0,0);
-    ////        (, uint112 _reserve1) = getSyncReserves(); // gas savings
+    //        (, uint112 _reserve1) = getSyncReserves(); // gas savings
     //
     //        if (shouldMintAnchor) {
     //            amountInAdjusted = Math.min((amountIn0.mul(_pairReserveTR1).mul(2))/_pairReserveTR0, amountIn1.mul(2)); //Adjust AmountIn0 to its value in Anchor tokens
@@ -188,7 +188,7 @@ contract ZirconPylon is IZirconPylon {
         energyRevAddress = _energyRev;
     }
 
-    //0.048 kb
+    // 0.048 kb
     function initMigratedPylon(uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external {
         onlyFactory(); // sufficient check
         gammaMulDecimals = _gamma;
@@ -1260,6 +1260,7 @@ contract ZirconPylon is IZirconPylon {
         // The pool tokens sent to the Pair are slashed by omega
         // handleOmega has sent the pool tokens if it had them, so this function retrieves the full share
         address to = _to; //stack too deep
+
 
         (, uint _pairReserves1) = getPairReservesTranslated(0, 0);
         // we save ptb here for the float anchorK calculation

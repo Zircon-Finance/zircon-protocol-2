@@ -30,8 +30,6 @@ async function getOutputAmount(input, inputReserves, outputReserves) {
     return numerator.div(denominator)
 }
 
-// TODO: See case where we have a big dump
-
 describe("Energy", () => {
     before(async () => {
         library = await librarySetup()
@@ -62,24 +60,19 @@ describe("Energy", () => {
         await pylonInstance.initPylon(account.address)
     }
 
-    it("Should verify that the contract address are correct", async () => {
+    it("Should verify that the contract address generated are correct", async () => {
         let energy0Address = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
         // let energy1Address = await factoryEnergyInstance.getEnergy(token1.address, token0.address);
         let energyRevAddress = await factoryEnergyInstance.getEnergyRevenue(token0.address, token1.address);
 
         let energyRevAddressPair = await pair.energyRevenueAddress();
-        expect(energyRevAddress).to.equal(energyRevAddressPair);
-
         let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
         let zirconEnergyRevenue = await zEnergyRev.attach(energyRevAddress);
         let information = await zirconEnergyRevenue.zircon();
-        console.log("Energy Address: ", information);
 
+        expect(energyRevAddress).to.equal(energyRevAddressPair);
         expect(information.energy0).to.equal(energy0Address);
-        // expect(information.energy1).to.equal(energy1Address);
-
         expect(information.pylon0).to.equal(pylonInstance.address);
-
     });
 
     it('should send tokens to energy', async function () {
@@ -92,11 +85,7 @@ describe("Energy", () => {
         await token1.transfer(pylonInstance.address, tokTransfer);
         await pylonInstance.mintPoolTokens(account.address, true);
 
-        console.log("sending", ethers.utils.formatEther(tokTransfer))
-        console.log("fees", ethers.utils.formatEther(await token1.balanceOf(energyAddress)))
-
-        expect(await token1.balanceOf(energyAddress)).to.eq('1918552036199095') // TODO: Change fee percentage
-
+        expect(await token1.balanceOf(energyAddress)).to.eq('1918552036199095')
     });
 
     it('should send tokens to energy (rev fee energy on)', async function () {
@@ -117,7 +106,6 @@ describe("Energy", () => {
 
         expect(await token1.balanceOf(energyAddress)).to.eq('1918552036199095') // TODO: Change fee percentage
         expect(await token1.balanceOf(energyRevAddress)).to.eq('479638009049773') // TODO: Change fee percentage
-
     });
 
 
@@ -358,7 +346,6 @@ describe("Energy", () => {
         expect(await pair.balanceOf(energyAddress)).to.eq("289590940353806836")
 
         expect(await zirconEnergyRevenue.reserve()).to.eq("289590940353806836")
-
     });
 
     it('should send fees on swap to energy revenue on opposite pylon', async function () {
@@ -462,9 +449,11 @@ describe("Energy", () => {
     });
 
     it('burning without energy (checking anchor slashing token)', async function () {
-        await init(expandTo18Decimals(2), expandTo18Decimals(10))
+
+        await init(expandTo18Decimals(2), expandTo18Decimals(100))
         let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);
         let initialPTS1 = await poolTokenInstance1.balanceOf(account.address);
+
 
     });
 
