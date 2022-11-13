@@ -486,9 +486,51 @@ describe("Energy", () => {
 
     });
 
-    // TODO: Test that tokens are sent correctly to the address
-    // TODO: Test that calculation are correct
-    // TODO: Get Amount Out is sent correctly
+    it('burning with energy (checking anchor slashing tokens)', async function () {
+        await init(expandTo18Decimals(12), expandTo18Decimals(10))
+        let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);
+        let initialPTS1 = await poolTokenInstance1.balanceOf(account.address);
+        console.log("pair address", pair.address)
+        await feeToSetter.setFeePercentageRev(90)
+
+            await feeToSetter.setFees(10, ethers.BigNumber.from("40000000000000000"), 100, 240, 3,2);
+
+        // Time to swap, let's generate some fees
+        await token0.transfer(pair.address, expandTo18Decimals(4))
+        let output = getOutputAmount(expandTo18Decimals(4), expandTo18Decimals(12), expandTo18Decimals(10))
+        await pair.swap(0, output, account.address, '0x', overrides)
+
+        const newAmount0 = ethers.BigNumber.from('5000000000000000')
+
+        // Let's get some float shares...
+        await token0.transfer(pylonInstance.address, newAmount0)
+        await pylonInstance.mintPoolTokens(account.address, false)
+
+        // Let's get some anchor shares...
+        await token1.transfer(pylonInstance.address, newAmount0);
+        await pylonInstance.mintPoolTokens(account.address, true);
+
+        // So After minting Float we do a swap so we pay both fees one for swapping one for entering in the pool
+        // Let's check that...
+        let energyRevenueAddress = await pair.energyRevenueAddress()
+        let energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
+
+        let energyRevAddress = await pair.energyRevenueAddress()
+
+        let zEnergyRev = await ethers.getContractFactory('ZirconEnergyRevenue')
+        let zEnergy = await ethers.getContractFactory('ZirconEnergy')
+        let zirconEnergyRevenue = await zEnergyRev.attach(energyRevAddress);
+        let zirconEnergy = await zEnergy.attach(energyAddress);
+
+        let ptb1 = await poolTokenInstance1.balanceOf(account.address);
+        await poolTokenInstance1.transfer(pylonInstance.address, initialPTS1)
+        await expect(pylonInstance.burn(account2.address, true))
+        let tok2Balance = await token1.balanceOf(account2.address)
+        expect(tok2Balance).to.eq("845725770755454833")
+        // 1790392821657 (From Omega Anchor)
+        // 2429159020919464 (From Pylon + Omega PT)
+
+    });
     it('burning async with energy (checking anchor slashing tokens)', async function () {
         await init(expandTo18Decimals(12), expandTo18Decimals(10))
         let initialPTS0 = await poolTokenInstance0.balanceOf(account.address);

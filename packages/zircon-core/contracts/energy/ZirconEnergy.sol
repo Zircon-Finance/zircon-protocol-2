@@ -138,7 +138,7 @@ contract ZirconEnergy is IZirconEnergy {
   /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
   /// Also note that a dump of 60% only generates about 10% of slashing.
   // 0.39kb
-  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint gammaMulDecimals, uint fee, bool isFloatReserve0, address _to) _onlyPylon
+  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint fee, bool isFloatReserve0, address _to) _onlyPylon
   external returns (uint retPTU, uint amount){
     // Send slashing should send the extra PTUs to Uniswap.
     // When burn calls the uniswap burn it will also give users the compensation
@@ -162,7 +162,7 @@ contract ZirconEnergy is IZirconEnergy {
         uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
         {
           uint _fee = fee;
-          uint _ptu = ptu;
+          uint _ptu = retPTU;
           bool _isFloatReserve0 = isFloatReserve0;
           uint ts = IZirconPair(pylon.pairAddress).totalSupply();
           (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
@@ -173,8 +173,10 @@ contract ZirconEnergy is IZirconEnergy {
 
           uint amount0 = liquidity.mul(_reserve0) / ts;
           uint amount1 = liquidity.mul(_reserve1) / ts;
+
           // sends pool tokens directly to pair
           uint totalAmount = amount1 + getAmountOut(amount0, _reserve0, _reserve1, _fee);
+
           // TotalAmount is what the user already received, while percentage is what's missing.
           // We divide to arrive to the original amount and diff it with totalAmount to get final number.
           // Percentage is calculated "natively" as a full 1e18
@@ -187,6 +189,7 @@ contract ZirconEnergy is IZirconEnergy {
         amount = eBalance > amount ? amount : eBalance;
 
         _safeTransfer(pylon.anchorToken, _to, amount);
+
 
         // updating the reserves of energy
         anchorReserve = eBalance-amount;

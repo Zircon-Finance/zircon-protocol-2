@@ -23,7 +23,7 @@ library ZirconLibrary {
 
 
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
-    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) view public returns (uint anchorKFactor) {
+    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) pure public returns (uint anchorKFactor) {
 
         uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
@@ -49,7 +49,7 @@ library ZirconLibrary {
 
     //This should increase kFactor when removing float. Ignores if formula decreases it
     //We use ptu to derive change in K, reserve1 and gamma for FTV
-    function anchorFactorFloatBurn(uint amount, uint oldKFactor, uint ptu, uint ptb, uint _reserveTranslated1, uint _gamma) view public returns (uint anchorKFactor) {
+    function anchorFactorFloatBurn(uint amount, uint oldKFactor, uint ptu, uint ptb, uint _reserveTranslated1, uint _gamma) pure public returns (uint anchorKFactor) {
         // we know that ptu is proportional to sqrt(deltaK)
         // so our Kprime is just k - (ptu/ptb * (sqrtK))**2
         // while Kprime/k is simply 1 - ptu**2/ptb**2

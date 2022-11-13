@@ -204,7 +204,7 @@ contract ZirconPylon is IZirconPylon {
         initialized = 1;
     }
 
-    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) view public returns (uint gamma, bool isLineFormula, uint reserveSwitch) {
+    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) pure public returns (uint gamma, bool isLineFormula, uint reserveSwitch) {
         uint totalPoolValueAnchorPrime = _translatedReserve1 * 2;
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
 
@@ -1001,8 +1001,8 @@ contract ZirconPylon is IZirconPylon {
             {
 
                 //We redefine them here so that we don't use the old reference and get stack too deep.
-                uint _reserveTranslated0 = pairReserveTranslated0;
-                uint _reserveTranslated1 = pairReserveTranslated1;
+//                uint _reserveTranslated0 = pairReserveTranslated0;
+//                uint _reserveTranslated1 = pairReserveTranslated1;
 
 
 
@@ -1232,7 +1232,6 @@ contract ZirconPylon is IZirconPylon {
                     (ptuWithFee, amount1) = IZirconEnergy(energyAddress).handleOmegaSlashing(
                         ptuWithFee,
                         Math.min(1e18, (1e18 - gammaMulDecimals).mul(pairReserves1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                        gammaMulDecimals,
                         IZirconFactory(pairFactoryAddress).liquidityFee(),
                         isFloatReserve0,
                         to);
@@ -1274,8 +1273,6 @@ contract ZirconPylon is IZirconPylon {
 
         amount0 += isFloatReserve0 ? amountA : amountB;
         amount1 += isFloatReserve0 ? amountB : amountA;
-        //        amount1 += extraAmount;
-        console.log("Burned:", amount0, amount1);
         if(!_isAnchor) {
             anchorKFactor = ZirconLibrary.anchorFactorFloatBurn(
                 amount1 * 2,
@@ -1398,9 +1395,9 @@ contract ZirconPylon is IZirconPylon {
             if (reservePT < liquidity) {
                 uint _liquidityAdjusted = liquidity - reservePT;
                 uint ptu = calculateLPTU(isAnchor, _liquidityAdjusted, _totalSupply);
-                console.log("fee", feeBps);
                 //Two vars since we can't pay fees until omega calculations are done
-                uint ptuWithFee = ptu.mul((1e18 - feeBps)/10000);
+                uint ptuWithFee = ptu - (ptu * feeBps)/10000;
+
                 //                uint extraPercentage = 0;
                 (uint reservesTranslated0, uint reservesTranslated1) = getPairReservesTranslated(0, 0);
 
@@ -1409,15 +1406,15 @@ contract ZirconPylon is IZirconPylon {
                 if(isAnchor) {
                     (,uint reserveAnchor) = getSyncReserves();
                     {
-                        uint _amount = 0;
-                        (ptuWithFee, _amount) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+                        uint amount_ = 0;
+                        (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
                             ptuWithFee,
                             Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                            gammaMulDecimals,
                             IZirconFactory(pairFactoryAddress).liquidityFee(),
                             isFloatReserve0,
                             to_);
-                        returnAmount += _amount;
+                        returnAmount += amount_;
+
                     }
 
                     uint anchorPtSupply = _totalSupply; // stack too deep avoidance
