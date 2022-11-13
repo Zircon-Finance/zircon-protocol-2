@@ -138,26 +138,27 @@ contract ZirconEnergy is IZirconEnergy {
   /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
   /// Also note that a dump of 60% only generates about 10% of slashing.
   // 0.39kb
-  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint gammaMulDecimals, uint fee, bool isFloatReserve0, address _to) external returns (uint retPTU, uint amount){
+  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint gammaMulDecimals, uint fee, bool isFloatReserve0, address _to) _onlyPylon
+  external returns (uint retPTU, uint amount){
     // Send slashing should send the extra PTUs to Uniswap.
     // When burn calls the uniswap burn it will also give users the compensation
     retPTU = omegaMulDecimals.mul(ptu)/1e18;
-
     if (omegaMulDecimals < 1e18) {
       //finds amount to cover
       uint amountToAdd = ptu * (1e18-omegaMulDecimals)/1e18; // already checked
 
       // finds how much we can cover
       uint energyPTBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this));
+
       if (amountToAdd < energyPTBalance) {
         // Sending PT tokens to Pair because burn one side is going to be called after
         // sends pool tokens directly to pair
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, amountToAdd);
       } else {
-        console.log("sending PTS");
         // Sending PT tokens to Pair because burn one side is going to be called after
         // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
+
         uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
         {
           uint _fee = fee;
@@ -167,12 +168,13 @@ contract ZirconEnergy is IZirconEnergy {
           (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
 
           uint liquidity = _ptu + energyPTBalance;
+          uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
+          uint _reserve1 = _isFloatReserve0 ? reserve1 : reserve0;
 
-          uint amount0 = liquidity.mul(_isFloatReserve0 ? reserve0 : reserve1) / ts;
-          uint amount1 = liquidity.mul(_isFloatReserve0 ? reserve1 : reserve0) / ts;
+          uint amount0 = liquidity.mul(_reserve0) / ts;
+          uint amount1 = liquidity.mul(_reserve1) / ts;
           // sends pool tokens directly to pair
-          uint totalAmount = amount1 + getAmountOut(amount0, reserve0, reserve1, _fee);
-
+          uint totalAmount = amount1 + getAmountOut(amount0, _reserve0, _reserve1, _fee);
           // TotalAmount is what the user already received, while percentage is what's missing.
           // We divide to arrive to the original amount and diff it with totalAmount to get final number.
           // Percentage is calculated "natively" as a full 1e18
@@ -183,12 +185,11 @@ contract ZirconEnergy is IZirconEnergy {
         uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
 
         amount = eBalance > amount ? amount : eBalance;
+
         _safeTransfer(pylon.anchorToken, _to, amount);
 
         // updating the reserves of energy
         anchorReserve = eBalance-amount;
-
-
       }
     }
   }

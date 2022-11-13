@@ -114,7 +114,7 @@ contract ZirconPylon is IZirconPylon {
     // ****** CONSTRUCTOR ******
     constructor() public {
         factoryAddress = msg.sender;
-//        _entered = false;
+        //        _entered = false;
     }
 
     // ****** HELPER FUNCTIONS *****
@@ -1192,7 +1192,7 @@ contract ZirconPylon is IZirconPylon {
         uint liquidity = pt.balanceOf(address(this));
         notZero(liquidity);
         uint ptTotalSupply = pt.totalSupply(); // pylon total supply
-//        uint extraAmount = 0;
+        //        uint extraAmount = 0;
 
         uint feeBps = getFeeBps();
         // We disable the strike protection for burns
@@ -1229,13 +1229,13 @@ contract ZirconPylon is IZirconPylon {
                 // The ptu returned is adjusted by Omega
                 {
                     address to = _to;
-                    (ptuWithFee, ) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+                    (ptuWithFee, amount1) = IZirconEnergy(energyAddress).handleOmegaSlashing(
                         ptuWithFee,
                         Math.min(1e18, (1e18 - gammaMulDecimals).mul(pairReserves1 * 2)/(virtualAnchorBalance - reserveAnchor)),
                         gammaMulDecimals,
                         IZirconFactory(pairFactoryAddress).liquidityFee(),
                         isFloatReserve0,
-                            to);
+                        to);
                 }
 
                 // (ptuWithFee, extraPercentage) = handleOmegaSlashing(ptuWithFee);
@@ -1270,11 +1270,12 @@ contract ZirconPylon is IZirconPylon {
 
         // Burn fee after everything to avoid loss of precision to omega identity & burning compensation tokens
         uint ptuWithFee = payBurnFees(ptu, feeBps);
+        console.log("Burned:", amountA, amountB);
 
-        amount0 = isFloatReserve0 ? amountA : amountB;
-        amount1 = isFloatReserve0 ? amountB : amountA;
-//        amount1 += extraAmount;
-
+        amount0 += isFloatReserve0 ? amountA : amountB;
+        amount1 += isFloatReserve0 ? amountB : amountA;
+        //        amount1 += extraAmount;
+        console.log("Burned:", amount0, amount1);
         if(!_isAnchor) {
             anchorKFactor = ZirconLibrary.anchorFactorFloatBurn(
                 amount1 * 2,
@@ -1407,14 +1408,17 @@ contract ZirconPylon is IZirconPylon {
                 uint ptb = IZirconPair(pairAddress).balanceOf(address(this));
                 if(isAnchor) {
                     (,uint reserveAnchor) = getSyncReserves();
-
-//                    (ptuWithFee, ) = IZirconEnergy(energyAddress).handleOmegaSlashing(
-//                        ptuWithFee,
-//                        Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-//                        gammaMulDecimals,
-//                        IZirconFactory(pairFactoryAddress).liquidityFee(),
-//                        isFloatReserve0,
-//                        _to);
+                    {
+                        uint _amount = 0;
+                        (ptuWithFee, _amount) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+                            ptuWithFee,
+                            Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
+                            gammaMulDecimals,
+                            IZirconFactory(pairFactoryAddress).liquidityFee(),
+                            isFloatReserve0,
+                            to_);
+                        returnAmount += _amount;
+                    }
 
                     uint anchorPtSupply = _totalSupply; // stack too deep avoidance
 

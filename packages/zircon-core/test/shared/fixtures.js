@@ -4,10 +4,9 @@ const {LIB_ADDRESS} = require("../../scripts/constants");
 
 exports.librarySetup = async function librarySetup() {
     // Deploying Library
-    console.log("WTF")
     let library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
     if (library.address !== LIB_ADDRESS[31337]) {
-        console.error("UPDATE LIBRARY ADDRESS ON get-bytecodes.js", library.address)
+        console.error("UPDATE LIBRARY ADDRESS ON get-bytecodes.js -> 31337: ", library.address)
         throw new Error()
     }
     return library;
