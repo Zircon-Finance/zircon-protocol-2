@@ -785,7 +785,7 @@ contract ZirconPylon is IZirconPylon {
                 feeBps += (10000 - instantPriceDecimals.mul(10000)/lastPrice);
             }
         }
-        //console.log("feebps", feeBps);
+        console.log("feebps, ipd, lp", feeBps, instantPriceDecimals, lastPrice);
         // If either this block's gamma derivative or EMA is higher than threshold we go into the deltaTax mechanism
         if (maxDerivative >= deltaGammaThreshold) {
             uint strikeDiff = block.number - strikeBlock;
@@ -1081,9 +1081,7 @@ contract ZirconPylon is IZirconPylon {
 
         //The purpose is to avoid toxic flow swooping the sync reserves.
         //Arbing through the regular swap should always be cheaper than this.
-        if(lastUniTimestamp > lastOracleTimestamp)  {
-
-
+            //console.log("ping");
             uint currentFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
 
             uint blockTimestamp = block.timestamp;
@@ -1102,16 +1100,16 @@ contract ZirconPylon is IZirconPylon {
             //In the unlikely case this messes up somehow, we keep old lastPrice
             if(currentFloatAccumulator > lastFloatAccumulator) {
                 //convert accumulator to 1e18 multiplier form
-                lastPrice = uint256(((currentFloatAccumulator - lastFloatAccumulator) * 1e18) >> 112);
+                uint _avgPrice = uint256(((currentFloatAccumulator - lastFloatAccumulator) * 1e18) >> 112);
 
 
-                lastPrice = lastPrice/(blockTimestamp - lastOracleTimestamp);
+                _avgPrice = _avgPrice/(blockTimestamp - lastOracleTimestamp);
+
+                lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;
                 lastFloatAccumulator = currentFloatAccumulator;
 
             }
-
-        }
 
 
 
@@ -1561,18 +1559,18 @@ contract ZirconPylon is IZirconPylon {
                 uint ptb = IZirconPair(pairAddress).balanceOf(address(this));
                 if(isAnchor_) {
                     (,uint reserveAnchor) = getSyncReserves();
-                    {
-                        uint amount_ = 0;
-                        //ptuWithFee here is the one with omega applied
-                        (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
-                            ptuWithFee,
-                            Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                            IZirconFactory(pairFactoryAddress).liquidityFee(),
-                            isFloatReserve0,
-                            to__);
-                        returnAmount += amount_;
-
-                    }
+//                    {
+//                        uint amount_ = 0;
+//                        //ptuWithFee here is the one with omega applied
+//                        (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+//                            ptuWithFee,
+//                            Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
+//                            IZirconFactory(pairFactoryAddress).liquidityFee(),
+//                            isFloatReserve0,
+//                            to__);
+//                        returnAmount += amount_;
+//
+//                    }
 
                     anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
                         formulaSwitch,

@@ -6,7 +6,7 @@ const { ethers } = require('hardhat');
 const assert = require("assert");
 const {BigNumber} = require("ethers");
 const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
-const {coreFixtures} = require("./shared/fixtures");
+const {coreFixtures, librarySetup} = require("./shared/fixtures");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
@@ -14,7 +14,7 @@ const TEST_ADDRESSES = [
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
-    pair;
+    pair, library;
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const overrides = {
@@ -29,10 +29,13 @@ async function addLiquidity(token0Amount, token1Amount) {
 
 
 describe("Pylon", () => {
+    before(async () => {
+        library = await librarySetup()
+    })
     beforeEach(async () => {
         [account, account2] = await ethers.getSigners();
         deployerAddress = account.address;
-        let fixtures = await coreFixtures(deployerAddress)
+        let fixtures = await coreFixtures(deployerAddress, library)
         factoryInstance = fixtures.factoryInstance
         token0 = fixtures.token0
         token1 = fixtures.token1
@@ -116,10 +119,10 @@ describe("Pylon", () => {
     }
     //Let's try to calculate some cases for pylon
     const mintTestCases = [
-        [5, 10, '4762509926821186', '4749990617651023','5099985042963264985','9999999999999999000', false],
+        [5, 10, '4762509926821186', '4749990617651023','5099985037527377080','9999999999999999000', false],
         [10, 5, '4749999999999999', '4762499999999999','9999999999999999010', '5099989999999999000', true],
-        [5, 10, '2374999999999999', '9525000000000000','4999999999999999010', '10049994999999999000', true],
-        [10, 10, '9525009926820697', '4749995308820878','10099985091673915940', '9999999999999999000', false],
+        [5, 10, '2374999999999999', '9525000000000000','4999999999999999005', '10049994999999999000', true],
+        [10, 10, '9525009926820697', '4749995308820878','10099985086231613010', '9999999999999999000', false],
         [1000, 1000, '475000000000000000', '952500000000000000','999999999999999999000', '1009998999999999999000', true],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : expandTo18Decimals(n))))
     mintTestCases.forEach((mintCase, i) => {
@@ -1832,7 +1835,7 @@ describe("Pylon", () => {
         let floatsReceived = (await token0.balanceOf(account.address)).sub(balancePreBurn);
         console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
 
-        expect(floatsReceived).to.eq(ethers.BigNumber.from('1623721167834108967063'));
+        expect(floatsReceived).to.eq(ethers.BigNumber.from('1620587624987653420448'));
 
     });
 
@@ -1913,7 +1916,31 @@ describe("Pylon", () => {
         await token1.transfer(pylonInstance.address, token0Amount.div(10000))
         await pylonInstance.mintPoolTokens(account.address, true);
 
+        let initBlock = await ethers.provider.getBlockNumber();
+        let initTimestamp = (await ethers.provider.getBlock(initBlock)).timestamp;
+        console.log("initial Timestamp", initTimestamp);
+        //wait a bunch of time to regularize oracle
         await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        initBlock = await ethers.provider.getBlockNumber();
+        initTimestamp = (await ethers.provider.getBlock(initBlock)).timestamp;
+        console.log("Timestamp after pause", initTimestamp);
+
 
         //Now we add a lot of async liquidity
         //We record derVFB before and Float claim for the initial PTs
