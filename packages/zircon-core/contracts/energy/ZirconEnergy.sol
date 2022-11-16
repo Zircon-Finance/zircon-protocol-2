@@ -4,8 +4,8 @@ pragma solidity =0.5.16;
 import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-//import '../libraries/Math.sol';
-import "./libraries/SafeMath.sol";
+import '../libraries/Math.sol';
+//import "./libraries/SafeMath.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
@@ -130,6 +130,54 @@ contract ZirconEnergy is IZirconEnergy {
     uint numerator = amountInWithFee.mul(reserveOut);
     uint denominator = reserveIn.mul(10000).add(amountInWithFee);
     amountOut = numerator / denominator;
+  }
+
+  function _updateMu(uint muUpdatePeriod, uint muChangeFactor, uint muBlockNumber, uint muMulDecimals, uint gammaMulDecimals, uint muOldGamma) view external returns (uint mu) {
+//    uint _newBlockHeight = ; // t2
+
+    // We only go ahead with this if a sufficient amount of time passes
+    // This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
+    if((muBlockNumber - block.number) > muUpdatePeriod) { // reasonable to assume it won't subflow
+
+      uint _newGamma = gammaMulDecimals; // y2
+      uint _oldGamma = muOldGamma; // y1
+
+      bool deltaGammaIsPositive = _newGamma >= _oldGamma;
+      bool gammaIsOver50 = _newGamma >= 5e17;
+
+      // This the part that measures if gamma is going outside (to the extremes) or to the inside (0.5 midpoint)
+      // It uses an XOR between current gamma and its delta
+      // If delta is positive when above 50%, means it's moving to the outside
+      // If delta is negative when below 50%, that also means it's going to the outside
+
+      // In other scenarios it's going to the inside, which is why we use the XOR
+      uint deltaMu = Math.absoluteDiff(_newGamma, _oldGamma);
+      if(deltaGammaIsPositive != gammaIsOver50) { // != with booleans is an XOR
+        // This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
+        // Due to uint math we can't do this in one line
+        // Parameter to tweak the speed at which mu seeks to follow gamma
+        uint deltaMu = deltaMu.mul(Math.absoluteDiff(_newGamma, 5e17))/1e18;
+        if (deltaGammaIsPositive) {
+          uint deltaMu = deltaMu * muChangeFactor;
+        }
+      }
+
+      if (deltaGammaIsPositive) {
+        if (deltaMu + muMulDecimals <= 1e18) {
+          // Only updates if the result doesn't go above 1.
+          muMulDecimals += deltaMu;
+        }
+      } else {
+        if(deltaMu <= muMulDecimals) {
+          muMulDecimals -= deltaMu;
+        }
+      }
+
+      mu = Math.clamp(muMulDecimals, 1e17, 9e17);
+      // update variables for next step
+//      muOldGamma = _newGamma;
+//      muBlockNumber = _newBlockHeight;
+    }
   }
 
 

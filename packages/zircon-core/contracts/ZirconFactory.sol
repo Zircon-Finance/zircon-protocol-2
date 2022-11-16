@@ -28,7 +28,7 @@ contract ZirconFactory is IZirconFactory {
         energyFactory = _energyFactory;
         migrator = _migrator;
         feeToSetter = _feeToSetter;
-        liquidityFee = 30;
+        liquidityFee = 15;
         dynamicRatio = 5;
     }
 

@@ -24,12 +24,13 @@ library ZirconLibrary {
 
 
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
-    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) pure public returns (uint anchorKFactor) {
+    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma, bool async100) pure internal returns (uint anchorKFactor) {
 
-        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
+        uint ftv = async100 ? _reserveTranslated0.mul(2 * _gamma)/1e18 : _reserveTranslated1.mul(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
-        uint _anchorK = (_reserveTranslated0 + (amount * _reserveTranslated0/(2*_reserveTranslated1)))   .mul(_reserveTranslated1 + (amount/2))
-        /(amount + ftv);
+        uint _anchorK =  (_reserveTranslated0 + (async100 ? amount : amount * _reserveTranslated0/(2*_reserveTranslated1)))
+                                .mul(_reserveTranslated1 + (async100 ? 0 : amount/2))
+                                     /(amount + ftv);
 
         //ftv/halfK
         _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
@@ -50,33 +51,33 @@ library ZirconLibrary {
 
     //0 kb, not used in practice?
     //only required for anchors now
-    function calculateLiquidity(uint amountIn,  uint112 _reservePair0, uint112 _reservePair1, uint liquidityFee, bool isAnchor) pure external returns (uint amount) {
-        //Divides amountIn into two slippage-adjusted halves
-//        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
-
-        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
-        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
-
-        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
-        uint amountInWithFee = amountIn.mul(10000-(liquidityFee/2 + 1))/10000;
-        //Add the amountIn to one of the reserves
-        uint sqrtKPrime = isAnchor ?
-        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
-        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
-
-        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
-
-        amount = isAnchor
-        ? _reservePair1.mul(2 * liqPercentage)/1e18
-        : _reservePair0.mul(2 * liqPercentage)/1e18;
-
-        //        //Calculates pylon pool tokens by taking the minimum of between each amount*2
-        //        (liquidity, amount) = getLiquidityFromPoolTokens(
-        //            _reservePair0.mul(liqPercentage)/1e18,
-        //            _reservePair1.mul(liqPercentage)/1e18,
-        //            true,
-        //            ptTotalSupply);
-    }
+//    function calculateLiquidity(uint amountIn,  uint112 _reservePair0, uint112 _reservePair1, uint liquidityFee, bool isAnchor) pure external returns (uint amount) {
+//        //Divides amountIn into two slippage-adjusted halves
+////        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
+//
+//        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
+//        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
+//
+//        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
+//        uint amountInWithFee = amountIn.mul(10000-(liquidityFee/2 + 1))/10000;
+//        //Add the amountIn to one of the reserves
+//        uint sqrtKPrime = isAnchor ?
+//        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
+//        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
+//
+//        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
+//
+//        amount = isAnchor
+//        ? _reservePair1.mul(2 * liqPercentage)/1e18
+//        : _reservePair0.mul(2 * liqPercentage)/1e18;
+//
+//        //        //Calculates pylon pool tokens by taking the minimum of between each amount*2
+//        //        (liquidity, amount) = getLiquidityFromPoolTokens(
+//        //            _reservePair0.mul(liqPercentage)/1e18,
+//        //            _reservePair1.mul(liqPercentage)/1e18,
+//        //            true,
+//        //            ptTotalSupply);
+//    }
 
     //This should increase kFactor when removing float. Ignores if formula decreases it
     //We use ptu to derive change in K, reserve1 and gamma for FTV

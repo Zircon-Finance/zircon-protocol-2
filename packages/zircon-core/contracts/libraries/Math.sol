@@ -6,6 +6,9 @@ import "./SafeMath.sol";
 library Math {
     using SafeMath for uint256;
 
+    function clamp(uint x, uint min, uint max) internal pure returns (uint z) {
+        z = x <= min ? min : x >= max ? max : x;
+    }
     function min(uint x, uint y) internal pure returns (uint z) {
         z = x < y ? x : y;
     }

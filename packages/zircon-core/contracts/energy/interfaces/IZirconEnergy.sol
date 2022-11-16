@@ -9,5 +9,6 @@ interface IZirconEnergy {
     function registerFee() external;
     function syncReserve() external;
     function migrateLiquidity(address newEnergy) external;
+    function _updateMu(uint muUpdatePeriod, uint muChangeFactor, uint muBlockNumber, uint muMulDecimals, uint gammaMulDecimals, uint muOldGamma) view external returns (uint mu);
     function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint fee, bool isFloatReserve0, address _to) external returns (uint retPTU, uint amount);
 }

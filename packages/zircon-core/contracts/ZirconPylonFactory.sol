@@ -151,10 +151,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         onlyFeeToSetter();
         paused = _paused;
     }
-//    function setLiquidityFee(uint _liquidityFee) external {
-//        onlyFeeToSetter();
-//        liquidityFee = _liquidityFee;
-//    }
+
 
     function changeEnergyFactoryAddress(address _newEnergyFactory) external {
         onlyMigrator();

@@ -1,11 +1,12 @@
 pragma solidity =0.5.16;
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import "./libraries/SafeMath.sol";
+//import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
+import '../libraries/Math.sol';
 
 contract ZirconEnergyRevenue is ReentrancyGuard  {
     using SafeMath for uint112;

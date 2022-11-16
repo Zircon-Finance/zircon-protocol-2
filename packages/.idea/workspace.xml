@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
-    </list>
+    <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,6 +30,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/andriyshevchenko/Zircon/zircon-protocol-2/packages/zircon-farming&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;Errors&quot;,
     &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;
   }
 }</component>
@@ -123,7 +121,12 @@
       <workItem from="1666975088275" duration="633000" />
       <workItem from="1667133709400" duration="8494000" />
       <workItem from="1667158158480" duration="4306000" />
-      <workItem from="1667211150047" duration="28190000" />
+      <workItem from="1667211150047" duration="43938000" />
+      <workItem from="1667750900778" duration="5107000" />
+      <workItem from="1667818653548" duration="8131000" />
+      <workItem from="1667910098786" duration="20789000" />
+      <workItem from="1668105335151" duration="1089000" />
+      <workItem from="1668171716342" duration="20094000" />
     </task>
     <servers />
   </component>
