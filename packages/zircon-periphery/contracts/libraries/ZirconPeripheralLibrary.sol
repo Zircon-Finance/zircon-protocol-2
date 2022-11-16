@@ -11,7 +11,7 @@ library ZirconPeripheralLibrary {
 
 
     // DO NOT CHANGE THIS FUNCTION WILL BE UPDATED BY 'yarn bytecode' inside zircon-core
-    function pylonFor(address pylonFactory, address tokenA, address tokenB, address pair) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'd4e28cc14f9da0c8264b8de4c7998558cabf00a217d8ac08c65713ae35e9d562'))));}
+    function pylonFor(address pylonFactory, address tokenA, address tokenB, address pair) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'7f0532ae0ce1be498a532c9a2d9dec6505be73a9759e77ec060dbe2920372e3a'))));}
 
 //    function pylonFor(address factory, address tokenA, address tokenB, address pair) internal pure returns (address pylon) {
 //        pylon = address(uint(keccak256(abi.encodePacked(

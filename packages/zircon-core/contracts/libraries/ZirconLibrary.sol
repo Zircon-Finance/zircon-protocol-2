@@ -23,12 +23,13 @@ library ZirconLibrary {
 
 
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
-    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma) pure public returns (uint anchorKFactor) {
+    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma, bool async100) pure internal returns (uint anchorKFactor) {
 
-        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
+        uint ftv = async100 ? _reserveTranslated0.mul(2 * _gamma)/1e18 : _reserveTranslated1.mul(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
-        uint _anchorK = (_reserveTranslated0 + (amount * _reserveTranslated0/(2*_reserveTranslated1)))   .mul(_reserveTranslated1 + (amount/2))
-                            /(amount + ftv);
+        uint _anchorK =  (_reserveTranslated0 + (async100 ? amount : amount * _reserveTranslated0/(2*_reserveTranslated1)))
+                                .mul(_reserveTranslated1 + (async100 ? 0 : amount/2))
+                                     /(amount + ftv);
 
         //ftv/halfK
         _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
