@@ -6,6 +6,7 @@ import "../interfaces/IZirconPair.sol";
 import "hardhat/console.sol";
 library ZirconLibrary {
     using SafeMath for uint256;
+    using SafeMath for uint112;
 
 
     // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
@@ -13,13 +14,13 @@ library ZirconLibrary {
     // @_totalSupply is the supply of the pt's tranch
     // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
     // @deprecated TBD
-//    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure public returns (uint liquidity){
-//        if (_isAnchor) {
-//            liquidity = _amount.mul(_totalSupply)/_vab;
-//        }else {
-//            liquidity = ((_amount.mul(_totalSupply))/(_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18)));
-//        }
-//    }
+    //    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure public returns (uint liquidity){
+    //        if (_isAnchor) {
+    //            liquidity = _amount.mul(_totalSupply)/_vab;
+    //        }else {
+    //            liquidity = ((_amount.mul(_totalSupply))/(_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18)));
+    //        }
+    //    }
 
 
     //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
@@ -28,7 +29,7 @@ library ZirconLibrary {
         uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
         //kprime/amount + ftv, 1e18 final result
         uint _anchorK = (_reserveTranslated0 + (amount * _reserveTranslated0/(2*_reserveTranslated1)))   .mul(_reserveTranslated1 + (amount/2))
-                            /(amount + ftv);
+        /(amount + ftv);
 
         //ftv/halfK
         _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
@@ -45,6 +46,36 @@ library ZirconLibrary {
         }
 
         anchorKFactor = _anchorK;
+    }
+
+    //0 kb, not used in practice?
+    //only required for anchors now
+    function calculateLiquidity(uint amountIn,  uint112 _reservePair0, uint112 _reservePair1, uint liquidityFee, bool isAnchor) pure external returns (uint amount) {
+        //Divides amountIn into two slippage-adjusted halves
+//        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
+
+        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
+        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
+
+        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
+        uint amountInWithFee = amountIn.mul(10000-(liquidityFee/2 + 1))/10000;
+        //Add the amountIn to one of the reserves
+        uint sqrtKPrime = isAnchor ?
+        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
+        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
+
+        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
+
+        amount = isAnchor
+        ? _reservePair1.mul(2 * liqPercentage)/1e18
+        : _reservePair0.mul(2 * liqPercentage)/1e18;
+
+        //        //Calculates pylon pool tokens by taking the minimum of between each amount*2
+        //        (liquidity, amount) = getLiquidityFromPoolTokens(
+        //            _reservePair0.mul(liqPercentage)/1e18,
+        //            _reservePair1.mul(liqPercentage)/1e18,
+        //            true,
+        //            ptTotalSupply);
     }
 
     //This should increase kFactor when removing float. Ignores if formula decreases it
@@ -111,19 +142,19 @@ library ZirconLibrary {
 
             //splitting to avoid overflow chance
             uint initialHalfK = isLineFormula
-                                ? _reserveTranslated0
-                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
+            ? _reserveTranslated0
+            : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
 
             uint initialTailK = isLineFormula
-                                ? _reserveTranslated1
-                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18);
+            ? _reserveTranslated1
+            : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18);
 
             uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
 
 
             //divide by halfK to start working through 1e18s
             uint kPrime = (_reserveTranslated0 + (_amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + _amount/2)
-                            / initialHalfK;
+            / initialHalfK;
 
 
 
