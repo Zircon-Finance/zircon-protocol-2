@@ -5,7 +5,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/test/energy-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/energy-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
     </list>
@@ -134,7 +133,8 @@
       <workItem from="1667910098786" duration="20789000" />
       <workItem from="1668105335151" duration="1089000" />
       <workItem from="1668171716342" duration="20094000" />
-      <workItem from="1668614101090" duration="5697000" />
+      <workItem from="1668614101090" duration="5698000" />
+      <workItem from="1668696798395" duration="6695000" />
     </task>
     <servers />
   </component>

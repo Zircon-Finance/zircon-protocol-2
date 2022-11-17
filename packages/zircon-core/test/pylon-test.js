@@ -4557,7 +4557,11 @@ describe("Pylon", () => {
         await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
         let pylonAddress = await factoryPylonInstance.getPylon(token1.address, token0.address)
 
-        let zPylon = await ethers.getContractFactory('ZirconPylon')
+        let zPylon = await ethers.getContractFactory('ZirconPylon', {
+            libraries: {
+                ZirconLibrary: library.address,
+            },
+        }) 
         let newPylonInstance = await zPylon.attach(pylonAddress);
         // Let's transfer some tokens to the Pylon
         await token0.transfer(newPylonInstance.address, expandTo18Decimals(17))

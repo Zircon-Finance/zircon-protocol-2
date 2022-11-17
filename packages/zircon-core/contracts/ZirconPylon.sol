@@ -262,6 +262,11 @@ contract ZirconPylon is IZirconPylon {
         lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
         lastPrice = _reservePair1 * 1e18/_reservePair0;
 
+        liquidityFee = IZirconFactory(pairFactoryAddress).liquidityFee();
+        maxPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
+        deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+
+
         _entered = true;
         (uint balance0, uint balance1) = _getFloatAnchorBalance();
 //        uint balance0 = _getBalanceOf(pylonToken.float, address(this));//IUniswapV2ERC20(pylonToken.float).balanceOf(address(this));
@@ -429,7 +434,7 @@ contract ZirconPylon is IZirconPylon {
 
         //Counts gamma change and applies strike condition if necessary
         (gamma,,reserveToSwitch) = _calculateGamma(virtualAnchorBalance, anchorKFactor, pylonReserve1, reservesTranslated1);
-
+        console.log("gammaNew, gammaOld, blockN", gamma, gammaMulDecimals, block.number);
         if(Math.absoluteDiff(gamma, gammaMulDecimals) >= deltaGammaThreshold) {
             //This makes sure that a massive mintAsync can't be exited in the same block
             strikeBlock = block.number;
@@ -734,6 +739,7 @@ contract ZirconPylon is IZirconPylon {
 
             uint cooldownBlocks = 1e18/deltaGammaThreshold;
 
+            console.log("strike, current", strikeBlock, block.number);
 
             if(strikeDiff > cooldownBlocks) {
                 // This is the first strike (in a while)
@@ -745,8 +751,7 @@ contract ZirconPylon is IZirconPylon {
                 feeBps = ((maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + IZirconPylonFactory(factoryAddress).deltaGammaMinFee()) //DeltaGamma tax
                 .add(feeBps); //Regular Pylon fee
 
-                // Avoids underflow issues downstream
-                require(feeBps < 10000, "Z: FTH");
+                console.log("dgt, maxD", deltaGammaThreshold, maxDerivative);
                 //                return feeBps;
                 //                applied = true;
 
@@ -755,6 +760,10 @@ contract ZirconPylon is IZirconPylon {
                 //                return(feeBps, applied);
             }
         }
+
+        // Avoids underflow issues downstream
+        require(feeBps < 10000, "Z: FTH");
+
         //Base case where the threshold isn't passed or it's first strike
         //        applied = false;
         //        feeBps = IZirconEnergy(energyAddress).getFeeByGamma(gammaMulDecimals);
@@ -938,7 +947,6 @@ contract ZirconPylon is IZirconPylon {
         deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) {
-
             IZirconPair(pairAddress).tryLock();
         }
 
@@ -1045,7 +1053,7 @@ contract ZirconPylon is IZirconPylon {
             // KTranslated is reduced by mintFee since it mints extra pool tokens (diluting ptt part of the translation)
             // So as long as we can ensure mintFee is always called before assigning, this should be correct.
 
-            uint feeToAnchor = 0;
+            uint feeToAnchor;
 
 
             {
@@ -1090,7 +1098,7 @@ contract ZirconPylon is IZirconPylon {
 
             (gammaMulDecimals, formulaSwitch,) = _calculateGamma(virtualAnchorBalance, anchorKFactor, pylonReserve1, pairReserveTranslated1);
 
-
+            //Todo: Can simply pass factory instance and let energy fetch the parameters to save size
             muMulDecimals = IZirconEnergy(energyAddress)._updateMu(
                 IZirconPylonFactory(factoryAddress).muUpdatePeriod(),
                 IZirconPylonFactory(factoryAddress).muChangeFactor(),
@@ -1151,7 +1159,7 @@ contract ZirconPylon is IZirconPylon {
                 thisBlockEMA = thisBlockEMA.add(Math.absoluteDiff(gammaMulDecimals, oldGamma));
             }
 
-
+            console.log("thisEMA", thisBlockEMA);
 
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, anchorKFactor, gammaMulDecimals);
