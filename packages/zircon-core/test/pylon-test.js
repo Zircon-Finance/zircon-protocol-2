@@ -733,7 +733,7 @@ describe("Pylon", () => {
         console.log("Swap2 vab after new token: ", ethers.utils.formatEther(vab));
 
         //Gamma moved by 5% to 0.45, we expect mu to change by 5%* 5%*3 = 0.0075 (ish)
-        expect(mu).to.eq(ethers.BigNumber.from("408323653099489584"));
+        expect(mu).to.eq(ethers.BigNumber.from("408327822230484007"));
 
 
     });
@@ -3278,7 +3278,7 @@ describe("Pylon", () => {
 
 
         //original PTs should be worth about 10 due to IL when pumping
-        expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from('5399456543723861110'))
+        expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from('5408442312221238729'))
 
 
 
@@ -4561,7 +4561,7 @@ describe("Pylon", () => {
             libraries: {
                 ZirconLibrary: library.address,
             },
-        }) 
+        })
         let newPylonInstance = await zPylon.attach(pylonAddress);
         // Let's transfer some tokens to the Pylon
         await token0.transfer(newPylonInstance.address, expandTo18Decimals(17))

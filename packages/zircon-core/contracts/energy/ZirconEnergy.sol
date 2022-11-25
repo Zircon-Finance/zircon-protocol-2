@@ -137,7 +137,7 @@ contract ZirconEnergy is IZirconEnergy {
 
     // We only go ahead with this if a sufficient amount of time passes
     // This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
-    if((muBlockNumber - block.number) > muUpdatePeriod) { // reasonable to assume it won't subflow
+    if((block.number - muBlockNumber) > muUpdatePeriod) { // reasonable to assume it won't subflow
 
       uint _newGamma = gammaMulDecimals; // y2
       uint _oldGamma = muOldGamma; // y1
@@ -156,10 +156,7 @@ contract ZirconEnergy is IZirconEnergy {
         // This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
         // Due to uint math we can't do this in one line
         // Parameter to tweak the speed at which mu seeks to follow gamma
-        uint deltaMu = deltaMu.mul(Math.absoluteDiff(_newGamma, 5e17))/1e18;
-        if (deltaGammaIsPositive) {
-          uint deltaMu = deltaMu * muChangeFactor;
-        }
+        deltaMu = deltaMu.mul(muChangeFactor * Math.absoluteDiff(_newGamma, 5e17))/1e18;
       }
 
       if (deltaGammaIsPositive) {
