@@ -67,6 +67,7 @@ contract ZirconPylon is IZirconPylon {
     uint private lastOracleTimestamp;
     uint private lastFloatAccumulator;
     uint private lastPrice;
+    uint private oracleUpdateSecs;
 
     uint private liquidityFee;
     uint private maxPercentageSync;
@@ -265,6 +266,7 @@ contract ZirconPylon is IZirconPylon {
         liquidityFee = IZirconFactory(pairFactoryAddress).liquidityFee();
         maxPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+        oracleUpdateSecs = IZirconPylonFactory(factoryAddress).oracleUpdateSecs();
 
 
         _entered = true;
@@ -945,6 +947,7 @@ contract ZirconPylon is IZirconPylon {
         liquidityFee = IZirconFactory(pairFactoryAddress).liquidityFee();
         maxPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
+        oracleUpdateSecs = IZirconPylonFactory(factoryAddress).oracleUpdateSecs();
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) {
             IZirconPair(pairAddress).tryLock();
@@ -997,30 +1000,35 @@ contract ZirconPylon is IZirconPylon {
             uint currentFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
 
             uint blockTimestamp = block.timestamp;
-            if(blockTimestamp > lastUniTimestamp) {
-
-                uint timeElapsed = blockTimestamp - lastUniTimestamp;
-                uint _reservePair1 = pairReserveTranslated1 << 112; //UQ encode
-                //We simulate the Uni oracle in case no update, as per implementation.
-                //Manually handling UQs to avoid library calls etc.
-                currentFloatAccumulator += uint(_reservePair1/pairReserveTranslated0) * timeElapsed;
-
-            }
-            //        uint private lastOracleTimestamp;
-            //        uint private lastFloatAccumulator;
-
-            //In the unlikely case this messes up somehow, we keep old lastPrice
-            if(currentFloatAccumulator > lastFloatAccumulator) {
-                //convert accumulator to 1e18 multiplier form
-                uint _avgPrice = uint256(((currentFloatAccumulator - lastFloatAccumulator) * 1e18) >> 112);
+            //We set a minimum update delay for reliability. 120 seconds by default.
+            if(blockTimestamp > lastOracleTimestamp + oracleUpdateSecs) {
 
 
-                _avgPrice = _avgPrice/(blockTimestamp - lastOracleTimestamp);
+                if(blockTimestamp > lastUniTimestamp) {
 
-                lastPrice = _avgPrice;
-                lastOracleTimestamp = blockTimestamp;
-                lastFloatAccumulator = currentFloatAccumulator;
+                    uint timeElapsed = blockTimestamp - lastUniTimestamp;
+                    uint _reservePair1 = pairReserveTranslated1 << 112; //UQ encode
+                    //We simulate the Uni oracle in case no update, as per implementation.
+                    //Manually handling UQs to avoid library calls etc.
+                    currentFloatAccumulator += uint(_reservePair1/pairReserveTranslated0) * timeElapsed;
 
+                }
+                //        uint private lastOracleTimestamp;
+                //        uint private lastFloatAccumulator;
+
+                //In the unlikely case this messes up somehow, we keep old lastPrice
+                if(currentFloatAccumulator > lastFloatAccumulator) {
+                    //convert accumulator to 1e18 multiplier form
+                    uint _avgPrice = uint256(((currentFloatAccumulator - lastFloatAccumulator) * 1e18) >> 112);
+
+
+                    _avgPrice = _avgPrice/(blockTimestamp - lastOracleTimestamp);
+
+                    lastPrice = _avgPrice;
+                    lastOracleTimestamp = blockTimestamp;
+                    lastFloatAccumulator = currentFloatAccumulator;
+
+                }
             }
 
 
