@@ -1,25 +1,25 @@
 Arguments: 
-  /Users/vittori/.nvm/versions/node/v16.14.2/bin/node /usr/local/Cellar/yarn/1.22.17_2/libexec/bin/yarn.js ctest
+  /usr/local/bin/node /usr/local/bin/yarn revcheck
 
 PATH: 
-  /Users/vittori/Library/pnpm:/Users/vittori/.nvm/versions/node/v16.14.2/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/vittori/.cargo/bin
+  /Library/Frameworks/Python.framework/Versions/3.8/bin:/Users/andriyshevchenko/.cargo/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 Yarn version: 
-  1.22.17
+  1.22.19
 
 Node version: 
-  16.14.2
+  16.13.0
 
 Platform: 
-  darwin x64
+  darwin arm64
 
 Trace: 
-  SyntaxError: /Users/vittori/Develop/zircon/zircon-protocol/package.json: Unexpected token ` in JSON at position 0
+  SyntaxError: /Users/andriyshevchenko/Zircon/zircon-protocol-2/packages/zircon-core/package.json: Unexpected token } in JSON at position 2927
       at JSON.parse (<anonymous>)
-      at /usr/local/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:1625:59
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:1629:59
       at Generator.next (<anonymous>)
-      at step (/usr/local/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:310:30)
-      at /usr/local/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:321:13
+      at step (/usr/local/lib/node_modules/yarn/lib/cli.js:310:30)
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:321:13
 
 npm manifest: 
   {
@@ -65,14 +65,26 @@ npm manifest:
       "solidity-docgen": "^0.6.0-beta.10"
     },
     "scripts": {
-      "deploy:moonbase": "npx hardhat --network moonbase deploy --export-all ../zircon-periphery/external_contracts/core_contracts.json",
+      "deploy:moonbase": "npx hardhat --network moonbase deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
       "deploy:moonriver": "npx hardhat --network  moonriver deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
       "test": "npx hardhat test",
       "compile": "npx hardhat compile --show-stack-traces",
-      "ctest": "npx hardhat compile && npm test",
-      "bytecode": "npx hardhat run scripts/get-bytecodes.js",
+      "ctest": "npx hardhat run scripts/get-bytecodes.js && npx hardhat compile && npm test",
+      "bytecode:moonriver": "npx hardhat run --network moonriver scripts/get-bytecodes.js",
+      "bytecode:moonbase": "npx hardhat run --network moonbase scripts/get-bytecodes.js",
       "migrate:moonbase": "npx hardhat run --network moonbase scripts/migrate.js",
-      "migrate:moonriver": "npx hardhat run --network moonriver scripts/migrate.js"
+      "migrate:moonriver": "npx hardhat run --network moonriver scripts/migrate.js",
+      "pause:moonriver": "npx hardhat run --network moonriver scripts/pause.js",
+      "pause:moonbase": "npx hardhat run --network moonbase scripts/pause.js",
+      "changeMigrator:moonriver": "npx hardhat run --network moonriver scripts/change-migrator.js",
+      "changeMigrator:moonbase": "npx hardhat run --network moonbase scripts/change-migrator.js",
+      "check:moonriver": "npx hardhat run --network moonriver scripts/help.js",
+      "check:moonbase": "npx hardhat run --network moonbase scripts/help.js",
+      "fees:moonbase": "npx hardhat run --network moonbase scripts/change-fees.js",
+      "fees:moonriver": "npx hardhat run --network moonriver scripts/change-fees.js",
+      "add:moonbase": "npx hardhat run --network moonbase scripts/add-pair.js",
+      "add:moonriver": "npx hardhat run --network moonriver scripts/add-pair.js",
+      "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js",
     }
   }
 
