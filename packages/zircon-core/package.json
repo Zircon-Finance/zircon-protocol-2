@@ -43,7 +43,7 @@
   "scripts": {
     "deploy:moonbase": "npx hardhat --network moonbase deploy --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "deploy:moonriver": "npx hardhat --network  moonriver deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
-    "deploy:bsc": "npx hardhat --network  moonriver deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
+    "deploy:bsc": "npx hardhat --network bsc deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",

@@ -38,7 +38,7 @@
   "scripts": {
     "deploy:moonbase": "npx hardhat --network moonbase deploy --reset",
     "deploy:moonriver": "npx hardhat --network moonriver deploy --reset",
-    "deploy:bsc": "npx hardhat --network moonriver deploy --reset",
+    "deploy:bsc": "npx hardhat --network bsc deploy --reset",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "ctest": "npx hardhat compile && npm test",
