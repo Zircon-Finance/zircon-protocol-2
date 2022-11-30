@@ -9,14 +9,14 @@ library ZirconLibrary {
     using SafeMath for uint256;
 
     // Same Function as Uniswap Library, used here for incompatible solidity versions
-//        function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
-//            require(amountIn > 0, 'UV2: IIA');
-//            require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
-//            uint amountInWithFee = amountIn.mul(10000-fee);
-//            uint numerator = amountInWithFee.mul(reserveOut);
-//            uint denominator = reserveIn.mul(10000).add(amountInWithFee);
-//            amountOut = numerator / denominator;
-//        }
+    //        function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
+    //            require(amountIn > 0, 'UV2: IIA');
+    //            require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
+    //            uint amountInWithFee = amountIn.mul(10000-fee);
+    //            uint numerator = amountInWithFee.mul(reserveOut);
+    //            uint denominator = reserveIn.mul(10000).add(amountInWithFee);
+    //            amountOut = numerator / denominator;
+    //        }
 
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
@@ -34,20 +34,20 @@ library ZirconLibrary {
             maxY = _b1;
         }
     }
-//    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
-//
-//        //Expresses b1 in units of reserve0
-//        uint px = ts.mul(_b0)/_reserve0;
-//        uint py = ts.mul(_b1)/_reserve1;
-//        console.log("px: ", px, py);
-//        if (px > py) {
-//            maxX = py.mul(_reserve0)/ts;
-//            maxY = _b1; //b0 in units of reserve1
-//        } else {
-//            maxX = _b0; //max is b1 but in reserve0 units
-//            maxY = px.mul(_reserve1)/ts;
-//        }
-//    }
+    //    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1, uint ts) view internal returns (uint maxX, uint maxY)  {
+    //
+    //        //Expresses b1 in units of reserve0
+    //        uint px = ts.mul(_b0)/_reserve0;
+    //        uint py = ts.mul(_b1)/_reserve1;
+    //        console.log("px: ", px, py);
+    //        if (px > py) {
+    //            maxX = py.mul(_reserve0)/ts;
+    //            maxY = _b1; //b0 in units of reserve1
+    //        } else {
+    //            maxX = _b0; //max is b1 but in reserve0 units
+    //            maxY = px.mul(_reserve1)/ts;
+    //        }
+    //    }
 
     // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
     // @_amount is the quantity to convert
@@ -97,19 +97,19 @@ library ZirconLibrary {
 
             //splitting to avoid overflow chance
             uint initialHalfK = isLineFormula
-                                ? _reserveTranslated0
-                                : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1));
+            ? _reserveTranslated0
+            : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
 
             uint initialTailK = isLineFormula
-                                ? _reserveTranslated1
-                                : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2);
+            ? _reserveTranslated1
+            : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18);
 
             uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
 
 
             //divide by halfK to start working through 1e18s
             uint kPrime = (_reserveTranslated0 + (_amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + _amount/2)
-                            / initialHalfK;
+            / initialHalfK;
 
 
 
