@@ -329,10 +329,11 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
             //We run the update kFactor function for the anchor portion of liquidity
             //This is only required after initialization
-            if(initialized == 1) {
-                (, uint pylonReserve1) = getSyncReserves();
-                anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, py, anchorKFactor, virtualAnchorBalance.sub(pylonReserve1), reservesTranslated0, reservesTranslated1);
-            }
+            //Update: Unnecessary
+//            if(initialized == 1) {
+//                (, uint pylonReserve1) = getSyncReserves();
+//                anchorKFactor = ZirconLibrary.calculateAnchorFactor(formulaSwitch, py, anchorKFactor, virtualAnchorBalance.sub(pylonReserve1), reservesTranslated0, reservesTranslated1);
+//            }
 
             // Transferring tokens to pair and minting
             if(px != 0) _safeTransfer(pylonToken.float, pairAddress, px);
@@ -537,6 +538,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             }
         }
 
+        require(_amountIn < freeSpace, "ZP: As");
         //Now we do the Async part
         //already guaranteed less than amountIn
         uint amountAsyncToMint = _amountIn - freeSpace;
