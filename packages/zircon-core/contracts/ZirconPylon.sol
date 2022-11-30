@@ -1485,18 +1485,18 @@ contract ZirconPylon is IZirconPylon {
                 uint ptb = _getBalanceOf(pairAddress, address(this));
                 if(isAnchor_) {
                     (,uint reserveAnchor) = getSyncReserves();
-                    //                    {
-                    //                        uint amount_ = 0;
-                    //                        //ptuWithFee here is the one with omega applied
-                    //                        (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
-                    //                            ptuWithFee,
-                    //                            Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                    //                            IZirconFactory(pairFactoryAddress).liquidityFee(),
-                    //                            isFloatReserve0,
-                    //                            to__);
-                    //                        returnAmount += amount_;
-                    //
-                    //                    }
+                    {
+                        uint amount_ = 0;
+                        //ptuWithFee here is the one with omega applied
+                        (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+                            ptuWithFee,
+                            Math.min(1e18, (1e18 - gammaMulDecimals).mul(reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
+                            IZirconFactory(pairFactoryAddress).liquidityFee(),
+                            isFloatReserve0,
+                            to__);
+                        returnAmount += amount_;
+
+                    }
 
                     anchorKFactor = ZirconLibrary.calculateAnchorFactorBurn(
                         formulaSwitch,
