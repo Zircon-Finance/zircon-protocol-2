@@ -1392,7 +1392,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 returnAmount += sentAmount;
 
-                sendSlashedTokensToUser(0, sentAmount,  0, extraPercentage, to);
+                sendSlashedTokensToUser(0, sentAmount, extraPercentage, to);
 
                 payBurnFees(ptu, feeBps);
                 //Bool combines choice of anchor or float with which token is which in the pool
