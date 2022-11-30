@@ -667,6 +667,9 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     /// Burns them spayFeesending it to the energy address
     function payBurnFees(uint amountIn, uint feeBps) private returns (uint amountOut) {
         uint fee = amountIn * feeBps/10000;
+        if (fee == 0) {
+            return amountIn;
+        }
         //feeBps guaranteed to be less than 10000
         _safeTransfer(pairAddress, pairAddress, fee);
         IZirconPair(pairAddress).burnOneSide(energyAddress, !isFloatReserve0);
@@ -1127,7 +1130,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
     /// @notice function that sends tokens to Pair to be burned after
     /// this function must be called only before a burn takes place, if not it'll give away tokens
-    function sendSlashedTokensToUser(uint anchorAmount, uint floatAmount, uint percentage, address _to) private {
+    function sendSlashedTokensToUser(uint floatAmount, uint anchorAmount, uint percentage, address _to) private {
 
         if(percentage != 0) {
             uint totalAmount = anchorAmount;
@@ -1141,8 +1144,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
             //We divide to arrive to the original amount and diff it with totalAmount to get final number.
             uint originalAmount = totalAmount.mul(1e18)/(1e18 - percentage);
             uint amountToTransfer = originalAmount.sub(totalAmount); //percentage is calculated "natively" as a full 1e18
-
-
 
             if(IUniswapV2ERC20(pylonToken.anchor).balanceOf(energyAddress) > amountToTransfer ){
                 _safeTransferFrom(pylonToken.anchor, energyAddress, _to, amountToTransfer);
@@ -1391,7 +1392,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
                 returnAmount += sentAmount;
 
-                sendSlashedTokensToUser(isFloatReserve0 != isAnchor ? sentAmount : 0, isFloatReserve0 != isAnchor ? 0 : sentAmount, extraPercentage, to);
+                sendSlashedTokensToUser(0, sentAmount,  0, extraPercentage, to);
 
                 payBurnFees(ptu, feeBps);
                 //Bool combines choice of anchor or float with which token is which in the pool
