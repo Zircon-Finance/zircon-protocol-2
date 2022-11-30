@@ -98,7 +98,7 @@ library ZirconLibrary {
             //splitting to avoid overflow chance
             uint initialHalfK = isLineFormula
             ? _reserveTranslated0
-            : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
+            : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18 * _reserveTranslated0/_reserveTranslated1));
 
             uint initialTailK = isLineFormula
             ? _reserveTranslated1

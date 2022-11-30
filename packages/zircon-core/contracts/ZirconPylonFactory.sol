@@ -35,7 +35,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         migrator = _migrator;
 
         // Starting Variables
-        maximumPercentageSync = 10;
+        maximumPercentageSync = 40;
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 100; // 1%
         EMASamples = 2; //Previous average is multiplied by this number, sum is divided by samples + 1
