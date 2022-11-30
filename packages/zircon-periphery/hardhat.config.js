@@ -74,6 +74,11 @@ module.exports = {
       network_id: '5777',
       chainId: 1281,
     },
+    bsc: {
+      url: 'https://binance.nodereal.io',
+      accounts: [privateKey],
+      chainId: 56,
+    },
     moonriver: {
       url: 'https://moonriver.public.blastapi.io',
       accounts: [privateKey],
