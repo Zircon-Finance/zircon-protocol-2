@@ -6,7 +6,8 @@ const psionicFarmFactory = require('../core_contracts/abi/PsionicFarmFactory.jso
 
 const WETH_ADDRESS = {
     '1287': "0xD909178CC99d318e4D46e7E66a972955859670E1",
-    '1285': "0x98878B06940aE243284CA214f92Bb71a2b032B8A"
+    '1285': "0x98878B06940aE243284CA214f92Bb71a2b032B8A",
+    '56': "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
 }
 
 module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
