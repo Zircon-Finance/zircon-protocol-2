@@ -48,6 +48,8 @@
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",
     "bytecode": "npx hardhat run scripts/get-bytecodes.js",
-    "testScript": "npx hardhat run --network moonbase scripts/migrate.js"
+    "check:bsc": "npx hardhat run --network bsc scripts/add-pair.js",
+    "migrate:moonbase": "npx hardhat --network moonbase run scripts/migrate.js",
+    "migrate:moonriver": "npx hardhat --network moonriver run scripts/migrate.js"
   }
 }

@@ -1,8 +1,21 @@
 const { ethers } = require('hardhat');
+
+
+
+async function ptTest() {
+    let ptFactory = await ethers.getContractFactory('ZirconPTFactory')
+    let ea = await ptFactory.attach("0x09A57DcdBaFEf048ac5D749f297d014a41b39C88")
+    let eaA = await ea.getPoolToken( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82")
+    let eaB = await ea.getPoolToken( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56")
+
+    console.log("pts: ", eaA.toString(), eaB.toString())
+}
+
 async function eaTest() {
     let energyFactory = await ethers.getContractFactory('ZirconEnergyFactory')
     let ea = await energyFactory.attach("0xe2522E34d2eDAbEd507A8b975ae8d7bf4CBe40ff")
-    let eaA = await ea.getEnergy( "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29")
+    let eaA = await ea.getEnergy( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82")
+    let eaB = await ea.getEnergy( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0x98dc2d3bc896fe0971e135b02b2b6831c839f0fe")
 
     console.log("balances: ", eaA.toString())
 }
@@ -56,7 +69,7 @@ async function addPair() {
     // let pRouterInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, wethInstance.address)
 }
 
-eaTest()
+ptTest()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

@@ -1,5 +1,20 @@
 const { ethers } = require('hardhat');
 
+async function pylonFactoryChack() {
+    // Deploy Pylon Router
+    let peripheralLibrary = await (await ethers.getContractFactory('ZirconPeripheralLibrary')).deploy();
+    let pylonRouterContract = await ethers.getContractFactory('ZirconPylonRouter', {
+        libraries: {
+            ZirconPeripheralLibrary: peripheralLibrary.address,
+        },
+    });
+    let pRouterInstance = pylonRouterContract.attach("0xC5Cc92B016e6fd1838a3bE4F0Fb26D1dDfc060Cf")
+    let pFactory = await pRouterInstance.pylonFactory();
+        //await pylonRouterContract.deploy("0x7EC6289EAF48Ed7E474aB6C9f400d068F8869397", "0x846C5f92311Eb8719b04Af075b43A3157857D6F8", "0xC0B897E2598f5a1Aa18fd1927cC7b72Ec74e2B1B")
+    console.log(`PylonFactory : ${pFactory}`);
+
+}
+
 async function deployPylonRouter() {
     // Deploy Pylon Router
     let peripheralLibrary = await (await ethers.getContractFactory('ZirconPeripheralLibrary')).deploy();
@@ -80,7 +95,7 @@ async function deploy() {
 
 }
 
-deploy()
+pylonFactoryChack()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
