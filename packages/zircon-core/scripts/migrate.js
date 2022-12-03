@@ -2,8 +2,8 @@ const hre = require('hardhat');
 
 // ADDRESSES
 const FEE_TO_SETTER_ADDRESS = {1285: "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce", 1287: '0x7A282B0BE9676BCc6377eD81A6f1196f0e7647a6'};
-const MIGRATOR_ADDRESS = {1285: "0x03209097D62b3EB7e62b2dB13Bb2729A3431F437", 1287: '0x1915Bd4a625c7b202E0c64EA35F8760Bcd259C04'};
-const ENERGY_FACTORY = {1285: "0x49e15A5ea67FD7ebe70EB539a51abf1919282De8", 1287: '0x9918f0D920E6052175b06F293C11856e569B8C5B'};
+const MIGRATOR_ADDRESS = {1285: "0x6B722a4835055BE4DEcFb28646D5C2D9dFE43eFd", 1287: '0x1915Bd4a625c7b202E0c64EA35F8760Bcd259C04'};
+const ENERGY_FACTORY = {1285: "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8", 1287: '0x9918f0D920E6052175b06F293C11856e569B8C5B'};
 const NEW_ENERGY_FACTORY = {1285: "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8", 1287: '0x9A747f8cF3A9aD39B7A5770B694160A56c86a592'};
 const PYLON_FACTORY = {1285: "0x3dA19d8f9f1208f844edE1b6Ac6caF2c14a318bD", 1287: '0x4bfdb286D14435a8E44989817e6Fa368beDC35d9'};
 const GENESIS_PYLON_FACTORY = {1285: "0x1153550210Bbef5b74890b242F37Ae24E1F41440", 1287: '0x19040fC4c40863F0af606e21E6d1CEef80958858'};
@@ -110,13 +110,13 @@ const migratePylons = async () => {
         // let _genesisPylonAddress2 = await genesisPylonInstance2.getPylon(token1, token0)
 
 
-        if (genesisPylonAddress === "0x0000000000000000000000000000000000000000") {
+        if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
             console.log("migrating pylon ====> ", pylonAddress)
-            // pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
+            pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
         }
-        if (genesisPylonAddress2 === "0x0000000000000000000000000000000000000000") {
+        if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
             console.log("migrating pylon =====> ", pylonAddress2)
-            // pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
+            pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
         }
     }
 
