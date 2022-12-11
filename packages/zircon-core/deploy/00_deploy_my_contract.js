@@ -1,3 +1,4 @@
+const {LIB_ADDRESS} = require("../scripts/constants");
 const FEE_TO_SETTER_ADDRESS = {1285: "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce", 1287: '0xbCea98Df85045F2Fcf5310fE4237ca95C9C24622'};
 const MIGRATOR_ADDRESS = {1285: "0x03209097D62b3EB7e62b2dB13Bb2729A3431F437", 1287: '0xec89E7389Cfa95A801f8ddC18dA92C1165280971'};
 const ENERGY_FACTORY = {1285: "0x49e15A5ea67FD7ebe70EB539a51abf1919282De8", 1287: '0x625ad88bb31E7119E963F2C718C9419c23Cd6F10'};
@@ -50,8 +51,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         log: true
     });
 
-    // /// Deploy Pylon
-    //
+    // Deploy Pylon
     let factoryPylonInstance = await deploy('ZirconPylonFactory', {
         from: deployer,
         args: [
@@ -61,11 +61,12 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
             feeToSetter.address,
             migrator.address //MIGRATOR_ADDRESS[chainId]
         ],
+        libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
         log: true
     });
 
-    await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
-    await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
+    // await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
+    // await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
 
     console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
 

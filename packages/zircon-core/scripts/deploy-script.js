@@ -1,6 +1,10 @@
 const { ethers } = require('hardhat');
 
-
+async function deployZLibrary() {
+    // Deploy Zircon Peripheral Library
+    let zirconLibrary = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
+    console.log(`Zircon Library deployed to: ${zirconLibrary.address}`);
+}
 async function deployPylonRouter() {
     // Deploy Pylon Router
     let peripheralLibrary = await (await ethers.getContractFactory('ZirconPeripheralLibrary')).deploy();
@@ -81,7 +85,7 @@ async function deploy() {
 
 }
 
-deploy()
+deployZLibrary()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

@@ -61,6 +61,8 @@
     "fees:moonriver": "npx hardhat run --network moonriver scripts/change-fees.js",
     "add:moonbase": "npx hardhat run --network moonbase scripts/add-pair.js",
     "add:moonriver": "npx hardhat run --network moonriver scripts/add-pair.js",
+    "lib:moonriver": "npx hardhat run --network moonriver scripts/deploy-script.js",
+    "lib:moonbase": "npx hardhat run --network moonbase scripts/deploy-script.js",
     "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js"
   }
 }

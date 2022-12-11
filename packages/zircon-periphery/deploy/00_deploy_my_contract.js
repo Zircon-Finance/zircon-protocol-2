@@ -11,15 +11,15 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
     let coreContracts = CORE_DEPLOYED[chainId][0].contracts
     let farmingContracts = FARMING_DEPLOYED[chainId][0].contracts
-
+    console.log("hello", coreContracts['ZirconFactory'])
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
     // // Deploy Wrapped ETH
-    let wrappedInstance = await deploy('WETH', {
-        from: deployer,
-        log: true
-    });
+    // let wrappedInstance = await deploy('WETH', {
+    //     from: deployer,
+    //     log: true
+    // });
 
     /// Deploy Factory
     let router = await deploy('ZirconRouter', {
@@ -44,8 +44,8 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         log: true
     });
 
-    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
-    const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
-    await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
+    // const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
+    // const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
+    // await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
 };
 module.exports.tags = ['ZirconPeripheral'];
