@@ -32,7 +32,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
 
     // coreContracts["ZirconPylonFactory"]["address"]
  let router = await deploy('ZirconRouter', {
-        from: deployer,iled
+        from: deployer,
         args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x65815a6e55fA08fcdE76ad772Bd64A4F264a6924", WETH_ADDRESS[chainId.toString()]],
         log: true
     });
@@ -54,8 +54,8 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         log: true
     });
 
-    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
-    const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
-    await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
+    // const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
+    // const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
+    // await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
 };
 module.exports.tags = ['ZirconPeripheral'];
