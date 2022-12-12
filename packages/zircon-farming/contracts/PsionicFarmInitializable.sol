@@ -194,7 +194,7 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     }
 
     /*
-     * @notice Withdraw staked tokens without caring about rewards rewards
+     * @notice Withdraw staked tokens without caring about rewards
      * @dev Needs to be for emergency.
      */
     function emergencyWithdraw() external nonReentrant notPaused {

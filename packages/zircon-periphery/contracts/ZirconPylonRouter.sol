@@ -409,10 +409,8 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         IZirconPoolToken(poolToken).transferFrom(msg.sender, pylon, liquidity); // send liquidity to pair
         (amountA, amountB) = IZirconPylon(pylon).burnAsync(to, isAnchor);
 
-
         require(amountA >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
         require(amountB >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
-
     }
     function removeLiquidityAsyncETH(
         address token,
