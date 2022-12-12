@@ -308,7 +308,8 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         (uint amountA, uint amountB) = _addAsyncLiquidity(tokenA, tokenB, amountADesired, amountBDesired);
         address pylon = _transferAsync(tokenA, tokenB, amountA, amountB);
         liquidity = IZirconPylon(pylon).mintAsync(to, isAnchor);
-        require(liquidity >= minLiquidity, uint2str(liquidity));
+
+        require(liquidity >= minLiquidity,string(abi.encodePacked("MIN_LIQUIDITY: ", uint2str(liquidity), " ", uint2str(minLiquidity))));
         // Adding liquidity
         if (farm != address(0)) {
             stake(farm, liquidity);
@@ -433,8 +434,8 @@ contract ZirconPylonRouter is IZirconPylonRouter {
         (amountA, amountB) = IZirconPylon(pylon).burnAsync(to, isAnchor);
 
 
-        require(amountA >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
-        require(amountB >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
+        require(amountA >= amountAMin, string(abi.encodePacked("A_AMOUNT: ", uint2str(amountA), " ", uint2str(amountAMin))));
+        require(amountB >= amountBMin,  string(abi.encodePacked("B_AMOUNT: ", uint2str(amountB), " ", uint2str(amountBMin))));
 
     }
     function removeLiquidityAsyncETH(
@@ -452,8 +453,8 @@ contract ZirconPylonRouter is IZirconPylonRouter {
                 !isAnchor ? token : WETH,
                 !isAnchor ? WETH : token,
                 liquidity,
-                amountTokenMin,
-                amountETHMin,
+                !isAnchor ? amountTokenMin : amountETHMin,
+                !isAnchor ? amountETHMin : amountTokenMin,
                 shouldBurnAnchor,
                 address(this),
                 deadline
