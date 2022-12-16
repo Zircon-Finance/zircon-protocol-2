@@ -64,8 +64,8 @@ contract ZirconPylon is IZirconPylon {
     uint private muBlockNumber; //block height of last mu update
     uint private muOldGamma; //gamma value at last mu update
 
-    uint private lastOracleTimestamp;
-    uint private lastFloatAccumulator;
+    uint public lastOracleTimestamp;
+    uint public lastFloatAccumulator;
     uint public lastPrice;
     uint private oracleUpdateSecs;
 
@@ -145,10 +145,10 @@ contract ZirconPylon is IZirconPylon {
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'Z: TF');
     }
 
-    function _safeTransferFrom(address token, address from, address to, uint value) private {
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR_FROM, from, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Z: TFF');
-    }
+//    function _safeTransferFrom(address token, address from, address to, uint value) private {
+//        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR_FROM, from, to, value));
+//        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Z: TFF');
+//    }
 
     function getSyncReserves()  public view returns  (uint112 _reserve0, uint112 _reserve1) { //, uint32 _blockTimestampLast) {
         _reserve0 = reserve0;

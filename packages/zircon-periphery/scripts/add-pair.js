@@ -1,5 +1,10 @@
 const { ethers } = require('hardhat');
 
+async function updatePylonRouter() {
+    const psionicFactory = await ethers.getContractFactory(farmingContracts["PsionicFarmFactory"]['abi'], psionicFarmFactory['bytecode'])
+    const psionicFarmingInstance = await psionicFactory.attach(farmingContracts["PsionicFarmFactory"]['address'])
+    await psionicFarmingInstance.updatePylonRouter(pylonRouter.address)
+}
 // Add Pair Function
 async function addPair() {
     // Deploy Pylon Router

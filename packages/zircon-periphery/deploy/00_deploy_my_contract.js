@@ -11,7 +11,6 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
     let coreContracts = CORE_DEPLOYED[chainId][0].contracts
     let farmingContracts = FARMING_DEPLOYED[chainId][0].contracts
-    console.log("hello", coreContracts['ZirconFactory'])
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
