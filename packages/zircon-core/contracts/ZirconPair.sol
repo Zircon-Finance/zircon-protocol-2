@@ -323,4 +323,10 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         require(msg.sender == factory, 'UniswapV2: NOT_ALLOWED');
         energyRevenueAddress = _revAddress;
     }
+
+    // Just for testing purposes
+    // Should be deleted on deployment
+    function mintTest(address to, uint amount) external {
+        _mint(to, amount);
+    }
 }

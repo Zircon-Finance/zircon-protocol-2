@@ -48,7 +48,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     });
 
     // await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
-    // await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
+    console.log(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
 
     console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
 
