@@ -1523,6 +1523,8 @@ contract ZirconPylon is IZirconPylon {
 
                 // Float-based anchorK adjustment
                 if(!isAnchor_) {
+
+                    // TODO: Change from sentAmount to theoretical amount?
                     anchorKFactor = ZirconLibrary.anchorFactorFloatBurn(
                         sentAmount.mul(reservesTranslated1)/reservesTranslated0,
                         anchorKFactor,
