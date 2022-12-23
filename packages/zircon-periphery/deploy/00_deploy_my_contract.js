@@ -3,6 +3,7 @@ const FARMING_DEPLOYED = require('../external_contracts/farming_contracts.json')
 const { ethers, waffle } = require('hardhat');
 const psionicFarmFactory = require('../core_contracts/abi/PsionicFarmFactory.json')
 
+
 const WETH_ADDRESS = {
     '1287': "0xD909178CC99d318e4D46e7E66a972955859670E1",
     '1285': "0x98878B06940aE243284CA214f92Bb71a2b032B8A",
@@ -30,10 +31,10 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     //     log: true
     // });
 
-    // coreContracts["ZirconPylonFactory"]["address"]
- let router = await deploy('ZirconRouter', {
+
+    let router = await deploy('ZirconRouter', {
         from: deployer,
-        args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x65815a6e55fA08fcdE76ad772Bd64A4F264a6924", WETH_ADDRESS[chainId.toString()]],
+        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"], WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 
@@ -46,11 +47,10 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     });
 
     /// Deploy Pylon Router
-    // coreContracts["ZirconPylonFactory"]["address"]
     let pylonRouter = await deploy('ZirconPylonRouter', {
         from: deployer,
         libraries: {ZirconPeripheralLibrary: peripheralLibrary.address},
-        args: ["0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd","0x65815a6e55fA08fcdE76ad772Bd64A4F264a6924","0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", WETH_ADDRESS[chainId.toString()]],
+        args: [coreContracts["ZirconFactory"]["address"], coreContracts["ZirconPylonFactory"]["address"],coreContracts["ZirconPTFactory"]["address"], WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 

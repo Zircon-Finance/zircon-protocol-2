@@ -47,6 +47,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         log: true
     });
 
+
     // await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
     console.log(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
 

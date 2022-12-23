@@ -55,6 +55,7 @@
     "migrate:moonriver": "npx hardhat --network moonriver run scripts/migrate.js",
     "pause:moonriver": "npx hardhat --network moonriver run scripts/pause.js",
     "help:moonriver": "npx hardhat --network moonriver run scripts/help.js",
+    "help:moonbase": "npx hardhat --network moonbase run scripts/help.js",
     "chMigrator:moonriver": "npx hardhat --network moonriver run scripts/change-migrator.js",
     "createTest:moonbase": "npx hardhat --network moonbase run scripts/creating-test.js"
   }

@@ -43,4 +43,9 @@ contract ZirconPoolToken is ZirconERC20 {
         require(msg.sender == factory, 'ZPT: FORBIDDEN');
         pylon = _pylon;
     }
+
+    // Only for testing purposes
+    function mintTest(address account, uint256 amount) external {
+        _mint(account, amount);
+    }
 }

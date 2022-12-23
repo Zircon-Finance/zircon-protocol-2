@@ -1,5 +1,18 @@
 const { ethers } = require('hardhat');
 
+
+async function helloBugs() {
+    let token1 = await ethers.getContractFactory('ERC20');
+    
+}
+
+async function changeOwner() {
+    let feeToSetter = await ethers.getContractFactory('FeeToSetter');
+    let feeToSetterInstance = feeToSetter.attach("0x68e528361ddbE5e300D10a9a6534d2c5176D37ff")
+    await feeToSetterInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")
+    await feeToSetterInstance.initialize("0xEEF0B38bB77fD15300fCe13a44CcDA74e74381Fb", "0x35E26bCcD60aF26dE1C0ADEcaf21A04e20A22262", "0x42155AA0EC2c9D468F8d66e25795f293e7D117bA")
+}
+
 async function checkEnergy() {
     const energyFactory = await ethers.getContractFactory('ZirconEnergyFactory');
     const energyInstance = energyFactory.attach("0xFc413b0b8481eeBCf335Eb35B1A7a634fef64649")
@@ -85,7 +98,7 @@ async function check() {
 
 }
 
-checkEnergy()
+helloBugs()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
