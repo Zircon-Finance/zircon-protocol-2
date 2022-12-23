@@ -48,8 +48,8 @@ contract ZirconEnergy is IZirconEnergy {
   function initialize(address _pylon, address _pair, address _token0, address _token1) external {
     require(initialized == 0, "ZER: AI");
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
-    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
-    (address tokenA, address tokenB) = isFloatToken0 ? (_token0, _token1) : (_token1, _token0);
+    //    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
+    (address tokenA, address tokenB) = (_token0, _token1);
     pylon = Pylon(
       _pylon,
       _pair,
@@ -117,9 +117,11 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
     uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+    uint balanceFloat = IUniswapV2ERC20(pylon.floatToken).balanceOf(address(this));
 
     _safeTransfer(pylon.pairAddress, newEnergy, balance);
     _safeTransfer(pylon.anchorToken, newEnergy, balanceAnchor);
+    _safeTransfer(pylon.floatToken, newEnergy, balanceFloat);
   }
 
 
