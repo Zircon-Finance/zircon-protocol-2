@@ -119,11 +119,11 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
     uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
-    uint balanceAnchor = IUniswapV2ERC20(pylon.floatToken).balanceOf(address(this));
+    uint balanceFloat = IUniswapV2ERC20(pylon.floatToken).balanceOf(address(this));
 
     _safeTransfer(pylon.pairAddress, newEnergy, balance);
     _safeTransfer(pylon.floatToken, newEnergy, balanceAnchor);
-    _safeTransfer(pylon.anchorToken, newEnergy, balanceAnchor);
+    _safeTransfer(pylon.anchorToken, newEnergy, balanceFloat);
   }
 
 

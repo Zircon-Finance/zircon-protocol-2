@@ -40,21 +40,20 @@ async function main() {
     const [owner] = await hre.ethers.getSigners();
     console.log("Deploying contracts with the account:", owner.address);
 
-    let migratorAddress = "0x893beDE386611Bcf96fc52eF03A8B39240aB8a63"
-    let factory = "0x4201F3F4F965354f40418CA750529736fbbC6Da1"
-    let pylonFactory = "0x9c9E1f99Cb55663DEF01bc7907191082DFcC4BDC"
-    let energyFactory = "0x056605b92dAAE144283784D6Ff218D29a7AD2b40"
+    let migratorAddress = "0x2078110b5871a505bFe52FB7B3f6263be746F08C"
+    let factory = "0x559780e4a4d77ED70af3954bE79Ac49eD0C88524"
+    let pylonFactory = "0x34d58903DeBD3849cacbA4d2AAb85961B772AEB9"
+    let energyFactory = "0xa24e087EbE7152Aba370507751D64688c4498583"
+    let ptFactory = "0x9882D4ABE6C6B379e5dE268fCfb41FF7a9658D05"
 
     let migrator = await hre.ethers.getContractFactory("Migrator");
     console.log("Migrator address", migratorAddress, "owner", owner.address)
-
     let migratorContract = await migrator.attach(migratorAddress);
-    // await migratorContract.initialize(
-    //     "0x056605b92dAAE144283784D6Ff218D29a7AD2b40", "0x0BEb401d87964D53cDB2cf9956a9FcF0Cc52d927", "0x9c9E1f99Cb55663DEF01bc7907191082DFcC4BDC", "0x4201F3F4F965354f40418CA750529736fbbC6Da1"
-    // )
+    await(await migratorContract.initialize(
+        energyFactory, ptFactory, pylonFactory, factory
+    )).wait()
 
-    // return;
-    await loadFromProd(migratorAddress, factory, pylonFactory, energyFactory, owner.address, tokens.tokens)
+    await loadFromProd(migratorAddress, factory, pylonFactory, energyFactory, ptFactory, owner.address, tokens.tokens)
 }
 
 main()

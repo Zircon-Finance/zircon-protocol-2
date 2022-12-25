@@ -611,9 +611,7 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountIn = IUniswapV2ERC20(isAnchor ? pylonToken.anchor : pylonToken.float).balanceOf(address(this)).sub(isAnchor ? _reserve1 : _reserve0);
         notZero(amountIn);
 
-        console.log("amountIn", amountIn);
         amountIn = payFees(amountIn, getFeeBps(), isAnchor);
-
 
 
         (uint _reservePairTranslated0, uint _reservePairTranslated1) = getPairReservesTranslated(0, 0);
@@ -631,7 +629,6 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
         uint amountOut = _handleSyncAndAsync(amountIn, isAnchor ? _reservePairTranslated1 : _reservePairTranslated0,
             isAnchor ? _reserve1 : _reserve0, isAnchor);
 
-        console.log("amountOut", amountOut);
         if(isAnchor) {
             //liquidity to mint is a straight amountOut/vab
             liquidity = amountOut.mul(ptTotalSupply)/virtualAnchorBalance;
@@ -655,11 +652,8 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
 
         }
 
-        console.log("mintPoolTokens: ", liquidity);
         // Mints zircon pool tokens to user after throwing their assets in the pool
         IZirconPoolToken(isAnchor ? anchorPoolTokenAddress : floatPoolTokenAddress).mint(_to, liquidity);
-
-
     }
 
 
@@ -1069,7 +1063,12 @@ contract ZirconPylon is IZirconPylon, ReentrancyGuard {
     }
 
 
-    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) pure private returns (uint gamma, bool isLineFormula, uint reserveSwitch) {
+    function _calculateGamma(uint _virtualAnchorBalance, uint _anchorKFactor, uint _pylonReserve1, uint _translatedReserve1) view private returns (uint gamma, bool isLineFormula, uint reserveSwitch) {
+
+        console.log("virtualAnchorBalance", _virtualAnchorBalance);
+        console.log("anchorKFactor", _anchorKFactor);
+        console.log("pylonReserve1", _pylonReserve1);
+        console.log("translatedReserve1", _translatedReserve1);
 
         uint totalPoolValueAnchorPrime = _translatedReserve1.mul(2);
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);

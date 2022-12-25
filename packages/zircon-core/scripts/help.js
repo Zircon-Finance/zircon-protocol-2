@@ -2,8 +2,10 @@ const { ethers } = require('hardhat');
 
 
 async function helloBugs() {
-    let token1 = await ethers.getContractFactory('ERC20');
-    
+    let pylon = await ethers.getContractFactory('ZirconPylon');
+    let pylonInstance = await pylon.attach("0x46a20Fb35E95e6c9f6DB635C63Da9A63D12d85a5")
+    let vab = await pylonInstance.virtualAnchorBalance()
+    console.log("vab::", vab.toString())
 }
 
 async function changeOwner() {
