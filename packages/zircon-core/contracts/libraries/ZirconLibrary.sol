@@ -23,222 +23,155 @@ library ZirconLibrary {
     //    }
 
 
-    //This should reduce kFactor when adding float. Ignores if formula increases it or it's reached 1
-    function anchorFactorFloatAdd(uint amount, uint oldKFactor, uint _reserveTranslated0, uint _reserveTranslated1, uint _gamma, bool async100) pure internal returns (uint anchorKFactor) {
-
-        uint ftv = async100 ? _reserveTranslated0.mul(2 * _gamma)/1e18 : _reserveTranslated1.mul(2 * _gamma)/1e18;
-        //kprime/amount + ftv, 1e18 final result
-        uint _anchorK =  (_reserveTranslated0 + (async100 ? amount : amount * _reserveTranslated0/(2*_reserveTranslated1)))
-                                .mul(_reserveTranslated1 + (async100 ? 0 : amount/2))
-                                     /(amount + ftv);
-
-        //ftv/halfK
-        _anchorK = _anchorK.mul(ftv)/(_reserveTranslated1);
-        _anchorK = _anchorK.mul(oldKFactor)/(_reserveTranslated0);
-
-        //We don't accept increases of anchorK when adding Float
-        if(_anchorK > oldKFactor) {
-            return oldKFactor;
-        }
-
-        //Can't let anchorK go below 1
-        if(_anchorK < 1e18) {
-            return 1e18;
-        }
-
-        anchorKFactor = _anchorK;
-    }
-
-    //0 kb, not used in practice?
-    //only required for anchors now
-//    function calculateLiquidity(uint amountIn,  uint112 _reservePair0, uint112 _reservePair1, uint liquidityFee, bool isAnchor) pure external returns (uint amount) {
-//        //Divides amountIn into two slippage-adjusted halves
-////        (uint112 _reservePair0, uint112 _reservePair1) = getPairReservesNormalized();
-//
-//        //We use the same mechanism as in mintOneSide: calculate percentage of liquidity (sqrt(k'/k))
-//        //Then return amount0 and amount1 such that they're equal to reserveX * liquidity percentage
-//
-//        uint sqrtK = Math.sqrt(uint(_reservePair0.mul(_reservePair1)));
-//        uint amountInWithFee = amountIn.mul(10000-(liquidityFee/2 + 1))/10000;
-//        //Add the amountIn to one of the reserves
-//        uint sqrtKPrime = isAnchor ?
-//        Math.sqrt(_reservePair0.mul(_reservePair1.add(amountInWithFee)))
-//        : Math.sqrt((_reservePair0.add(amountInWithFee)).mul(_reservePair1));
-//
-//        uint liqPercentage = ((sqrtKPrime.sub(sqrtK)).mul(1e18))/sqrtK;
-//
-//        amount = isAnchor
-//        ? _reservePair1.mul(2 * liqPercentage)/1e18
-//        : _reservePair0.mul(2 * liqPercentage)/1e18;
-//
-//        //        //Calculates pylon pool tokens by taking the minimum of between each amount*2
-//        //        (liquidity, amount) = getLiquidityFromPoolTokens(
-//        //            _reservePair0.mul(liqPercentage)/1e18,
-//        //            _reservePair1.mul(liqPercentage)/1e18,
-//        //            true,
-//        //            ptTotalSupply);
-//    }
-
-    //This should increase kFactor when removing float. Ignores if formula decreases it
-    //We use ptu to derive change in K, reserve1 and gamma for FTV
-    function anchorFactorFloatBurn(uint amount, uint oldKFactor, uint ptu, uint ptb, uint _reserveTranslated1, uint _gamma) pure public returns (uint anchorKFactor) {
-        // we know that ptu is proportional to sqrt(deltaK)
-        // so our Kprime is just k - (ptu/ptb * (sqrtK))**2
-        // while Kprime/k is simply 1 - ptu**2/ptb**2
-
-        uint kRatio = ((1e18 - uint(1e18).mul(ptu)/ptb)**2)/1e18;
-
-        uint ftv = _reserveTranslated1.mul(2 * _gamma)/1e18;
-        //kprime/amount + ftv, 1e18 final result
-        uint _anchorK = kRatio.mul(ftv)/(ftv - amount);
-
-        _anchorK = oldKFactor.mul(_anchorK)/1e18;
-
-        //console.log("akFR", _anchorK);
-
-        //We don't accept reductions of anchorK when removing Float
-        //This can only happen with large changes in liquidity
-        if(_anchorK < oldKFactor) {
-            return oldKFactor;
-        }
-        //No reason this should ever be below 1
-        require(_anchorK >= 1e18, "ZL: AK");
-
-        anchorKFactor = _anchorK;
-    }
+    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) pure external returns (bool aNegative, uint a, uint b) {
 
 
-    function calculateAnchorFactor(bool isLineFormula, uint amount, uint oldKFactor, uint adjustedVab, uint _reserveTranslated0, uint _reserveTranslated1) pure public returns (uint anchorKFactor) {
-
-        //calculate the anchor liquidity change that would move formula switch to current price
-        uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
-        uint vabFactor = sqrtKFactor < oldKFactor ? oldKFactor - sqrtKFactor : oldKFactor + sqrtKFactor;
-
-        uint amountThresholdMultiplier = _reserveTranslated1.mul(1e18)/adjustedVab;
-        amountThresholdMultiplier = amountThresholdMultiplier * 1e18 / vabFactor;
-
-        //console.log("atm", amountThresholdMultiplier);
-
-        //We need to change anchor factor if we're using line formula or if adding liquidity might trigger a switch
-        if(isLineFormula || amountThresholdMultiplier >= 1e18) {
-
-            if(!isLineFormula && (1e18 + (amount.mul(1e18)/adjustedVab)) < amountThresholdMultiplier) {
-                //We return kFactor unchanged if the addition isn't sufficient to trigger formula switch
-                return oldKFactor;
+        //Allows us to use the function for checking without reverting everything
+        if(p3x < p2x) {
+            if(check) {
+                return (false, 42e25, 42e25);
+            } else {
+                revert("ZP: ExFlt0");
             }
-
-            //stack too deep
-            uint _amount = amount;
-            //first of all we need to figure out how much   of the anchor liquidity change requires kFactor to follow
-            //This is the entire amount if isLineFormula && adding and if !isLineFormula it's amount - (threshold - 1)vab
-            //in other words it's only the liquidity added above the threshold
-            //We're only going to reach this part of the code if the liquidity does exceed the threshold
+        }
 
 
-            //If it's the second case we need to increase initial k and vab by the amount that doesn't require changing kFactor
-            //It's as if we're adding liquidity in two tranches
+        if(!check) {
 
-            //We're splitting anchor amount to halves in anchor and float tokens that are thrown in reserves.
-            //It's important that we pass down slippage adjusted values
+        }
 
-            //splitting to avoid overflow chance
-            uint initialHalfK = isLineFormula
-            ? _reserveTranslated0
-            : (_reserveTranslated0 + ((amountThresholdMultiplier - 1e18).mul(adjustedVab)/2 * _reserveTranslated0/_reserveTranslated1)/1e18);
+        if(p3x == p2x) {
+            return (false, 0, p3y.mul(1e18)/p3x);
+        }
 
-            uint initialTailK = isLineFormula
-            ? _reserveTranslated1
-            : (_reserveTranslated1 + (amountThresholdMultiplier - 1e18).mul(adjustedVab)/2e18);
+        //We pass a and b as 1e18s.
+        //We use a bool flag to see if a is negative. B negative should basically never happen so we can revert if it happens
+        //a can take values from approx. 1e19 to 0, so using encoding is ill-advised.
 
-            uint initialVab = isLineFormula ? adjustedVab : (amountThresholdMultiplier).mul(adjustedVab)/1e18;
+        uint aNumerator;
 
+        uint aPartial1 = p3y.mul(p2x);
+        uint aPartial2 = p3x.mul(p2y);
+        uint aDenominator = p3x.mul(p3x - p2x)/1e18; //Always positive
+        if(aPartial1 >= aPartial2) {
+            //a is positive
+            aNumerator = (aPartial1 - aPartial2)/p2x;
+            a = aNumerator * 1e18/aDenominator;
+            require(p2y * 1e18/p2x >= (p2x * a)/1e18, "ZP: BNeg");
 
-            //divide by halfK to start working through 1e18s
-            uint kPrime = (_reserveTranslated0 + (_amount.mul(_reserveTranslated0)/(2*_reserveTranslated1))).mul(_reserveTranslated1 + _amount/2)
-            / initialHalfK;
+            b = p2y * 1e18/p2x - (p2x * a)/1e18; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
 
-
-
-            //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
-            //This has the effect of keeping the line formula still, moving the switchover point.
-            //Without this, anchor liquidity additions would change value of the float side
-            //Lots of overflow potential, so we split calculations
-            anchorKFactor = kPrime.mul(initialVab)/initialTailK;
-            anchorKFactor = anchorKFactor.mul(oldKFactor)/(adjustedVab + _amount);
-
-            //in principle this should never happen when adding liquidity, but better safe than sorry
-            if(anchorKFactor < 1e18) {
-                anchorKFactor = 1e18;
-            }
+            aNegative = false;
 
         } else {
-            //all other cases don't matter, kFactor is unchanged
-            anchorKFactor = oldKFactor;
-        }
+            //a is negative
+            aNumerator = (aPartial2 - aPartial1)/p2x;
 
+            a = aNumerator * 1e18/aDenominator;
+
+            b = (p2y * 1e18/p2x).add((p2x * a)/1e18); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+
+            aNegative = true;
+
+        }
     }
 
+    function calculateP2(uint k, uint vab, uint vfb) pure external returns (uint p2x, uint p2y) {
+        p2y = ((k * 2)/vfb) - vab;
+        p2x = (p2y * 1e18)/vfb;
+    }
 
+    function evaluateP2(uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) pure external returns (uint p2x, uint p2y) {
 
-    function calculateAnchorFactorBurn(bool isLineFormula, uint amount, uint ptu, uint ptb, uint oldKFactor, uint adjustedVab, uint _reserveTranslated1) pure public returns (uint anchorKFactor) {
+        uint p3x = (adjustedVab ** 2)/ reserve0;
+        p3x = (p3x * 1e18) / reserve1;
 
-        //When burning We need to change anchor factor if we're already in line formula
-        //if we're not, removals of liquidity shift the point further down so there's no way for it to reach line formula
-        if(isLineFormula || oldKFactor > 1e18) {
-
-            uint factorAnchorAmount = amount;
-
-            //This splits between the cases where you're removing liquidity while in line formula
-            //Or if some was added while in lineFormula and now we need to bring back to balance
-            if(isLineFormula) {
-                //calculate the anchor liquidity change that would move formula switch to current price
-                uint sqrtKFactor = Math.sqrt((oldKFactor**2/1e18 - oldKFactor)*1e18);
-
-                uint vabFactor = sqrtKFactor < oldKFactor ? oldKFactor - sqrtKFactor : oldKFactor + sqrtKFactor;
-                uint amountThresholdMultiplier = _reserveTranslated1.mul(1e18)/(adjustedVab);
-
-                amountThresholdMultiplier = (amountThresholdMultiplier * 1e18)/vabFactor;
-
-                //if we're burning we only care about the threshold liquidity amount
-                factorAnchorAmount = Math.min((uint(1e18).sub(amountThresholdMultiplier)).mul(adjustedVab)/1e18, amount);
-
-            }
-            uint _ptu = ptu.mul(factorAnchorAmount)/amount; //adjust ptu by the factor contribution
-
-            // omega can only be different than 1 in case we're removing liquidity and it's using the line formula
-            // but it's already embedded in the ptu;
-
-            // we know that ptu is proportional to sqrt(deltaK)
-            // so our Kprime is just k - (ptu/ptb * (sqrtK))**2
-            // while Kprime/k is simply 1 - ptu**2/ptb**2
-
-
-
-            uint kRatio = ((1e18 - uint(1e18).mul(_ptu)/ptb)**2)/1e18;
-            //console.log("kr, vbp,", kRatio, (adjustedVab).mul(1e18)/(adjustedVab - factorAnchorAmount));
-
-            //AnchorkFactor is simply the ratio between change in k and change in vab (almost always different than 1)
-            //This has the effect of keeping the line formula still, moving the switchover point.
-            //Without this, anchor liquidity additions would change value of the float side
-            //Lots of overflow potential, so we split calculations
-            anchorKFactor = kRatio.mul(adjustedVab)/(adjustedVab.sub(factorAnchorAmount));
-            anchorKFactor = anchorKFactor.mul(oldKFactor)/1e18;
-
-            //Anchor factor can never be below 1
-            if(anchorKFactor < 1e18) {
-                anchorKFactor = 1e18;
-            }
-            //console.log("cac");
+        if(x < p3x) {
+            p2y = desiredFtv;
+            p2x = x;
         } else {
-            // all other cases don't matter, kFactor is unchanged
-            anchorKFactor = oldKFactor;
+            (p2x, p2y) = calculateP2(reserve0 * reserve1, adjustedVab, adjustedVfb);
         }
 
     }
 
+    //         if x < (adjusted_vab ** 2)/k:
+    //            self.p2y = adjusted_ftv
+    //            self.p2x = reserve1/reserve0
+    //
+    //        else:
+    //            # resets p2 to its default value
+    //            self.p2y = (2 * k/adjusted_vfb) - adjusted_vab
+    //            self.p2x = self.p2y/adjusted_vfb
 
+    function getFTVForX(uint x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) pure external returns (uint ftv) {
 
+        uint p3x = (adjustedVab ** 2)/ reserve0;
+        p3x = (p3x * 1e18) / reserve1;
 
+        if (x >= p3x) {
+            ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * x) - adjusted_vab;
+        } else {
+
+            (bool aNeg, uint a, uint b) = ZirconLibrary.calculateParabolaCoefficients(
+                p2x, p2y, p3x, adjustedVab, false
+            ); //p3y is just adjustedVab
+
+            //If derivative is positive at p3x
+            if(!aNeg || b > (2 * a * p3x)/1e18) {
+                ftv = aNeg
+                ? (b * x).sub(((a * x)/1e18) * x)
+                : (((a * x)/1e18) * x).add(b * x);
+
+            } else {
+                //Since this uses the current formula it really should never trigger this error.
+                revert("ZP: ExFlt2");
+            }
+
+        }
+    }
+
+    function checkDerivative(uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) pure external returns (bool isNeg) {
+
+        uint p3x = (adjustedVab ** 2)/ reserve0;
+        p3x = (p3x * 1e18) / reserve1;
+
+        (bool aNeg, uint a, uint b) = calculateParabolaCoefficients(p2x, p2y, p3x, adjustedVab, true);
+
+        if(a == 42e25) {
+            return true;
+        }
+
+        if(!aNeg || b > (2 * a * p3x)/1e18) {
+            return false;
+
+        } else {
+            return true;
+        }
+
+    }
+
+//    def get_ftv_for_x(x, p2x, p2y, k, adjusted_vab):
+    //    print("Debug: getFTV adj_vab: {}, getFTV k: {}".format(adjusted_vab, k))
+    //    p3x = (adjusted_vab ** 2) / k
+    //
+    //    result = 0
+    //    if x > p3x:
+    //        result = 2 * math.sqrt(k * x) - adjusted_vab
+    //    else:
+    //
+    //        a, b = calculate_parabola_coefficients(p2x, p2y, p3x, adjusted_vab)
+    //
+    //        # derivative check at p3x (crossing point)
+    //        # sufficient to check if the parabola is too curved at any point
+    //        if 2 * a * p3x + b > 0:
+    //            result = a * (x ** 2) + b * x
+    //        else:
+    //            # In solidity this should just revert
+    //            print("Error: Derivative is negative")
+    //            return -1
+    //    print("Debug: GetFTV: X: {}, result: {}, p3x: {}".format(x, result, p3x))
+    //    return result
 
 
 
