@@ -10,9 +10,9 @@ async function helloBugs() {
 
 async function changeOwner() {
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
-    let feeToSetterInstance = feeToSetter.attach("0x68e528361ddbE5e300D10a9a6534d2c5176D37ff")
-    await feeToSetterInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")
-    await feeToSetterInstance.initialize("0xEEF0B38bB77fD15300fCe13a44CcDA74e74381Fb", "0x35E26bCcD60aF26dE1C0ADEcaf21A04e20A22262", "0x42155AA0EC2c9D468F8d66e25795f293e7D117bA")
+    let feeToSetterInstance = feeToSetter.attach("0x7A282B0BE9676BCc6377eD81A6f1196f0e7647a6")
+    // await feeToSetterInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")
+    await feeToSetterInstance.initialize("0xCa7EB17663dd2C4A1943aDc80b74f9E02413147C", "0x498957f9c29abF48aa881306d75a3C58B19B26fC", "0xCd334f6BbBED0920fbA37c9dEE81D4058Fed2100")
 }
 
 async function checkEnergy() {
@@ -100,7 +100,7 @@ async function check() {
 
 }
 
-helloBugs()
+changeOwner()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
