@@ -111,12 +111,13 @@ contract Migrator {
         // Migrating Pylon Liquidity
         IZirconPylonFactory(pylonFactory).migrateLiquidity(oldPylon, newPylonAddress);
 
+        //TODO: Write some kind of function to convert anchorK to new parameters
         // Communicating new Pylon Variables
-        IZirconPylonFactory(newPylonFactory).startPylon(newPylonAddress,
-            IZirconPylon(oldPylon).gammaMulDecimals(),
-            IZirconPylon(oldPylon).virtualAnchorBalance(),
-            IZirconPylon(oldPylon).anchorKFactor(),
-            IZirconPylon(oldPylon).formulaSwitch());
+//        IZirconPylonFactory(newPylonFactory).startPylon(newPylonAddress,
+//            IZirconPylon(oldPylon).gammaMulDecimals(),
+//            IZirconPylon(oldPylon).virtualAnchorBalance(),
+//            IZirconPylon(oldPylon).anchorKFactor(),
+//            IZirconPylon(oldPylon).formulaSwitch());
 
         // Migrating Energy Liquidity
         IZirconEnergyFactory(energyFactory).migrateEnergy(oldEnergy, newEnergy);

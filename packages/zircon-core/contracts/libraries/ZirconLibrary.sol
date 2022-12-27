@@ -23,7 +23,7 @@ library ZirconLibrary {
     //    }
 
 
-    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) pure external returns (bool aNegative, uint a, uint b) {
+    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) pure public returns (bool aNegative, uint a, uint b) {
 
 
         //Allows us to use the function for checking without reverting everything
@@ -35,10 +35,6 @@ library ZirconLibrary {
             }
         }
 
-
-        if(!check) {
-
-        }
 
         if(p3x == p2x) {
             return (false, 0, p3y.mul(1e18)/p3x);
@@ -76,7 +72,7 @@ library ZirconLibrary {
         }
     }
 
-    function calculateP2(uint k, uint vab, uint vfb) pure external returns (uint p2x, uint p2y) {
+    function calculateP2(uint k, uint vab, uint vfb) pure public returns (uint p2x, uint p2y) {
         p2y = ((k * 2)/vfb) - vab;
         p2x = (p2y * 1e18)/vfb;
     }
@@ -110,10 +106,10 @@ library ZirconLibrary {
         p3x = (p3x * 1e18) / reserve1;
 
         if (x >= p3x) {
-            ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * x) - adjusted_vab;
+            ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * x) - adjustedVab;
         } else {
 
-            (bool aNeg, uint a, uint b) = ZirconLibrary.calculateParabolaCoefficients(
+            (bool aNeg, uint a, uint b) = calculateParabolaCoefficients(
                 p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
 
