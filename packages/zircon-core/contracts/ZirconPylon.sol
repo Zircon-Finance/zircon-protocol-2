@@ -463,6 +463,8 @@ contract ZirconPylon is IZirconPylon {
         //Update lastK since we may have added/removed liquidity
         lastRootKTranslated = Math.sqrt(reservesTranslated0.mul(reservesTranslated1));
 
+        uint _desiredFtv = desiredFtv;
+
 
         (uint pylonReserve0, uint pylonReserve1) = getSyncReserves();
 
@@ -473,7 +475,7 @@ contract ZirconPylon is IZirconPylon {
             virtualAnchorBalance - pylonReserve1,
             virtualFloatBalance - pylonReserve0,
             reservesTranslated0, reservesTranslated1,
-            desiredFtv
+            _desiredFtv
         );
 
         //Counts gamma change and applies strike condition if necessary
@@ -1207,7 +1209,7 @@ contract ZirconPylon is IZirconPylon {
             uint feeToAnchor;
             uint feeToFloat;
 
-
+            (uint _pairReserveTranslated0, uint _pairReserveTranslated1) = (pairReserveTranslated0, pairReserveTranslated1);
             {
 
                 //We redefine them here so that we don't use the old reference and get stack too deep.
@@ -1219,49 +1221,73 @@ contract ZirconPylon is IZirconPylon {
                 if(rootKTranslated > lastRootKTranslated) {
                     uint feeValuePercentage = (rootKTranslated - lastRootKTranslated) * 1e18 / lastRootKTranslated;
 
-                    if(feeValuePercentage > 0) {
-                        feeToAnchor = ((2*pairReserveTranslated1.mul(feeValuePercentage)/1e18) * muMulDecimals)/1e18;
+                    uint _pylonReserve1 = pylonReserve1;
+                    uint _pylonReserve0 = pylonReserve0;
 
-                        uint x = pairReserveTranslated1 * 1e18/pairReserveTranslated0;
-                        uint ftv = ZirconLibrary.getFTVForX(
-                            x,
-                            p2x, p2y,
-                            pairReserveTranslated0 - (pairReserveTranslated0 * feeValuePercentage/1e18),
-                            pairReserveTranslated1 - (pairReserveTranslated1 * feeValuePercentage/1e18),
-                            virtualAnchorBalance - pylonReserve1
-                        );
+                    (uint _feeToAnchor, uint _feeToFloat, uint _p2x, uint _p2y) = processFees(
+                        _pylonReserve0, _pylonReserve1,
+                        _pairReserveTranslated0, _pairReserveTranslated1,
+                        feeValuePercentage
+                    );
 
-
-                        feeToFloat = ((2 * pairReserveTranslated1.mul(feeValuePercentage)/1e18) * (1e18 - muMulDecimals))/1e18;
-
-
-
-                        (uint _p2x, uint _p2y) = ZirconLibrary.evaluateP2(
-                            x,
-                            virtualAnchorBalance - pylonReserve1,
-                            virtualFloatBalance - pylonReserve0,
-                            pairReserveTranslated0,
-                            pairReserveTranslated1,
-                            ftv + feeToFloat //Always in anchor units
-                        );
-
-                        uint newVab = virtualAnchorBalance + feeToAnchor - pylonReserve1;
-
-                        // Recovery code for the unlikely case that fees make VFB go into negative derivative territory.
-                        // Checks if the derivative with current parameters is not negative
-                        // Assigns all fees to anchor if it is.
-
-                        if(!ZirconLibrary.checkDerivative(_p2x, _p2y, pairReserveTranslated0, pairReserveTranslated1, newVab)) {
-                            feeToFloat = virtualFloatBalance.mul(feeToFloat)/(ftv + pylonReserve0 * pairReserveTranslated1 / pairReserveTranslated0);
-                            p2x = _p2x;
-                            p2y = _p2y;
-                        } else {
-                            //reset all fees to anchor.
-                            feeToAnchor = feeToAnchor * 1e18/(muMulDecimals);
-                            feeToFloat = 0;
-                        }
-
+                    if(_feeToFloat != 0 && _p2x != 0) {
+                        p2x = _p2x;
+                        p2y = _p2y;
+                        feeToAnchor = _feeToAnchor;
+                        feeToFloat = _feeToFloat;
+                    } else {
+                        feeToAnchor = _feeToAnchor;
                     }
+
+
+//                    uint _pylonReserve1 = pylonReserve1;
+//                    uint _pylonReserve0 = pylonReserve0;
+//
+//                    if(feeValuePercentage > 0) {
+//                        (uint _pairReserveTranslated0, uint _pairReserveTranslated1) = (pairReserveTranslated0, pairReserveTranslated1);
+//
+//                        feeToAnchor = ((2*_pairReserveTranslated1.mul(feeValuePercentage)/1e18) * muMulDecimals)/1e18;
+//
+//                        uint x = _pairReserveTranslated1 * 1e18/_pairReserveTranslated0;
+//                        uint ftv = ZirconLibrary.getFTVForX(
+//                            x,
+//                            p2x, p2y,
+//                            _pairReserveTranslated0 - (_pairReserveTranslated0 * feeValuePercentage/1e18),
+//                            _pairReserveTranslated1 - (_pairReserveTranslated1 * feeValuePercentage/1e18),
+//                            virtualAnchorBalance - _pylonReserve1
+//                        );
+//
+//
+//                        feeToFloat = ((2 * _pairReserveTranslated1.mul(feeValuePercentage)/1e18) * (1e18 - muMulDecimals))/1e18;
+//
+//
+//
+//                        (uint _p2x, uint _p2y) = ZirconLibrary.evaluateP2(
+//                            x,
+//                            virtualAnchorBalance - _pylonReserve1,
+//                            virtualFloatBalance - _pylonReserve0,
+//                            _pairReserveTranslated0,
+//                            _pairReserveTranslated1,
+//                            ftv + feeToFloat //Always in anchor units
+//                        );
+//
+//                        uint newVab = virtualAnchorBalance + feeToAnchor - _pylonReserve1;
+//
+//                        // Recovery code for the unlikely case that fees make VFB go into negative derivative territory.
+//                        // Checks if the derivative with current parameters is not negative
+//                        // Assigns all fees to anchor if it is.
+//
+//                        if(!ZirconLibrary.checkDerivative(_p2x, _p2y, _pairReserveTranslated0, _pairReserveTranslated1, newVab)) {
+//                            feeToFloat = virtualFloatBalance.mul(feeToFloat)/(ftv + _pylonReserve0 * _pairReserveTranslated1 / _pairReserveTranslated0);
+//                            p2x = _p2x;
+//                            p2y = _p2y;
+//                        } else {
+//                            //reset all fees to anchor.
+//                            feeToAnchor = feeToAnchor * 1e18/(muMulDecimals);
+//                            feeToFloat = 0;
+//                        }
+//
+//                    }
 
                 }
 
@@ -1276,7 +1302,7 @@ contract ZirconPylon is IZirconPylon {
                 virtualAnchorBalance, virtualFloatBalance,
                 p2x, p2y,
                 pylonReserve0, pylonReserve1,
-                pairReserveTranslated0, pairReserveTranslated1
+                _pairReserveTranslated0, _pairReserveTranslated1
             );
 
 
@@ -1345,6 +1371,60 @@ contract ZirconPylon is IZirconPylon {
 
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
+        }
+    }
+
+
+    function processFees(uint pylonReserve0, uint pylonReserve1,
+                        uint pairReserve0, uint pairReserve1, uint feeValuePercentage) private view returns (uint feeToAnchor,
+                                                                                    uint feeToFloat,
+                                                                                    uint _p2x,
+                                                                                    uint _p2y) {
+
+        feeToAnchor = ((2*pairReserve1.mul(feeValuePercentage)/1e18) * muMulDecimals)/1e18;
+
+        uint ftv;
+        {
+            uint _pylonReserve1 = pylonReserve1;
+            uint _pylonReserve0 = pylonReserve0;
+            uint _pairReserve0 = pairReserve0;
+            uint _pairReserve1 = pairReserve1;
+            uint _feeValuePercentage = feeValuePercentage;
+            uint x = pairReserve1 * 1e18 / pairReserve0;
+            ftv = ZirconLibrary.getFTVForX(
+                x,
+                p2x, p2y,
+                _pairReserve0 - (_pairReserve0 * _feeValuePercentage / 1e18),
+                _pairReserve1 - (_pairReserve1 * _feeValuePercentage / 1e18),
+                virtualAnchorBalance - _pylonReserve1
+            );
+
+            //feeToFloat = ((2 * _pairReserve1.mul(_feeValuePercentage) / 1e18) * (1e18 - muMulDecimals)) / 1e18;
+
+            (_p2x, _p2y) = ZirconLibrary.evaluateP2(
+                x,
+                virtualAnchorBalance - _pylonReserve1,
+                virtualFloatBalance - _pylonReserve0,
+                _pairReserve0,
+                _pairReserve1,
+                ftv + (((2 * _pairReserve1.mul(_feeValuePercentage) / 1e18) * (1e18 - muMulDecimals)) / 1e18) //Always in anchor units
+            );
+        }
+
+//        uint newVab = virtualAnchorBalance + feeToAnchor - _pylonReserve1;
+
+        // Recovery code for the unlikely case that fees make VFB go into negative derivative territory.
+        // Checks if the derivative with current parameters is not negative
+        // Assigns all fees to anchor if it is.
+
+        if(!ZirconLibrary.checkDerivative(_p2x, _p2y, pairReserve0, pairReserve1, virtualAnchorBalance + feeToAnchor - pylonReserve1)) {
+            feeToFloat = virtualFloatBalance.mul(feeToFloat)/(ftv + pylonReserve0 * pairReserve1 / pairReserve0);
+        } else {
+            //reset all fees to anchor.
+            feeToAnchor = feeToAnchor * 1e18/(muMulDecimals);
+            feeToFloat = 0;
+            _p2x = 0;
+            _p2y = 0;
         }
     }
 
@@ -1625,16 +1705,11 @@ contract ZirconPylon is IZirconPylon {
         uint _totalSupply = pt.totalSupply();
         (uint reservesTranslated0, uint reservesTranslated1,) = getPairReservesTranslated(0, 0);
         (, uint syncReserve1) = getSyncReserves();
+        uint percentageFloatChange = 1e18;
         {
             //address to = _to;
             bool isAnchor = _isAnchor;
             //address _pairAddress = pairAddress;
-
-
-
-
-
-            //desiredFtv = (2 * reservesTranslated1 * gammaMulDecimals)/1e18;
 
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
@@ -1643,104 +1718,126 @@ contract ZirconPylon is IZirconPylon {
 
             //This is a reserve extraction
             //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
-            uint returnAmount = _amount - (_amount * feeBps)/10000;
-            _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, _to, returnAmount);
-
             address to_ = _to;
+            uint returnAmount = _amount - (_amount * feeBps)/10000;
+            _safeTransfer(isAnchor ? pylonToken.anchor : pylonToken.float, to_, returnAmount);
+
+
 
             //In case the reserves weren't able to pay for everything
             if (reservePT < liquidity) {
-                uint ptu = calculateLPTU(isAnchor, liquidity - reservePT, _totalSupply);
-                //Two vars since we can't pay fees until omega calculations are done
-                uint ptuWithFee = ptu - (ptu * feeBps)/10000;
-
-                uint anchorPtSupply = _totalSupply; // stack too deep avoidance
-
-                bool isAnchor_ = isAnchor;
-                address to__ = to_;
-                uint syncReserveAmount = _amount;
-
-                uint _reservesTranslated0 = reservesTranslated0;
+                uint adjustedLiquidity = liquidity - reservePT;
+                uint totalSupply_ = _totalSupply;
                 uint _reservesTranslated1 = reservesTranslated1;
-                uint ptb = _getBalanceOf(pairAddress, address(this));
-                (,uint reserveAnchor) = getSyncReserves();
-                uint percentageOfPool;
 
-
-                if(isAnchor_) {
-
-                    //reduce ptu by additional slippage
-                    //This is primarily a disincentive to dump enormous amounts with this method.
-                    //If they do, they suffer extra slippage equal to the percentage of the pool they're withdrawing.
-                    //Though below 3% this is not applied.
-                    //Can be avoided with burn & swap, withdrawing with small amounts, waiting for reserves. Everything really.
-                    //The slashing goes primarily to float side, since they're getting dumped hard
-                    //But also it helps anchors by not worsening omega too much.
-                    percentageOfPool = (ptb - ptuWithFee) * 1e18/ptb;
-
-                    if(percentageOfPool < 97e16) {
-                        ptuWithFee = (ptuWithFee * percentageOfPool)/1e18;
-                    } else {
-                        percentageOfPool = 0;
-                    }
-
-
-
-                    uint amount_ = 0;
-                    //ptuWithFee here is the one with omega applied
-                    (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
-                        ptuWithFee,
-                        Math.min(1e18, (1e18 - gammaMulDecimals).mul(_reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                        IZirconFactory(pairFactoryAddress).liquidityFee(),
-                        isFloatReserve0,
-                        to__);
-                    returnAmount += amount_;
-
-                } else {
-                    //Just records % of float liquidity removed here
-                    percentageOfPool = (ptuWithFee * 1e18)/((gammaMulDecimals * ptb)/1e18);
-                }
-
-                payFees(syncReserveAmount, feeBps, isAnchor_);
-
-                _safeTransfer(pairAddress, pairAddress, ptuWithFee);
-                // address to_ = _to; //stack too deep
-                // bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
-                returnAmount += IZirconPair(pairAddress).burnOneSide(to_, isFloatReserve0 != isAnchor_);  // XOR
-
-                // Setting up desired FTV after minting
-//                if(isAnchor_) {
-//                    (uint newReserve0, uint newReserve1, ) = getPairReservesTranslated(0, 0);
-//
-//                    desiredFtv = ZirconLibrary.getFTVForX(
-//                        newReserve1 * 1e18/newReserve0,
-//                        p2x, p2y,
-//                        _reservesTranslated0, _reservesTranslated1,
-//                        virtualAnchorBalance - reserveAnchor
-//                    );
-//
-//                    if(percentageOfPool != 0) {
-//                        //We add the withdrawal slashing to float if it exists
-//                        //Divide by 0.5e18 instead of multiplying by 2, thus getting rid of an extra 1e18 in one go
-//                        desiredFtv.add(((ptuWithFee * (1e18 - percentageOfPool)/ptb) * newReserve1)/5e17);
-//                    }
-//                } else {
-//
-//                    (uint newReserve0, uint newReserve1,) = getPairReservesTranslated(0, 0);
-//
-//                    desiredFtv = ZirconLibrary.getFTVForX(
-//                        newReserve1 * 1e18/newReserve0,
-//                        p2x, p2y,
-//                        _reservesTranslated0, _reservesTranslated1,
-//                        virtualAnchorBalance - reserveAnchor
-//                    );
-//
-//                    desiredFtv -= (desiredFtv * percentageOfPool)/1e18;
-//                }
-
+                (uint amountOut, uint ptu, uint floatPercentage) = handleAsyncBurn(
+                    isAnchor,
+                    adjustedLiquidity,
+                    feeBps,
+                    _reservesTranslated1,
+                    to_,
+                    totalSupply_
+                );
+                returnAmount += amountOut;
+                percentageFloatChange = floatPercentage;
                 payBurnFees(ptu, feeBps);
-                // Bool combines choice of anchor or float with which token is which in the pool
+//
+//                uint ptu = calculateLPTU(isAnchor, liquidity - reservePT, _totalSupply);
+//                //Two vars since we can't pay fees until omega calculations are done
+//                uint ptuWithFee = ptu - (ptu * feeBps)/10000;
+//
+//                bool isAnchor_ = isAnchor;
+//                address to__ = to_;
+//                uint syncReserveAmount = _amount;
+//
+//                uint ptb = _getBalanceOf(pairAddress, address(this));
+//                uint _reservesTranslated1 = reservesTranslated1;
+//                (,uint reserveAnchor) = getSyncReserves();
+//                //uint percentageOfPool;
+//
+//
+//                if(isAnchor_) {
+//
+//                    //reduce ptu by additional slippage
+//                    //This is primarily a disincentive to dump enormous amounts with this method.
+//                    //If they do, they suffer extra slippage equal to the percentage of the pool they're withdrawing.
+//                    //Though below 3% this is not applied.
+//                    //Can be avoided with burn & swap, withdrawing with small amounts, waiting for reserves. Everything really.
+//                    //The slashing goes primarily to float side, since they're getting dumped hard
+//                    //But also it helps anchors by not worsening omega too much.
+//
+//                    //var temping as percentage of pool getting extracted here
+//                    percentageFloatChange = (ptb - ptuWithFee) * 1e18/ptb;
+//
+//                    if(percentageFloatChange < 97e16) {
+//                        uint _oldPtu = ptuWithFee;
+//                        ptuWithFee = (ptuWithFee * percentageFloatChange)/1e18;
+//                        //Now we make it actually become about floats
+//                        percentageFloatChange = (_oldPtu - ptuWithFee)/((gammaMulDecimals * ptb)/1e18);
+//                        percentageFloatChange += 1e18;
+//                    } else {
+//                        percentageFloatChange = 1e18;
+//                    }
+//
+//
+//
+//                    uint amount_ = 0;
+//                    //ptuWithFee here is the one with omega applied
+//                    (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+//                        ptuWithFee,
+//                        Math.min(1e18, (1e18 - gammaMulDecimals).mul(_reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
+//                        IZirconFactory(pairFactoryAddress).liquidityFee(),
+//                        isFloatReserve0,
+//                        to__);
+//                    returnAmount += amount_;
+//
+//                } else {
+//                    //Just records % of float liquidity removed here
+//                    percentageFloatChange = 1e18 - ((ptuWithFee * 1e18)/((gammaMulDecimals * ptb)/1e18));
+//                }
+//
+//                payFees(syncReserveAmount, feeBps, isAnchor_);
+//
+//                _safeTransfer(pairAddress, pairAddress, ptuWithFee);
+//                // address to_ = _to; //stack too deep
+//                // bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
+//                returnAmount += IZirconPair(pairAddress).burnOneSide(to_, isFloatReserve0 != isAnchor_);  // XOR
+//
+//                // Setting up desired FTV after minting
+////                if(isAnchor_) {
+////                    (uint newReserve0, uint newReserve1, ) = getPairReservesTranslated(0, 0);
+////
+////                    desiredFtv = ZirconLibrary.getFTVForX(
+////                        newReserve1 * 1e18/newReserve0,
+////                        p2x, p2y,
+////                        _reservesTranslated0, _reservesTranslated1,
+////                        virtualAnchorBalance - reserveAnchor
+////                    );
+////
+////                    if(percentageOfPool != 0) {
+////                        //We add the withdrawal slashing to float if it exists
+////                        //Divide by 0.5e18 instead of multiplying by 2, thus getting rid of an extra 1e18 in one go
+////                        desiredFtv.add(((ptuWithFee * (1e18 - percentageOfPool)/ptb) * newReserve1)/5e17);
+////                    }
+////                } else {
+////
+////                    (uint newReserve0, uint newReserve1,) = getPairReservesTranslated(0, 0);
+////
+////                    desiredFtv = ZirconLibrary.getFTVForX(
+////                        newReserve1 * 1e18/newReserve0,
+////                        p2x, p2y,
+////                        _reservesTranslated0, _reservesTranslated1,
+////                        virtualAnchorBalance - reserveAnchor
+////                    );
+////
+////                    desiredFtv -= (desiredFtv * percentageOfPool)/1e18;
+////                }
+//
+//                payBurnFees(ptu, feeBps);
+//                // Bool combines choice of anchor or float with which token is which in the pool
             }
+
+            payFees(_amount, feeBps, isAnchor);
 
             pt.burn(address(this), liquidity); // Should burn unadjusted amount ofc
             amount = returnAmount;
@@ -1749,7 +1846,7 @@ contract ZirconPylon is IZirconPylon {
         uint desiredFtv = calculateDesiredFtv(
             reservesTranslated0, reservesTranslated1,
             virtualAnchorBalance - syncReserve1,
-
+            percentageFloatChange
         );
 
         if(_isAnchor) {
@@ -1780,6 +1877,96 @@ contract ZirconPylon is IZirconPylon {
             desiredFtv = desiredFtv.mul(percentageChange)/1e18;
         }
     }
+
+    function handleAsyncBurn(bool isAnchor, uint adjustedLiquidity, uint feeBps, uint reservesTranslated1, address to, uint totalSupply) private returns (uint floatPercentage, uint ptu, uint amountOut) {
+
+        ptu = calculateLPTU(isAnchor, adjustedLiquidity, totalSupply);
+        //Two vars since we can't pay fees until omega calculations are done
+        uint ptuWithFee = ptu - (ptu * feeBps)/10000;
+        uint ptb = _getBalanceOf(pairAddress, address(this));
+        (,uint reserveAnchor) = getSyncReserves();
+        uint percentageFloatChange;
+
+        if(isAnchor) {
+            //reduce ptu by additional slippage
+            //This is primarily a disincentive to dump enormous amounts with this method.
+            //If they do, they suffer extra slippage equal to the percentage of the pool they're withdrawing.
+            //Though below 3% this is not applied.
+            //Can be avoided with burn & swap, withdrawing with small amounts, waiting for reserves. Everything really.
+            //The slashing goes primarily to float side, since they're getting dumped hard
+            //But also it helps anchors by not worsening omega too much.
+
+            //var temping as percentage of pool getting extracted here
+            percentageFloatChange = (ptb - ptuWithFee) * 1e18/ptb;
+            uint _reservesTranslated1 = reservesTranslated1;
+            address _to = to;
+            if(percentageFloatChange < 97e16) {
+                uint _oldPtu = ptuWithFee;
+                ptuWithFee = (ptuWithFee * percentageFloatChange)/1e18;
+                ptu = (ptu * percentageFloatChange)/1e18;
+                //Now we make it actually become about floats
+                percentageFloatChange = (_oldPtu - ptuWithFee)/((gammaMulDecimals * ptb)/1e18);
+                percentageFloatChange += 1e18;
+            } else {
+                percentageFloatChange = 1e18;
+            }
+
+            uint amount_ = 0;
+            //ptuWithFee here is the one with omega applied
+            (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
+                ptuWithFee,
+                    Math.min(1e18, (1e18 - gammaMulDecimals).mul(_reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
+                    liquidityFee,
+                    isFloatReserve0,
+                    _to);
+
+            amountOut = amount_;
+        } else {
+            //Just records % of float liquidity removed here
+            percentageFloatChange = 1e18 - ((ptu * 1e18)/((gammaMulDecimals * ptb)/1e18));
+        }
+
+        //payFees(syncAmount, feeBps, isAnchor);
+        _safeTransfer(pairAddress, pairAddress, ptuWithFee);
+        // address to_ = _to; //stack too deep
+        // bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;
+        amountOut += IZirconPair(pairAddress).burnOneSide(to, isFloatReserve0 != isAnchor);  // XOR
+                        // Setting up desired FTV after minting
+        //                if(isAnchor_) {
+        //                    (uint newReserve0, uint newReserve1, ) = getPairReservesTranslated(0, 0);
+        //
+        //                    desiredFtv = ZirconLibrary.getFTVForX(
+        //                        newReserve1 * 1e18/newReserve0,
+        //                        p2x, p2y,
+        //                        _reservesTranslated0, _reservesTranslated1,
+        //                        virtualAnchorBalance - reserveAnchor
+        //                    );
+        //
+        //                    if(percentageOfPool != 0) {
+        //                        //We add the withdrawal slashing to float if it exists
+        //                        //Divide by 0.5e18 instead of multiplying by 2, thus getting rid of an extra 1e18 in one go
+        //                        desiredFtv.add(((ptuWithFee * (1e18 - percentageOfPool)/ptb) * newReserve1)/5e17);
+        //                    }
+        //                } else {
+        //
+        //                    (uint newReserve0, uint newReserve1,) = getPairReservesTranslated(0, 0);
+        //
+        //                    desiredFtv = ZirconLibrary.getFTVForX(
+        //                        newReserve1 * 1e18/newReserve0,
+        //                        p2x, p2y,
+        //                        _reservesTranslated0, _reservesTranslated1,
+        //                        virtualAnchorBalance - reserveAnchor
+        //                    );
+        //
+        //                    desiredFtv -= (desiredFtv * percentageOfPool)/1e18;
+        //                }
+
+        //payBurnFees(ptu, feeBps);
+
+        floatPercentage = percentageFloatChange;
+
+    }
+
 
     // 0.287kb
     function migrateLiquidity(address newPylon) external{
