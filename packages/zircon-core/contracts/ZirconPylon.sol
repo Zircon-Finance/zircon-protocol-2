@@ -486,7 +486,7 @@ contract ZirconPylon is IZirconPylon {
             pylonReserve0, pylonReserve1,
             reservesTranslated0, reservesTranslated1
         );
-        console.log("gammaNew, gammaOld, blockN", gamma, gammaMulDecimals, block.number);
+//        console.log("gammaNew, gammaOld, blockN", gamma, gammaMulDecimals, block.number);
         if(Math.absoluteDiff(gamma, gammaMulDecimals) >= deltaGammaThreshold) {
             //This makes sure that a massive mintAsync can't be exited in the same block
             strikeBlock = block.number;
@@ -851,7 +851,7 @@ contract ZirconPylon is IZirconPylon {
                 feeBps += (10000 - instantPriceDecimals.mul(10000)/lastPrice);
             }
         }
-        console.log("feebps, ipd, lp", feeBps, instantPriceDecimals, lastPrice);
+//        console.log("feebps, ipd, lp", feeBps, instantPriceDecimals, lastPrice);
         // If either this block's gamma derivative or EMA is higher than threshold we go into the deltaTax mechanism
         if (maxDerivative >= deltaGammaThreshold) {
             uint strikeDiff = block.number - strikeBlock;
@@ -865,7 +865,7 @@ contract ZirconPylon is IZirconPylon {
 
             uint cooldownBlocks = 1e18/deltaGammaThreshold;
 
-            console.log("strike, current", strikeBlock, block.number);
+//            console.log("strike, current", strikeBlock, block.number);
 
             if(strikeDiff > cooldownBlocks) {
                 // This is the first strike (in a while)
@@ -877,7 +877,7 @@ contract ZirconPylon is IZirconPylon {
                 feeBps = ((maxDerivative.mul(10000)/deltaGammaThreshold) - 10000 + IZirconPylonFactory(factoryAddress).deltaGammaMinFee()) //DeltaGamma tax
                 .add(feeBps); //Regular Pylon fee
 
-                console.log("dgt, maxD", deltaGammaThreshold, maxDerivative);
+//                console.log("dgt, maxD", deltaGammaThreshold, maxDerivative);
                 //                return feeBps;
                 //                applied = true;
 
@@ -1367,7 +1367,7 @@ contract ZirconPylon is IZirconPylon {
                 thisBlockEMA = thisBlockEMA.add(Math.absoluteDiff(gammaMulDecimals, oldGamma));
             }
 
-            console.log("thisEMA", thisBlockEMA);
+//            console.log("thisEMA", thisBlockEMA);
 
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
