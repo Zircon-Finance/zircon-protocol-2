@@ -3,7 +3,7 @@ pragma solidity =0.5.16;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 library ZirconLibrary {
     using SafeMath for uint256;
     using SafeMath for uint112;
@@ -23,7 +23,7 @@ library ZirconLibrary {
     //    }
 
 
-    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) pure public returns (bool aNegative, uint a, uint b) {
+    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) view public returns (bool aNegative, uint a, uint b) {
 
 
         //Allows us to use the function for checking without reverting everything
@@ -35,8 +35,8 @@ library ZirconLibrary {
             }
         }
 
-
-        if(p3x == p2x) {
+        //Makes it a line if the points are are within 0.1% of each other;
+        if((p3x * 1e18)/p2x <= 1001e15) {
             return (false, 0, p3y.mul(1e18)/p3x);
         }
 
@@ -45,6 +45,8 @@ library ZirconLibrary {
         //a can take values from approx. 1e19 to 0, so using encoding is ill-advised.
 
         uint aNumerator;
+
+        console.log("p3x, p3y", p3x, p3y);
 
         uint aPartial1 = p3y.mul(p2x);
         uint aPartial2 = p3x.mul(p2y);
@@ -63,7 +65,9 @@ library ZirconLibrary {
             //a is negative
             aNumerator = (aPartial2 - aPartial1)/p2x;
 
-            a = aNumerator * 1e18/aDenominator;
+            console.log("aPart2, aPart1, p2x", aPartial2, aPartial1, p2x);
+
+            a = (aNumerator * 1e18)/aDenominator;
 
             b = (p2y * 1e18/p2x).add((p2x * a)/1e18); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
 
@@ -72,12 +76,13 @@ library ZirconLibrary {
         }
     }
 
-    function calculateP2(uint k, uint vab, uint vfb) pure public returns (uint p2x, uint p2y) {
+    function calculateP2(uint k, uint vab, uint vfb) view public returns (uint p2x, uint p2y) {
         p2y = ((k * 2)/vfb) - vab;
         p2x = (p2y * 1e18)/vfb;
+        console.log("p2y, p2x", p2y, p2x);
     }
 
-    function evaluateP2(uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) pure external returns (uint p2x, uint p2y) {
+    function evaluateP2(uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) view external returns (uint p2x, uint p2y) {
 
         uint p3x = (adjustedVab ** 2)/ reserve0;
         p3x = (p3x * 1e18) / reserve1;
@@ -100,7 +105,7 @@ library ZirconLibrary {
     //            self.p2y = (2 * k/adjusted_vfb) - adjusted_vab
     //            self.p2x = self.p2y/adjusted_vfb
 
-    function getFTVForX(uint x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) pure external returns (uint ftv) {
+    function getFTVForX(uint x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv) {
 
         uint p3x = (adjustedVab ** 2)/ reserve0;
         p3x = (p3x * 1e18) / reserve1;
@@ -127,7 +132,7 @@ library ZirconLibrary {
         }
     }
 
-    function checkDerivative(uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) pure external returns (bool isNeg) {
+    function checkDerivative(uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (bool isNeg) {
 
         uint p3x = (adjustedVab ** 2)/ reserve0;
         p3x = (p3x * 1e18) / reserve1;

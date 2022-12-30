@@ -91,8 +91,8 @@ describe("Pylon", () => {
         let gEMA = await pylonInstance.gammaEMA()
         console.log("gEMA: ", (gEMA.toString()));
 
-        let anchorKValue = await pylonInstance.anchorKFactor()
-        console.log("akv: ", (anchorKValue.toString()));
+        // let anchorKValue = await pylonInstance.anchorKFactor()
+        // console.log("akv: ", (anchorKValue.toString()));
 
         let formulaSwitch = await pylonInstance.formulaSwitch()
         console.log("fs: ", (formulaSwitch.toString()));
@@ -119,10 +119,10 @@ describe("Pylon", () => {
     }
     //Let's try to calculate some cases for pylon
     const mintTestCases = [
-        [5, 10, '4762509926821186', '4749990617651023','5099985037527377080','9999999999999999000', false],
+        [5, 10, '4762509926821186', '4749990617651023','5099989902573940085','9999999999999999000', false],
         [10, 5, '4749999999999999', '4762499999999999','9999999999999999010', '5099989999999999000', true],
         [5, 10, '2374999999999999', '9525000000000000','4999999999999999005', '10049994999999999000', true],
-        [10, 10, '9525009926820697', '4749995308820878','10099985086231613010', '9999999999999999000', false],
+        [10, 10, '9525009926820697', '4749995308820878','10099989951286945808', '9999999999999999000', false],
         [1000, 1000, '475000000000000000', '952500000000000000','999999999999999999000', '1009998999999999999000', true],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : expandTo18Decimals(n))))
     mintTestCases.forEach((mintCase, i) => {
@@ -163,7 +163,7 @@ describe("Pylon", () => {
             let ptt = await pair.totalSupply();
 
             let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-            let anchorK = await pylonInstance.anchorKFactor();
+            // let anchorK = await pylonInstance.anchorKFactor();
             let vabF = await pylonInstance.virtualAnchorBalance();
             let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -211,7 +211,7 @@ describe("Pylon", () => {
             ptt = await pair.totalSupply();
 
             tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-            anchorK = await pylonInstance.anchorKFactor();
+            // anchorK = await pylonInstance.anchorKFactor();
             vabF = await pylonInstance.virtualAnchorBalance();
             gamma = await pylonInstance.gammaMulDecimals();
 
@@ -429,7 +429,7 @@ describe("Pylon", () => {
         //let kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
 
         let vab = await pylonInstance.virtualAnchorBalance();
-        let anchorFactor = await pylonInstance.anchorKFactor();
+        // let anchorFactor = await pylonInstance.anchorKFactor();
 
         pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after init: ", ethers.utils.formatEther(pylonRes[0]));
@@ -517,7 +517,7 @@ describe("Pylon", () => {
         //kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
 
         vab = await pylonInstance.virtualAnchorBalance();
-        anchorFactor = await pylonInstance.anchorKFactor();
+        // anchorFactor = await pylonInstance.anchorKFactor();
 
         pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
@@ -537,8 +537,8 @@ describe("Pylon", () => {
 
         await token0.transfer(pylonInstance.address, token0Amount.div(100000000))
         console.log("Sent token0", ethers.utils.formatEther(token0Amount.div(100000000)))
-        anchorFactor = await pylonInstance.anchorKFactor();
-        console.log("anchorFactor before", ethers.utils.formatEther(anchorFactor));
+        // anchorFactor = await pylonInstance.anchorKFactor();
+        // console.log("anchorFactor before", ethers.utils.formatEther(anchorFactor));
 
         vab = await pylonInstance.virtualAnchorBalance();
         console.log("Vab before", ethers.utils.formatEther(vab));
@@ -553,8 +553,8 @@ describe("Pylon", () => {
 
         pylonInstance.mintPoolTokens(account.address, false)
 
-        anchorFactor = await pylonInstance.anchorKFactor();
-        console.log("anchorFactor after", ethers.utils.formatEther(anchorFactor));
+        // anchorFactor = await pylonInstance.anchorKFactor();
+        // console.log("anchorFactor after", ethers.utils.formatEther(anchorFactor));
 
         console.log("mu after first mint: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
 
@@ -575,7 +575,7 @@ describe("Pylon", () => {
         //kTranslated = (pairRes[0].mul(ptb).div(ptt)).mul((pairRes[1].mul(ptb).div(ptt)));
 
         vab = await pylonInstance.virtualAnchorBalance();
-        anchorFactor = await pylonInstance.anchorKFactor();
+        // anchorFactor = await pylonInstance.anchorKFactor();
 
         pylonRes = await pylonInstance.getSyncReserves();
         console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
@@ -1279,7 +1279,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1326,7 +1326,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1420,7 +1420,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         pairResT = await pair.getReserves();
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1471,7 +1471,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1558,7 +1558,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1637,7 +1637,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1733,7 +1733,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1780,7 +1780,7 @@ describe("Pylon", () => {
             await token0.transfer(pylonInstance.address, floatAdd)
             await pylonInstance.mintPoolTokens(account.address, false);
 
-            anchorK = await pylonInstance.anchorKFactor();
+            // anchorK = await pylonInstance.anchorKFactor();
             let isLineFormula = await pylonInstance.formulaSwitch();
             console.log("anchorK after mint ", i, ethers.utils.formatEther(anchorK));
             console.log("isLineFormula after mint ", i, isLineFormula);
@@ -1799,7 +1799,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -1952,7 +1952,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2003,7 +2003,7 @@ describe("Pylon", () => {
                 await pylonInstance.mintAsync(account.address, false);
             }
 
-            anchorK = await pylonInstance.anchorKFactor();
+            // anchorK = await pylonInstance.anchorKFactor();
             let isLineFormula = await pylonInstance.formulaSwitch();
             console.log("anchorK after mint ", i, ethers.utils.formatEther(anchorK));
             console.log("isLineFormula after mint ", i, isLineFormula);
@@ -2022,7 +2022,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2137,7 +2137,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2176,7 +2176,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2246,7 +2246,7 @@ describe("Pylon", () => {
         // ptt = await pair.totalSupply();
         //
         // let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        // let anchorK = await pylonInstance.anchorKFactor();
+        // // let anchorK = await pylonInstance.anchorKFactor();
         // let vabF = await pylonInstance.virtualAnchorBalance();
         // let gamma = await pylonInstance.gammaMulDecimals();
         //
@@ -2297,7 +2297,7 @@ describe("Pylon", () => {
         //         await pylonInstance.mintAsync(account.address, false);
         //     }
         //
-        //     anchorK = await pylonInstance.anchorKFactor();
+        // //     anchorK = await pylonInstance.anchorKFactor();
         //     let isLineFormula = await pylonInstance.formulaSwitch();
         //     console.log("anchorK after mint ", i, ethers.utils.formatEther(anchorK));
         //     console.log("isLineFormula after mint ", i, isLineFormula);
@@ -2316,7 +2316,7 @@ describe("Pylon", () => {
         // ptt = await pair.totalSupply();
         //
         // tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        // anchorK = await pylonInstance.anchorKFactor();
+        // // anchorK = await pylonInstance.anchorKFactor();
         // vabF = await pylonInstance.virtualAnchorBalance();
         // gamma = await pylonInstance.gammaMulDecimals();
         //
@@ -2431,7 +2431,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2470,7 +2470,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2511,7 +2511,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2563,7 +2563,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2620,7 +2620,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2678,7 +2678,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         pairResT = await pair.getReserves();
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2730,7 +2730,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         pairResT = await pair.getReserves();
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2752,7 +2752,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2818,7 +2818,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2871,7 +2871,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -2955,7 +2955,7 @@ describe("Pylon", () => {
         // ptt = await pair.totalSupply();
         //
         // tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        // anchorK = await pylonInstance.anchorKFactor();
+        // // anchorK = await pylonInstance.anchorKFactor();
         // vabF = await pylonInstance.virtualAnchorBalance();
         // gamma = await pylonInstance.gammaMulDecimals();
         //
@@ -3009,7 +3009,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3067,7 +3067,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         pairResT = await pair.getReserves();
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3125,7 +3125,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
         pairResT = await pair.getReserves();
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3147,7 +3147,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3213,7 +3213,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3266,7 +3266,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3350,7 +3350,7 @@ describe("Pylon", () => {
         // ptt = await pair.totalSupply();
         //
         // tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        // anchorK = await pylonInstance.anchorKFactor();
+        // // anchorK = await pylonInstance.anchorKFactor();
         // vabF = await pylonInstance.virtualAnchorBalance();
         // gamma = await pylonInstance.gammaMulDecimals();
         //
@@ -3403,7 +3403,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3455,7 +3455,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3489,7 +3489,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3523,7 +3523,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3556,7 +3556,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3591,7 +3591,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3631,7 +3631,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3659,7 +3659,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3723,7 +3723,7 @@ describe("Pylon", () => {
         console.log("ptt before async mint", ethers.utils.formatEther(ptt));
 
         let tpv = pairResIni[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
 
         let gamma = await pylonInstance.gammaMulDecimals();
@@ -3735,7 +3735,7 @@ describe("Pylon", () => {
         await pylonInstance.mintPoolTokens(account.address, true);
 
         ptt = await pair.totalSupply();
-        let anchorFactor = await pylonInstance.anchorKFactor();
+        // let anchorFactor = await pylonInstance.anchorKFactor();
 
         console.log("ptt after async mint", ethers.utils.formatEther(ptt));
         console.log("anchorFactor after async mint", ethers.utils.formatEther(anchorFactor));
@@ -3762,7 +3762,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
 
         derVfb = tpv.mul(gamma).mul(pairResT[0]).div(pairResT[1]).div(ethers.BigNumber.from('1000000000000000000'));
@@ -3843,7 +3843,7 @@ describe("Pylon", () => {
 
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3895,7 +3895,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -3984,7 +3984,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -4051,7 +4051,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -4124,7 +4124,7 @@ describe("Pylon", () => {
         console.log("ptt before async mint", ethers.utils.formatEther(ptt));
 
         let tpv = pairResIni[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
 
         let gamma = await pylonInstance.gammaMulDecimals();
@@ -4136,7 +4136,7 @@ describe("Pylon", () => {
         await pylonInstance.mintPoolTokens(account.address, true);
 
         ptt = await pair.totalSupply();
-        let anchorFactor = await pylonInstance.anchorKFactor();
+        // let anchorFactor = await pylonInstance.anchorKFactor();
 
         console.log("ptt after async mint", ethers.utils.formatEther(ptt));
         console.log("anchorFactor after async mint", ethers.utils.formatEther(anchorFactor));
@@ -4157,7 +4157,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
 
         derVfb = tpv.mul(gamma).mul(pairResT[0]).div(pairResT[1]).div(ethers.BigNumber.from('1000000000000000000'));
@@ -4194,7 +4194,7 @@ describe("Pylon", () => {
 
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -4253,7 +4253,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 
@@ -4751,7 +4751,7 @@ describe("Pylon", () => {
         let ptt = await pair.totalSupply();
 
         let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        let anchorK = await pylonInstance.anchorKFactor();
+        // let anchorK = await pylonInstance.anchorKFactor();
         let vabF = await pylonInstance.virtualAnchorBalance();
         let gamma = await pylonInstance.gammaMulDecimals();
 
@@ -4777,7 +4777,7 @@ describe("Pylon", () => {
         ptt = await pair.totalSupply();
 
         tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        anchorK = await pylonInstance.anchorKFactor();
+        // anchorK = await pylonInstance.anchorKFactor();
         vabF = await pylonInstance.virtualAnchorBalance();
         gamma = await pylonInstance.gammaMulDecimals();
 

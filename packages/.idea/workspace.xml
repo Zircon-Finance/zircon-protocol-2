@@ -5,14 +5,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/interfaces/IZirconPylonFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/interfaces/IZirconPylonFactory.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/scripts/rev-check.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/scripts/rev-check.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/yarn-error.log" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/yarn-error.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/yarn.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../yarn.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
