@@ -26,8 +26,11 @@ library ZirconLibrary {
     function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) view public returns (bool aNegative, uint a, uint b) {
 
 
+        console.log("parab p2x, p2y", p2x, p2y);
+        console.log("p3x, p3y", p3x, p3y);
+
         //Allows us to use the function for checking without reverting everything
-        if(p3x < p2x) {
+        if(p3x < p2x && p2y > p3y) {
             if(check) {
                 return (false, 42e25, 42e25);
             } else {
@@ -46,8 +49,6 @@ library ZirconLibrary {
 
         uint aNumerator;
 
-        console.log("p3x, p3y", p3x, p3y);
-
         uint aPartial1 = p3y.mul(p2x);
         uint aPartial2 = p3x.mul(p2y);
         uint aDenominator = p3x.mul(p3x - p2x)/1e18; //Always positive
@@ -55,6 +56,13 @@ library ZirconLibrary {
             //a is positive
             aNumerator = (aPartial1 - aPartial2)/p2x;
             a = aNumerator * 1e18/aDenominator;
+            {
+                uint _p2x = p2x;
+                console.log("aNum, a", aNumerator, a);
+                console.log("left, right", p2y * 1e18/p2x, (_p2x * a)/1e18);
+
+            }
+
             require(p2y * 1e18/p2x >= (p2x * a)/1e18, "ZP: BNeg");
 
             b = p2y * 1e18/p2x - (p2x * a)/1e18; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
@@ -79,7 +87,7 @@ library ZirconLibrary {
     function calculateP2(uint k, uint vab, uint vfb) view public returns (uint p2x, uint p2y) {
         p2y = ((k * 2)/vfb) - vab;
         p2x = (p2y * 1e18)/vfb;
-        console.log("p2y, p2x", p2y, p2x);
+        console.log("cal p2y, p2x", p2y, p2x);
     }
 
     function evaluateP2(uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) view external returns (uint p2x, uint p2y) {
@@ -90,8 +98,10 @@ library ZirconLibrary {
         if(x < p3x) {
             p2y = desiredFtv;
             p2x = x;
+            console.log("d p2x, p2y", p2x, p2y);
         } else {
             (p2x, p2y) = calculateP2(reserve0 * reserve1, adjustedVab, adjustedVfb);
+            console.log("d p2x, p2y", p2x, p2y);
         }
 
     }
@@ -107,8 +117,8 @@ library ZirconLibrary {
 
     function getFTVForX(uint x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv) {
 
-        uint p3x = (adjustedVab ** 2)/ reserve0;
-        p3x = (p3x * 1e18) / reserve1;
+        uint p3x = (adjustedVab ** 2)/ reserve1;
+        p3x = (p3x * 1e18) / reserve0;
 
         if (x >= p3x) {
             ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * x) - adjustedVab;
@@ -118,11 +128,13 @@ library ZirconLibrary {
                 p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
 
+//            console.log("gf aNeg, a, b", aNeg, a, b);
+
             //If derivative is positive at p3x
             if(!aNeg || b > (2 * a * p3x)/1e18) {
                 ftv = aNeg
-                ? (b * x).sub(((a * x)/1e18) * x)
-                : (((a * x)/1e18) * x).add(b * x);
+                ? ((b * x).sub(((a * x)/1e18) * x))/1e18
+                : ((((a * x)/1e18) * x).add(b * x))/1e18;
 
             } else {
                 //Since this uses the current formula it really should never trigger this error.
