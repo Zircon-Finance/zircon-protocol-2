@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/utils.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,17 +161,5 @@
         <option value="Space.CommitStatus" />
       </list>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/zircon-core/test/shared/commands.js</url>
-          <line>36</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
