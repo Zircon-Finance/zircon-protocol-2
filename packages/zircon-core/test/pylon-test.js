@@ -7,6 +7,7 @@ const assert = require("assert");
 const {BigNumber} = require("ethers");
 const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
 const {coreFixtures, librarySetup} = require("./shared/fixtures");
+const {initPylon} = require("./shared/commands");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
@@ -129,20 +130,7 @@ describe("Pylon", () => {
         it(`mintPylon:${i}`, async () => {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor] = mintCase
             // Add some liquidity to the Pair...
-            await addLiquidity(token0Amount, token1Amount)
-            let pairRes1 = await pair.getReserves()
-            console.log("Pylon Pair Reserve0: ", ethers.utils.formatEther(pairRes1[0]))
-            console.log("Pylon Pair Reserve1: ", ethers.utils.formatEther(pairRes1[1]))
-            // Transferring some tokens
-            let maxSync = await factoryPylonInstance.maximumPercentageSync();
-            console.log("maxSync: ", maxSync);
-            await token0.transfer(pylonInstance.address, token0Amount)
-            await token1.transfer(pylonInstance.address, token1Amount)
-
-            console.log("Mint test token0Amount: ", ethers.utils.formatEther(token0Amount));
-            console.log("Mint test token1Amount: ", ethers.utils.formatEther(token1Amount));
-            // Let's start the pylon
-            await pylonInstance.initPylon(account.address)
+            await initPylon(token0Amount, token1Amount, 50);
             // Transferring some liquidity to pylon
             let pylonRes = await pylonInstance.getSyncReserves();
             console.log("Pylon Sync Reserve0: ", ethers.utils.formatEther(pylonRes[0]));
