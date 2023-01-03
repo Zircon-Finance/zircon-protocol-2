@@ -1,5 +1,5 @@
 const {ethers} = require("hardhat");
-const {coreFixtures, librarySetup} = require("fixtures");
+const {coreFixtures, librarySetup} = require("./fixtures");
 const {expandTo18Decimals, getAmountOut} = require("./utils");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
@@ -17,9 +17,9 @@ const overrides = {
     gasLimit: 9999999
 }
 
-exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPercentage) {
+exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPercentage, library) {
 
-    await initData();
+    await initData(library);
 
     let token0Decimals = expandTo18Decimals(token0Amount);
     let token1Decimals = expandTo18Decimals(token1Amount);
@@ -43,25 +43,24 @@ exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPe
 
 }
 
-exports.mintSync()
+// exports.mintSync()
+//
+// exports.mintAsync()
+//
+// exports.burn()
+//
+// exports.burnAsync()
+//
+// exports.setPrice()
+//
+// exports.forwardTime()
+//
+// exports.updateMint()
+//
+// exports.printState()
 
-exports.mintAsync()
 
-exports.burn()
-
-exports.burnAsync()
-
-exports.setPrice()
-
-exports.forwardTime()
-
-exports.updateMint()
-
-exports.printState()
-
-
-async function initData() {
-    library = await librarySetup()
+async function initData(library) {
 
     [account, account2] = await ethers.getSigners();
     deployerAddress = account.address;

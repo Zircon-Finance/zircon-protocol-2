@@ -55,7 +55,7 @@ describe("Pylon", () => {
         await token0.transfer(pylonInstance.address, token0Amount)
         await token1.transfer(pylonInstance.address, token1Amount)
         //Let's initialize the Pylon, this should call two sync
-        await pylonInstance.initPylon(account.address)
+        await pylonInstance.initPylon(account.address, library)
     }
 
     //     feeValueAnchor: BigintIsh,
