@@ -1,6 +1,6 @@
 const {ethers} = require("hardhat");
 const {coreFixtures, librarySetup} = require("./fixtures");
-const {expandTo18Decimals, getAmountOut, sqrt} = require("./utils");
+const {expandTo18Decimals, getAmountOut, sqrt, format} = require("./utils");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
@@ -70,13 +70,17 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(tokenAmount) : tokenAmount;
 
+    console.log("\n===Starting MintSync ===")
+
     if(isAnchor) {
-        await token0.transfer(pylonInstance.address, tokenDecimals)
-    } else {
         await token1.transfer(pylonInstance.address, tokenDecimals)
+    } else {
+        await token0.transfer(pylonInstance.address, tokenDecimals)
     }
 
-    return await pylonInstance.mintPoolTokens(account.address, isAnchor)
+    let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
+    console.log("\n===MintSync Complete ===")
+    return results
 }
 //
 exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount, isAnchor, fixtures, isDecimals) {
@@ -86,11 +90,14 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
     let token0Decimals = !isDecimals? expandTo18Decimals(token0Amount) : token0Amount;
     let token1Decimals = !isDecimals? expandTo18Decimals(token1Amount) : token1Amount;
 
+    console.log("\n===Starting MintAsync ===")
+
     await token0.transfer(pylonInstance.address, token0Decimals)
     await token1.transfer(pylonInstance.address, token1Decimals)
 
-    return await pylonInstance.mintAsync(address, isAnchor)
-
+    let results = await pylonInstance.mintAsync(address, isAnchor)
+    console.log("\n===MintAsync Complete ===")
+    return results
 }
 //
 exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures, isDecimals) {
@@ -99,13 +106,16 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
+    console.log("\n===Starting Burn ===")
     if(isAnchor) {
         await poolTokenInstance1.transfer(pylonInstance.address, tokenDecimals)
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
 
-    return await pylonInstance.burn(address, isAnchor)
+    let results = await pylonInstance.burn(address, isAnchor)
+    console.log("\n===Burn Complete ===")
+    return results;
 }
 //
 exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor, fixtures, isDecimals) {
@@ -114,37 +124,52 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
 
     let tokenDecimals = !isDecimals ? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
+    console.log("\n===Starting BurnAsync ===")
+
     if (isAnchor) {
         await poolTokenInstance1.transfer(pylonInstance.address, tokenDecimals)
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
 
-    return await pylonInstance.burnAsync(address, isAnchor)
+    let results = await pylonInstance.burnAsync(address, isAnchor)
+    console.log("\n===BurnAsync Complete ===")
+    return results
 
 }
 //
-exports.setPrice = async function setPrice(address, targetPrice) {
+exports.setPrice = async function setPrice(address, targetPrice, fixtures) {
+
+    destructure(fixtures);
 
     let pairResT = await pair.getReserves();
     let resIn;
     let resOut;
     let targetPriceDecimals = expandTo18Decimals(targetPrice)
 
-    let price = pairResT[1].mul(DECIMALS)/pairResT[0];
+    let price = pairResT[1].mul(DECIMALS).div(pairResT[0]);
 
-    let dump = targetPriceDecimals < price
+    console.log("price, targetPrice", format(price), format(targetPriceDecimals));
+
+    let dump = targetPriceDecimals.lt(price);
 
     if(dump) {
         resIn = pairResT[0]
         resOut = pairResT[1]
         targetPriceDecimals = (DECIMALS.pow(2)).div(targetPriceDecimals)
+        console.log("dump target: ", format(targetPriceDecimals))
     } else {
         resIn = pairResT[1]
         resOut = pairResT[0]
     }
 
-    let x = sqrt((targetPriceDecimals.mul(resIn).div(DECIMALS)).mul(resOut).div(DECIMALS)).sub(resIn)
+    let x = sqrt((targetPriceDecimals.mul(resIn).div(DECIMALS)).mul(resOut)).sub(resIn)
+
+    // let sqrt2 = sqrt(expandTo18Decimals(2).mul(expandTo18Decimals(2)));
+    // console.log("Sqrt test ", format(sqrt2))
+    //x = math.sqrt(adjusted_price * res_in * res_out) - res_in
+
+    console.log("X", format(x))
 
     //TODO: Adjust by fee as well
 
@@ -170,9 +195,11 @@ exports.forwardTime = async function forwardTime(provider, blocksToMine) {
 //
 exports.updateMint = async function updateMint(fixtures) {
     destructure(fixtures)
+    console.log("\n===Starting updateMint ===")
     await token0.transfer(pylonInstance.address, MINIMUM_LIQUIDITY)
     //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
     await pylonInstance.mintPoolTokens(account.address, false)
+    console.log("\n=== updateMint complete ===")
 }
 //
 
@@ -222,15 +249,18 @@ exports.printState = async function printState(fixtures) {
     let p2y = await pylonInstance.p2y();
     let p2yF = ethers.utils.formatEther(p2y);
 
+    let sync = await pylonInstance.getSyncReserves();
 
-    console.log("Pylon State: VAB: " + vabF + ", Gamma: " + gammaF + ", VFB: " + vfbF + ", p2x: " + p2xF + ", p2y: " + p2yF);
+
+    console.log("\n===Pylon State: VAB: " + vabF + ", Gamma: " + gammaF + ", VFB: " + vfbF + ", p2x: " + p2xF + ", p2y: " + p2yF);
 
     return {
         vab,
         gamma,
         vfb,
         p2x,
-        p2y
+        p2y,
+        sync
     }
 
 }
@@ -253,10 +283,10 @@ exports.printPairState = async function printPairState(fixtures) {
     let tr1 = pairResT[1].mul(ptb).div(ptt);
     let tr1F = ethers.utils.formatEther(tr1);
 
-    let rootK = sqrt(tr0.mul(tr1).div(DECIMALS))
+    let rootK = sqrt(tr0.mul(tr1))
     let rootKF = ethers.utils.formatEther(rootK);
 
-    console.log("Pair State: TR0: " + tr0F + ", TR1: " + tr1F + ", Price: " + priceF + ", rootK: " + rootKF);
+    console.log("\n===Pair State: TR0: " + tr0F + ", TR1: " + tr1F + ", Price: " + priceF + ", rootK: " + rootKF);
 
     return {
         pairResT,

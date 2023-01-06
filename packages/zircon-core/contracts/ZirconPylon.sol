@@ -260,8 +260,8 @@ contract ZirconPylon is IZirconPylon {
         uint p3x = (adjustedVab ** 2)/ _translatedReserve1;
         p3x = (p3x * 1e18) / _translatedReserve0;
 
-        console.log("gp3x, p3y", p3x, adjustedVab);
-        console.log("pair0, pair1", _translatedReserve0, _translatedReserve1);
+//        console.log("gp3x, p3y", p3x, adjustedVab);
+//        console.log("pair0, pair1", _translatedReserve0, _translatedReserve1);
 
         uint x = (_translatedReserve1 * 1e18)/_translatedReserve0;
 
@@ -273,7 +273,6 @@ contract ZirconPylon is IZirconPylon {
                 p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
 
-            //console.log("aNeg, a, b", aNeg, a, b);
             //If derivative is positive at p3x
             if(!aNeg || b > (2 * a * p3x)/1e18) {
                 uint ftv = aNeg
@@ -289,7 +288,7 @@ contract ZirconPylon is IZirconPylon {
             }
 
         }
-        console.log("gama,", gamma);
+//        console.log("gama,", gamma);
     }
 
     // @notice On init pylon we have to handle two cases
@@ -310,7 +309,7 @@ contract ZirconPylon is IZirconPylon {
         lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
         lastPrice = (uint256(_reservePair1) * 1e18)/_reservePair0;
 
-        console.log("init lp, rp0, rp1", lastPrice, _reservePair0, _reservePair1);
+//        console.log("init lp, rp0, rp1", lastPrice, _reservePair0, _reservePair1);
 
         liquidityFee = IZirconFactory(pairFactoryAddress).liquidityFee();
         maxPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
@@ -368,6 +367,7 @@ contract ZirconPylon is IZirconPylon {
         //        IZirconPoolToken(floatPoolTokenAddress).mint(_to, floatLiquidity);
 
         muMulDecimals = gammaMulDecimals; // Starts as gamma, diversifies over time. Used to calculate fee distribution
+        console.log("mu, g", muMulDecimals, gammaMulDecimals);
         muBlockNumber = block.number; // block height of last mu update
         muOldGamma = gammaMulDecimals; // gamma value at last mu update
 
@@ -677,6 +677,7 @@ contract ZirconPylon is IZirconPylon {
         // Reduces by amount that was in sync reserves
 
         uint amountIn = _getBalanceOf(isAnchor ? pylonToken.anchor : pylonToken.float, address(this)).sub(isAnchor ? _reserve1 : _reserve0);
+//        console.log("amIn", amountIn);
         notZero(amountIn);
 
         {
@@ -844,7 +845,7 @@ contract ZirconPylon is IZirconPylon {
     // 0.615kb
     function payFees(uint amountIn, uint feeBps, bool isAnchor) private returns (uint amountOut){
         uint fee = amountIn * feeBps/10000;
-        if(fee == 0) {
+        if(fee <= 10) {
             return(amountIn);
         }
         // TODO: This should never go above the balance
@@ -1305,7 +1306,8 @@ contract ZirconPylon is IZirconPylon {
 
 
                 if(rootKTranslated > lastRootKTranslated) {
-                    uint feeValuePercentage = (rootKTranslated - lastRootKTranslated) * 1e18 / lastRootKTranslated;
+                    //Since we always multiply current reserves by feePercentage it's more correct to divide by SqrtKPrime
+                    uint feeValuePercentage = (rootKTranslated - lastRootKTranslated) * 1e18 / rootKTranslated;
 
                     uint _pylonReserve1 = pylonReserve1;
                     uint _pylonReserve0 = pylonReserve0;
@@ -1325,62 +1327,12 @@ contract ZirconPylon is IZirconPylon {
                         feeToAnchor = _feeToAnchor;
                     }
 
-
-//                    uint _pylonReserve1 = pylonReserve1;
-//                    uint _pylonReserve0 = pylonReserve0;
-//
-//                    if(feeValuePercentage > 0) {
-//                        (uint _pairReserveTranslated0, uint _pairReserveTranslated1) = (pairReserveTranslated0, pairReserveTranslated1);
-//
-//                        feeToAnchor = ((2*_pairReserveTranslated1.mul(feeValuePercentage)/1e18) * muMulDecimals)/1e18;
-//
-//                        uint x = _pairReserveTranslated1 * 1e18/_pairReserveTranslated0;
-//                        uint ftv = ZirconLibrary.getFTVForX(
-//                            x,
-//                            p2x, p2y,
-//                            _pairReserveTranslated0 - (_pairReserveTranslated0 * feeValuePercentage/1e18),
-//                            _pairReserveTranslated1 - (_pairReserveTranslated1 * feeValuePercentage/1e18),
-//                            virtualAnchorBalance - _pylonReserve1
-//                        );
-//
-//
-//                        feeToFloat = ((2 * _pairReserveTranslated1.mul(feeValuePercentage)/1e18) * (1e18 - muMulDecimals))/1e18;
-//
-//
-//
-//                        (uint _p2x, uint _p2y) = ZirconLibrary.evaluateP2(
-//                            x,
-//                            virtualAnchorBalance - _pylonReserve1,
-//                            virtualFloatBalance - _pylonReserve0,
-//                            _pairReserveTranslated0,
-//                            _pairReserveTranslated1,
-//                            ftv + feeToFloat //Always in anchor units
-//                        );
-//
-//                        uint newVab = virtualAnchorBalance + feeToAnchor - _pylonReserve1;
-//
-//                        // Recovery code for the unlikely case that fees make VFB go into negative derivative territory.
-//                        // Checks if the derivative with current parameters is not negative
-//                        // Assigns all fees to anchor if it is.
-//
-//                        if(!ZirconLibrary.checkDerivative(_p2x, _p2y, _pairReserveTranslated0, _pairReserveTranslated1, newVab)) {
-//                            feeToFloat = virtualFloatBalance.mul(feeToFloat)/(ftv + _pylonReserve0 * _pairReserveTranslated1 / _pairReserveTranslated0);
-//                            p2x = _p2x;
-//                            p2y = _p2y;
-//                        } else {
-//                            //reset all fees to anchor.
-//                            feeToAnchor = feeToAnchor * 1e18/(muMulDecimals);
-//                            feeToFloat = 0;
-//                        }
-//
-//                    }
-
                 }
 
             }
 
 
-            console.log("feeToAnchor, feeToFloat", feeToAnchor, feeToFloat);
+//            console.log("feeToAnchor, feeToFloat", feeToAnchor, feeToFloat);
             virtualAnchorBalance += feeToAnchor;
             virtualFloatBalance += feeToFloat;
 
@@ -1467,6 +1419,8 @@ contract ZirconPylon is IZirconPylon {
                                                                                     uint _p2x,
                                                                                     uint _p2y) {
 
+        console.log("puttana", muMulDecimals);
+
         feeToAnchor = ((2*pairReserve1.mul(feeValuePercentage)/1e18) * muMulDecimals)/1e18;
 
         uint ftv;
@@ -1479,7 +1433,7 @@ contract ZirconPylon is IZirconPylon {
             uint x = pairReserve1 * 1e18 / pairReserve0;
 
             {
-                console.log("fvp, pair0, pair1", _feeValuePercentage, _pairReserve0, _pairReserve1);
+//                console.log("fvp, mu, pair1", _feeValuePercentage, muMulDecimals, _pairReserve1);
             }
             ftv = ZirconLibrary.getFTVForX(
                 x,
@@ -1489,7 +1443,7 @@ contract ZirconPylon is IZirconPylon {
                 virtualAnchorBalance - _pylonReserve1
             );
 
-            //feeToFloat = ((2 * _pairReserve1.mul(_feeValuePercentage) / 1e18) * (1e18 - muMulDecimals)) / 1e18;
+            feeToFloat = ((2 * _pairReserve1.mul(_feeValuePercentage) / 1e18).mul(1e18 - muMulDecimals)) / 1e18;
 
             (_p2x, _p2y) = ZirconLibrary.evaluateP2(
                 x,
@@ -1511,6 +1465,7 @@ contract ZirconPylon is IZirconPylon {
             feeToFloat = virtualFloatBalance.mul(feeToFloat)/(ftv + pylonReserve0 * pairReserve1 / pairReserve0);
         } else {
             //reset all fees to anchor.
+            console.log("madonna", muMulDecimals);
             feeToAnchor = feeToAnchor * 1e18/(muMulDecimals);
             feeToFloat = 0;
             _p2x = 0;

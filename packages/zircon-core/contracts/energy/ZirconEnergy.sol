@@ -171,10 +171,13 @@ contract ZirconEnergy is IZirconEnergy {
       }
 
       mu = Math.clamp(muMulDecimals, 1e17, 9e17);
+
+      console.log("Energy: Mu: ", mu);
       // update variables for next step
 //      muOldGamma = _newGamma;
 //      muBlockNumber = _newBlockHeight;
     }
+    mu = muMulDecimals;
   }
 
 

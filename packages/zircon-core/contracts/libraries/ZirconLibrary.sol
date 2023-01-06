@@ -31,12 +31,15 @@ library ZirconLibrary {
 
         //Allows us to use the function for checking without reverting everything
         if(p3x < p2x && p2y > p3y) {
+//            console.log("cane", check);
             if(check) {
                 return (false, 42e25, 42e25);
             } else {
                 revert("ZP: ExFlt0");
             }
         }
+
+//        console.log("dio");
 
         //Makes it a line if the points are are within 0.1% of each other;
         if((p3x * 1e18)/p2x <= 1001e15) {
@@ -52,6 +55,7 @@ library ZirconLibrary {
         uint aPartial1 = p3y.mul(p2x);
         uint aPartial2 = p3x.mul(p2y);
         uint aDenominator = p3x.mul(p3x - p2x)/1e18; //Always positive
+//        console.log("aDen, p2x", aDenominator, p2x);
         if(aPartial1 >= aPartial2) {
             //a is positive
             aNumerator = (aPartial1 - aPartial2)/p2x;
@@ -59,7 +63,7 @@ library ZirconLibrary {
             {
                 uint _p2x = p2x;
                 console.log("aNum, a", aNumerator, a);
-                console.log("left, right", p2y * 1e18/p2x, (_p2x * a)/1e18);
+
 
             }
 
@@ -73,7 +77,7 @@ library ZirconLibrary {
             //a is negative
             aNumerator = (aPartial2 - aPartial1)/p2x;
 
-            console.log("aPart2, aPart1, p2x", aPartial2, aPartial1, p2x);
+//            console.log("aPart2, aPart1, p2x", aPartial2, aPartial1, p2x);
 
             a = (aNumerator * 1e18)/aDenominator;
 
@@ -87,7 +91,7 @@ library ZirconLibrary {
     function calculateP2(uint k, uint vab, uint vfb) view public returns (uint p2x, uint p2y) {
         p2y = ((k * 2)/vfb) - vab;
         p2x = (p2y * 1e18)/vfb;
-        console.log("cal p2y, p2x", p2y, p2x);
+//        console.log("cal p2y, p2x", p2y, p2x);
     }
 
     function evaluateP2(uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) view external returns (uint p2x, uint p2y) {
@@ -98,10 +102,10 @@ library ZirconLibrary {
         if(x < p3x) {
             p2y = desiredFtv;
             p2x = x;
-            console.log("d p2x, p2y", p2x, p2y);
+//            console.log("d p2x, p2y", p2x, p2y);
         } else {
             (p2x, p2y) = calculateP2(reserve0 * reserve1, adjustedVab, adjustedVfb);
-            console.log("d p2x, p2y", p2x, p2y);
+//            console.log("d p2x, p2y", p2x, p2y);
         }
 
     }
@@ -146,8 +150,8 @@ library ZirconLibrary {
 
     function checkDerivative(uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (bool isNeg) {
 
-        uint p3x = (adjustedVab ** 2)/ reserve0;
-        p3x = (p3x * 1e18) / reserve1;
+        uint p3x = (adjustedVab ** 2)/ reserve1;
+        p3x = (p3x * 1e18) / reserve0;
 
         (bool aNeg, uint a, uint b) = calculateParabolaCoefficients(p2x, p2y, p3x, adjustedVab, true);
 

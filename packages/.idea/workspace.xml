@@ -3,10 +3,16 @@
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergy.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergy.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/fixtures.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/UniswapV2Library.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/UniswapV2Library.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,6 +61,9 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration name="utils.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/zircon-core/test/shared/utils.js" working-dir="$PROJECT_DIR$/zircon-core/test/shared">
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="SolidityConfigurationType" factoryName="Solidity" show_console_on_std_err="false" show_console_on_std_out="false">
       <option name="VMParameters" value="" />
       <option name="allowRunningInParallel" value="false" />
@@ -89,6 +98,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Node.js.utils.js" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
