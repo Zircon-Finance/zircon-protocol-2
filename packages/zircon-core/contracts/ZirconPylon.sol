@@ -1287,8 +1287,15 @@ contract ZirconPylon is IZirconPylon {
             //In the unlikely case this messes up somehow, we keep old lastPrice
             if(currentFloatAccumulator > lastFloatAccumulator) {
                 //convert accumulator to 1e18 multiplier form
-                uint _avgPrice = uint256((((currentFloatAccumulator - lastFloatAccumulator)/(blockTimestamp - lastOracleTimestamp)) >> 112)) * 1e18;
+                //Shift in two steps to avoid cancellation
+                uint _avgPrice = (uint256(((
+                (currentFloatAccumulator - lastFloatAccumulator)
+                /(blockTimestamp - lastOracleTimestamp))
+                >> 56)) * 1e18) >> 56;
 
+
+
+//                console.log("oracleRes", _avgPrice);
 //                console.log("cfa, lfa", currentFloatAccumulator, lastFloatAccumulator);
 //                console.log("bt, lot", blockTimestamp, lastOracleTimestamp);
 //                _avgPrice = _avgPrice/(blockTimestamp - lastOracleTimestamp);
@@ -1381,17 +1388,22 @@ contract ZirconPylon is IZirconPylon {
             );
 
 
-            //Todo: Can simply pass factory instance and let energy fetch the parameters to save size
-            muMulDecimals = IZirconEnergy(energyAddress)._updateMu(
-                IZirconPylonFactory(factoryAddress).muUpdatePeriod(),
-                IZirconPylonFactory(factoryAddress).muChangeFactor(),
-                muBlockNumber,
-                muMulDecimals,
-                gammaMulDecimals,
-                muOldGamma
-            );
-            muOldGamma = gammaMulDecimals;
-            muBlockNumber = block.number;
+            {
+                uint oldMu = muMulDecimals;
+
+                muMulDecimals = IZirconEnergy(energyAddress)._updateMu(
+                    IZirconPylonFactory(factoryAddress).muUpdatePeriod(),
+                    IZirconPylonFactory(factoryAddress).muChangeFactor(),
+                    muBlockNumber,
+                    muMulDecimals,
+                    gammaMulDecimals,
+                    muOldGamma
+                );
+                if(muMulDecimals != oldMu) {
+                    muOldGamma = gammaMulDecimals;
+                    muBlockNumber = block.number;
+                }
+            }
 
             lastRootKTranslated = rootKTranslated;
 

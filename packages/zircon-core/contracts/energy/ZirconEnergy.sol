@@ -139,6 +139,8 @@ contract ZirconEnergy is IZirconEnergy {
     // This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
     if((block.number - muBlockNumber) > muUpdatePeriod) { // reasonable to assume it won't subflow
 
+
+      console.log("Energy initialMu", muMulDecimals);
       uint _newGamma = gammaMulDecimals; // y2
       uint _oldGamma = muOldGamma; // y1
 
@@ -152,6 +154,7 @@ contract ZirconEnergy is IZirconEnergy {
 
       // In other scenarios it's going to the inside, which is why we use the XOR
       uint deltaMu = Math.absoluteDiff(_newGamma, _oldGamma);
+      console.log("deltaMu, dgP, go50", deltaMu, deltaGammaIsPositive, gammaIsOver50);
       if(deltaGammaIsPositive != gammaIsOver50) { // != with booleans is an XOR
         // This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
         // Due to uint math we can't do this in one line
@@ -192,6 +195,7 @@ contract ZirconEnergy is IZirconEnergy {
   external returns (uint retPTU, uint amount){
     // Send slashing should send the extra PTUs to Uniswap.
     // When burn calls the uniswap burn it will also give users the compensation
+    console.log("energyOmega", omegaMulDecimals);
     retPTU = omegaMulDecimals.mul(ptu)/1e18;
     if (omegaMulDecimals < 1e18) {
       //finds amount to cover

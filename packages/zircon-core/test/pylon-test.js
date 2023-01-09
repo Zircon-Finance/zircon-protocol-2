@@ -751,15 +751,18 @@ describe("Pylon", () => {
         await setPrice(account.address, 5, fixtures);
         await setPrice(account.address, 0.5, fixtures);
         await setPrice(account.address, 3.1, fixtures);
-        await setPrice(account.address, 3.1, fixtures);
+        await setPrice(account.address, 3.3, fixtures);
 
+        await updateMint(fixtures);
         await updateMint(fixtures);
         pylonState = await printState(fixtures);
         pairState = await printPairState(fixtures);
 
-        omega = calculateOmega(pylonState.gamma, pairState.pairResT[1], pylonState.vab, pylonState.sync[1]);
 
-
+        //Avoid oracle stuff
+        await forwardTime(ethers.provider, 96);
+        await forwardTime(ethers.provider, 96);
+        await forwardTime(ethers.provider, 96);
         await forwardTime(ethers.provider, 96);
 
 
@@ -767,12 +770,31 @@ describe("Pylon", () => {
         let balancePreBurn = await token1.balanceOf(account.address)
 
         let aptBalance = await poolTokenInstance1.balanceOf(account.address)
-        let oldVab = await pylonInstance.virtualAnchorBalance();
-        let totalApt = await poolTokenInstance1.totalSupply();
-
         aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
 
-        console.log("AptBalance:", ethers.utils.formatEther(aptBalance.div(100)));
+        console.log("Anchor PT for burning:", ethers.utils.formatEther(aptBalance.div(100)));
+
+        let energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
+        let pairTokenBalanceOld = await pair.balanceOf(energyAddress);
+
+        omega = calculateOmega(pylonState.gamma, pairState.tr1, pylonState.vab, pylonState.sync[1]);
+
+        expect(omega).to.gt(DECIMALS);
+
+        console.log("Omega Pre-burn:", format(omega));
+
+        await burnAsync(account.address, aptBalance.div(100), true, fixtures, true);
+
+        let pairTokenBalanceNew = await pair.balanceOf(energyAddress);
+
+        let balancePostBurn = await token1.balanceOf(account.address);
+
+        //Burn async only sends half in anchor
+        //TODO: Oracle isn't working properly it seems, resulting in a large feeBps
+        expect(balancePostBurn.sub(balancePreBurn)).to.lt(aptBalance.div(200));
+        //Be that as it may it shouldn't do any compensation
+        expect(pairTokenBalanceNew).to.eq(pairTokenBalanceOld);
+
 
         //We test with burnAsync to avoid reserve distortions
         await poolTokenInstance1.transfer(pylonInstance.address, aptBalance.div(100));
@@ -784,10 +806,10 @@ describe("Pylon", () => {
         console.log("\nPylon Sync Reserve0 before burn: ", ethers.utils.formatEther(pylonRes[0]));
         console.log("Pylon Sync Reserve1 before burn: ", ethers.utils.formatEther(pylonRes[1]));
 
-        let energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
+        energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
 
 
-        let pairTokenBalanceOld = await pair.balanceOf(energyAddress);
+        pairTokenBalanceOld = await pair.balanceOf(energyAddress);
         console.log("Pairtoken reserve before first burn: ", ethers.utils.formatEther(pairTokenBalanceOld));
 
 
@@ -821,7 +843,7 @@ describe("Pylon", () => {
 
 
 
-        let pairTokenBalanceNew = await pair.balanceOf(energyAddress);
+        pairTokenBalanceNew = await pair.balanceOf(energyAddress);
         console.log("Pairtoken reserve after first burn: ", ethers.utils.formatEther(pairTokenBalanceNew));
 
         ptt = await pair.totalSupply();
@@ -832,7 +854,7 @@ describe("Pylon", () => {
         console.log("Pylon Sync Reserve1 after first burn: ", ethers.utils.formatEther(pylonRes[1]));
 
 
-        let balancePostBurn = await token1.balanceOf(account.address);
+        // let balancePostBurn = await token1.balanceOf(account.address);
 
         console.log("Received anchor tokens after burn:", ethers.utils.formatEther(balancePostBurn.sub(balancePreBurn)))
 
