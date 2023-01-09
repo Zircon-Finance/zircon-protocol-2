@@ -176,8 +176,10 @@ contract ZirconEnergy is IZirconEnergy {
       // update variables for next step
 //      muOldGamma = _newGamma;
 //      muBlockNumber = _newBlockHeight;
+    } else {
+      mu = muMulDecimals;
     }
-    mu = muMulDecimals;
+
   }
 
 

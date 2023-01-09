@@ -719,8 +719,13 @@ describe("Pylon", () => {
         let pylonEarly = await printState(fixtures);
         let pairEarly = await printPairState(fixtures);
 
+        let oldomega = calculateOmega(pylonEarly.gamma, pairEarly.tr1, pylonEarly.vab, pylonEarly.sync[1]);
+        console.log("oldOmega", oldomega);
+
         console.log("Ftv: ", format(pairEarly.tr1.mul(2).mul(pylonEarly.gamma).div(DECIMALS)))
-        await mintAsync(account.address, token0Amount * 2, token1Amount * 2, true, fixtures, true);
+        await mintAsync(account.address, token0Amount * 2, token1Amount * 2, true, fixtures, false);
+        await forwardTime(ethers.provider, 32);
+
         await updateMint(fixtures);
 
 
@@ -729,7 +734,9 @@ describe("Pylon", () => {
 
         console.log("P2y (Ftv) after: ", format(pairState.tr1.mul(2).mul(pylonState.gamma).div(DECIMALS)))
 
-        let omega = calculateOmega(pylonState.gamma, pairState.pairResT[1], pylonState.vab, pylonState.sync[1]);
+        let omega = calculateOmega(pylonState.gamma, pairState.tr1, pylonState.vab, pylonState.sync[1]);
+
+        expect(omega).to.lt(DECIMALS);
 
         console.log("Post mint Omega: ", format(omega));
 
@@ -752,7 +759,6 @@ describe("Pylon", () => {
 
         omega = calculateOmega(pylonState.gamma, pairState.pairResT[1], pylonState.vab, pylonState.sync[1]);
 
-        expect(omega).to.eq(DECIMALS);
 
         await forwardTime(ethers.provider, 96);
 
