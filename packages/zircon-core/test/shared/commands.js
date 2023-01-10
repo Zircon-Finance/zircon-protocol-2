@@ -185,15 +185,28 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures) {
     }
 }
 //
-exports.forwardTime = async function forwardTime(provider, blocksToMine) {
+async function forwardTime(provider, blocksToMine) {
 
     let blocksBig = ethers.BigNumber.from(blocksToMine);
 
     await provider.send("hardhat_mine", [blocksBig.toHexString()]);
 
 }
+exports.forwardTime = forwardTime
+
+exports.unblockOracle = async function unblockOracle(provider, fixtures) {
+
+    await forwardTime(ethers.provider, 96);
+    await forwardTime(ethers.provider, 96);
+    await updateMint(fixtures);
+
+    await forwardTime(ethers.provider, 96);
+    await forwardTime(ethers.provider, 96);
+    await forwardTime(ethers.provider, 96);
+}
 //
-exports.updateMint = async function updateMint(fixtures) {
+
+async function updateMint(fixtures) {
     destructure(fixtures)
     console.log("\n===Starting updateMint ===")
     await token0.transfer(pylonInstance.address, MINIMUM_LIQUIDITY)
@@ -201,6 +214,10 @@ exports.updateMint = async function updateMint(fixtures) {
     await pylonInstance.mintPoolTokens(account.address, false)
     console.log("\n=== updateMint complete ===")
 }
+exports.updateMint = updateMint
+
+
+
 //
 
 exports.printPoolTokens = async function printPoolTokens(address, fixtures) {

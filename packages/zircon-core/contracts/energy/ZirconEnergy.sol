@@ -220,22 +220,22 @@ contract ZirconEnergy is IZirconEnergy {
           bool _isFloatReserve0 = isFloatReserve0;
           uint ts = IZirconPair(pylon.pairAddress).totalSupply();
           (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
-
-          uint liquidity = _ptu + energyPTBalance;
           uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
           uint _reserve1 = _isFloatReserve0 ? reserve1 : reserve0;
 
-          uint amount0 = liquidity.mul(_reserve0) / ts;
-          uint amount1 = liquidity.mul(_reserve1) / ts;
-
-          // sends pool tokens directly to pair
-          uint totalAmount = amount1 + getAmountOut(amount0, _reserve0, _reserve1, _fee);
-
-          // TotalAmount is what the user already received, while percentage is what's missing.
-          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
-          // Percentage is calculated "natively" as a full 1e18
-          // ta/(1-p) - ta = ta*p/(1-p)
-          amount = totalAmount.mul(percentage)/(1e18 - percentage);
+          //Simplified, the previous system was necessary because it was two separate functions
+          amount = (amountToAdd - energyPTBalance).mul(2 * _reserve1)/ts;
+//          uint amount0 = liquidity.mul(_reserve0) / ts;
+//          uint amount1 = liquidity.mul(_reserve1) / ts;
+//
+//          // sends pool tokens directly to pair
+//          uint totalAmount = amount1 + getAmountOut(amount0, _reserve0, _reserve1, _fee);
+//
+//          // TotalAmount is what the user already received, while percentage is what's missing.
+//          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
+//          // Percentage is calculated "natively" as a full 1e18
+//          // ta/(1-p) - ta = ta*p/(1-p)
+//          amount = totalAmount.mul(percentage)/(1e18 - percentage);
         }
 
         uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));

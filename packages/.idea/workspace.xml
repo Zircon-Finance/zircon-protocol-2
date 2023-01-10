@@ -7,6 +7,7 @@
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergy.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergy.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

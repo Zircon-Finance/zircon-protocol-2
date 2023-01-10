@@ -132,7 +132,7 @@ contract ZirconPylon is IZirconPylon {
     }
 
     function _burn(address token, address to, uint value) internal {
-        IZirconPoolToken(token).mint(to, value);
+        IZirconPoolToken(token).burn(to, value);
     }
 
     function _totalSupply(address token) private view returns (uint totalSupply) {
@@ -444,6 +444,8 @@ contract ZirconPylon is IZirconPylon {
                 pairReserves1,
                 balance0 - max0,
                 balance1 - max1);
+
+//            console.log("sM, px + py", px, py);
 
             // We run the update kFactor function for the anchor portion of liquidity
             // This is only required after initialization
@@ -1822,7 +1824,7 @@ contract ZirconPylon is IZirconPylon {
                 uint totalSupply_ = _totalSupply;
                 uint _reservesTranslated1 = reservesTranslated1;
 
-                (uint amountOut, uint ptu, uint floatPercentage) = handleAsyncBurn(
+                (uint floatPercentage, uint ptu, uint amountOut) = handleAsyncBurn(
                     isAnchor,
                     adjustedLiquidity,
                     feeBps,
@@ -1968,6 +1970,7 @@ contract ZirconPylon is IZirconPylon {
 
         //Percentage easier when removing, raw amount easier when adding
 
+        console.log("percent", change);
         if(isPercentage) {
             if(change != 1e18) {
                 desiredFtv = desiredFtv.mul(change)/1e18;
@@ -2006,7 +2009,7 @@ contract ZirconPylon is IZirconPylon {
                 ptuWithFee = (ptuWithFee * percentageFloatChange)/1e18;
                 ptu = (ptu * percentageFloatChange)/1e18;
                 //Now we make it actually become about floats
-                percentageFloatChange = (_oldPtu - ptuWithFee)/((gammaMulDecimals * ptb)/1e18);
+                percentageFloatChange = (_oldPtu - ptuWithFee).mul(1e18)/((gammaMulDecimals * ptb)/1e18);
                 percentageFloatChange += 1e18;
             } else {
                 percentageFloatChange = 1e18;
@@ -2024,7 +2027,8 @@ contract ZirconPylon is IZirconPylon {
             amountOut = amount_;
         } else {
             //Just records % of float liquidity removed here
-            percentageFloatChange = 1e18 - ((ptu * 1e18)/((gammaMulDecimals * ptb)/1e18));
+            percentageFloatChange = uint(1e18).sub((ptu * 1e18)/((gammaMulDecimals * ptb)/1e18));
+            console.log("percPre", percentageFloatChange);
         }
 
         //payFees(syncAmount, feeBps, isAnchor);
