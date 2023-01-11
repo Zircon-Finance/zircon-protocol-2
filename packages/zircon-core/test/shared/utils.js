@@ -54,6 +54,10 @@ exports.calculateOmega = function calculateOmega(gamma, reserve1, vab, syncReser
     return (ethers.BigNumber.from('1000000000000000000').sub(gamma)).mul(reserve1.mul(2)).div(vab.sub(syncReserve1));
 }
 
+exports.getFtv = function getFtv(reserve0, reserve1, gamma, sync0) {
+    return (reserve1.mul(gamma.mul(2)).div(DECIMALS).add(sync0.mul(reserve1).div(reserve0)))
+}
+
 //function sqrt(value) {
 //     x = ethers.BigNumber.from(value);
 //     let z = x.add(ONE).div(TWO);

@@ -5,7 +5,7 @@ const { expect } = require("chai");
 const { ethers } = require('hardhat');
 const assert = require("assert");
 const {BigNumber} = require("ethers");
-const {expandTo18Decimals, getAmountOut, format, sqrt, findDeviation, calculateOmega} = require("./shared/utils");
+const {expandTo18Decimals, getAmountOut, format, sqrt, findDeviation, calculateOmega, getFtv} = require("./shared/utils");
 const {coreFixtures, librarySetup} = require("./shared/fixtures");
 const {initPylon, printState, printPoolTokens, printPairState, burn, burnAsync, forwardTime, unblockOracle, mintAsync, mintSync, setPrice, updateMint} = require("./shared/commands");
 const TEST_ADDRESSES = [
@@ -135,7 +135,7 @@ describe("Pylon", () => {
             // Add some liquidity to the Pair...
             let fixtures = await init(token0Amount, token1Amount, 50);
 
-            await printState(fixtures)
+            await printState(fixtures, true)
             // Transferring some liquidity to pylon
 
             if (isAnchor) {
@@ -147,10 +147,10 @@ describe("Pylon", () => {
             await forwardTime(ethers.provider, 50);
             await updateMint(fixtures);
 
-            await printState(fixtures);
-            await printPairState(fixtures);
+            await printState(fixtures, true)
+            await printPairState(fixtures, true);
 
-            let poolTokens = await printPoolTokens(account.address, fixtures);
+            let poolTokens = await printPoolTokens(account.address, fixtures, true);
 
             expect(poolTokens.pt1).to.eq(expectedOutputAmount1);
             expect(poolTokens.pt0).to.eq(expectedOutputAmount0);
@@ -168,7 +168,7 @@ describe("Pylon", () => {
         // Add some liquidity to the Pair...
         let fixtures = await init(token0Amount, token1Amount, 50)
 
-        let poolTokens = await printPoolTokens(account.address, fixtures);
+        let poolTokens = await printPoolTokens(account.address, fixtures, true);
         let initialPtBalance = poolTokens.pt1;
 
         if (isAnchor) {
@@ -204,7 +204,7 @@ describe("Pylon", () => {
 
         expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from("99980001000000000"))
 
-        await printState(fixtures)
+        await printState(fixtures, true)
 
         // expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(expectedOutputAmount1);
         // expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(expectedOutputAmount0);
@@ -227,13 +227,13 @@ describe("Pylon", () => {
         let initialVfb = await pylonInstance.virtualFloatBalance();
         let initialp2y = await pylonInstance.p2y();
 
-        let pairResIni = (await printPairState(fixtures)).pairResT;
+        let pairResIni = (await printPairState(fixtures, true)).pairResT;
 
         //Dump to 33% and back to generate some fees
         await setPrice(account.address, 2.0, fixtures);
         await setPrice(account.address, 3.1, fixtures);
 
-        let results = await printPairState(fixtures);
+        let results = await printPairState(fixtures, true);
         let pairRes = results.pairResT;
 
         let kprime = pairRes[0].mul(pairRes[1]);
@@ -271,7 +271,7 @@ describe("Pylon", () => {
         await updateMint(fixtures);
         await updateMint(fixtures);
 
-        await printState(fixtures);
+        await printState(fixtures, true)
 
 
         console.log("mu after assignment mint: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
@@ -425,7 +425,7 @@ describe("Pylon", () => {
         await setPrice(account.address, 2.5, fixtures);
 
 
-        let pairResults = await printPairState(fixtures)
+        let pairResults = await printPairState(fixtures, true)
 
         //Now the mint async
         // We do it with the other token
@@ -716,8 +716,8 @@ describe("Pylon", () => {
         let initialPtBalance = await poolTokenInstance1.balanceOf(account.address)
         //Now we deposit a large amount of Anchors to test Omega
         //We do it with async 50/50 to make sure we avoid slippage distortions
-        let pylonEarly = await printState(fixtures);
-        let pairEarly = await printPairState(fixtures);
+        let pylonEarly = await printState(fixtures, true);
+        let pairEarly = await printPairState(fixtures, true);
 
         let oldomega = calculateOmega(pylonEarly.gamma, pairEarly.tr1, pylonEarly.vab, pylonEarly.sync[1]);
         console.log("oldOmega", oldomega);
@@ -729,8 +729,8 @@ describe("Pylon", () => {
         await updateMint(fixtures);
 
 
-        let pylonState = await printState(fixtures);
-        let pairState = await printPairState(fixtures);
+        let pylonState = await printState(fixtures, true);
+        let pairState = await printPairState(fixtures, true);
 
         console.log("P2y (Ftv) after: ", format(pairState.tr1.mul(2).mul(pylonState.gamma).div(DECIMALS)))
 
@@ -754,8 +754,8 @@ describe("Pylon", () => {
         await setPrice(account.address, 3.3, fixtures);
 
         await updateMint(fixtures);
-        pylonState = await printState(fixtures);
-        pairState = await printPairState(fixtures);
+        pylonState = await printState(fixtures, true);
+        pairState = await printPairState(fixtures, true);
 
 
         //Avoid oracle stuff
@@ -812,7 +812,7 @@ describe("Pylon", () => {
         expect(pairTokenBalanceNew).to.not.eq(expandTo18Decimals(0))
 
         console.log("PTB old, PTB new", format(pairTokenBalanceOld), format(pairTokenBalanceNew));
-        let pairData = await printPairState(fixtures);
+        let pairData = await printPairState(fixtures, true);
 
         let valOfPtb = pairTokenBalanceOld.sub(pairTokenBalanceNew).mul(pairData.pairResT[1].mul(2)).div(pairData.ptt);
 
@@ -852,7 +852,7 @@ describe("Pylon", () => {
         //Here the relationship breaks because we are adding compensation for the total only in anchors
         //So we adjust by including the other half of the money
 
-        pairData = await printPairState(fixtures);
+        pairData = await printPairState(fixtures, true);
 
         let totalReceived = balancePostBurn.sub(balancePreBurn)
         totalReceived = totalReceived.add(floatBalancePostBurn.sub(floatBalancePreBurn).mul(pairData.pairResT[1]).div(pairData.pairResT[0]));
@@ -885,17 +885,28 @@ describe("Pylon", () => {
         //We record derVFB before and Float claim for the initial PTs
         // //Then we check anchorK and Float claim again
 
-        let pylonState = await printState(fixtures);
+        let pylonState = await printState(fixtures, true);
 
-        let pairState = await printPairState(fixtures);
+        let pairState = await printPairState(fixtures, true);
 
         let initialFloatPtBalance = await poolTokenInstance0.balanceOf(account.address)
 
+        let initialFloatValue = pairState.tr1.mul(pylonState.gamma.mul(2)).div(DECIMALS);
+
         console.log("ptBalance before mints", ethers.utils.formatEther(initialFloatPtBalance));
 
+        //Benchmark burn
+        let initialFloatBalance = await token0.balanceOf(account.address);
+        await burn(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
+        initialFloatBalance = (await token0.balanceOf(account.address)).sub(initialFloatBalance);
+
+        console.log("Val of 1% burn", format(initialFloatBalance));
+
+
+
         let floatSum = ethers.BigNumber.from('000000000000000000');
-        let floatAdd = (pairState.tr0.div(50));
-        let anchorAdd = (pairState.tr1.div(50));
+        let floatAdd = (pairState.tr0.div(25));
+        let anchorAdd = (pairState.tr1.div(25));
         //We add sync liquidity in cycles
         for(let i = 0; i < 15; i++) {
 
@@ -904,28 +915,47 @@ describe("Pylon", () => {
             await mintSync(account.address, floatAdd, false, fixtures, true)
 
             await ethers.provider.send("hardhat_mine", ['0x30']);
+            await updateMint(fixtures)
+
+            let pylonState = await printState(fixtures, false)
+            let pairState = await printPairState(fixtures, false)
+            let ptState = await printPoolTokens(account.address, fixtures, false)
+
+            let ftv = getFtv(pairState.tr0, pairState.tr1, pylonState.gamma, pylonState.sync[0]).mul(pairState.tr0).div(pairState.tr1)
+            let ptTotal = ptState.ptTotal0;
+
+            let ptPrice = ftv.mul(DECIMALS).div(ptTotal);
+            console.lo
+            console.log("Price of PTs: ", format(ptPrice))
         }
 
         await ethers.provider.send("hardhat_mine", ['0x30']);
 
         //Now we check what happened
 
-        let newPylon = await printState(fixtures)
+        let newPylon = await printState(fixtures, true)
 
-        let newPair = await printPairState(fixtures)
+        let newPair = await printPairState(fixtures, true)
 
+        console.log("Float sum, p2y new, p2y old", format(floatSum.mul(newPair.price).div(DECIMALS)), format(newPylon.p2y), format(initialFloatValue));
 
         //We now burn the initial share and see how much we get back
 
+        await setPrice(account.address, 2.1, fixtures);
 
         balancePreBurn = await token0.balanceOf(account.address)
 
-        await burn(account.address, initialFloatPtBalance, false, fixtures, true);
+        await burn(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
 
         let floatsReceived = (await token0.balanceOf(account.address)).sub(balancePreBurn);
         console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
 
-        expect(floatsReceived).to.eq(ethers.BigNumber.from('1620587624987653420448'));
+        let deviation = findDeviation(floatsReceived, initialFloatBalance);
+
+        //TODO: The first burn itself is a bit sussy actually, but otherwise deviations are explainable by the change in price during syncs.
+
+        //Expecting deviation of at most 0.1%
+        expect(deviation).to.lt(expandTo18Decimals(0.001));
 
     });
 

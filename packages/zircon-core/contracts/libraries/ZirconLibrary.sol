@@ -96,8 +96,8 @@ library ZirconLibrary {
 
     function evaluateP2(uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) view external returns (uint p2x, uint p2y) {
 
-        uint p3x = (adjustedVab ** 2)/ reserve0;
-        p3x = (p3x * 1e18) / reserve1;
+        uint p3x = (adjustedVab ** 2)/ reserve1;
+        p3x = (p3x * 1e18) / reserve0;
 
         if(x < p3x) {
             p2y = desiredFtv;
@@ -123,6 +123,8 @@ library ZirconLibrary {
 
         uint p3x = (adjustedVab ** 2)/ reserve1;
         p3x = (p3x * 1e18) / reserve0;
+
+//        console.log("adjVab", adjustedVab);
 
         if (x >= p3x) {
             ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * x) - adjustedVab;

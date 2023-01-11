@@ -70,8 +70,8 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(tokenAmount) : tokenAmount;
 
-    console.log("\n===Starting MintSync ===")
-
+    console.log("\n===Starting MintSync", isAnchor ? "Anchor ===": "Float ===");
+    console.log("== AmountIn:", format(tokenDecimals))
     if(isAnchor) {
         await token1.transfer(pylonInstance.address, tokenDecimals)
     } else {
@@ -220,7 +220,7 @@ exports.updateMint = updateMint
 
 //
 
-exports.printPoolTokens = async function printPoolTokens(address, fixtures) {
+exports.printPoolTokens = async function printPoolTokens(address, fixtures, doPrint) {
 
     destructure(fixtures);
 
@@ -235,7 +235,10 @@ exports.printPoolTokens = async function printPoolTokens(address, fixtures) {
     let pt1 = await poolTokenInstance1.balanceOf(address);
     let pt1F = ethers.utils.formatEther(pt1);
 
-    console.log("PoolToken State: PTotal0: " + ptTotal0F + ", P0Balance: " + pt0F + ", PTotal1: " + ptTotal1F + ", P1Balance: " + pt1F);
+    if(doPrint) {
+        console.log("PoolToken State: PTotal0: " + ptTotal0F + ", P0Balance: " + pt0F + ", PTotal1: " + ptTotal1F + ", P1Balance: " + pt1F);
+    }
+
 
     return {
         ptTotal0,
@@ -246,7 +249,7 @@ exports.printPoolTokens = async function printPoolTokens(address, fixtures) {
 }
 
 
-exports.printState = async function printState(fixtures) {
+exports.printState = async function printState(fixtures, doPrint) {
 
     destructure(fixtures)
 
@@ -269,7 +272,10 @@ exports.printState = async function printState(fixtures) {
     let sync = await pylonInstance.getSyncReserves();
 
 
-    console.log("\n===Pylon State: VAB: " + vabF + ", Gamma: " + gammaF + ", VFB: " + vfbF + ", p2x: " + p2xF + ", p2y: " + p2yF);
+    if(doPrint) {
+        console.log("\n===Pylon State: VAB: " + vabF + ", Gamma: " + gammaF + ", VFB: " + vfbF + ", p2x: " + p2xF + ", p2y: " + p2yF);
+    }
+
 
     return {
         vab,
@@ -282,7 +288,7 @@ exports.printState = async function printState(fixtures) {
 
 }
 
-exports.printPairState = async function printPairState(fixtures) {
+exports.printPairState = async function printPairState(fixtures, doPrint) {
 
     destructure(fixtures)
 
@@ -303,7 +309,10 @@ exports.printPairState = async function printPairState(fixtures) {
     let rootK = sqrt(tr0.mul(tr1))
     let rootKF = ethers.utils.formatEther(rootK);
 
-    console.log("\n===Pair State: TR0: " + tr0F + ", TR1: " + tr1F + ", Price: " + priceF + ", rootK: " + rootKF);
+    if(doPrint) {
+        console.log("\n===Pair State: TR0: " + tr0F + ", TR1: " + tr1F + ", Price: " + priceF + ", rootK: " + rootKF);
+    }
+
 
     return {
         pairResT,
