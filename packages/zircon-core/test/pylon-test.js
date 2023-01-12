@@ -960,6 +960,100 @@ describe("Pylon", () => {
     });
 
 
+    it('Async100 Parabola Test', async function () {
+
+        //Similar test as previous but with fewer, larger cycles of liquidity to trigger plenty of asyncs
+        let token0Amount = 1700
+        let token1Amount = 5300
+        let fixtures = await init(token0Amount, token1Amount, 99)
+
+        // Pylon initialized.
+
+
+        //Dump float to trigger isLineFormula
+
+        await setPrice(account.address, 2.0, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        //Now we add a lot of sync liquidity
+        //We record derVFB before and Float claim for the initial PTs
+        // //Then we check anchorK and Float claim again
+
+        let pylonState = await printState(fixtures, true);
+
+        let pairState = await printPairState(fixtures, true);
+
+        let initialFloatPtBalance = await poolTokenInstance0.balanceOf(account.address)
+
+        let initialFloatValue = pairState.tr1.mul(pylonState.gamma.mul(2)).div(DECIMALS);
+
+        console.log("ptBalance before mints", ethers.utils.formatEther(initialFloatPtBalance));
+
+        //Benchmark burn
+        let initialFloatBalance = await token0.balanceOf(account.address);
+        await burn(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
+        initialFloatBalance = (await token0.balanceOf(account.address)).sub(initialFloatBalance);
+
+        console.log("Val of 1% burn", format(initialFloatBalance));
+
+
+
+        let floatSum = ethers.BigNumber.from('000000000000000000');
+        let floatAdd = (pairState.tr0.div(5));
+        let anchorAdd = (pairState.tr1.div(5));
+        //We add sync liquidity in cycles
+        for(let i = 0; i < 5; i++) {
+
+            floatSum = floatSum.add(floatAdd);
+            await mintSync(account.address, anchorAdd, true, fixtures, true)
+            await mintSync(account.address, floatAdd, false, fixtures, true)
+
+            await ethers.provider.send("hardhat_mine", ['0x30']);
+            await updateMint(fixtures)
+
+            let pylonState = await printState(fixtures, false)
+            let pairState = await printPairState(fixtures, false)
+            let ptState = await printPoolTokens(account.address, fixtures, false)
+
+            let ftv = getFtv(pairState.tr0, pairState.tr1, pylonState.gamma, pylonState.sync[0]).mul(pairState.tr0).div(pairState.tr1)
+            let ptTotal = ptState.ptTotal0;
+
+            let ptPrice = ftv.mul(DECIMALS).div(ptTotal);
+            console.lo
+            console.log("Price of PTs: ", format(ptPrice))
+        }
+
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        //Now we check what happened
+
+        let newPylon = await printState(fixtures, true)
+
+        let newPair = await printPairState(fixtures, true)
+
+        console.log("Float sum, p2y new, p2y old", format(floatSum.mul(newPair.price).div(DECIMALS)), format(newPylon.p2y), format(initialFloatValue));
+
+        //We now burn the initial share and see how much we get back
+
+        await setPrice(account.address, 2.1, fixtures);
+
+        balancePreBurn = await token0.balanceOf(account.address)
+
+        await burn(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
+
+        let floatsReceived = (await token0.balanceOf(account.address)).sub(balancePreBurn);
+        console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
+
+        let deviation = findDeviation(floatsReceived, initialFloatBalance);
+
+        //Due to slight extra slashing when adding async float we can relax deviation, but with added condition that it should always be higher
+        expect(deviation).to.lt(expandTo18Decimals(0.002));
+        expect(floatsReceived).to.gt(initialFloatBalance);
+
+    });
+
+
 
     it('AnchorK async Test', async function () {
         let token0Amount = expandTo18Decimals(1700)
