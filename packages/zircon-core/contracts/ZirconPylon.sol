@@ -65,8 +65,8 @@ contract ZirconPylon is IZirconPylon {
     uint private muBlockNumber; //block height of last mu update
     uint private muOldGamma; //gamma value at last mu update
 
-    uint private lastOracleTimestamp;
-    uint private lastFloatAccumulator;
+    uint public lastOracleTimestamp;
+    uint public lastFloatAccumulator;
     uint public lastPrice;
     uint private oracleUpdateSecs;
 

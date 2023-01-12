@@ -1,11 +1,11 @@
 const {ethers} = require("hardhat");
 const {coreFixtures, librarySetup} = require("./fixtures");
 const {expandTo18Decimals, getAmountOut, sqrt, format} = require("./utils");
+const {saveValuesForSDK} = require("./generate-json-sdk-test");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
 ]
-
 
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
@@ -14,7 +14,6 @@ let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
 
 function destructure(fixtures) {
     // factoryInstance = fixtures.factoryInstance
-
     token0 = fixtures.token0
     token1 = fixtures.token1
     poolTokenInstance0 = fixtures.poolTokenInstance0
@@ -78,7 +77,12 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
         await token0.transfer(pylonInstance.address, tokenDecimals)
     }
 
+    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
     let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
+    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+
+    await saveValuesForSDK(true, false, tokenDecimals, 0, balanceAfter.sub(balanceBefore), 0, isAnchor, fixtures)
+
     console.log("\n===MintSync Complete ===")
     return results
 }
@@ -94,8 +98,13 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 
     await token0.transfer(pylonInstance.address, token0Decimals)
     await token1.transfer(pylonInstance.address, token1Decimals)
+    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
     let results = await pylonInstance.mintAsync(address, isAnchor)
+
+    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+    await saveValuesForSDK(false, false, token0Decimals, token0Decimals, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
+
     console.log("\n===MintAsync Complete ===")
     return results
 }
@@ -112,8 +121,13 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
+    let balanceBefore = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
 
     let results = await pylonInstance.burn(address, isAnchor)
+
+    let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
+    await saveValuesForSDK(true, true, poolTokenAmount, null, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
+
     console.log("\n===Burn Complete ===")
     return results;
 }
@@ -132,7 +146,14 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
 
+    let balanceBeforeA = await token0.balanceOf(address);
+    let balanceBeforeB = await token1.balanceOf(address);
     let results = await pylonInstance.burnAsync(address, isAnchor)
+    let balanceAfterA = await token0.balanceOf(address);
+    let balanceAfterB = await token1.balanceOf(address);
+
+    await saveValuesForSDK(false, true, poolTokenAmount, null, balanceAfterA.sub(balanceBeforeA), balanceAfterB.sub(balanceBeforeB), isAnchor, fixtures)
+
     console.log("\n===BurnAsync Complete ===")
     return results
 
