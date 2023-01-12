@@ -1,6 +1,3 @@
-
-
-// TODO: clean this...
 const { expect } = require("chai");
 const { ethers } = require('hardhat');
 const assert = require("assert");
@@ -8,11 +5,11 @@ const {BigNumber} = require("ethers");
 const {expandTo18Decimals, getAmountOut, format, sqrt, findDeviation, calculateOmega, getFtv} = require("./shared/utils");
 const {coreFixtures, librarySetup} = require("./shared/fixtures");
 const {initPylon, printState, printPoolTokens, printPairState, burn, burnAsync, forwardTime, unblockOracle, mintAsync, mintSync, setPrice, updateMint} = require("./shared/commands");
+const {generateJSONFile} = require("./shared/generate-json-sdk-test");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
 ]
-
 
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
@@ -40,12 +37,13 @@ describe("Pylon", () => {
         // [account, account2] = await ethers.getSigners();
         // deployerAddress = account.address;
         // let fixtures = await coreFixtures(deployerAddress, library)
-
-
     });
+    after(async () => {
+        await generateJSONFile()
+    })
+
     const init = async (token0Amount, token1Amount, pylonPercentage) => {
         // Let's initialize the Pool, inserting some liquidity in it
-
         let fixtures = await initPylon(token0Amount, token1Amount, pylonPercentage, library)
         factoryInstance = fixtures.factoryInstance
         token0 = fixtures.token0
@@ -61,66 +59,6 @@ describe("Pylon", () => {
         return fixtures
     }
 
-    //     feeValueAnchor: BigintIsh,
-    //     lastBlockNumber: BigintIsh,
-    const printValues = async () => {
-        console.log("VALUES WE NEED");
-        let pylonRes = await pylonInstance.getSyncReserves();
-        console.log("\nPylon Sync Reserve0 after mint: ", pylonRes[0].toString());
-        console.log("Pylon Sync Reserve1 after mint: ", pylonRes[1].toString());
-
-        let pairResIni = await pair.getReserves();
-        console.log("Pylon Pair Reserve0 after initPylon: ", (pairResIni[0].toString()))
-        console.log("Pylon Pair Reserve1 after initPylon: ", (pairResIni[1].toString()))
-
-        let ptb = await pair.balanceOf(pylonInstance.address);
-        let ptt = await pair.totalSupply();
-        console.log("ptb: ", (ptb.toString()));
-        console.log("ptt: ", (ptt.toString()));
-
-        let ftt = await poolTokenInstance0.totalSupply();
-        let att = await poolTokenInstance1.totalSupply();
-        console.log("ftt: ", (ftt.toString()));
-        console.log("att: ", (att.toString()));
-
-        let gamma = await pylonInstance.gammaMulDecimals()
-        console.log("gamma: ", (gamma.toString()));
-
-        let muuu = await pylonInstance.muMulDecimals()
-        console.log("muuu: ", (muuu.toString()));
-
-        let vab = await pylonInstance.virtualAnchorBalance()
-        console.log("vab: ", (vab.toString()));
-
-        let gEMA = await pylonInstance.gammaEMA()
-        console.log("gEMA: ", (gEMA.toString()));
-
-        // // let anchorKValue = await pylonInstance.anchorKFactor()
-        // // console.log("akv: ", (anchorKValue.toString()));
-
-        let formulaSwitch = await pylonInstance.formulaSwitch()
-        console.log("fs: ", (formulaSwitch.toString()));
-
-        let lastRootKTranslated = await pylonInstance.lastRootKTranslated()
-        console.log("lrkt: ", (lastRootKTranslated.toString()));
-
-        let thisBlockEMA = await pylonInstance.thisBlockEMA()
-        console.log("thisBlockEMA: ", (thisBlockEMA.toString()));
-
-        let EMABlockNumber = await pylonInstance.EMABlockNumber()
-        console.log("EMABlockNumber: ", (EMABlockNumber.toString()));
-
-        let strikeBlock = await pylonInstance.strikeBlock()
-        console.log("strikeBlock: ", (strikeBlock.toString()));
-
-        let block = await ethers.provider.getBlockNumber()
-        console.log("blockNumber: ", block)
-
-        let lastK = await pair.kLast()
-        console.log("lastK: ", lastK.toString())
-
-        console.log("END VALUES")
-    }
     //Let's try to calculate some cases for pylon
     const mintTestCases = [
         [10, 20, '4762509926821186', '4749990617651023','5099989902573941079','9999999999999999000', false],
@@ -173,7 +111,6 @@ describe("Pylon", () => {
 
         if (isAnchor) {
             let t = token0Amount/200;
-            console.log("t", t);
             await mintSync(account.address, t, isAnchor, fixtures, false);
         }else{
             let t = token1Amount/200
@@ -663,7 +600,7 @@ describe("Pylon", () => {
 //                 //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
 //
 //                 console.log("Token0Amount: ", (token0Amount.div(10000)).toString())
-//                 await printValues()
+//                 await saveValuesForSDK()
 //                 await pylonInstance.mintPoolTokens(account.address, false)
 //                 let gamma = await pylonInstance.gammaMulDecimals();
 //                 let vab = await pylonInstance.virtualAnchorBalance();
@@ -2566,7 +2503,7 @@ describe("Pylon", () => {
         console.log("sent floats:", ethers.utils.formatEther(token0Amount.mul(3)));
         console.log("sent floats:", token0Amount.mul(3));
         await token0.transfer(pylonInstance.address, token0Amount.mul(3))
-        //await printValues();
+        //await saveValuesForSDK();
         await pylonInstance.mintPoolTokens(account.address, false);
 
         pairResT = await pair.getReserves();
@@ -4148,7 +4085,7 @@ describe("Pylon", () => {
     //     console.log("Sent anchors:", token0Amount.toString());
     //     await token1.transfer(pylonInstance.address, token0Amount)
     //
-    //     await printValues()
+    //     await saveValuesForSDK()
     //     await pylonInstance.mintAsync100(account.address, true);
     //
     //     //This tx should trigger delta tax of 66% or 33 tokens (somewhat sensitive to min deltagamma fee)
