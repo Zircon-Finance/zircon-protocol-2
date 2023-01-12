@@ -40,7 +40,7 @@ exports.findDeviation = function findDeviation(value1, value2) {
 
     let ratio = value1.mul(DECIMALS).div(value2);
     let deviation;
-    if(ratio > DECIMALS) {
+    if(ratio.gt(DECIMALS)) {
         deviation = ratio.sub(DECIMALS);
     } else {
         deviation = DECIMALS.sub(ratio);

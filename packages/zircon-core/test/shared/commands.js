@@ -1,6 +1,6 @@
 const {ethers} = require("hardhat");
 const {coreFixtures, librarySetup} = require("./fixtures");
-const {expandTo18Decimals, getAmountOut, sqrt, format} = require("./utils");
+const {expandTo18Decimals, getAmountOut, sqrt, format, getFtv} = require("./utils");
 const {saveValuesForSDK} = require("./generate-json-sdk-test");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
@@ -94,7 +94,8 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
     let token0Decimals = !isDecimals? expandTo18Decimals(token0Amount) : token0Amount;
     let token1Decimals = !isDecimals? expandTo18Decimals(token1Amount) : token1Amount;
 
-    console.log("\n===Starting MintAsync ===")
+    console.log("\n===Starting MintAsync",  isAnchor ? "Anchor ===": "Float ===")
+    console.log("== AmountIn:", format(token0Decimals), format(token1Decimals))
 
     await token0.transfer(pylonInstance.address, token0Decimals)
     await token1.transfer(pylonInstance.address, token1Decimals)
@@ -241,7 +242,7 @@ exports.updateMint = updateMint
 
 //
 
-exports.printPoolTokens = async function printPoolTokens(address, fixtures, doPrint) {
+async function printPoolTokens(address, fixtures, doPrint) {
 
     destructure(fixtures);
 
@@ -269,8 +270,10 @@ exports.printPoolTokens = async function printPoolTokens(address, fixtures, doPr
     }
 }
 
+exports.printPoolTokens = printPoolTokens;
 
-exports.printState = async function printState(fixtures, doPrint) {
+
+async function printState(fixtures, doPrint) {
 
     destructure(fixtures)
 
@@ -309,7 +312,28 @@ exports.printState = async function printState(fixtures, doPrint) {
 
 }
 
-exports.printPairState = async function printPairState(fixtures, doPrint) {
+exports.printState = printState;
+
+exports.getPTPrice = async function getPTPrice(fixtures, doPrint) {
+    let pylonState = await printState(fixtures, false)
+    let pairState = await printPairState(fixtures, false)
+    let ptState = await printPoolTokens(account.address, fixtures, false)
+
+    let ftv = getFtv(pairState.tr0, pairState.tr1, pylonState.gamma, pylonState.sync[0]).mul(pairState.tr0).div(pairState.tr1)
+    let ptTotal = ptState.ptTotal0;
+
+    let ptPrice = ftv.mul(DECIMALS).div(ptTotal);
+
+    if(doPrint) {
+        console.log("Price of Float PTs: ", format(ptPrice))
+    }
+    return ptPrice;
+}
+
+
+
+
+async function printPairState(fixtures, doPrint) {
 
     destructure(fixtures)
 
@@ -346,6 +370,8 @@ exports.printPairState = async function printPairState(fixtures, doPrint) {
     }
 
 }
+
+exports.printPairState = printPairState;
 
 async function initData(library) {
 
