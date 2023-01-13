@@ -179,7 +179,7 @@ contract ZirconPylon is IZirconPylon {
     /// @return Float -> _reserve0
     /// @dev Anchor -> _reserve1
     function getPairReservesTranslated(uint error0, uint error1) view private  returns  (uint _reserve0, uint _reserve1, uint32 timestamp) {
-        (uint112 _reservePair0, uint112 _reservePair1, uint32 _timestamp) = getPairReservesNormalized();
+        (uint _reservePair0, uint _reservePair1, uint32 _timestamp) = getPairReservesNormalized();
 
         uint ptb = _getBalanceOf(pairAddress, address(this));
         uint ptt = _totalSupply(pairAddress);
@@ -462,6 +462,7 @@ contract ZirconPylon is IZirconPylon {
             // Transferring tokens to pair and minting
             _safeTransfer(pylonToken.float, pairAddress, px);
             _safeTransfer(pylonToken.anchor, pairAddress, py);
+//            console.log("px, py", px, py);
             IZirconPair(pairAddress).mint(address(this));
 
         } else {
@@ -505,7 +506,7 @@ contract ZirconPylon is IZirconPylon {
             uint _floatChange = floatChange;
             bool _isPercentage = isPercentage;
             (uint newReserve0, uint newReserve1,) = getPairReservesTranslated(balance0, balance1);
-            (, uint112 sync1) = getSyncReserves();
+
             desiredFtv = calculateDesiredFtv(
                 reservesTranslated0, reservesTranslated1, //We take old reserves
                 newReserve1.mul(1e18)/newReserve0,
@@ -674,8 +675,8 @@ contract ZirconPylon is IZirconPylon {
             uint liqPercentage = ((sqrtKPrime - sqrtK) * 1e18)/sqrtK;
             uint liqPercentageAdjusted = ((sqrtKPrime - sqrtK) * 1e18)/sqrtKPrime;
 
-            _amountOut += _reservePairTranslated1 * (2 * liqPercentageAdjusted)/1e18;
-            trueAmountOut = _reservePairTranslated1 * (2 * liqPercentage)/1e18;
+            _amountOut += _reservePairTranslated0 * (2 * liqPercentageAdjusted)/1e18;
+            trueAmountOut = _reservePairTranslated0 * (2 * liqPercentage)/1e18;
 
         }
         //Amount Out return
@@ -787,11 +788,15 @@ contract ZirconPylon is IZirconPylon {
             //Logic of desiredFtv is same for both cases
             //Amount pool returns px + trueAmountOut so it's already adjusted by slippage
 
-            //TODO: This needs to account for any liquidity getting async minted (which happens at update)
+            //Adjusted in update if there is any price change
 
             ftvChange = amountPool * _pairReserve1/_pairReserve0;
 
-            if (_isAnchor) {
+
+//            console.log("ftvc, amOut", ftvChange, amountOut);
+
+
+        if (_isAnchor) {
                 // liquidity to mint is a straight amountOut/vab
                 _liquidity = amountOut.mul(ptTotalSupply) / virtualAnchorBalance;
                 virtualAnchorBalance += amountOut;
@@ -882,6 +887,7 @@ contract ZirconPylon is IZirconPylon {
         // TODO: This should never go above the balance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
+            console.log("fee", fee);
         } else {
             _safeTransfer(pylonToken.float, pairAddress, fee);
             (uint112 _reservePair0, uint112 _reservePair1,) = getPairReservesNormalized();
@@ -937,7 +943,7 @@ contract ZirconPylon is IZirconPylon {
             }
         }
 
-        console.log("feebps, ipd, lp", feeBps, instantPriceDecimals, lastPrice);
+//        console.log("feebps, ipd, lp", feeBps, instantPriceDecimals, lastPrice);
         // If either this block's gamma derivative or EMA is higher than threshold we go into the deltaTax mechanism
         if (maxDerivative >= deltaGammaThreshold) {
             uint strikeDiff = block.number - strikeBlock;
@@ -973,6 +979,7 @@ contract ZirconPylon is IZirconPylon {
             }
         }
 
+        console.log("feebps", feeBps);
         // Avoids underflow issues downstream
         require(feeBps < 10000, "Z: FTH");
 
@@ -1064,7 +1071,7 @@ contract ZirconPylon is IZirconPylon {
                 uint feeBps = getFeeBps(_pairReserve1*1e18/_pairReserve0);
 
                 //We charge all fees to the Anchor side and use a mintOneSide to throw the rest of the float.
-                //Due to how small this is, in most cases the extra slippage is something like 0.0004% of the amount so no big deal.
+                //Due to how small this is, in most cases the extra slippage is something like 0.0004% of the amountIn so no big deal.
                 //Similarly the effect on price is tiny - swapping 30 bucks out of 20k.
 
                 //But we need to keep track of the extra float and mint it separately.
@@ -1075,6 +1082,7 @@ contract ZirconPylon is IZirconPylon {
                 floatExtra = amountIn0 * (2 * feeBps)/10000;
                 amountIn0 -= floatExtra;
                 amountIn1 = payFees(balance1.sub(_syncReserve1), 2 * feeBps, true);
+                console.log("p of am", amountIn1.mul(1e18)/amountIn0);
             }
 
 
@@ -1093,17 +1101,28 @@ contract ZirconPylon is IZirconPylon {
             ? Math.min((_amountIn0.mul(2 * pairReserveTranslated1))/pairReserveTranslated0, _amountIn1 * 2)
             : Math.min((_amountIn1.mul(2 * pairReserveTranslated0))/pairReserveTranslated1, _amountIn0 * 2);
 
+
+
             {
                 //Calculating extra liquidity from floatExtra
                 //Since we saved on a swap we can add a few sqrts to give the mathematically correct amount
-                uint sqrtK = Math.sqrt(pairReserveTranslated0 * pairReserveTranslated1);
-                uint sqrtKP = Math.sqrt((pairReserveTranslated0 + floatExtra) * pairReserveTranslated1);
+                //We simulate the fact that we're minting this one after the main mint. Ensures lowest slippage
+                uint sqrtK = Math.sqrt((pairReserveTranslated0 + _amountIn0) * (pairReserveTranslated1 + _amountIn1));
+                uint sqrtKP = Math.sqrt((pairReserveTranslated0 + _amountIn0 + floatExtra) * (pairReserveTranslated1 + _amountIn1));
 
                 if(sqrtKP > sqrtK) {
-                    amount += (sqrtKP - sqrtK).mul(_shouldMintAnchor ? 2 * pairReserveTranslated1 : 2 * pairReserveTranslated0)/sqrtK;
+                    uint supposedAmount = _shouldMintAnchor ? _amountIn1 * 2 : _amountIn0 * 2;
+//                    console.log("sup - act, add", supposedAmount - amount, (sqrtKP - sqrtK).mul(_shouldMintAnchor ? 2 * pairReserveTranslated1 : 2 * pairReserveTranslated0)/sqrtK);
+
+                    amount += (sqrtKP - sqrtK).mul(_shouldMintAnchor ? 2 * (pairReserveTranslated1 + _amountIn1) : 2 * (pairReserveTranslated0 + _amountIn0))/sqrtK;
                 }
 
             }
+
+//            {
+//                uint supposedAmount = _shouldMintAnchor ? _amountIn1 * 2 : _amountIn0 * 2;
+//                console.log("sup - act2", supposedAmount - amount);
+//            }
 
 //            desiredFtv = (2 * pairReserveTranslated1 * gammaMulDecimals)/1e18;
 
@@ -1182,11 +1201,13 @@ contract ZirconPylon is IZirconPylon {
         (uint cacheReserve0, uint cacheReserve1,) = getPairReservesTranslated(0, 0);
         notZero(amountIn0);
         notZero(amountIn1);
-        _safeTransfer(pylonToken.float, pairAddress, amountIn0 - floatExtra);
+//        console.log("floatE", floatExtra);
+        _safeTransfer(pylonToken.float, pairAddress, amountIn0);
         _safeTransfer(pylonToken.anchor, pairAddress, amountIn1);
         IZirconPair(pairAddress).mint(address(this));
         //Minting the extra chunk
         //Quite inefficient ofc but better than losing extra to fees.
+        console.log("floatE", floatExtra);
         _safeTransfer(pylonToken.float, pairAddress, floatExtra);
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
         // uint deltaSupply = pair.totalSupply().sub(_totalSupply);
@@ -2017,12 +2038,18 @@ contract ZirconPylon is IZirconPylon {
             adjustedVab
         );
 
+//        console.log("desFtv, change", desiredFtv, change);
+
         //Percentage easier when removing, raw amount easier when adding
         if(isPercentage) {
             if(change != 1e18) {
                 desiredFtv = desiredFtv.mul(change)/1e18;
             }
         } else {
+            uint oldPrice = oldReserve1.mul(1e18)/oldReserve0;
+            if(oldPrice != newPrice) {
+                change = change.mul(newPrice)/oldPrice;
+            }
             desiredFtv = desiredFtv.add(change);
         }
 
@@ -2075,7 +2102,7 @@ contract ZirconPylon is IZirconPylon {
         } else {
             //Just records % of float liquidity removed here
             percentageFloatChange = uint(1e18).sub((ptu * 1e18)/((gammaMulDecimals * ptb)/1e18));
-            console.log("percPre", percentageFloatChange);
+//            console.log("percPre", percentageFloatChange);
         }
 
         //payFees(syncAmount, feeBps, isAnchor);

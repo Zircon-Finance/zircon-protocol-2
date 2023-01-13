@@ -96,6 +96,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         reserve0 = uint112(balance0);
         reserve1 = uint112(balance1);
         console.log("Uni: Updated reserve0, reserve1", reserve0, reserve1);
+        console.log("Uni: Internal price", uint(reserve1) * 1e18/uint(reserve0));
         blockTimestampLast = blockTimestamp;
         emit Sync(reserve0, reserve1);
     }
@@ -107,6 +108,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         (uint112 _reserve0, uint112 _reserve1,) = getReserves();
 
         _mintFee(_reserve0, _reserve1);
+        console.log("UniPMF: Internal price", uint(reserve1) * 1e18/uint(reserve0));
 
         kLast = uint(reserve0).mul(reserve1); //Reserves don't change from mintFee
     }
