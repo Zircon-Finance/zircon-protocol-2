@@ -98,3 +98,4 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
 
 module.exports.saveValuesForSDK = saveValuesForSDK
 module.exports.generateJSONFile = generateJSONFile
+module.exports.casesSDK = casesSDK
