@@ -40,8 +40,8 @@ contract FeeToSetter {
         IZirconFactory(factory).setFeeToSetter(feeToSetter_);
     }
 
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaTreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external onlyOwner {
-        IZirconPylonFactory(pylonFactory).setFees(_maximumPercentageSync, _deltaGammaTreshold, _deltaGammaMinFee, _muUpdatePeriod, _muChangeFactor, _EMASamples);
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaTreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples, uint _oracleUpdate) external onlyOwner {
+        IZirconPylonFactory(pylonFactory).setFees(_maximumPercentageSync, _deltaGammaTreshold, _deltaGammaMinFee, _muUpdatePeriod, _muChangeFactor, _EMASamples, _oracleUpdate);
     }
 
     function setMinMaxFee(uint112 minFee, uint112 maxFee) external onlyOwner {

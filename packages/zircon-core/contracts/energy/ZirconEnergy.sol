@@ -4,11 +4,11 @@ pragma solidity =0.5.16;
 import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import "./libraries/SafeMath.sol";
+import '../libraries/Math.sol';
+//import "./libraries/SafeMath.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
-import '../libraries/Math.sol';
 
 contract ZirconEnergy is IZirconEnergy {
 
@@ -16,7 +16,6 @@ contract ZirconEnergy is IZirconEnergy {
   Zircon Energy is the protocol-wide accumulator of revenue.
   Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
 */
-
   using SafeMath for uint112;
   using SafeMath for uint256;
 
@@ -49,8 +48,8 @@ contract ZirconEnergy is IZirconEnergy {
   function initialize(address _pylon, address _pair, address _token0, address _token1) external {
     require(initialized == 0, "ZER: AI");
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
-//    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
-    (address tokenA, address tokenB) = (_token0, _token1);
+    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
+    (address tokenA, address tokenB) = isFloatToken0 ? (_token0, _token1) : (_token1, _token0);
     pylon = Pylon(
       _pylon,
       _pair,
@@ -58,9 +57,8 @@ contract ZirconEnergy is IZirconEnergy {
       tokenB
     );
     // Approving pylon to use anchor tokens
-    IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-    IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-    IUniswapV2ERC20(tokenA).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+    //    IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+    //    IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
 
     initialized = 1;
 
@@ -95,7 +93,7 @@ contract ZirconEnergy is IZirconEnergy {
 
   //Called when tokens are withdrawn to ensure pylon doesn't get bricked
   function syncReserve() external _onlyPylon _initialize {
-      anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+    anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
   }
 
 
@@ -119,14 +117,139 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
     uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
-    uint balanceFloat = IUniswapV2ERC20(pylon.floatToken).balanceOf(address(this));
 
     _safeTransfer(pylon.pairAddress, newEnergy, balance);
-    _safeTransfer(pylon.floatToken, newEnergy, balanceAnchor);
-    _safeTransfer(pylon.anchorToken, newEnergy, balanceFloat);
+    _safeTransfer(pylon.anchorToken, newEnergy, balanceAnchor);
   }
 
 
+  function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
+    require(amountIn > 0, 'UV2: IIA');
+    require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
+    uint amountInWithFee = amountIn.mul(10000-fee);
+    uint numerator = amountInWithFee.mul(reserveOut);
+    uint denominator = reserveIn.mul(10000).add(amountInWithFee);
+    amountOut = numerator / denominator;
+  }
+
+  function _updateMu(uint muUpdatePeriod, uint muChangeFactor, uint muBlockNumber, uint muMulDecimals, uint gammaMulDecimals, uint muOldGamma) view external returns (uint mu) {
+//    uint _newBlockHeight = ; // t2
+
+    // We only go ahead with this if a sufficient amount of time passes
+    // This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
+    if((block.number - muBlockNumber) > muUpdatePeriod) { // reasonable to assume it won't subflow
+
+
+      console.log("Energy initialMu", muMulDecimals);
+      uint _newGamma = gammaMulDecimals; // y2
+      uint _oldGamma = muOldGamma; // y1
+
+      bool deltaGammaIsPositive = _newGamma >= _oldGamma;
+      bool gammaIsOver50 = _newGamma >= 5e17;
+
+      // This the part that measures if gamma is going outside (to the extremes) or to the inside (0.5 midpoint)
+      // It uses an XOR between current gamma and its delta
+      // If delta is positive when above 50%, means it's moving to the outside
+      // If delta is negative when below 50%, that also means it's going to the outside
+
+      // In other scenarios it's going to the inside, which is why we use the XOR
+      uint deltaMu = Math.absoluteDiff(_newGamma, _oldGamma);
+      console.log("deltaMu, dgP, go50", deltaMu, deltaGammaIsPositive, gammaIsOver50);
+      if(deltaGammaIsPositive != gammaIsOver50) { // != with booleans is an XOR
+        // This block assigns the dampened delta gamma to mu and checks that it's between 0 and 1
+        // Due to uint math we can't do this in one line
+        // Parameter to tweak the speed at which mu seeks to follow gamma
+        deltaMu = deltaMu.mul(muChangeFactor * Math.absoluteDiff(_newGamma, 5e17))/1e18;
+      }
+
+      if (deltaGammaIsPositive) {
+        if (deltaMu + muMulDecimals <= 1e18) {
+          // Only updates if the result doesn't go above 1.
+          muMulDecimals += deltaMu;
+        }
+      } else {
+        if(deltaMu <= muMulDecimals) {
+          muMulDecimals -= deltaMu;
+        }
+      }
+
+      mu = Math.clamp(muMulDecimals, 1e17, 9e17);
+
+      console.log("Energy: Mu: ", mu);
+      // update variables for next step
+//      muOldGamma = _newGamma;
+//      muBlockNumber = _newBlockHeight;
+    } else {
+      mu = muMulDecimals;
+    }
+
+  }
+
+
+  /// @notice Omega is the slashing factor. It's always equal to 1 if pool has gamma above 50%
+  /// If it's below 50%, it begins to go below 1 and thus slash any withdrawal.
+  /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
+  /// Also note that a dump of 60% only generates about 10% of slashing.
+  // 0.39kb
+  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint fee, bool isFloatReserve0, address _to) _onlyPylon
+  external returns (uint retPTU, uint amount){
+    // Send slashing should send the extra PTUs to Uniswap.
+    // When burn calls the uniswap burn it will also give users the compensation
+    console.log("energyOmega", omegaMulDecimals);
+    retPTU = omegaMulDecimals.mul(ptu)/1e18;
+    if (omegaMulDecimals < 1e18) {
+      //finds amount to cover
+      uint amountToAdd = ptu * (1e18-omegaMulDecimals)/1e18; // already checked
+
+      // finds how much we can cover
+      uint energyPTBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this));
+
+      if (amountToAdd < energyPTBalance) {
+        // Sending PT tokens to Pair because burn one side is going to be called after
+        // sends pool tokens directly to pair
+        _safeTransfer(pylon.pairAddress, pylon.pairAddress, amountToAdd);
+      } else {
+        // Sending PT tokens to Pair because burn one side is going to be called after
+        // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
+        _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
+
+        uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
+        {
+          uint _fee = fee;
+          uint _ptu = retPTU;
+          bool _isFloatReserve0 = isFloatReserve0;
+          uint ts = IZirconPair(pylon.pairAddress).totalSupply();
+          (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
+          uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
+          uint _reserve1 = _isFloatReserve0 ? reserve1 : reserve0;
+
+          //Simplified, the previous system was necessary because it was two separate functions
+          amount = (amountToAdd - energyPTBalance).mul(2 * _reserve1)/ts;
+//          uint amount0 = liquidity.mul(_reserve0) / ts;
+//          uint amount1 = liquidity.mul(_reserve1) / ts;
+//
+//          // sends pool tokens directly to pair
+//          uint totalAmount = amount1 + getAmountOut(amount0, _reserve0, _reserve1, _fee);
+//
+//          // TotalAmount is what the user already received, while percentage is what's missing.
+//          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
+//          // Percentage is calculated "natively" as a full 1e18
+//          // ta/(1-p) - ta = ta*p/(1-p)
+//          amount = totalAmount.mul(percentage)/(1e18 - percentage);
+        }
+
+        uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+
+        amount = eBalance > amount ? amount : eBalance;
+
+        _safeTransfer(pylon.anchorToken, _to, amount);
+
+
+        // updating the reserves of energy
+        anchorReserve = eBalance-amount;
+      }
+    }
+  }
 
 
 }

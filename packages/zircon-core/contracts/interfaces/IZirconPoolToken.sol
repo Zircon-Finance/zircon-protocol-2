@@ -5,6 +5,7 @@ interface IZirconPoolToken {
     function isAnchor() external view returns (bool);
     function token() external view returns (address);
     function pair() external view returns (address);
+    function pylonFactory() external view returns (address);
     function pylon() external view returns (address);
     function pylonFactory() external view returns (address);
     function totalSupply() external view returns (uint);

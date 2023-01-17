@@ -1,11 +1,12 @@
 pragma solidity =0.5.16;
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import "./libraries/SafeMath.sol";
+//import "./libraries/SafeMath.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "hardhat/console.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
+import '../libraries/Math.sol';
 
 contract ZirconEnergyRevenue is ReentrancyGuard  {
     using SafeMath for uint112;
@@ -24,7 +25,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         address pylon0;
         address pylon1;
     }
-    Zircon zircon;
+    Zircon public zircon;
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
     function _safeTransfer(address token, address to, uint value) private {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
@@ -94,6 +95,9 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             uint amount = balance.sub(reserve);
             uint pylon0Liq = (amount.mul(pylonBalance0)/totalSupply).mul(100 - feePercentageForRev)/(100);
             uint pylon1Liq = (amount.mul(pylonBalance1)/totalSupply).mul(100 - feePercentageForRev)/(100);
+            console.log("reserves", amount);
+            console.log("pylon0Liq", pylon0Liq);
+            console.log("pylon1Liq", pylon1Liq);
             _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
             _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));
@@ -116,7 +120,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
         _safeTransfer(zircon.floatToken, newEnergy, floatBalance);
     }
 
-
+    // Balances From Pair
     function getBalanceFromPair() external _initialize returns (uint balance) {
         require(msg.sender == zircon.pylon0 || msg.sender == zircon.pylon1, "ZE: Not Pylon");
         if(msg.sender == zircon.pylon0) {
@@ -128,6 +132,11 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             feeValue1 = 0;
         }
     }
+
+
+
+
+
 
     function getFees(address _token, uint _amount, address _to) external {
         require(msg.sender == energyFactory, "ZER: Not properly called");

@@ -9,6 +9,8 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract PsionicFarmVault is ERC20, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
+    // @TODO: ADD A REWARDS TOKEN LENGTH VARIABLE
+    // @TODO: ADD EVENTS
 
     // Mapping that contains the reward tokens
     mapping (address => bool) tokens;

@@ -1,21 +1,8 @@
 const { ethers } = require('hardhat');
-
-
-
-async function ptTest() {
-    let ptFactory = await ethers.getContractFactory('ZirconPTFactory')
-    let ea = await ptFactory.attach("0x09A57DcdBaFEf048ac5D749f297d014a41b39C88")
-    let eaA = await ea.getPoolToken( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82")
-    let eaB = await ea.getPoolToken( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56")
-
-    console.log("pts: ", eaA.toString(), eaB.toString())
-}
-
 async function eaTest() {
     let energyFactory = await ethers.getContractFactory('ZirconEnergyFactory')
     let ea = await energyFactory.attach("0xe2522E34d2eDAbEd507A8b975ae8d7bf4CBe40ff")
-    let eaA = await ea.getEnergy( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82")
-    let eaB = await ea.getEnergy( "0x82413D05710CD45C256b491bDe1c1a5B9303eb62", "0x98dc2d3bc896fe0971e135b02b2b6831c839f0fe")
+    let eaA = await ea.getEnergy( "0xe75F9ae61926FF1d27d16403C938b4cd15c756d5", "0xed13B028697febd70f34cf9a9E280a8f1E98FD29")
 
     console.log("balances: ", eaA.toString())
 }
@@ -30,28 +17,22 @@ async function test() {
 
     console.log("balances: ", balance.toString(), balance2.toString())
 }
-
-// Add Pair Function
-async function addPair() {
-    // Deploy Pylon Router
-    // let peripheralLibrary = await (await ethers.getContractFactory('ZirconPeripheralLibrary')).attach("")
-    // deploy tokens
-    let factory = await ethers.getContractFactory('ZirconFactory');
-    let factoryInstance = await factory.attach("0xC325D108cb7270c55dde8668Bd34997C10739847");
-
-    // let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
-    // let factoryEnergyInstance = await factoryEnergy.deploy();
-    let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
-    let factoryPylonInstance = await factoryPylon.attach("0x5ff31403A412e982Bd1eE870ca1c98490FfAc894");
-
-    // Deploy Tokens
-    let tok0 = await ethers.getContractFactory('Token');
-    let tk0 = await tok0.attach("0x53bF3fA280d8fa915F503f182fE602cd310EB39D");
-    let tok1 = await ethers.getContractFactory('Token');
-    let tk1 = await tok1.attach("0xf5dd274285dC9243187b7a201239531e75fEAaa4");
-
-    //await factoryInstance.createPair(tk0.address, tk1.address);
+function getAmountOut(amountIn, reserveIn, reserveOut) {
+    let amounInWithFees = amountIn.mul(ethers.BigNumber.from("997"))
+    let numerator = amounInWithFees.mul(reserveOut);
+    let denominator = reserveIn.mul(ethers.BigNumber.from("1000")).add(amounInWithFees);
+    return numerator.div(denominator);
+}
+async function createPairPylon(t, t0, factoryInstance, factoryPylonInstance) {
+    let tok = await ethers.getContractFactory('Token');
+    let tk0 = await tok.attach(t);
+    let tk1 = await tok.attach(t0);
     let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
+    if (lpAddress == "0x0000000000000000000000000000000000000000") {
+        await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
+        lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
+    }
+    console.log("Pair Address: ", lpAddress)
     let pairContract = await ethers.getContractFactory("ZirconPair");
     let pair = await pairContract.attach(lpAddress);
 
@@ -59,17 +40,68 @@ async function addPair() {
     let token0 = tk0.address === token0Address ? tk0 : tk1
     let token1 = tk1.address === token0Address ? tk0 : tk1
 
-    await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
-    // let pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
-    //
-    // let pylonRouterContract = await ethers.getContractFactory('ZirconPylonRouter');
-    // pylonRouterContract.attach("0x292993357d974fA1a4aa6e37305D5F266B399f99")
-    // await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
 
-    // let pRouterInstance = await pylonRouterContract.deploy(factoryInstance.address, factoryPylonInstance.address, wethInstance.address)
+    let pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
+    if (pylonAddress == "0x0000000000000000000000000000000000000000") {
+        await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
+        pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
+    }
+
+    let pylonAddress2 = await factoryPylonInstance.getPylon(token1.address, token0.address)
+    if (pylonAddress2 == "0x0000000000000000000000000000000000000000") {
+        await factoryPylonInstance.addPylon(lpAddress, token1.address, token0.address);
+        pylonAddress2 = await factoryPylonInstance.getPylon(token1.address, token0.address)
+    }
+
+    let pylonContract = await ethers.getContractFactory("ZirconPylon");
+    let pylon = await pylonContract.attach(pylonAddress);
+    let pylon1 = await pylonContract.attach(pylonAddress2);
+
+    // await initialize(token0, token1, pair, pylon)
+    await initialize(token1, token0, pair, pylon1)
 }
 
-ptTest()
+async function initialize(tk0, tk1, pair, pylonInstance) {
+    console.log("Initializing Pylon: ", pylonInstance.address)
+    let account = "0x10AD3b25F0CD7Ed4EA01A95d2f1bf9E4bE987161"
+    let balance = await tk0.balanceOf(account)
+    console.log("balance: ", balance.toString())
+    await tk0.transfer(pair.address, "2000000000000000")
+    await tk1.transfer(pair.address, "10000000000000000")
+    await pair.mint(account)
+    console.log("minted")
+    // Let's transfer some tokens to the Pylon
+    await tk0.transfer(pylonInstance.address, "20000000000000")
+    await tk1.transfer(pylonInstance.address, "1000000000000000")
+    //Let's initialize the Pylon, this should call two sync
+    await pylonInstance.initPylon(account)
+    console.log("initialized")
+    await tk0.transfer(pylonInstance.address, "2000")
+    let outcome = getAmountOut(input, "200000000000000", "1000000000000000")
+    await pair.swap(0, outcome, account, '0x', overrides)
+    console.log("swapped")
+    await tk1.transfer(pylonInstance.address, "2000")
+    await pylonInstance.mintPoolTokens(account, false)
+    console.log("minted")
+
+}
+
+// Add Pair Function
+async function addPair() {
+    // Getting factory instance
+    let factory = await ethers.getContractFactory('ZirconFactory');
+    let factoryInstance = await factory.attach("0x6D934416741C25aA2C87Fe9D35757a41820a046d");
+
+    // Getting Pylon Factory Instance
+    let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
+    let factoryPylonInstance = await factoryPylon.attach("0x8D40Ac43Ef276493DF8b2E71C18442DC3CE2E121");
+
+    // Deploy Tokens
+    await createPairPylon("0xD909178CC99d318e4D46e7E66a972955859670E1", "0xd9224c102A73e5941aBfCd645e08623dC4d182bc", factoryInstance, factoryPylonInstance)
+    await createPairPylon("0xD909178CC99d318e4D46e7E66a972955859670E1", "0x9Aac6FB41773af877a2Be73c99897F3DdFACf576", factoryInstance, factoryPylonInstance)
+}
+
+addPair()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

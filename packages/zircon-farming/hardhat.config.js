@@ -73,6 +73,11 @@ module.exports = {
       accounts: [privateKeyDev],
       chainId: 1287,
     },
+    bsc: {
+      url: 'https://binance.nodereal.io',
+      accounts: [privateKey],
+      chainId: 56,
+    },
     dev: {
       url: 'http://127.0.0.1:7545',
       accounts: [privateKeyDev],

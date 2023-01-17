@@ -1,8 +1,18 @@
 const { ethers } = require('hardhat');
 const {expandTo18Decimals} = require("./utils");
+const {LIB_ADDRESS} = require("../../scripts/constants");
 
-exports.coreFixtures = async function coreFixtures(address) {
+exports.librarySetup = async function librarySetup() {
+    // Deploying Library
+    let library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
+    if (library.address !== LIB_ADDRESS[31337]) {
+        console.error("UPDATE LIBRARY ADDRESS ON get-bytecodes.js -> 31337: ", library.address)
+        throw new Error()
+    }
+    return library;
+}
 
+exports.coreFixtures = async function coreFixtures(library) {
     // Deploy feeToSetter contract
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
     let feeToSetterInstance = await feeToSetter.deploy();
@@ -18,8 +28,8 @@ exports.coreFixtures = async function coreFixtures(address) {
     // Deploy Tokens
     let tok = await ethers.getContractFactory('Token');
 
-    let tk0 = await tok.deploy('Token1', 'TOK1', 18);
-    let tk1 = await tok.deploy('Token2', 'TOK2', 6);
+    let tk0 = await tok.deploy('Token1', 'TOK1', 6);
+    let tk1 = await tok.deploy('Token2', 'TOK2', 18);
 
     // Deploy Factory
     let factory = await ethers.getContractFactory('ZirconFactory');
@@ -30,7 +40,11 @@ exports.coreFixtures = async function coreFixtures(address) {
     let ptFactoryInstance = await ptFactory.deploy(migratorInstance.address, feeToSetterInstance.address);
 
     // Deploying Pylon Factory
-    let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
+    let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory', {
+        libraries: {
+            ZirconLibrary: library.address,
+        },
+    });
     let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address, feeToSetterInstance.address, migratorInstance.address);
 
     // Creating Pair
@@ -54,11 +68,15 @@ exports.coreFixtures = async function coreFixtures(address) {
     await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
     let pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
 
-    let zPylon = await ethers.getContractFactory('ZirconPylon');
+    console.log("Lib:Address", library.address)
+    let zPylon = await ethers.getContractFactory('ZirconPylon', {
+        libraries: {
+            ZirconLibrary: library.address,
+        },
+    });
     let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
     let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
     let pylonInstance = await zPylon.attach(pylonAddress);
-    console.log("pylon", pylonInstance.address);
     let energyContract = await ethers.getContractFactory('ZirconEnergy')
 
     // Configuring Pool Tokens Anchor And Float
@@ -67,10 +85,12 @@ exports.coreFixtures = async function coreFixtures(address) {
 
     let poolTokenInstance0 = poolToken1.attach(poolAddress0);
     let poolTokenInstance1 = poolToken2.attach(poolAddress1);
-    console.log("hello", poolTokenInstance0.address, poolTokenInstance1.address)
+    console.log("hello", poolTokenInstance0.address, poolTokenInstance1.address);
 
-    await feeToSetterInstance.setFeePercentageEnergy(0)
-    await feeToSetterInstance.setFeePercentageRev(0)
+    [account, account2] = await ethers.getSigners();
+
+    // await feeToSetterInstance.setFeePercentageEnergy(20)
+    // await feeToSetterInstance.setFeePercentageRev(20)
 
     return {
         factoryInstance,
@@ -84,7 +104,10 @@ exports.coreFixtures = async function coreFixtures(address) {
         migratorInstance,
         factoryEnergyInstance,
         ptFactoryInstance,
-        feeToSetterInstance
+        feeToSetterInstance,
+        zirconPylonLibrary: library,
+        account,
+        account2
     }
 }
 

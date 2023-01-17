@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 
 interface IPsionicFarmVault {
-
     function rewardTokens(uint) external view returns (address);
     function isInitialized() external view returns (bool);
     function PSIONIC_FACTORY() external view returns (address);

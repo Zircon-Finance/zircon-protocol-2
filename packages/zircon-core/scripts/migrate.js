@@ -1,15 +1,15 @@
 const hre = require('hardhat');
 
 // ADDRESSES
-const FEE_TO_SETTER_ADDRESS = {1285: "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce", 1287: '0x7A282B0BE9676BCc6377eD81A6f1196f0e7647a6'};
-const MIGRATOR_ADDRESS = {1285: "0xdf109A381F0E9EC6751430279c9d817075a5D3C3", 1287: '0x1915Bd4a625c7b202E0c64EA35F8760Bcd259C04'};
-const ENERGY_FACTORY = {1285: "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8", 1287: '0x9918f0D920E6052175b06F293C11856e569B8C5B'};
+const FEE_TO_SETTER_ADDRESS = {1285: "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce", 1287: '0xbCea98Df85045F2Fcf5310fE4237ca95C9C24622'};
+const MIGRATOR_ADDRESS = {1285: "0x03209097D62b3EB7e62b2dB13Bb2729A3431F437", 1287: '0xec89E7389Cfa95A801f8ddC18dA92C1165280971'};
+const ENERGY_FACTORY = {1285: "0x49e15A5ea67FD7ebe70EB539a51abf1919282De8", 1287: '0x625ad88bb31E7119E963F2C718C9419c23Cd6F10'};
 const NEW_ENERGY_FACTORY = {1285: "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8", 1287: '0x9A747f8cF3A9aD39B7A5770B694160A56c86a592'};
-const PYLON_FACTORY = {1285: "0x3dA19d8f9f1208f844edE1b6Ac6caF2c14a318bD", 1287: '0x4bfdb286D14435a8E44989817e6Fa368beDC35d9'};
+const PYLON_FACTORY = {1285: "0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548", 1287: '0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89'};
 const GENESIS_PYLON_FACTORY = {1285: "0x1153550210Bbef5b74890b242F37Ae24E1F41440", 1287: '0x19040fC4c40863F0af606e21E6d1CEef80958858'};
 const NEW_PYLON_FACTORY = {1285: "0x3dA19d8f9f1208f844edE1b6Ac6caF2c14a318bD", 1287: '0xE41d18e55372A4e55bC0647186A322B84a5EE1C7'};
-const FACTORY = {1285: "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", 1287: '0xCa7EB17663dd2C4A1943aDc80b74f9E02413147C'};
-const PT_FACTORY = {1285: "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", 1287: '0xFB040134a89f13317C9d7b346f7AB85A2bed9c87'};
+const FACTORY = {1285: "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", 1287: '0xeEec0dEaC43918612319C24774923f04F8A6f284'};
+const PT_FACTORY = {1285: "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", 1287: '0x3EbB4d256C123D9bBccabcfB4cBd0c89A569F867'};
 
 const migratePylons = async () => {
     const chainId = hre.network.config.chainId
@@ -21,7 +21,7 @@ const migratePylons = async () => {
 
 
     // Updating Factory with new addresses
-    await migrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])
+    // await migrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])
 
     // OLD ENERGY
     let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
@@ -29,10 +29,10 @@ const migratePylons = async () => {
     // NEW ENERGY 0x625ad88bb31E7119E963F2C718C9419c23Cd6F10
     // NEW PYLON FACTORY 0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89
     // NEW ENERGY
-    let energyInstance2 = await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS[chainId], MIGRATOR_ADDRESS[chainId]);
-    console.log("NEW ENERGY FACTORY", energyInstance2.address)
+    let energyInstance2 = factoryEnergy.attach(NEW_ENERGY_FACTORY[chainId]); //await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS[chainId], MIGRATOR_ADDRESS[chainId]);
+    console.log("NEW ENERGY", energyInstance2.address)
     //
-    await energyInstance2.deployed();
+    // await energyInstance2.deployed();
 
     // OLD PYLON FACTORY
     let pylonFactory = await ethers.getContractFactory("ZirconPylonFactory")
@@ -52,14 +52,14 @@ const migratePylons = async () => {
     // NEW PYLON FACTORY
     let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
     //
-    let newFactoryPylonInstance = //factoryPylon.attach(NEW_PYLON_FACTORY[chainId])
-        await factoryPylon.deploy(
-            FACTORY[chainId],
-            energyInstance2.address,
-            PT_FACTORY[chainId],
-            FEE_TO_SETTER_ADDRESS[chainId],
-            MIGRATOR_ADDRESS[chainId])
-    await newFactoryPylonInstance.deployed();
+    let newFactoryPylonInstance = factoryPylon.attach(NEW_PYLON_FACTORY[chainId])
+    //     await factoryPylon.deploy(
+    //         FACTORY[chainId],
+    //         energyInstance2.address,
+    //         PT_FACTORY[chainId],
+    //         FEE_TO_SETTER_ADDRESS[chainId],
+    //         MIGRATOR_ADDRESS[chainId])
+    // await newFactoryPylonInstance.deployed();
 
     console.log("NEW PYLON FACTORY", newFactoryPylonInstance.address)
 
@@ -91,7 +91,7 @@ const migratePylons = async () => {
     // 0x2d28AA28fA1E5e6bF121CF688309Bf3faAAe3C70 0x98878B06940aE243284CA214f92Bb71a2b032B8A 0x01Ccf73dda86A56F2DE4566F3aa070b055F79906 0x61F0F6De5B6BA993e6585646743D022938326ec9
     // let pairs = [ "0x2d28AA28fA1E5e6bF121CF688309Bf3faAAe3C70", "0x900f1Ec5819FA087d368877cD03B265Bf1802667"]//, "0x2d28AA28fA1E5e6bF121CF688309Bf3faAAe3C70"]
     let pairsToMigrate = []
-    for (let i = allPairsLength-1; i >= 0; i--) {
+    for (let i = 0; i < allPairsLength; i++) {
         let pairAddress = await zFactory.allPairs(i)
         let pairContract = await ethers.getContractFactory("ZirconPair")
         let pair = pairContract.attach(pairAddress)
@@ -105,17 +105,13 @@ const migratePylons = async () => {
         let genesisPylonAddress = await genesisPylonInstance.getPylon(token0, token1)
         let genesisPylonAddress2 = await genesisPylonInstance.getPylon(token1, token0)
 
-        // let _genesisPylonAddress = await genesisPylonInstance2.getPylon(token0, token1)
-        // let _genesisPylonAddress2 = await genesisPylonInstance2.getPylon(token1, token0)
-
-
         if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
-            console.log("migrating pylon ====> ", pylonAddress)
-            pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
+            console.log(pylonAddress)
+            // pairsToMigrate.push(await migrate(token0, token1, pylonAddress, pair))
         }
         if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
-            console.log("migrating pylon =====> ", pylonAddress2)
-            pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
+            console.log(pylonAddress2)
+            // pairsToMigrate.push(await migrate(token1, token0, pylonAddress2, pair))
         }
     }
 

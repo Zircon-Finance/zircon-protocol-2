@@ -45,7 +45,7 @@
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "ctest": "npx hardhat compile && npm test",
-    "testScript": "npx hardhat run --network moonbase scripts/add-pair.js",
-    "send:moonriver": "npx hardhat run --network moonriver script/send-tokens.js"
+    "send:moonriver": "npx hardhat run --network moonriver script/send-tokens.js",
+    "send:moonbase": "npx hardhat run --network moonbase script/send-tokens.js"
   }
 }

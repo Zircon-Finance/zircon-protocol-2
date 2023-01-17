@@ -32,7 +32,12 @@
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat compile && npm test",
     "deployPools:moonbase": "npx hardhat run --network moonbase scripts/deploy-script.js",
-    "deployPools:moonriver": "npx hardhat run --network moonriver scripts/deploy-script.js"
+    "deployPools:moonriver": "npx hardhat run --network moonriver scripts/deploy-script.js",
+    "update:moonbase": "npx hardhat run --network moonbase scripts/updatePylon.js",
+    "update:moonriver": "npx hardhat run --network moonriver scripts/updatePylon.js",
+    "addFarm:moonriver": "npx hardhat run --network moonriver scripts/updateFarm.js",
+    "check:moonbase": "npx hardhat run --network moonbase scripts/check.js",
+    "check:moonriver": "npx hardhat run --network moonriver scripts/check.js"
   },
   "files": [
     "artifacts",

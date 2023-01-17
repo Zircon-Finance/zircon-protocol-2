@@ -21,6 +21,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         uint112 maxPylonFee;
     }
     Fee private fee;
+    event CREATE_ENERGY(address a, address b, address c, address d);
 
     event EnergyCreated(address indexed pair, address indexed energy, address tokenA, address tokenB, uint);
 
@@ -37,6 +38,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         fee = Fee({minPylonFee: 1, maxPylonFee: 50});
         insurancePerMille = 100;
         feePercentageRev = 20;
+        feePercentageEnergy = 20;
         feeToSetter = _feeToSetter;
         migrator = _migrator;
     }
@@ -71,27 +73,14 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
         return keccak256(type(ZirconEnergy).creationCode);
     }
 
-    function energyFor(address token, address pair) view internal returns (address energy) {
-        energy = address(uint(keccak256(abi.encodePacked(
-        hex'ff',
-        address(this),
-        keccak256(abi.encodePacked(pair, token)),
-        hex'f357b629b87c5fb4aff19b5c34d906f8b512d4ab69d3b848b05d7b3f24751013' // init code hash
-        ))));
-    }
+    // DO NOT CHANGE THIS FUNCTIONS 'yarn bytecode' will do it for you ;)
+    function energyFor(address token, address pair) view internal returns (address energy) {energy = address(uint(keccak256(abi.encodePacked(hex'ff',address(this),keccak256(abi.encodePacked(pair, token)),hex'565c1a8935473c113363144b99b885f4b79dd745bd40793206b35a9d400d1058'))));}
 
-    function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon) {
-        pylon = address(uint(keccak256(abi.encodePacked(
-        hex'ff',
-        pylonFactory,
-        keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-        hex'b946c1a980c835b03424e50d125c2cb36367bc360e4e996247533f36ece31409' // init code hash
-        ))));
-    }
+    function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'5e2dd913e1ce71051607f2c6d99bd43844f8eb4ef681756728341cf9198d0b02'))));}
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
-        require(_pair != address(0), 'ZE: ZERO_ADDRESS');
+        require(_pair != address(0), 'ZE: ZERO_ADDRESS0');
         (address token0, address token1) = _tokenA < _tokenB ? (_tokenA, _tokenB) : (_tokenB, _tokenA);
         require(getEnergyRevenue[token0][token1] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(ZirconEnergyRevenue).creationCode;
@@ -116,8 +105,9 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
 
 
     function createEnergy(address _pylon, address _pair, address _tokenA, address _tokenB) external returns (address energy) {
+        emit CREATE_ENERGY(_pylon, _pair, _tokenA, _tokenB);
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
-        require(_pylon != address(0) && _pair != address(0), 'ZE: ZERO_ADDRESS');
+        require(_pylon != address(0) && _pair != address(0), 'ZE: ZERO_ADDRESS1');
         require(getEnergy[_tokenA][_tokenB] == address(0), 'ZE: ENERGY_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(ZirconEnergy).creationCode;
         require(bytecode.length != 0, "Create2: bytecode length is zero");
@@ -133,7 +123,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function migrateEnergyLiquidity(address pair, address token, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS2');
         address energy = address(uint(keccak256(abi.encodePacked(
                 hex'ff',
                 address(this),
@@ -144,12 +134,12 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function migrateEnergyRevenue(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS3');
         IZirconEnergyRevenue(oldEnergy).migrateLiquidity(newEnergy);
     }
 
     function migrateEnergyRevenueFees(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS4');
 
         uint feeValue0 = IZirconEnergyRevenue(oldEnergy).feeValue0();
         uint feeValue1 = IZirconEnergyRevenue(oldEnergy).feeValue1();
@@ -158,7 +148,7 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function migrateEnergy(address oldEnergy, address newEnergy) external onlyMigrator{
-        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS');
+        require(newEnergy != address(0), 'ZE: ZERO_ADDRESS5');
 
         IZirconEnergy(oldEnergy).migrateLiquidity(newEnergy);
     }

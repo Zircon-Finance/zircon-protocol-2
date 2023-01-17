@@ -9,6 +9,7 @@ interface IZirconPylonFactory {
     function muChangeFactor() external view returns (uint);
 //    function liquidityFee() external view returns (uint);
     function EMASamples() external view returns (uint);
+    function oracleUpdateSecs() external view returns (uint);
 
     function allPylons(uint p) external view returns (address);
     function getPylon(address tokenA, address tokenB) external view returns (address pair);
@@ -24,12 +25,12 @@ interface IZirconPylonFactory {
     function addPylonCustomPT(address _pairAddress, address _tokenA, address _tokenB, address floatPTAddress, address anchorPTAddress) external returns (address pylonAddress);
     function setMigrator(address _migrator) external;
     function setFeeToSetter(address _feeToSetter) external;
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external;
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples, uint _oracleUpdate) external;
     function setPaused(bool _paused) external;
 
     function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external returns (address energy);
     function migrateLiquidity(address _oldPylon, address _newPylon) external;
-    function startPylon(address _pylon, uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external;
+    function startPylon(address _pylon, uint _gamma, uint _vab, uint _vfb, bool _formulaSwitch, uint _p2x, uint _p2y) external;
     function changeEnergyFactoryAddress(address _newEnergyFactory) external;
 
 }

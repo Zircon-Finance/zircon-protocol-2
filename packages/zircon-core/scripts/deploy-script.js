@@ -1,16 +1,5 @@
 const { ethers } = require('hardhat');
 
-async function pauseContract() {
-    // Deploy Pylon Router
-    let pylonFactory = await ethers.getContractFactory('FeeToSetter');
-    let ft = pylonFactory.attach("0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce")
-    // await ft.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x168C95536C77Be5400EED2AEEE21ef64D9c8CA2E", "0x1153550210Bbef5b74890b242F37Ae24E1F41440");
-    // let owner = await ft.pylonFactory()
-    // console.log(owner)
-    await ft.setPaused(true);
-//
-
-}
 
 async function deployPylonRouter() {
     // Deploy Pylon Router
@@ -92,7 +81,7 @@ async function deploy() {
 
 }
 
-pauseContract()
+deploy()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

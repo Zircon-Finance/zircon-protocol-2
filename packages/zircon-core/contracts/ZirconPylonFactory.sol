@@ -20,8 +20,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
     uint public maximumPercentageSync;
     uint public deltaGammaThreshold;
     uint public deltaGammaMinFee;
-//    uint public liquidityFee;
     uint public EMASamples;
+    uint public oracleUpdateSecs;
 
     uint public muUpdatePeriod;
     uint public muChangeFactor;
@@ -39,6 +39,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 100; // 1%
         EMASamples = 2; //Previous average is multiplied by this number, sum is divided by samples + 1
+        oracleUpdateSecs = 120;
 
         muUpdatePeriod = 240; // number of blocks; 1 hour on Ethereum and Moonbeam/river
         muChangeFactor = 3; //Increases absolute gamma deviation factor to speed up mu change
@@ -108,7 +109,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         IZirconPoolToken(poolTokenB).initialize(_tokenB, _pairAddress, pylonAddress, true);
     }
 
-    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples) external {
+    function setFees(uint _maximumPercentageSync, uint _deltaGammaThreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples, uint _oracleUpdate) external {
         onlyFeeToSetter();
         maximumPercentageSync = _maximumPercentageSync;
         deltaGammaThreshold = _deltaGammaThreshold;
@@ -116,6 +117,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         muUpdatePeriod = _muUpdatePeriod;
         muChangeFactor = _muChangeFactor;
         EMASamples = _EMASamples;
+        oracleUpdateSecs = _oracleUpdate;
     }
 
     function setMigrator(address _migrator) external  {
@@ -133,9 +135,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
     }
 
-    function startPylon(address _pylon, uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external {
+    function startPylon(address _pylon, uint _gamma, uint _vab, uint _vfb, bool _formulaSwitch, uint _p2x, uint _p2y) external {
         onlyMigrator();
-        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _anchorKFactor, _formulaSwitch);
+        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _vfb, _formulaSwitch, _p2x, _p2y);
     }
 
 
@@ -152,10 +154,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         onlyFeeToSetter();
         paused = _paused;
     }
-//    function setLiquidityFee(uint _liquidityFee) external {
-//        onlyFeeToSetter();
-//        liquidityFee = _liquidityFee;
-//    }
+
 
     function changeEnergyFactoryAddress(address _newEnergyFactory) external {
         onlyMigrator();

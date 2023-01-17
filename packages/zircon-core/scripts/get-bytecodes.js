@@ -1,18 +1,14 @@
 const { ethers } = require('hardhat');
+const {LIB_ADDRESS} = require("./constants");
+const updateBytecode = require('./update-bytecode');
+const hre = require('hardhat');
 
-// Get Bytecodes
+// GET BYTECODES
 async function getBytecodes() {
-
-    let pairContract = await ethers.getContractFactory("ZirconPair");
-    let pylonContract = await ethers.getContractFactory("ZirconPylon");
-    let energyContract = await ethers.getContractFactory("ZirconEnergy");
-    let ptContract = await ethers.getContractFactory("ZirconPoolToken");
-
-    console.log("keccak256 bytecode poolToken", ethers.utils.keccak256(ptContract.bytecode))
-    console.log("keccak256 bytecode pairContract", ethers.utils.keccak256(pairContract.bytecode))
-    console.log("keccak256 bytecode pylon", ethers.utils.keccak256(pylonContract.bytecode))
-    console.log("keccak256 bytecode energy", ethers.utils.keccak256(energyContract.bytecode))
+    const chainId = hre.network.config.chainId
+    await updateBytecode(LIB_ADDRESS[chainId], false);
 }
+
 
 getBytecodes()
     .then(() => process.exit(0))
