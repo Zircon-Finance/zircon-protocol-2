@@ -208,13 +208,10 @@ contract ZirconPylon is IZirconPylon {
     //TODO: Add p2x and p2y to inits
 
     // 0.048 kb
-    function initMigratedPylon(uint _gamma, uint _vab, uint _vfb, bool _formulaSwitch, uint _p2x, uint _p2y) external {
+    function initMigratedPylon(uint _gamma, uint _vab, bool _formulaSwitch) external {
         onlyFactory(); // sufficient check
         gammaMulDecimals = _gamma;
         virtualAnchorBalance = _vab;
-        virtualFloatBalance = _vfb;
-        p2x = _p2x;
-        p2y = _p2y;
         formulaSwitch = _formulaSwitch;
 
         muMulDecimals = gammaMulDecimals; //Starts as gamma, diversifies over time. Used to calculate fee distribution
@@ -222,6 +219,11 @@ contract ZirconPylon is IZirconPylon {
         muOldGamma = gammaMulDecimals; //gamma value at last mu update
 
         (uint cacheReserve0, uint cacheReserve1,) = getPairReservesTranslated(0, 0);
+        (uint syncReserve0,) = getSyncReserves();
+        p2x = cacheReserve1*1e18/cacheReserve0;
+        p2y = 2*cacheReserve1*gammaMulDecimals/1e18;
+        virtualFloatBalance = 2*cacheReserve0*gammaMulDecimals/1e18 + syncReserve0;
+
         //TODO: Might cause issue since it's not adjusted, maybe call with code 42?
         if (_vab != 0 ) {_update(0, false, cacheReserve0, cacheReserve1, _vab);}
         initialized = 1;

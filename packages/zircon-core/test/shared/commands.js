@@ -2,6 +2,9 @@ const {ethers} = require("hardhat");
 const {coreFixtures, librarySetup} = require("./fixtures");
 const {expandTo18Decimals, getAmountOut, sqrt, format, getFtv} = require("./utils");
 const {saveValuesForSDK, casesSDK} = require("./generate-json-sdk-test");
+const {loadFromProd, createTokens} = require("../../scripts/shared/loadFromProd");
+const axios = require('axios');
+const API_MONITORING = 'https://edgeapi.zircon.finance/static/monitoring';
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
@@ -10,7 +13,7 @@ const TEST_ADDRESSES = [
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
-    pair;
+    pair, migratorInstance;
 
 function destructure(fixtures) {
     // factoryInstance = fixtures.factoryInstance
@@ -20,16 +23,41 @@ function destructure(fixtures) {
     poolTokenInstance1 = fixtures.poolTokenInstance1
     pair = fixtures.pair
     pylonInstance = fixtures.pylonInstance
+    factoryInstance = fixtures.factoryInstance
+    factoryPTInstance = fixtures.ptFactoryInstance
     factoryPylonInstance = fixtures.factoryPylonInstance
     factoryEnergyInstance = fixtures.factoryEnergyInstance
     account = fixtures.account
     account2 = fixtures.account2
+    migratorInstance = fixtures.migratorInstance
 }
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const DECIMALS = ethers.BigNumber.from(10).pow(18)
 const overrides = {
     gasLimit: 9999999
+}
+
+exports.initPylonsFromProdSnapshot = async function initProductionData(library) {
+    const monitoring = await axios.get(API_MONITORING);
+    const tokens = await createTokens(monitoring)
+
+    let fixtures = await initData(library);
+    destructure(fixtures);
+
+    await loadFromProd(
+        migratorInstance.address,
+        factoryInstance.address,
+        factoryPylonInstance.address,
+        factoryEnergyInstance.address,
+        factoryPTInstance.address,
+        account.address,
+        tokens,
+        library
+    )
+
+    return fixtures
+
 }
 
 exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPercentage, library) {
@@ -370,6 +398,5 @@ async function printPairState(fixtures, doPrint) {
 exports.printPairState = printPairState;
 
 async function initData(library) {
-
     return await coreFixtures(library)
 }

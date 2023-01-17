@@ -20,7 +20,7 @@ interface IZirconPylon {
     // @_anchorPoolToken -> Contains Address Of Anchor PT
     // @token0 -> Float token
     // @token1 -> Anchor token
-    function initMigratedPylon(uint _gamma, uint _vab, uint _vfb, bool _formulaSwitch, uint _p2x, uint _p2y) external;
+    function initMigratedPylon(uint _gamma, uint _vab, bool _formulaSwitch) external;
     function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external;
     // On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon

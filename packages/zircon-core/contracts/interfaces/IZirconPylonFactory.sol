@@ -30,7 +30,7 @@ interface IZirconPylonFactory {
 
     function changeEnergyAddress(address _newEnergyRev, address _pylonAddress, address _pairAddress, address _tokenA, address _tokenB) external returns (address energy);
     function migrateLiquidity(address _oldPylon, address _newPylon) external;
-    function startPylon(address _pylon, uint _gamma, uint _vab, uint _vfb, bool _formulaSwitch, uint _p2x, uint _p2y) external;
+    function startPylon(address _pylon, uint _gamma, uint _vab, bool _formulaSwitch) external;
     function changeEnergyFactoryAddress(address _newEnergyFactory) external;
 
 }

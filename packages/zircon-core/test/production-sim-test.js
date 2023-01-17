@@ -4,55 +4,24 @@ const assert = require("assert");
 const {BigNumber} = require("ethers");
 const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
 const {coreFixtures} = require("./shared/fixtures");
-const {loadFromProd, createTokens} = require("../scripts/shared/loadFromProd");
-const axios = require('axios');
+const { initPylonsFromProdSnapshot } = require("./shared/commands");
+const { librarySetup} = require("./shared/fixtures");
 
-const TEST_ADDRESSES = [
-    '0x1000000000000000000000000000000000000000',
-    '0x2000000000000000000000000000000000000000'
-]
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
-    pair, factoryPTInstance;
+    pair, factoryPTInstance, library;
 
-const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const overrides = {
     gasLimit: 9999999
 }
 
-async function addLiquidity(token0Amount, token1Amount) {
-    await token0.transfer(pair.address, token0Amount)
-    await token1.transfer(pair.address, token1Amount)
-    await pair.mint(account.address)
-}
 
 describe("Pylon", () => {
-    beforeEach(async () => {
-        [account, account2] = await ethers.getSigners();
-        deployerAddress = account.address;
-        let fixtures = await coreFixtures(deployerAddress)
-        factoryInstance = fixtures.factoryInstance
-        token0 = fixtures.token0
-        token1 = fixtures.token1
-        poolTokenInstance0 = fixtures.poolTokenInstance0
-        poolTokenInstance1 = fixtures.poolTokenInstance1
-        pair = fixtures.pair
-        pylonInstance = fixtures.pylonInstance
-        factoryPylonInstance = fixtures.factoryPylonInstance
-        factoryEnergyInstance = fixtures.factoryEnergyInstance
-        migratorInstance = fixtures.migratorInstance
-        factoryPTInstance = fixtures.ptFactoryInstance
-    });
-    const init = async (token0Amount, token1Amount) => {
-        // Let's initialize the Pool, inserting some liquidity in it
-        await addLiquidity(token0Amount, token1Amount)
-        // Let's transfer some tokens to the Pylon
-        await token0.transfer(pylonInstance.address, token0Amount.div(11))
-        await token1.transfer(pylonInstance.address, token1Amount.div(11))
-        //Let's initialize the Pylon, this should call two sync
-        await pylonInstance.initPylon(account.address)
-    }
+    before(async () => {
+        library = await librarySetup()
+    })
+
 
     function getTokenBySymbol(tokens, symbol) {
         return tokens.find(token => token.symbol == symbol)
@@ -61,10 +30,7 @@ describe("Pylon", () => {
     //Let's try to calculate some cases for pylon
     it(`Prod Testing ZRG/ETH Bug FTT`, async () => {
 
-        const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
-
-        const tokens = await createTokens(monitoring)
-        await loadFromProd(migratorInstance.address, factoryInstance.address, factoryPylonInstance.address, factoryEnergyInstance.address, factoryPTInstance.address, account.address, tokens)
+        let fixtures = await initPylonsFromProdSnapshot(library);
 
         let zrg = getTokenBySymbol(tokens, "ZRG")
         let eth = getTokenBySymbol(tokens, "ETH")
@@ -88,6 +54,7 @@ describe("Pylon", () => {
         console.log("Getting Some Tokens")
 
         // Minting a bit of ETH Stable PT
+
         await ethToken.transfer(pylon.address, "100000000000000000")
         await pylon.mintPoolTokens(account.address, true)
 

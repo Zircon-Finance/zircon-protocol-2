@@ -13,7 +13,7 @@ exports.createTokens = async function createTokens(monitoring) {
     return tokens
 }
 
-exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens) {
+exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens, library) {
     console.log("Loading from prod")
     const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
 
@@ -31,7 +31,11 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     let factory = await hre.ethers.getContractFactory("ZirconFactory");
     let factoryContract = await factory.attach(factoryAddress);
 
-    let pylonFactory = await hre.ethers.getContractFactory("ZirconPylonFactory");
+    let pylonFactory = await hre.ethers.getContractFactory("ZirconPylonFactory", {
+        libraries: {
+            ZirconLibrary: library.address,
+        }
+    });
     let pylonFactoryContract = await pylonFactory.attach(pFactoryAddress);
 
     let energyFactory = await hre.ethers.getContractFactory("ZirconEnergyFactory");
@@ -140,7 +144,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             console.log("Tokens minted for: ", tk0.symbol, tk1.symbol, " pylon")
 
             // Passing here all the old information for the vab anchoK ecc
-            await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.anchorKFactor, pylon.formulaSwitch)).wait()
+            await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.formulaSwitch)).wait()
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)
         }
