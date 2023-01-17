@@ -21,14 +21,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "21",
+<<<<<<< HEAD
     "timestamp": "1673982508",
+=======
+    "timestamp": "1673607319",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "190612822791051608979583542396575536624",
     "price0CumulativeLast": "51922968585348276285304963292200960",
     "price1CumulativeLast": "12980742146337069071326240823050240",
     "amountOut": "99989902573941081",
     "amountIn": "100000000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982503",
     "lastBlockTimestamp": "1673982508",
+=======
+    "lastOracleTimestamp": "1673607314",
+    "lastBlockTimestamp": "1673607319",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2000000000000000000",
     "skip": false,
     "isSync": true,
@@ -60,14 +69,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "93",
+<<<<<<< HEAD
     "timestamp": "1673982580",
+=======
+    "timestamp": "1673607391",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "190612812500000000009762500000000000000",
     "price0CumulativeLast": "12980742146337069071326240823050240",
     "price1CumulativeLast": "51922968585348276285304963292200960",
     "amountOut": "99990000000000000",
     "amountIn": "100000000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982575",
     "lastBlockTimestamp": "1673982580",
+=======
+    "lastOracleTimestamp": "1673607386",
+    "lastBlockTimestamp": "1673607391",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "500000000000000000",
     "skip": false,
     "isSync": true,
@@ -99,14 +117,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "165",
+<<<<<<< HEAD
     "timestamp": "1673982652",
+=======
+    "timestamp": "1673607463",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "190612812500000000039050000000000000002",
     "price0CumulativeLast": "51922968585348276285304963292200960",
     "price1CumulativeLast": "12980742146337069071326240823050240",
     "amountOut": "49995000000000000",
     "amountIn": "50000000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982647",
     "lastBlockTimestamp": "1673982652",
+=======
+    "lastOracleTimestamp": "1673607458",
+    "lastBlockTimestamp": "1673607463",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2000000000000000000",
     "skip": false,
     "isSync": true,
@@ -138,14 +165,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "237",
+<<<<<<< HEAD
     "timestamp": "1673982724",
+=======
+    "timestamp": "1673607535",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "381225635291051685942721926032188981204",
     "price0CumulativeLast": "25961484292674138142652481646100480",
     "price1CumulativeLast": "25961484292674138142652481646100480",
     "amountOut": "99989951286946808",
     "amountIn": "100000000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982719",
     "lastBlockTimestamp": "1673982724",
+=======
+    "lastOracleTimestamp": "1673607530",
+    "lastBlockTimestamp": "1673607535",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "1000000000000000000",
     "skip": false,
     "isSync": true,
@@ -177,14 +213,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "309",
+<<<<<<< HEAD
     "timestamp": "1673982796",
+=======
+    "timestamp": "1673607607",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "3812256250000000000000000000000000000000000",
     "price0CumulativeLast": "25961484292674138142652481646100480",
     "price1CumulativeLast": "25961484292674138142652481646100480",
     "amountOut": "9999000000000000000",
     "amountIn": "10000000000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982791",
     "lastBlockTimestamp": "1673982796",
+=======
+    "lastOracleTimestamp": "1673607602",
+    "lastBlockTimestamp": "1673607607",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "1000000000000000000",
     "skip": false,
     "isSync": true,
@@ -216,14 +261,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "381",
+<<<<<<< HEAD
     "timestamp": "1673982868",
+=======
+    "timestamp": "1673607679",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "190612812500000000009762500000000000000",
     "price0CumulativeLast": "12980742146337069071326240823050240",
     "price1CumulativeLast": "51922968585348276285304963292200960",
     "amountOut": "99990000000000000",
     "amountIn": "100000000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982863",
     "lastBlockTimestamp": "1673982868",
+=======
+    "lastOracleTimestamp": "1673607674",
+    "lastBlockTimestamp": "1673607679",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "500000000000000000",
     "skip": false,
     "isSync": true,
@@ -255,14 +309,23 @@
     "strikeBlock": "0",
     "lastFloatAccumulator": "0",
     "blockNumber": "485",
+<<<<<<< HEAD
     "timestamp": "1673982972",
+=======
+    "timestamp": "1673607783",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "190612812500000000009762500000000000000",
     "price0CumulativeLast": "12980742146337069071326240823050240",
     "price1CumulativeLast": "51922968585348276285304963292200960",
     "amountOut": "99980001000000000",
     "amountIn": "99990000000000000",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673982863",
     "lastBlockTimestamp": "1673982868",
+=======
+    "lastOracleTimestamp": "1673607674",
+    "lastBlockTimestamp": "1673607679",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "500000000000000000",
     "skip": false,
     "isSync": true,
@@ -280,7 +343,11 @@
     "totalSupply": "3286327044197699670743",
     "ptb": "314528156422626967094",
     "anchorTotalSupply": "53000000000000000000",
+<<<<<<< HEAD
     "floatTotalSupply": "50228737420701607889",
+=======
+    "floatTotalSupply": "81976693368601570964",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "gamma": "400615838568369653",
     "mu": "400615838568369653",
     "vab": "53010041835232849961",
@@ -294,6 +361,7 @@
     "strikeBlock": "1310",
     "lastFloatAccumulator": "2626684452556772252942713233239691405",
     "blockNumber": "1310",
+<<<<<<< HEAD
     "timestamp": "1673983797",
     "lastK": "10806761741296179575220646731409210566322245",
     "price0CumulativeLast": "2647466050168274485329168869869814615",
@@ -302,31 +370,49 @@
     "amountIn": "425000000000000000000",
     "lastOracleTimestamp": "1673983795",
     "lastBlockTimestamp": "1673983797",
+=======
+    "timestamp": "1673608608",
+    "lastK": "10806761741296179575220646731409210566322245",
+    "price0CumulativeLast": "2647466050168274485329168869869814615",
+    "price1CumulativeLast": "649192995164425040872529350584892338",
+    "amountOut": "64976693368601568966",
+    "amountIn": "425000000000000000000",
+    "lastOracleTimestamp": "1673608606",
+    "lastBlockTimestamp": "1673608608",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2023524096654192569",
     "skip": false,
     "isSync": true,
     "isBurn": false,
-    "p2x": "6944914750766963530",
-    "p2y": "1147367618610494243651",
+    "p2x": "1844348267637440867",
+    "p2y": "579314064104275093732",
     "reservePtEnergy": "1135539767604842",
     "reserveAnchorEnergy": "135871706124182644"
   },
   {
-    "resPair0": "2030004659712170463666",
-    "resPair1": "4849961308327589230155",
+    "resPair0": "1804448586410818189926",
+    "resPair1": "4512536399085938201163",
     "resPylon0": "84150000000000000000",
     "resPylon1": "262350000000000000000",
-    "totalSupply": "3137279048602490473899",
-    "ptb": "3107187828632660170332",
+    "totalSupply": "2853083726864670895923",
+    "ptb": "2823067064825063627160",
     "anchorTotalSupply": "5247000000000000000000",
+<<<<<<< HEAD
     "floatTotalSupply": "2042389124253624059060",
     "gamma": "447817706268916784",
     "mu": "499999999999999999",
     "vab": "5247583398594596948596",
+=======
+    "floatTotalSupply": "1683000000000000000000",
+    "gamma": "500000000000000000",
+    "mu": "500000000000000000",
+    "vab": "5247000000000000000000",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "gEMA": "0",
-    "fs": true,
+    "fs": false,
     "isAnchor": false,
     "isBlocked": false,
+<<<<<<< HEAD
     "lrkt": "3107649369298121192867",
     "thisBlockEMA": "52182293731083215",
     "EMABlockNumber": "1335",
@@ -342,20 +428,45 @@
     "amountIn2": "225556073301352273740",
     "lastOracleTimestamp": "1673983814",
     "lastBlockTimestamp": "1673983822",
+=======
+    "lrkt": "2823067064825063627202",
+    "thisBlockEMA": "0",
+    "EMABlockNumber": "0",
+    "strikeBlock": "0",
+    "lastFloatAccumulator": "0",
+    "blockNumber": "1335",
+    "timestamp": "1673608633",
+    "lastK": "8140086752500000000000000000000000000000000",
+    "price0CumulativeLast": "80938745147748783621210678073136790",
+    "price1CumulativeLast": "8327268546706799026888531848749210",
+    "amountOut": "0",
+    "amountIn": "225556073301352273740",
+    "amountIn2": "225556073301352273740",
+    "lastOracleTimestamp": "1673608625",
+    "lastBlockTimestamp": "1673608630",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "3117647058823529411",
     "skip": false,
     "isSync": false,
     "isBurn": false,
+<<<<<<< HEAD
     "p2x": "2389138017552754641",
     "p2y": "4679181190846933924223",
     "reservePtEnergy": "59017275937582486",
     "reserveAnchorEnergy": "181313712515272996923"
+=======
+    "p2x": "3117647058823529411",
+    "p2y": "4984650000000000000000",
+    "reservePtEnergy": "0",
+    "reserveAnchorEnergy": "0"
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
   },
   {
-    "resPair0": "5015850000000000000000",
-    "resPair1": "15574050000000000000000",
+    "resPair0": "1615850000000000000000",
+    "resPair1": "5037650000000000000000",
     "resPylon0": "84150000000000000000",
     "resPylon1": "262350000000000000000",
+<<<<<<< HEAD
     "totalSupply": "8838373409400849703253",
     "ptb": "8808356747361242434490",
     "anchorTotalSupply": "26383334980337565839972",
@@ -363,15 +474,25 @@
     "gamma": "499999999999999999",
     "mu": "499999999999999999",
     "vab": "26383334980337565839972",
+=======
+    "totalSupply": "2853083726864670895923",
+    "ptb": "2823067064825063627160",
+    "anchorTotalSupply": "5247000000000000000000",
+    "floatTotalSupply": "1683000000000000000000",
+    "gamma": "500000000000000000",
+    "mu": "500000000000000000",
+    "vab": "5247000000000000000000",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "gEMA": "0",
     "fs": false,
     "isAnchor": true,
     "isBlocked": false,
-    "lrkt": "8808371077208916478070",
+    "lrkt": "2823067064825063627202",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "1384",
-    "strikeBlock": "1384",
+    "EMABlockNumber": "0",
+    "strikeBlock": "0",
     "lastFloatAccumulator": "0",
+<<<<<<< HEAD
     "blockNumber": "1384",
     "timestamp": "1673983871",
     "lastK": "78117098692500000000000000000000000000000000",
@@ -382,13 +503,26 @@
     "amountIn2": "3400000000000000000000",
     "lastOracleTimestamp": "1673983865",
     "lastBlockTimestamp": "1673983871",
+=======
+    "blockNumber": "1356",
+    "timestamp": "1673608654",
+    "lastK": "8140086752500000000000000000000000000000000",
+    "price0CumulativeLast": "48563247088649270172726406843882074",
+    "price1CumulativeLast": "4996361128024079416133119109249526",
+    "amountOut": "0",
+    "amountIn": "3400000000000000000000",
+    "amountIn2": "3400000000000000000000",
+    "lastOracleTimestamp": "1673608648",
+    "lastBlockTimestamp": "1673608651",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "3117647058823529411",
     "skip": false,
     "isSync": false,
     "isBurn": false,
-    "p2x": "3104967253805436765",
-    "p2y": "4964376893746822572937",
+    "p2x": "3117647058823529411",
+    "p2y": "4984650000000000000000",
     "reservePtEnergy": "0",
+<<<<<<< HEAD
     "reserveAnchorEnergy": "50880000000000000000"
   },
   {
@@ -510,6 +644,9 @@
     "p2y": "3681460475802749360794",
     "reservePtEnergy": "0",
     "reserveAnchorEnergy": "50122313491194115519"
+=======
+    "reserveAnchorEnergy": "0"
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
   },
   {
     "resPair0": "2017438217552940491483",
@@ -529,18 +666,29 @@
     "isBlocked": false,
     "lrkt": "2823769822762214553445",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3442",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "1894",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3442",
     "timestamp": "1673985929",
+=======
+    "blockNumber": "1894",
+    "timestamp": "1673609192",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "8144950684739450280810436884369940464809925",
     "price0CumulativeLast": "5110085367131289025027079471219513330",
     "price1CumulativeLast": "1264112740947417847825029738116943466",
     "amountOut": "16831602726683164899",
+<<<<<<< HEAD
     "amountIn": "16830000000000000033",
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673985929",
+=======
+    "amountIn": "16829999999999999999",
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609192",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -568,18 +716,28 @@
     "isBlocked": false,
     "lrkt": "2831761457188391190171",
     "thisBlockEMA": "668492622111",
-    "EMABlockNumber": "3444",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "1896",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3444",
     "timestamp": "1673985931",
+=======
+    "blockNumber": "1896",
+    "timestamp": "1673609194",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "8190630186323577139389891520975497619588530",
     "price0CumulativeLast": "5130866895428176465674522965945012992",
     "price1CumulativeLast": "1269301954422384185797034750768364412",
     "amountOut": "159671992136358442311",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673985931",
+=======
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609194",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -607,18 +765,28 @@
     "isBlocked": false,
     "lrkt": "2898908749450633503404",
     "thisBlockEMA": "11990919781840",
-    "EMABlockNumber": "3446",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "1898",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3446",
     "timestamp": "1673985933",
+=======
+    "blockNumber": "1898",
+    "timestamp": "1673609196",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "8579480354671786455275564920656054897035078",
     "price0CumulativeLast": "5151764973163530188473664843321098374",
     "price1CumulativeLast": "1274462227440517700408653050876494070",
     "amountOut": "79804289367332445570",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673985933",
+=======
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609196",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -646,18 +814,28 @@
     "isBlocked": false,
     "lrkt": "2917433259273924807596",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3498",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "1950",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3498",
     "timestamp": "1673985985",
+=======
+    "blockNumber": "1950",
+    "timestamp": "1673609248",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "8688343760659650448371282519938994500370589",
     "price0CumulativeLast": "5695106399141577591123631211157811466",
     "price1CumulativeLast": "1408631448307031738098151664523460158",
     "amountOut": "159512252532652235670",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673985985",
+=======
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609248",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -685,18 +863,28 @@
     "isBlocked": false,
     "lrkt": "3028002702930323336093",
     "thisBlockEMA": "26492788154599",
-    "EMABlockNumber": "3500",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "1952",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3500",
     "timestamp": "1673985987",
+=======
+    "blockNumber": "1952",
+    "timestamp": "1673609250",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "9352398290095282425947952353944572145043550",
     "price0CumulativeLast": "5716269313861669903663339785984056162",
     "price1CumulativeLast": "1413727144627454852410533402598940894",
     "amountOut": "79804319267428253546",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673985987",
+=======
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609250",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -724,18 +912,28 @@
     "isBlocked": false,
     "lrkt": "3028002702930323336093",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3552",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2004",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3552",
     "timestamp": "1673986039",
+=======
+    "blockNumber": "2004",
+    "timestamp": "1673609302",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "9352398290095282425947952353944572145043550",
     "price0CumulativeLast": "5716269313861669903663339785984056162",
     "price1CumulativeLast": "1413727144627454852410533402598940894",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673985987",
+=======
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609250",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -763,18 +961,28 @@
     "isBlocked": false,
     "lrkt": "3136430969734821476407",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3554",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2006",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "5110085367131289025027268263378773298",
+<<<<<<< HEAD
     "blockNumber": "3554",
     "timestamp": "1673986041",
+=======
+    "blockNumber": "2006",
+    "timestamp": "1673609304",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "10027338949917676429814317227826038786744552",
     "price0CumulativeLast": "6287659179744225510938543671584320978",
     "price1CumulativeLast": "1551313071812187178949446714698942782",
     "amountOut": "79804319358662749523",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673985929",
     "lastBlockTimestamp": "1673986041",
+=======
+    "lastOracleTimestamp": "1673609192",
+    "lastBlockTimestamp": "1673609304",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2001195056609920391",
     "skip": false,
     "isSync": true,
@@ -802,18 +1010,28 @@
     "isBlocked": false,
     "lrkt": "3136430969734821476407",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3606",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2058",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "6816715988841748583887106320448449928",
+<<<<<<< HEAD
     "blockNumber": "3606",
     "timestamp": "1673986093",
+=======
+    "blockNumber": "2058",
+    "timestamp": "1673609356",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "10027338949917676429814317227826038786744552",
     "price0CumulativeLast": "6287659179744225510938543671584320978",
     "price1CumulativeLast": "1551313071812187178949446714698942782",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986091",
     "lastBlockTimestamp": "1673986041",
+=======
+    "lastOracleTimestamp": "1673609354",
+    "lastBlockTimestamp": "1673609304",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2028920381703937722",
     "skip": false,
     "isSync": true,
@@ -841,18 +1059,28 @@
     "isBlocked": false,
     "lrkt": "3244965473076190817737",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3608",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2060",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "6816715988841748583887106320448449928",
+<<<<<<< HEAD
     "blockNumber": "3608",
     "timestamp": "1673986095",
+=======
+    "blockNumber": "2060",
+    "timestamp": "1673609358",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "10726488855141714311193217948867617712936738",
     "price0CumulativeLast": "6859040533569550429722934404933061550",
     "price1CumulativeLast": "1688901048660035904288562977768845534",
     "amountOut": "79804316504944587665",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986091",
     "lastBlockTimestamp": "1673986095",
+=======
+    "lastOracleTimestamp": "1673609354",
+    "lastBlockTimestamp": "1673609358",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2028920381703937722",
     "skip": false,
     "isSync": true,
@@ -880,18 +1108,28 @@
     "isBlocked": false,
     "lrkt": "3244965473076190817737",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3660",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2112",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "6816715988841748583887106320448449928",
+<<<<<<< HEAD
     "blockNumber": "3660",
     "timestamp": "1673986147",
+=======
+    "blockNumber": "2112",
+    "timestamp": "1673609410",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "10726488855141714311193217948867617712936738",
     "price0CumulativeLast": "6859040533569550429722934404933061550",
     "price1CumulativeLast": "1688901048660035904288562977768845534",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986091",
     "lastBlockTimestamp": "1673986095",
+=======
+    "lastOracleTimestamp": "1673609354",
+    "lastBlockTimestamp": "1673609358",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2028920381703937722",
     "skip": false,
     "isSync": true,
@@ -919,18 +1157,28 @@
     "isBlocked": false,
     "lrkt": "3353493870411284711857",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3662",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2114",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "6816715988841748583887106320448449928",
+<<<<<<< HEAD
     "blockNumber": "3662",
     "timestamp": "1673986149",
+=======
+    "blockNumber": "2114",
+    "timestamp": "1673609412",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "11449156917123148559008109184089655731948400",
     "price0CumulativeLast": "7430413666981719318009687972757936478",
     "price1CumulativeLast": "1826491005002454556822880446053032240",
     "amountOut": "79804311032821651335",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986091",
     "lastBlockTimestamp": "1673986149",
+=======
+    "lastOracleTimestamp": "1673609354",
+    "lastBlockTimestamp": "1673609412",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2028920381703937722",
     "skip": false,
     "isSync": true,
@@ -958,18 +1206,28 @@
     "isBlocked": false,
     "lrkt": "3353493870411284711857",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3714",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2166",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "6816715988841748583887106320448449928",
+<<<<<<< HEAD
     "blockNumber": "3714",
     "timestamp": "1673986201",
+=======
+    "blockNumber": "2166",
+    "timestamp": "1673609464",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "11449156917123148559008109184089655731948400",
     "price0CumulativeLast": "7430413666981719318009687972757936478",
     "price1CumulativeLast": "1826491005002454556822880446053032240",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986091",
     "lastBlockTimestamp": "1673986149",
+=======
+    "lastOracleTimestamp": "1673609354",
+    "lastBlockTimestamp": "1673609412",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2028920381703937722",
     "skip": false,
     "isSync": true,
@@ -997,18 +1255,28 @@
     "isBlocked": false,
     "lrkt": "3462021804364428993148",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3716",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2168",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "6816715988841748583887106320448449928",
+<<<<<<< HEAD
     "blockNumber": "3716",
     "timestamp": "1673986203",
+=======
+    "blockNumber": "2168",
+    "timestamp": "1673609466",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "12195378569991070158679828137439531150092887",
     "price0CumulativeLast": "8001778852565457484382300140727316392",
     "price1CumulativeLast": "1964082875254565979384447846227069762",
     "amountOut": "79804303258864218539",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986091",
     "lastBlockTimestamp": "1673986203",
+=======
+    "lastOracleTimestamp": "1673609354",
+    "lastBlockTimestamp": "1673609466",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2028920381703937722",
     "skip": false,
     "isSync": true,
@@ -1036,18 +1304,28 @@
     "isBlocked": false,
     "lrkt": "3462021804364428993148",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3768",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2220",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "8530813568152459597963028216398905392",
+<<<<<<< HEAD
     "blockNumber": "3768",
     "timestamp": "1673986255",
+=======
+    "blockNumber": "2220",
+    "timestamp": "1673609518",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "12195378569991070158679828137439531150092887",
     "price0CumulativeLast": "8001778852565457484382300140727316392",
     "price1CumulativeLast": "1964082875254565979384447846227069762",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986253",
     "lastBlockTimestamp": "1673986203",
+=======
+    "lastOracleTimestamp": "1673609516",
+    "lastBlockTimestamp": "1673609466",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037797441726032873",
     "skip": false,
     "isSync": true,
@@ -1075,18 +1353,28 @@
     "isBlocked": false,
     "lrkt": "3570549016752739249304",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3770",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2222",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "8530813568152459597963028216398905392",
+<<<<<<< HEAD
     "blockNumber": "3770",
     "timestamp": "1673986257",
+=======
+    "blockNumber": "2222",
+    "timestamp": "1673609520",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "12965151652719031021583562796189854348813401",
     "price0CumulativeLast": "8573136345399419767049437584301459574",
     "price1CumulativeLast": "2101676598041810520329277591564906176",
     "amountOut": "79804293456919331196",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986253",
     "lastBlockTimestamp": "1673986257",
+=======
+    "lastOracleTimestamp": "1673609516",
+    "lastBlockTimestamp": "1673609520",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037797441726032873",
     "skip": false,
     "isSync": true,
@@ -1114,18 +1402,28 @@
     "isBlocked": false,
     "lrkt": "3570549016752739249304",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3822",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2274",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "8530813568152459597963028216398905392",
+<<<<<<< HEAD
     "blockNumber": "3822",
     "timestamp": "1673986309",
+=======
+    "blockNumber": "2274",
+    "timestamp": "1673609572",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "12965151652719031021583562796189854348813401",
     "price0CumulativeLast": "8573136345399419767049437584301459574",
     "price1CumulativeLast": "2101676598041810520329277591564906176",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986253",
     "lastBlockTimestamp": "1673986257",
+=======
+    "lastOracleTimestamp": "1673609516",
+    "lastBlockTimestamp": "1673609520",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037797441726032873",
     "skip": false,
     "isSync": true,
@@ -1153,18 +1451,28 @@
     "isBlocked": false,
     "lrkt": "3679075542984802610074",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3824",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2276",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "8530813568152459597963028216398905392",
+<<<<<<< HEAD
     "blockNumber": "3824",
     "timestamp": "1673986311",
+=======
+    "blockNumber": "2276",
+    "timestamp": "1673609574",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "13758475958127718784152906369379072074275530",
     "price0CumulativeLast": "9144486384702034581549590361393682136",
     "price1CumulativeLast": "2239272115804211204365159238676251138",
     "amountOut": "79804281865997967655",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986253",
     "lastBlockTimestamp": "1673986311",
+=======
+    "lastOracleTimestamp": "1673609516",
+    "lastBlockTimestamp": "1673609574",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037797441726032873",
     "skip": false,
     "isSync": true,
@@ -1192,18 +1500,28 @@
     "isBlocked": false,
     "lrkt": "3679075542984802610074",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3876",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2328",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "8530813568152459597963028216398905392",
+<<<<<<< HEAD
     "blockNumber": "3876",
     "timestamp": "1673986363",
+=======
+    "blockNumber": "2328",
+    "timestamp": "1673609626",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "13758475958127718784152906369379072074275530",
     "price0CumulativeLast": "9144486384702034581549590361393682136",
     "price1CumulativeLast": "2239272115804211204365159238676251138",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986253",
     "lastBlockTimestamp": "1673986311",
+=======
+    "lastOracleTimestamp": "1673609516",
+    "lastBlockTimestamp": "1673609574",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037797441726032873",
     "skip": false,
     "isSync": true,
@@ -1231,18 +1549,28 @@
     "isBlocked": false,
     "lrkt": "3787601402470169616813",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3878",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2330",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "8530813568152459597963028216398905392",
+<<<<<<< HEAD
     "blockNumber": "3878",
     "timestamp": "1673986365",
+=======
+    "blockNumber": "2330",
+    "timestamp": "1673609628",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "14575351187621746960548818758564682223467790",
     "price0CumulativeLast": "9715829195265478375224022950134930492",
     "price1CumulativeLast": "2376869374451577300089326902930363086",
     "amountOut": "79804268695311328229",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986253",
     "lastBlockTimestamp": "1673986365",
+=======
+    "lastOracleTimestamp": "1673609516",
+    "lastBlockTimestamp": "1673609628",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037797441726032873",
     "skip": false,
     "isSync": true,
@@ -1270,18 +1598,28 @@
     "isBlocked": false,
     "lrkt": "3787601402470169616813",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3930",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2382",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "10244843818836705501245556502605877992",
+<<<<<<< HEAD
     "blockNumber": "3930",
     "timestamp": "1673986417",
+=======
+    "blockNumber": "2382",
+    "timestamp": "1673609680",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "14575351187621746960548818758564682223467790",
     "price0CumulativeLast": "9715829195265478375224022950134930492",
     "price1CumulativeLast": "2376869374451577300089326902930363086",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986415",
     "lastBlockTimestamp": "1673986365",
+=======
+    "lastOracleTimestamp": "1673609678",
+    "lastBlockTimestamp": "1673609628",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037717398381697297",
     "skip": false,
     "isSync": true,
@@ -1309,18 +1647,28 @@
     "isBlocked": false,
     "lrkt": "3896126614211556386987",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3932",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2384",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "10244843818836705501245556502605877992",
+<<<<<<< HEAD
     "blockNumber": "3932",
     "timestamp": "1673986419",
+=======
+    "blockNumber": "2384",
+    "timestamp": "1673609682",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "15415777056265295590022503899702727962231344",
     "price0CumulativeLast": "10287164988722403671327291540208206882",
     "price1CumulativeLast": "2514468323058913765888772036185823276",
     "amountOut": "79804254128531236656",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986415",
     "lastBlockTimestamp": "1673986419",
+=======
+    "lastOracleTimestamp": "1673609678",
+    "lastBlockTimestamp": "1673609682",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037717398381697297",
     "skip": false,
     "isSync": true,
@@ -1348,18 +1696,28 @@
     "isBlocked": false,
     "lrkt": "3896126614211556386987",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3984",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2436",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "10244843818836705501245556502605877992",
+<<<<<<< HEAD
     "blockNumber": "3984",
     "timestamp": "1673986471",
+=======
+    "blockNumber": "2436",
+    "timestamp": "1673609734",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "15415777056265295590022503899702727962231344",
     "price0CumulativeLast": "10287164988722403671327291540208206882",
     "price1CumulativeLast": "2514468323058913765888772036185823276",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986415",
     "lastBlockTimestamp": "1673986419",
+=======
+    "lastOracleTimestamp": "1673609678",
+    "lastBlockTimestamp": "1673609682",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037717398381697297",
     "skip": false,
     "isSync": true,
@@ -1387,18 +1745,28 @@
     "isBlocked": false,
     "lrkt": "4004651196125523293173",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "3986",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2438",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "10244843818836705501245556502605877992",
+<<<<<<< HEAD
     "blockNumber": "3986",
     "timestamp": "1673986473",
+=======
+    "blockNumber": "2438",
+    "timestamp": "1673609736",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "16279753286858461907113732494368444880435477",
     "price0CumulativeLast": "10858493964668558809604917349099069678",
     "price1CumulativeLast": "2652068913596475351793109312703404402",
     "amountOut": "79804238327354003074",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986415",
     "lastBlockTimestamp": "1673986473",
+=======
+    "lastOracleTimestamp": "1673609678",
+    "lastBlockTimestamp": "1673609736",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037717398381697297",
     "skip": false,
     "isSync": true,
@@ -1426,18 +1794,28 @@
     "isBlocked": false,
     "lrkt": "4004651196125523293173",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4038",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2490",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "10244843818836705501245556502605877992",
+<<<<<<< HEAD
     "blockNumber": "4038",
     "timestamp": "1673986525",
+=======
+    "blockNumber": "2490",
+    "timestamp": "1673609788",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "16279753286858461907113732494368444880435477",
     "price0CumulativeLast": "10858493964668558809604917349099069678",
     "price1CumulativeLast": "2652068913596475351793109312703404402",
     "amountOut": "159722040279303898692",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986415",
     "lastBlockTimestamp": "1673986473",
+=======
+    "lastOracleTimestamp": "1673609678",
+    "lastBlockTimestamp": "1673609736",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037717398381697297",
     "skip": false,
     "isSync": true,
@@ -1465,18 +1843,28 @@
     "isBlocked": false,
     "lrkt": "4113175165165912231814",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4040",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2492",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "10244843818836705501245556502605877992",
+<<<<<<< HEAD
     "blockNumber": "4040",
     "timestamp": "1673986527",
+=======
+    "blockNumber": "2492",
+    "timestamp": "1673609790",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "17167279609781160784216487355703015287935076",
     "price0CumulativeLast": "11429816311661251402233577101404880110",
     "price1CumulativeLast": "2789671100689669486692800822067597206",
     "amountOut": "79804221434497960662",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986415",
     "lastBlockTimestamp": "1673986527",
+=======
+    "lastOracleTimestamp": "1673609678",
+    "lastBlockTimestamp": "1673609790",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037717398381697297",
     "skip": false,
     "isSync": true,
@@ -1504,18 +1892,28 @@
     "isBlocked": false,
     "lrkt": "4113175165165912231814",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4092",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2544",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "11958812512077089015238352142848414510",
+<<<<<<< HEAD
     "blockNumber": "4092",
     "timestamp": "1673986579",
+=======
+    "blockNumber": "2544",
+    "timestamp": "1673609842",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "17167279609781160784216487355703015287935076",
     "price0CumulativeLast": "11429816311661251402233577101404880110",
     "price1CumulativeLast": "2789671100689669486692800822067597206",
     "amountOut": "159738015678411650632",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986577",
     "lastBlockTimestamp": "1673986527",
+=======
+    "lastOracleTimestamp": "1673609840",
+    "lastBlockTimestamp": "1673609790",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037644216082663647",
     "skip": false,
     "isSync": true,
@@ -1543,18 +1941,28 @@
     "isBlocked": false,
     "lrkt": "4221710791721423507711",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4094",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2546",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "11958812512077089015238352142848414510",
+<<<<<<< HEAD
     "blockNumber": "4094",
     "timestamp": "1673986581",
+=======
+    "blockNumber": "2546",
+    "timestamp": "1673609844",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "18078459957629954919792900436230966798082062",
     "price0CumulativeLast": "12001132208110356024278644058359612286",
     "price1CumulativeLast": "2927274841404793558219415282499255554",
     "amountOut": "79812393404294407871",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986577",
     "lastBlockTimestamp": "1673986581",
+=======
+    "lastOracleTimestamp": "1673609840",
+    "lastBlockTimestamp": "1673609844",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037644216082663647",
     "skip": false,
     "isSync": true,
@@ -1582,18 +1990,28 @@
     "isBlocked": false,
     "lrkt": "4221710791721423507711",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4146",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2598",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "11958812512077089015238352142848414510",
+<<<<<<< HEAD
     "blockNumber": "4146",
     "timestamp": "1673986633",
+=======
+    "blockNumber": "2598",
+    "timestamp": "1673609896",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "18078459957629954919792900436230966798082062",
     "price0CumulativeLast": "12001132208110356024278644058359612286",
     "price1CumulativeLast": "2927274841404793558219415282499255554",
     "amountOut": "159738015678411650632",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986577",
     "lastBlockTimestamp": "1673986581",
+=======
+    "lastOracleTimestamp": "1673609840",
+    "lastBlockTimestamp": "1673609844",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037644216082663647",
     "skip": false,
     "isSync": true,
@@ -1621,18 +2039,28 @@
     "isBlocked": false,
     "lrkt": "4330245529242674371403",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4148",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2600",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "11958812512077089015238352142848414510",
+<<<<<<< HEAD
     "blockNumber": "4148",
     "timestamp": "1673986635",
+=======
+    "blockNumber": "2600",
+    "timestamp": "1673609898",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "19013192517459744921490694279023746966062160",
     "price0CumulativeLast": "12572444963804752274835518640004589102",
     "price1CumulativeLast": "3064879338587530566669003329573459078",
     "amountOut": "79812384046837454426",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986577",
     "lastBlockTimestamp": "1673986635",
+=======
+    "lastOracleTimestamp": "1673609840",
+    "lastBlockTimestamp": "1673609898",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037644216082663647",
     "skip": false,
     "isSync": true,
@@ -1660,18 +2088,28 @@
     "isBlocked": false,
     "lrkt": "4330245529242674371403",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4200",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2652",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "11958812512077089015238352142848414510",
+<<<<<<< HEAD
     "blockNumber": "4200",
     "timestamp": "1673986687",
+=======
+    "blockNumber": "2652",
+    "timestamp": "1673609950",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "19013192517459744921490694279023746966062160",
     "price0CumulativeLast": "12572444963804752274835518640004589102",
     "price1CumulativeLast": "3064879338587530566669003329573459078",
     "amountOut": "159738015678411650632",
     "amountIn": "159784259440843754134",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986577",
     "lastBlockTimestamp": "1673986635",
+=======
+    "lastOracleTimestamp": "1673609840",
+    "lastBlockTimestamp": "1673609898",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037644216082663647",
     "skip": false,
     "isSync": true,
@@ -1699,18 +2137,28 @@
     "isBlocked": false,
     "lrkt": "4438780013103334640362",
     "thisBlockEMA": "0",
-    "EMABlockNumber": "4202",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2654",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "11958812512077089015238352142848414510",
+<<<<<<< HEAD
     "blockNumber": "4202",
     "timestamp": "1673986689",
+=======
+    "blockNumber": "2654",
+    "timestamp": "1673609952",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "19971482389225058632286953969154538446091444",
     "price0CumulativeLast": "13143754658941892958832245568105640354",
     "price1CumulativeLast": "3202484572929895419556730364762037880",
     "amountOut": "79812374312317752153",
     "amountIn": "79844420419228246259",
+<<<<<<< HEAD
     "lastOracleTimestamp": "1673986577",
     "lastBlockTimestamp": "1673986689",
+=======
+    "lastOracleTimestamp": "1673609840",
+    "lastBlockTimestamp": "1673609952",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037644216082663647",
     "skip": false,
     "isSync": true,
@@ -1738,18 +2186,29 @@
     "isBlocked": false,
     "lrkt": "4438863091971092633950",
     "thisBlockEMA": "6272586157479612",
-    "EMABlockNumber": "4304",
-    "strikeBlock": "3152",
+    "EMABlockNumber": "2756",
+    "strikeBlock": "1604",
     "lastFloatAccumulator": "13672742354111990437481484420425245404",
+<<<<<<< HEAD
     "blockNumber": "4304",
     "timestamp": "1673986791",
+=======
+    "blockNumber": "2756",
+    "timestamp": "1673610054",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastK": "19972379495458651764650552525259853803187368",
     "price0CumulativeLast": "14223536716546368102336448752777006166",
     "price1CumulativeLast": "3462255678861799914940664445390558406",
     "amountOut": "16821163791365699453",
+<<<<<<< HEAD
     "amountIn": "16830000000000000033",
     "lastOracleTimestamp": "1673986739",
     "lastBlockTimestamp": "1673986791",
+=======
+    "amountIn": "16829999999999999999",
+    "lastOracleTimestamp": "1673610002",
+    "lastBlockTimestamp": "1673610054",
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
     "lastPrice": "2037598027996235558",
     "skip": false,
     "isSync": true,
@@ -1758,6 +2217,7 @@
     "p2y": "5691500218426982281182",
     "reservePtEnergy": "125726707020715651",
     "reserveAnchorEnergy": "703924393930107279"
+<<<<<<< HEAD
   },
   {
     "resPair0": "2017438217552940491483",
@@ -7371,5 +7831,7 @@
     "p2y": "5508159851820011184833",
     "reservePtEnergy": "385241402329450654",
     "reserveAnchorEnergy": "18338885990664627829"
+=======
+>>>>>>> 843d001bddd50ca11f033b5c4bee5ab805fcb0ce
   }
 ]

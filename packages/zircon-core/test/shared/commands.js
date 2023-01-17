@@ -1,7 +1,7 @@
 const {ethers} = require("hardhat");
 const {coreFixtures, librarySetup} = require("./fixtures");
 const {expandTo18Decimals, getAmountOut, sqrt, format, getFtv} = require("./utils");
-const {saveValuesForSDK} = require("./generate-json-sdk-test");
+const {saveValuesForSDK, casesSDK} = require("./generate-json-sdk-test");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
     '0x2000000000000000000000000000000000000000'
@@ -69,7 +69,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(tokenAmount) : tokenAmount;
 
-    console.log("\n===Starting MintSync", isAnchor ? "Anchor ===": "Float ===");
+    console.log("\n===Starting MintSync ", casesSDK.length, isAnchor ? " Anchor ===": " Float ===");
     console.log("== AmountIn:", format(tokenDecimals))
     if(isAnchor) {
         await token1.transfer(pylonInstance.address, tokenDecimals)
@@ -77,11 +77,11 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
         await token0.transfer(pylonInstance.address, tokenDecimals)
     }
 
-    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
-    let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
-    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+    // Just simulating for SDK, callStatic doesn't have an impact on the blockchain
+    let staticResult = await pylonInstance.callStatic.mintPoolTokens(account.address, isAnchor)
+    await saveValuesForSDK(true, false, tokenDecimals, 0, staticResult, 0, isAnchor, fixtures)
 
-    await saveValuesForSDK(true, false, tokenDecimals, 0, balanceAfter.sub(balanceBefore), 0, isAnchor, fixtures)
+    let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
 
     console.log("\n===MintSync Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
     return results
@@ -94,12 +94,16 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
     let token0Decimals = !isDecimals? expandTo18Decimals(token0Amount) : token0Amount;
     let token1Decimals = !isDecimals? expandTo18Decimals(token1Amount) : token1Amount;
 
-    console.log("\n===Starting MintAsync",  isAnchor ? "Anchor ===": "Float ===")
+    console.log("\n===Starting MintAsync", casesSDK.length, isAnchor ? "Anchor ===": "Float ===")
     console.log("== AmountIn:", format(token0Decimals), format(token1Decimals))
 
     await token0.transfer(pylonInstance.address, token0Decimals)
     await token1.transfer(pylonInstance.address, token1Decimals)
-    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+
+    // Just simulating for SDK, callStatic doesn't have an impact on the blockchain
+    let staticResult = await pylonInstance.callStatic.mintAsync(address, isAnchor)
+
+    await saveValuesForSDK(false, false, token0Decimals, token1Decimals, staticResult, null, isAnchor, fixtures)
 
     let results = await pylonInstance.mintAsync(address, isAnchor)
 
@@ -116,18 +120,18 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
-    console.log("\n===Starting Burn ===")
+    console.log("\n===Starting Burn ", casesSDK.length, " ===")
     if(isAnchor) {
         await poolTokenInstance1.transfer(pylonInstance.address, tokenDecimals)
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
-    let balanceBefore = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
+    let staticResult = await pylonInstance.callStatic.burn(address, isAnchor)
+
+    await saveValuesForSDK(true, true, poolTokenAmount, null, staticResult, null, isAnchor, fixtures)
 
     let results = await pylonInstance.burn(address, isAnchor)
 
-    let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
-    await saveValuesForSDK(true, true, poolTokenAmount, null, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
 
     console.log("\n===Burn Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
     return results;
@@ -139,27 +143,22 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
 
     let tokenDecimals = !isDecimals ? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
-    console.log("\n===Starting BurnAsync ===")
+    console.log("\n===Starting BurnAsync ", casesSDK.length, " ===")
 
     if (isAnchor) {
         await poolTokenInstance1.transfer(pylonInstance.address, tokenDecimals)
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
-
-    let balanceBeforeA = await token0.balanceOf(address);
-    let balanceBeforeB = await token1.balanceOf(address);
+    let staticCall = await pylonInstance.callStatic.burnAsync(address, isAnchor)
+    await saveValuesForSDK(false, true, poolTokenAmount, null, staticCall[0].toString(), staticCall[1].toString(), isAnchor, fixtures)
     let results = await pylonInstance.burnAsync(address, isAnchor)
-    let balanceAfterA = await token0.balanceOf(address);
-    let balanceAfterB = await token1.balanceOf(address);
-
-    await saveValuesForSDK(false, true, poolTokenAmount, null, balanceAfterA.sub(balanceBeforeA), balanceAfterB.sub(balanceBeforeB), isAnchor, fixtures)
 
     console.log("\n===BurnAsync Complete ===, amOut0, 1:", format(balanceAfterA.sub(balanceBeforeA)), format(balanceAfterB.sub(balanceBeforeB)))
     return results
 
 }
-//
+
 exports.setPrice = async function setPrice(address, targetPrice, fixtures) {
 
     destructure(fixtures);

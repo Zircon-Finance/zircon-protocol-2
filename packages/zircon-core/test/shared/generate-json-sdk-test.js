@@ -32,6 +32,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
     let gamma = await pylonInstance.gammaMulDecimals()
     let muuu = await pylonInstance.muMulDecimals()
     let vab = await pylonInstance.virtualAnchorBalance()
+    let vfb = await pylonInstance.virtualFloatBalance()
     let gEMA = await pylonInstance.gammaEMA()
     let formulaSwitch = await pylonInstance.formulaSwitch()
     let lastRootKTranslated = await pylonInstance.lastRootKTranslated()
@@ -62,6 +63,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
         gamma: gamma.toString(),
         mu: muuu.toString(),
         vab: vab.toString(),
+        vfb: vfb.toString(),
         gEMA: gEMA.toString(),
         fs: formulaSwitch,
         isAnchor: isAnchor,
@@ -96,3 +98,4 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
 
 module.exports.saveValuesForSDK = saveValuesForSDK
 module.exports.generateJSONFile = generateJSONFile
+module.exports.casesSDK = casesSDK
