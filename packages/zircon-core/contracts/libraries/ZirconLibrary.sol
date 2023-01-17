@@ -23,17 +23,24 @@ library ZirconLibrary {
     //    }
 
 
-    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) view public returns (bool aNegative, uint a, uint b) {
+    function calculateParabolaCoefficients(uint p2x, uint p2y, uint p3x, uint p3y, bool check) view public returns (bool aNegative, uint a, bool bNegative, uint b) {
 
 
         console.log("parab p2x, p2y", p2x, p2y);
         console.log("p3x, p3y", p3x, p3y);
 
+        //Makes it a line if the points are are within 0.1% of each other;
+        if((p3x * 1e18)/p2x <= 1001e15) {
+            return (false, 0, false, p3y.mul(1e18)/p3x);
+        }
+
+
         //Allows us to use the function for checking without reverting everything
-        if(p3x < p2x && p2y > p3y) {
+        //For now this particular case we keep to a revert. In principle it should just snap out of line formula.
+        if(p3x < p2x) {
 //            console.log("cane", check);
             if(check) {
-                return (false, 42e25, 42e25);
+                return (false, 42e25, false, 42e25);
             } else {
                 revert("ZP: ExFlt0");
             }
@@ -41,13 +48,9 @@ library ZirconLibrary {
 
 //        console.log("dio");
 
-        //Makes it a line if the points are are within 0.1% of each other;
-        if((p3x * 1e18)/p2x <= 1001e15) {
-            return (false, 0, p3y.mul(1e18)/p3x);
-        }
 
         //We pass a and b as 1e18s.
-        //We use a bool flag to see if a is negative. B negative should basically never happen so we can revert if it happens
+        //We use a bool flag to see if a is negative. B negative can happen sometimes, in that case the parabola becomes a line to p2
         //a can take values from approx. 1e19 to 0, so using encoding is ill-advised.
 
         uint aNumerator;
@@ -67,9 +70,16 @@ library ZirconLibrary {
 
             }
 
-            require(p2y * 1e18/p2x >= (p2x * a)/1e18, "ZP: BNeg");
-
-            b = p2y * 1e18/p2x - (p2x * a)/1e18; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+            //If b is positive
+            if(p2y * 1e18/p2x >= (p2x * a)/1e18) {
+                b = p2y * 1e18/p2x - (p2x * a)/1e18; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+                bNegative = false;
+            } else {
+                //If b is negative we must construct a further piecewise definition upstream
+                //Parabola becomes a line from 0 to p2, and then returns to its normal self.
+                b = (p2x * a)/1e18 - p2y * 1e18/p2x; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+                bNegative = true;
+            }
 
             aNegative = false;
 
@@ -84,6 +94,7 @@ library ZirconLibrary {
             b = (p2y * 1e18/p2x).add((p2x * a)/1e18); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
 
             aNegative = true;
+            bNegative = false;
 
         }
     }
@@ -119,32 +130,53 @@ library ZirconLibrary {
     //            self.p2y = (2 * k/adjusted_vfb) - adjusted_vab
     //            self.p2x = self.p2y/adjusted_vfb
 
-    function getFTVForX(uint x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv) {
+    function getFTVForX(uint _x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv, bool lineFormula, bool reduceOnly) {
 
         uint p3x = (adjustedVab ** 2)/ reserve1;
         p3x = (p3x * 1e18) / reserve0;
 
-//        console.log("adjVab", adjustedVab);
+        console.log("p3x, p2x, x", p3x, p2x, _x);
 
-        if (x >= p3x) {
-            ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * x) - adjustedVab;
+        if (_x >= p3x) {
+            //x and reserves may not match, which is why we use this more general formula
+            ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * _x) - adjustedVab;
+            reduceOnly = false;
+            lineFormula = false;
         } else {
 
-            (bool aNeg, uint a, uint b) = calculateParabolaCoefficients(
+            lineFormula = true;
+            (bool aNeg, uint a, bool bNeg, uint b) = calculateParabolaCoefficients(
                 p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
 
 //            console.log("gf aNeg, a, b", aNeg, a, b);
 
-            //If derivative is positive at p3x
-            if(!aNeg || b > (2 * a * p3x)/1e18) {
-                ftv = aNeg
-                ? ((b * x).sub(((a * x)/1e18) * x))/1e18
+            uint x = _x;
+
+            if(bNeg && x <= p2x) {
+                ftv = p2y.mul(x)/p2x; //straight line to p2
+                return (ftv, true, false);
+            }
+
+            //Different conditions
+            //a negative means parabola is pointing downwards (concave)
+            //B can never be negative in this case
+            //if a is positive, we differentiate for b being negative
+            //b being negative means parabola can go below 0 for a while, which is no good.
+
+            ftv = aNeg
+            ? ((b * x).sub(((a * x)/1e18) * x))/1e18
+            : bNeg
+                ? ((((a * x)/1e18) * x).sub(b * x))/1e18
                 : ((((a * x)/1e18) * x).add(b * x))/1e18;
 
+            //If derivative is positive at p3x
+            if(!aNeg || b > (2 * a * p3x)/1e18) {
+                reduceOnly = false;
             } else {
-                //Since this uses the current formula it really should never trigger this error.
-                revert("ZP: ExFlt2");
+                //This means there is an excess of floats and the derivative becomes negative at some point before the juncture
+                //At this point float liquidity can only be removed until this condition doesn't persist anymore.
+                reduceOnly = true;
             }
 
         }
@@ -155,13 +187,13 @@ library ZirconLibrary {
         uint p3x = (adjustedVab ** 2)/ reserve1;
         p3x = (p3x * 1e18) / reserve0;
 
-        (bool aNeg, uint a, uint b) = calculateParabolaCoefficients(p2x, p2y, p3x, adjustedVab, true);
+        (bool aNeg, uint a, bool bNeg, uint b) = calculateParabolaCoefficients(p2x, p2y, p3x, adjustedVab, true);
 
         if(a == 42e25) {
             return true;
         }
 
-        if(!aNeg || b > (2 * a * p3x)/1e18) {
+        if(!aNeg || bNeg || b > (2 * a * p3x)/1e18) {
             return false;
 
         } else {

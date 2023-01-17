@@ -83,7 +83,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     await saveValuesForSDK(true, false, tokenDecimals, 0, balanceAfter.sub(balanceBefore), 0, isAnchor, fixtures)
 
-    console.log("\n===MintSync Complete ===")
+    console.log("\n===MintSync Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
     return results
 }
 //
@@ -106,7 +106,7 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
     let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
     await saveValuesForSDK(false, false, token0Decimals, token0Decimals, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
 
-    console.log("\n===MintAsync Complete ===")
+    console.log("\n===MintAsync Complete === AmOut:", format(balanceAfter.sub(balanceBefore)))
     return results
 }
 //
@@ -129,7 +129,7 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
     let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
     await saveValuesForSDK(true, true, poolTokenAmount, null, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
 
-    console.log("\n===Burn Complete ===")
+    console.log("\n===Burn Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
     return results;
 }
 //
@@ -155,7 +155,7 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
 
     await saveValuesForSDK(false, true, poolTokenAmount, null, balanceAfterA.sub(balanceBeforeA), balanceAfterB.sub(balanceBeforeB), isAnchor, fixtures)
 
-    console.log("\n===BurnAsync Complete ===")
+    console.log("\n===BurnAsync Complete ===, amOut0, 1:", format(balanceAfterA.sub(balanceBeforeA)), format(balanceAfterB.sub(balanceBeforeB)))
     return results
 
 }

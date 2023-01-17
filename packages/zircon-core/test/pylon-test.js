@@ -6,6 +6,7 @@ const {expandTo18Decimals, getAmountOut, format, sqrt, findDeviation, calculateO
 const {coreFixtures, librarySetup} = require("./shared/fixtures");
 const {initPylon, printState, printPoolTokens, printPairState, getPTPrice, burn, burnAsync, forwardTime, unblockOracle, mintAsync, mintSync, setPrice, updateMint,
 } = require("./shared/commands");
+const {safeBurnAsync, safeBurn, safeMintSync, executeRandomInstruction, safeMintAsync} = require("./shared/safe-commands");
 const {generateJSONFile} = require("./shared/generate-json-sdk-test");
 const TEST_ADDRESSES = [
     '0x1000000000000000000000000000000000000000',
@@ -62,7 +63,7 @@ describe("Pylon", () => {
 
     //Let's try to calculate some cases for pylon
     const mintTestCases = [
-        [10, 20, '4762509926821186', '4749990617651023','5099989902573941079','9999999999999999000', false],
+        [10, 20, '4762509926821186', '4749990617651023','5099989902573941080','9999999999999999000', false],
         [20, 10, '4749999999999999', '4762499999999999','9999999999999999998', '5099989999999999000', true],
         [10, 20, '2374999999999999', '9525000000000000','4999999999999999999', '10049994999999999000', true],
         [20, 20, '9525009926820697', '4749995308820878','10099989951286946806', '9999999999999999000', false],
@@ -322,7 +323,7 @@ describe("Pylon", () => {
         console.log("thisblockEMA after: ", ethers.utils.formatEther(thisBlockEMA))
         console.log("strikeBlock after: ", strikeBlock.toBigInt())
 
-        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99384161431630347"));
+        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99384161431630346"));
         expect(strikeBlock).to.eq(blockNumber);
 
         // Advance time to reset this block ema. GammaEMA should also bleed to zero
@@ -1098,225 +1099,307 @@ describe("Pylon", () => {
 
     });
 
-
-    it('AnchorK async Test', async function () {
-        let token0Amount = expandTo18Decimals(1700)
-        let token1Amount = expandTo18Decimals(5300)
-        await addLiquidity(token0Amount, token1Amount)
-
-        let pairRes = await pair.getReserves();
-        console.log("Pylon Pair Reserve0 initial: ", ethers.utils.formatEther(pairRes[0]))
-        console.log("Pylon Pair Reserve1 initial: ", ethers.utils.formatEther(pairRes[1]))
-
-        // Let's transfer some tokens to the Pylon
-        await token0.transfer(pylonInstance.address, token0Amount.div(1))
-        await token1.transfer(pylonInstance.address, token1Amount.div(1))
-
-        // Let's initialize the Pylon, this should call two sync
-        console.log("token0Amount init: ", ethers.utils.formatEther(token0Amount));
-        console.log("token1Amount init: ", ethers.utils.formatEther(token1Amount));
-        await pylonInstance.initPylon(account.address)
-
-        let pylonRes = await pylonInstance.getSyncReserves();
-        console.log("\nPylon Sync Reserve0 after mint: ", ethers.utils.formatEther(pylonRes[0]));
-        console.log("Pylon Sync Reserve1 after mint: ", ethers.utils.formatEther(pylonRes[1]));
-
-        let ptb = await pair.balanceOf(pylonInstance.address);
-        let ptt = await pair.totalSupply();
-        console.log("ptb: ", ethers.utils.formatEther(ptb));
-        console.log("ptt: ", ethers.utils.formatEther(ptt));
-
-        let pairResIni = await pair.getReserves();
-        console.log("Pylon Pair Reserve0 after initPylon: ", ethers.utils.formatEther(pairResIni[0]))
-        console.log("Pylon Pair Reserve1 after initPylon: ", ethers.utils.formatEther(pairResIni[1]))
+    /*TODO:
+        - add init parameters with low float price, high float price, low float decimals, low anchor decimals and low both
+        - "unit invariant" test + single-state conditions test (low gamma, mid-low gamma, high gamma)
+        - Oracle deep test
+        - extremes (remove all anchor, all float)
+    */
+    it('Burn 100% test', async function () {
+        //Opposite of previous tests: we burn a bunch of tokens and make sure the amounts never change.
+        //Similar test as previous but with fewer, larger cycles of liquidity to trigger plenty of asyncs
+        let token0Amount = 1700
+        let token1Amount = 5300
+        let fixtures = await init(token0Amount, token1Amount, 99)
 
         // Pylon initialized.
 
-        // //add async anchor to trigger change in anchorK
-
-        await token0.transfer(pylonInstance.address, token0Amount.div(3))
-        await token1.transfer(pylonInstance.address, token1Amount.div(3))
-
-        await pylonInstance.mintAsync(account.address, true);
-
-        await ethers.provider.send("hardhat_mine", ['0x30']);
 
         //Dump float to trigger isLineFormula
 
-        let pairResk = await pair.getReserves();
-        //console.log("K before swaps: ", ethers.utils.formatEther(pairResk[0].mul(pairResk[1])))
+        await setPrice(account.address, 2.1, fixtures);
 
-        // 25% of pool swap
-        let input = pairRes[0].div(2);
-        await token0.transfer(pair.address, input)
+        await unblockOracle(ethers.provider, fixtures);
 
-        let balance = await token0.balanceOf(account.address);
-        console.log("preSwap balance token0: ", ethers.utils.formatEther(balance));
-        let balance1 = await token1.balanceOf(account.address);
-        console.log("preSwap balance token1: ", ethers.utils.formatEther(balance1));
+        //Now we remove liquidity via burn()
 
-        let outcome = getAmountOut(input, pairRes[0], pairRes[1])
-        await pair.swap(0, outcome, account.address, '0x', overrides)
+        let pylonState = await printState(fixtures, true);
 
-        let balanceNew = await token0.balanceOf(account.address);
-        console.log("postSwap1 balance token0: ", ethers.utils.formatEther(balanceNew));
-        let balance1New = await token1.balanceOf(account.address);
-        console.log("postSwap1 balance token1: ", ethers.utils.formatEther(balance1New));
-
-        pairRes = await pair.getReserves();
-        console.log("Pylon Pair Reserve0 after swapping: ", ethers.utils.formatEther(pairRes[0]))
-        console.log("Pylon Pair Reserve1 after swapping: ", ethers.utils.formatEther(pairRes[1]))
-
-
-        //force update
-
-        console.log("sent anchors:", ethers.utils.formatEther(token0Amount.div(10000)));
-        await token1.transfer(pylonInstance.address, token0Amount.div(10000))
-        await pylonInstance.mintPoolTokens(account.address, true);
-
-        let initBlock = await ethers.provider.getBlockNumber();
-        let initTimestamp = (await ethers.provider.getBlock(initBlock)).timestamp;
-        console.log("initial Timestamp", initTimestamp);
-        //wait a bunch of time to regularize oracle
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-        await ethers.provider.send("hardhat_mine", ['0x30']);
-
-        initBlock = await ethers.provider.getBlockNumber();
-        initTimestamp = (await ethers.provider.getBlock(initBlock)).timestamp;
-        console.log("Timestamp after pause", initTimestamp);
-
-
-        //Now we add a lot of async liquidity
-        //We record derVFB before and Float claim for the initial PTs
-        // //Then we check anchorK and Float claim again
-
-        let pairResT = await pair.getReserves();
-
-        ptb = await pair.balanceOf(pylonInstance.address);
-        ptt = await pair.totalSupply();
-
-        let tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        // // let anchorK = await pylonInstance.anchorKFactor();
-        let vabF = await pylonInstance.virtualAnchorBalance();
-        let gamma = await pylonInstance.gammaMulDecimals();
-
-        let derVfb = tpv.mul(gamma).mul(pairResT[0]).div(pairResT[1]).div(ethers.BigNumber.from('1000000000000000000'));
-
-        pylonRes = await pylonInstance.getSyncReserves();
-        derVfb = derVfb.add(pylonRes[1]);
-        console.log("derVfb before, with reserve", ethers.utils.formatEther(derVfb));
-
-        console.log("derVfb before mints", ethers.utils.formatEther(derVfb));
-
-        // console.log("anchorK before mints", ethers.utils.formatEther(anchorK));
-        console.log("vab before mints", ethers.utils.formatEther(vabF));
-        console.log("gamma before mints", ethers.utils.formatEther(gamma));
-
+        let pairState = await printPairState(fixtures, true);
 
         let initialFloatPtBalance = await poolTokenInstance0.balanceOf(account.address)
+        let initialAnchorPtBalance = await poolTokenInstance1.balanceOf(account.address)
+
+        let initialFloatValue = pairState.tr1.mul(pylonState.gamma.mul(2)).div(DECIMALS);
 
         console.log("ptBalance before mints", ethers.utils.formatEther(initialFloatPtBalance));
 
-        let floatSum = ethers.BigNumber.from('000000000000000000');
-        //We add async liquidity in cycles
-        for(let i = 0; i < 30; i++) {
-            pairResT = await pair.getReserves();
-            let floatAdd = (pairResT[0].mul(ptb).div(ptt)).div(20)
-            let anchorAdd = (pairResT[1].mul(ptb).div(ptt)).div(20)
-            ptb = await pair.balanceOf(pylonInstance.address);
-            ptt = await pair.totalSupply();
+        //Benchmark burn float
+        let initialFloatBalance = await token0.balanceOf(account.address);
+        await burn(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
+        initialFloatBalance = (await token0.balanceOf(account.address)).sub(initialFloatBalance);
 
-            floatSum = floatSum.add(floatAdd);
+        console.log("Val of 1% burn float", format(initialFloatBalance));
 
-            pylonRes = await pylonInstance.getSyncReserves();
-            let adjVab = (await pylonInstance.virtualAnchorBalance()).sub(pylonRes[1]);
+        //Benchmark burn anchor
+        let initialAnchorBalance = await token1.balanceOf(account.address);
+        await burn(account.address, initialAnchorPtBalance.div(100), true, fixtures, true);
+        initialAnchorBalance = (await token1.balanceOf(account.address)).sub(initialAnchorBalance);
 
+        console.log("Val of 1% burn anchor", format(initialAnchorBalance));
 
+        let floatRemove = initialFloatPtBalance.div(30);//3.3% every burn
+        let anchorRemove = initialAnchorPtBalance.div(30);
+        //We remove liquidity in cycles
+        for(let i = 0; i < 20; i++) { //Should remove 2/3 of liquidity
 
-            let pair1Translated = pairResT[1].mul(ptb).div(ptt);
+            let anchorsReceived = await token1.balanceOf(account.address)
+            await burn(account.address, anchorRemove, true, fixtures, true)
+            anchorsReceived = (await token1.balanceOf(account.address)).sub(anchorsReceived);
+            console.log("Anchors received: ", ethers.utils.formatEther(anchorsReceived));
 
-            console.log("adjVab, pair1Translated", ethers.utils.formatEther(adjVab), ethers.utils.formatEther(pair1Translated))
+            let floatsReceived = await token0.balanceOf(account.address)
+            await burn(account.address, floatRemove, false, fixtures, true);
+            floatsReceived = (await token0.balanceOf(account.address)).sub(floatsReceived);
+            console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
 
-            if(i % 2 != 0) {
-                await token1.transfer(pylonInstance.address, anchorAdd)
-                await token0.transfer(pylonInstance.address, anchorAdd.mul(pairResT[0]).div(pairResT[1]))
-                await pylonInstance.mintAsync(account.address, true);
-            } else {
-                await token0.transfer(pylonInstance.address, floatAdd)
-                await token1.transfer(pylonInstance.address, floatAdd.mul(pairResT[1]).div(pairResT[0]))
-                await pylonInstance.mintAsync(account.address, false);
-            }
-
-            // // anchorK = await pylonInstance.anchorKFactor();
-            let isLineFormula = await pylonInstance.formulaSwitch();
-            // console.log("anchorK after mint ", i, ethers.utils.formatEther(anchorK));
-            console.log("isLineFormula after mint ", i, isLineFormula);
+            // await burn(account.address, floatRemove, false, fixtures, true)
 
             await ethers.provider.send("hardhat_mine", ['0x30']);
+            await updateMint(fixtures)
+
+            let pylonState = await printState(fixtures, false)
+            let pairState = await printPairState(fixtures, false)
+            let ptState = await printPoolTokens(account.address, fixtures, false)
+
+            let omega = calculateOmega(pylonState.gamma, pairState.tr1, pylonState.vab, pylonState.sync[1]);
+            console.log("PostCycle omega:", format(omega));
+
+            let ftv = getFtv(pairState.tr0, pairState.tr1, pylonState.gamma, pylonState.sync[0]).mul(pairState.tr0).div(pairState.tr1)
+            let ptTotal = ptState.ptTotal0;
+
+            let ptPrice = ftv.mul(DECIMALS).div(ptTotal);
+            console.log("Price of PTs: ", format(ptPrice))
         }
 
         await ethers.provider.send("hardhat_mine", ['0x30']);
 
         //Now we check what happened
 
+        let newPylon = await printState(fixtures, true)
 
-        pairResT = await pair.getReserves();
+        let newPair = await printPairState(fixtures, true)
 
-        ptb = await pair.balanceOf(pylonInstance.address);
-        ptt = await pair.totalSupply();
-
-        tpv = pairResT[1].mul(2).mul(ptb).div(ptt);
-        // // anchorK = await pylonInstance.anchorKFactor();
-        vabF = await pylonInstance.virtualAnchorBalance();
-        gamma = await pylonInstance.gammaMulDecimals();
-
-        derVfb = tpv.mul(gamma).mul(pairResT[0]).div(pairResT[1]).div(ethers.BigNumber.from('1000000000000000000'));
-
-        console.log("derVfb after mints", ethers.utils.formatEther(derVfb));
-        pylonRes = await pylonInstance.getSyncReserves();
-        derVfb = derVfb.add(pylonRes[1]);
-        console.log("derVfb with reserve", ethers.utils.formatEther(derVfb));
-        // console.log("anchorK after mints", ethers.utils.formatEther(anchorK));
-        console.log("vab after mints", ethers.utils.formatEther(vabF));
-        console.log("gamma after mints", ethers.utils.formatEther(gamma));
-        console.log("floatSum after mints", ethers.utils.formatEther(floatSum));
-
-        ptb = await pair.balanceOf(pylonInstance.address);
-        ptt = await pair.totalSupply();
-
-        let pair0Translated = pairResT[0].mul(ptb).div(ptt);
-        let pair1Translated = pairResT[1].mul(ptb).div(ptt);
-
-        console.log("pair0 After", ethers.utils.formatEther(pair0Translated));
-        console.log("pair1 After", ethers.utils.formatEther(pair1Translated));
-
+        // console.log("Float sum, p2y new, p2y old", format(floatSum.mul(newPair.price).div(DECIMALS)), format(newPylon.p2y), format(initialFloatValue));
 
         //We now burn the initial share and see how much we get back
 
+        await setPrice(account.address, 2.1, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        await getPTPrice(fixtures, true);
 
         balancePreBurn = await token0.balanceOf(account.address)
 
-        await poolTokenInstance0.transfer(pylonInstance.address, initialFloatPtBalance);
-        await pylonInstance.burn(account.address, false);
+        await burn(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
 
         let floatsReceived = (await token0.balanceOf(account.address)).sub(balancePreBurn);
         console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
 
-        expect(floatsReceived).to.eq(ethers.BigNumber.from('1623721167834108967063'));
+        let deviation = findDeviation(floatsReceived, initialFloatBalance);
+
+        //Here deviation could be a lot
+        expect(deviation).to.lt(expandTo18Decimals(0.03));
+        expect(floatsReceived).to.gt(initialFloatBalance);
+
+    });
+
+    it('Burn Async test', async function () {
+        //Opposite of previous tests: we burn a bunch of tokens and make sure the amounts never change.
+        //Similar test as previous but with fewer, larger cycles of liquidity to trigger plenty of asyncs
+        let token0Amount = 1700
+        let token1Amount = 5300
+        let fixtures = await init(token0Amount, token1Amount, 99)
+
+        // Pylon initialized.
+
+
+        //Dump float to trigger isLineFormula
+
+        await setPrice(account.address, 2.1, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        //Now we remove liquidity via burn()
+
+        let pylonState = await printState(fixtures, true);
+
+        let pairState = await printPairState(fixtures, true);
+
+        let initialFloatPtBalance = await poolTokenInstance0.balanceOf(account.address)
+        let initialAnchorPtBalance = await poolTokenInstance1.balanceOf(account.address)
+
+        let initialFloatValue = pairState.tr1.mul(pylonState.gamma.mul(2)).div(DECIMALS);
+
+        console.log("ptBalance before mints", ethers.utils.formatEther(initialFloatPtBalance));
+
+        //Benchmark burn float
+        let initialFloatBalance = await token0.balanceOf(account.address);
+        await burnAsync(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
+        initialFloatBalance = (await token0.balanceOf(account.address)).sub(initialFloatBalance);
+
+        console.log("Val of 1% burn float", format(initialFloatBalance));
+
+        //Benchmark burn anchor
+        let initialAnchorBalance = await token1.balanceOf(account.address);
+        await burnAsync(account.address, initialAnchorPtBalance.div(100), true, fixtures, true);
+        initialAnchorBalance = (await token1.balanceOf(account.address)).sub(initialAnchorBalance);
+
+        console.log("Val of 1% burn anchor", format(initialAnchorBalance));
+
+        let floatRemove = initialFloatPtBalance.div(15);//6.6% every burn
+        let anchorRemove = initialAnchorPtBalance.div(15);
+        //We remove liquidity in cycles
+        for(let i = 0; i < 10; i++) { //Should remove 2/3 of liquidity
+
+            let anchorsReceived = await token1.balanceOf(account.address)
+            await burnAsync(account.address, anchorRemove, true, fixtures, true)
+            anchorsReceived = (await token1.balanceOf(account.address)).sub(anchorsReceived);
+            console.log("Anchors received: ", ethers.utils.formatEther(anchorsReceived));
+
+            let floatsReceived = await token0.balanceOf(account.address)
+            await burnAsync(account.address, floatRemove, false, fixtures, true);
+            floatsReceived = (await token0.balanceOf(account.address)).sub(floatsReceived);
+            console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
+
+            // await burn(account.address, floatRemove, false, fixtures, true)
+
+            await ethers.provider.send("hardhat_mine", ['0x30']);
+            await updateMint(fixtures)
+
+            let pylonState = await printState(fixtures, false)
+            let pairState = await printPairState(fixtures, false)
+            let ptState = await printPoolTokens(account.address, fixtures, false)
+
+            let omega = calculateOmega(pylonState.gamma, pairState.tr1, pylonState.vab, pylonState.sync[1]);
+            console.log("PostCycle omega:", format(omega));
+
+            let ftv = getFtv(pairState.tr0, pairState.tr1, pylonState.gamma, pylonState.sync[0]).mul(pairState.tr0).div(pairState.tr1)
+            let ptTotal = ptState.ptTotal0;
+
+            let ptPrice = ftv.mul(DECIMALS).div(ptTotal);
+            console.log("Price of PTs: ", format(ptPrice))
+        }
+
+        await ethers.provider.send("hardhat_mine", ['0x30']);
+
+        //Now we check what happened
+
+        let newPylon = await printState(fixtures, true)
+
+        let newPair = await printPairState(fixtures, true)
+
+        // console.log("Float sum, p2y new, p2y old", format(floatSum.mul(newPair.price).div(DECIMALS)), format(newPylon.p2y), format(initialFloatValue));
+
+        //We now burn the initial share and see how much we get back
+
+        await setPrice(account.address, 2.1, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        await getPTPrice(fixtures, true);
+
+        balancePreBurn = await token0.balanceOf(account.address)
+
+        await burnAsync(account.address, initialFloatPtBalance.div(100), false, fixtures, true);
+
+        let floatsReceived = (await token0.balanceOf(account.address)).sub(balancePreBurn);
+        console.log("Floats received: ", ethers.utils.formatEther(floatsReceived));
+
+        let deviation = findDeviation(floatsReceived, initialFloatBalance);
+
+        //Here deviation could be a lot
+        expect(deviation).to.lt(expandTo18Decimals(0.06));
+        // expect(floatsReceived).to.gt(initialFloatBalance);
+
+    });
+
+    it('Combined Single-State test', async function () {
+        //This test goes through a number of price and gamma conditions for a single initial pylon.
+        //It uses "Safe" mint/burn methods that check some invariants for each swap
+
+        let token0Amount = 1700
+        let token1Amount = 5300
+        let fixtures = await init(token0Amount, token1Amount, 99)
+
+        // Pylon initialized.
+
+        //Each test does a set of random actions based off an initial seed
+        //Dump float to trigger isLineFormula
+
+        await setPrice(account.address, 2.9, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        let j = 0;
+
+        for(let i = 0; i < 10; i++) {
+
+            if(j % 3 == 0) {
+                await unblockOracle(ethers.provider, fixtures);
+            }
+            await executeRandomInstruction(500, fixtures);
+            j++;
+        }
+
+        await setPrice(account.address, 7, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        for(let i = 0; i < 10; i++) {
+
+            if(j % 3 == 0) {
+                await unblockOracle(ethers.provider, fixtures);
+            }
+
+            await executeRandomInstruction(500, fixtures);
+
+            j++;
+        }
+
+        await setPrice(account.address, 1.0, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        for(let i = 0; i < 10; i++) {
+            if(j % 3 == 0) {
+                await unblockOracle(ethers.provider, fixtures);
+            }
+            await executeRandomInstruction(500, fixtures);
+
+            j++;
+        }
+
+        await setPrice(account.address, 3.1, fixtures);
+
+        await unblockOracle(ethers.provider, fixtures);
+
+        let floatBalance = await token0.balanceOf(account.address);
+        await burn(account.address, token0Amount/100, false, fixtures, false)
+        floatBalance = (await token0.balanceOf(account.address)).sub(floatBalance);
+
+        let deviation = findDeviation(floatBalance, expandTo18Decimals(token0Amount/100));
+
+        expect(deviation).to.lt(expandTo18Decimals(0.1))
+
+        let anchorBalance = await token1.balanceOf(account.address);
+        await burn(account.address, token1Amount/100, true, fixtures, false)
+        anchorBalance = (await token1.balanceOf(account.address)).sub(anchorBalance);
+
+        deviation = findDeviation(anchorBalance, expandTo18Decimals(token1Amount/100));
+
+        expect(deviation).to.lt(expandTo18Decimals(0.1))
 
     });
 

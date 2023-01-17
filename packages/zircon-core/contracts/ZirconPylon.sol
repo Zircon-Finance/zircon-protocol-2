@@ -250,7 +250,7 @@ contract ZirconPylon is IZirconPylon {
         uint _virtualAnchorBalance, uint _virtualFloatBalance,
         uint p2x, uint p2y,
         uint _pylonReserve0, uint _pylonReserve1,
-        uint _translatedReserve0, uint _translatedReserve1) view public returns (uint gamma, bool isLineFormula) {
+        uint _translatedReserve0, uint _translatedReserve1) view public returns (uint gamma, bool isLineFormula, bool reduceOnly) {
 
 
         //uint totalPoolValueAnchorPrime = _translatedReserve1 * 2;
@@ -258,38 +258,48 @@ contract ZirconPylon is IZirconPylon {
         // Gradual division since adding 1e18 immediately would result in overflow
         //adjustedVab ** 2 /k
 
-        //TODO: This calculation might be susceptible to fucked up decimals
-        uint p3x = (adjustedVab ** 2)/ _translatedReserve1;
-        p3x = (p3x * 1e18) / _translatedReserve0;
+//        //TODO: This calculation might be susceptible to fucked up decimals
+//        uint p3x = (adjustedVab ** 2)/ _translatedReserve1;
+//        p3x = (p3x * 1e18) / _translatedReserve0;
 
 //        console.log("gp3x, p3y", p3x, adjustedVab);
 //        console.log("pair0, pair1", _translatedReserve0, _translatedReserve1);
 
         uint x = (_translatedReserve1 * 1e18)/_translatedReserve0;
+        uint ftv;
 
-        if(x >= p3x) {
-            gamma = 1e18 - ((adjustedVab)*1e18 /  (_translatedReserve1 * 2));
-            isLineFormula = false;
-        } else {
-            (bool aNeg, uint a, uint b) = ZirconLibrary.calculateParabolaCoefficients(
-                p2x, p2y, p3x, adjustedVab, false
-            ); //p3y is just adjustedVab
+        (ftv, isLineFormula, reduceOnly) = ZirconLibrary.getFTVForX(
+            x,
+            p2x, p2y,
+            _translatedReserve0, _translatedReserve1,
+            adjustedVab);
 
-            //If derivative is positive at p3x
-            if(!aNeg || b > (2 * a * p3x)/1e18) {
-                uint ftv = aNeg
-                            ? ((b * x).sub(((a * x)/1e18) * x))
-                            : ((((a * x)/1e18) * x).add(b * x));
+        gamma = ftv.mul(1e18)/(_translatedReserve1 * 2);
 
-                gamma = ftv/(_translatedReserve1 * 2);
-                isLineFormula = true;
-            } else {
-                // This means that so much float has been added that the parabola has negative derivative before the switch.
-                // Hence we block any more float addition, can be unstuck only by adding anchors or adding sync.
-                revert("ZP: ExFlt1");
-            }
 
-        }
+//        if(x >= p3x) {
+//            gamma = 1e18 - ((adjustedVab)*1e18 /  (_translatedReserve1 * 2));
+//            isLineFormula = false;
+//        } else {
+//            (bool aNeg, uint a, uint b) = ZirconLibrary.calculateParabolaCoefficients(
+//                p2x, p2y, p3x, adjustedVab, false
+//            ); //p3y is just adjustedVab
+//
+//            //If derivative is positive at p3x
+//            if(!aNeg || b > (2 * a * p3x)/1e18) {
+//                uint ftv = aNeg
+//                            ? ((b * x).sub(((a * x)/1e18) * x))
+//                            : ((((a * x)/1e18) * x).add(b * x));
+//
+//                gamma = ftv/(_translatedReserve1 * 2);
+//                isLineFormula = true;
+//            } else {
+//                // This means that so much float has been added that the parabola has negative derivative before the switch.
+//                // Hence we block any more float addition, can be unstuck only by adding anchors or adding sync.
+//                revert("ZP: ExFlt1");
+//            }
+//
+//        }
 //        console.log("gama,", gamma);
     }
 
@@ -346,7 +356,7 @@ contract ZirconPylon is IZirconPylon {
         //This should always be 50%
 
 
-            (gammaMulDecimals, formulaSwitch) = _calculateGamma(
+            (gammaMulDecimals, formulaSwitch,) = _calculateGamma(
                 virtualAnchorBalance,
                 virtualFloatBalance,
                 p2x, p2y,
@@ -477,7 +487,7 @@ contract ZirconPylon is IZirconPylon {
     //It also calculates P2 and desiredFtv, critical for the system.
     //DesiredFtv requires holding both pre-mint and post-mint parameters, which adds a significant amount of awkwardness to the procedure.
     //1.3kb
-    function _update(uint floatChange, bool isPercentage, uint oldReserve0, uint oldReserve1, uint oldVab) private returns (uint gamma){
+    function _update(uint floatChange, bool isPercentage, uint oldReserve0, uint oldReserve1, uint oldVab) private returns (uint gamma, bool reduceOnly){
 
         // Removing excess reserves from the pool
         (uint balance0, uint balance1) = _getFloatAnchorBalance();
@@ -544,7 +554,7 @@ contract ZirconPylon is IZirconPylon {
 //        console.log("vab2", virtualAnchorBalance);
 
         //Counts gamma change and applies strike condition if necessary
-        (gamma,) = _calculateGamma(
+        (gamma, ,reduceOnly) = _calculateGamma(
             virtualAnchorBalance,
             virtualFloatBalance,
             p2x, p2y,
@@ -824,7 +834,10 @@ contract ZirconPylon is IZirconPylon {
 
         }
 
-        uint newGamma = _update(ftvChange, false, _reservePairTranslated0, _reservePairTranslated1, oldVab);
+        (uint newGamma, bool reduceOnly) = _update(ftvChange, false, _reservePairTranslated0, _reservePairTranslated1, oldVab);
+
+        //We block all float mints that place the pool into reduceOnly
+        require(!reduceOnly || isAnchor, "ZP: ReduceOnly");
 
 //        if(!_isAnchor) {
 //            // we calculate new derived vfb. All minting operations should be done, which means we can just calculate it
@@ -1213,7 +1226,9 @@ contract ZirconPylon is IZirconPylon {
         // uint deltaSupply = pair.totalSupply().sub(_totalSupply);
 
         //We need to pass update the pre-change reserves to ensure the Ftv calculations are correct
-        (uint newGamma) = _update(ftvChange, false, cacheReserve0, cacheReserve1, oldVab);
+        (uint newGamma, bool reduceOnly) = _update(ftvChange, false, cacheReserve0, cacheReserve1, oldVab);
+
+        require(!reduceOnly || shouldMintAnchor, "ZP: ReduceOnly");
 
 //        if(!shouldMintAnchor) {
 //
@@ -1284,7 +1299,7 @@ contract ZirconPylon is IZirconPylon {
                     _pairReserveTranslated0, _pairReserveTranslated1,
                     newReserve1.mul(1e18)/newReserve0,
                     virtualAnchorBalance - _pylonReserve1,
-                    liq0 * (2 * _pairReserveTranslated1),
+                    liq0 * (2 * _pairReserveTranslated1)/1e18,
                     false
                 );
 
@@ -1444,7 +1459,7 @@ contract ZirconPylon is IZirconPylon {
             virtualAnchorBalance += feeToAnchor;
             virtualFloatBalance += feeToFloat;
 
-            (gammaMulDecimals, formulaSwitch) = _calculateGamma(
+            (gammaMulDecimals, formulaSwitch,) = _calculateGamma(
                 virtualAnchorBalance, virtualFloatBalance,
                 p2x, p2y,
                 pylonReserve0, pylonReserve1,
@@ -1547,7 +1562,7 @@ contract ZirconPylon is IZirconPylon {
             {
 //                console.log("fvp, mu, pair1", _feeValuePercentage, muMulDecimals, _pairReserve1);
             }
-            ftv = ZirconLibrary.getFTVForX(
+            (ftv,,) = ZirconLibrary.getFTVForX(
                 x,
                 p2x, p2y,
                 (_pairReserve0 * 1e18)/(1e18 + _feeValuePercentage),
@@ -2031,7 +2046,7 @@ contract ZirconPylon is IZirconPylon {
 
 //        console.log("vab, adjVab", virtualAnchorBalance, adjustedVab);
 
-        desiredFtv = ZirconLibrary.getFTVForX(
+        (desiredFtv,,) = ZirconLibrary.getFTVForX(
             newPrice,
             p2x, p2y,
             oldReserve0, oldReserve1,
@@ -2066,28 +2081,21 @@ contract ZirconPylon is IZirconPylon {
         uint percentageFloatChange;
 
         if(isAnchor) {
+
             //reduce ptu by additional slippage
             //This is primarily a disincentive to dump enormous amounts with this method.
             //If they do, they suffer extra slippage equal to the percentage of the pool they're withdrawing.
-            //Though below 3% this is not applied.
+            //An alternative is applying the omega value after the dump, but this requires too many calculations.
+
             //Can be avoided with burn & swap, withdrawing with small amounts, waiting for reserves. Everything really.
             //The slashing goes primarily to float side, since they're getting dumped hard
             //But also it helps anchors by not worsening omega too much.
 
             //var temping as percentage of pool getting extracted here
-            percentageFloatChange = (ptb - ptuWithFee) * 1e18/ptb;
+            //The PTUs unclaimed are auto assigned to the remaining anchors
+
             uint _reservesTranslated1 = reservesTranslated1;
             address _to = to;
-            if(percentageFloatChange < 97e16) {
-                uint _oldPtu = ptuWithFee;
-                ptuWithFee = (ptuWithFee * percentageFloatChange)/1e18;
-                ptu = (ptu * percentageFloatChange)/1e18;
-                //Now we make it actually become about floats
-                percentageFloatChange = (_oldPtu - ptuWithFee).mul(1e18)/((gammaMulDecimals * ptb)/1e18);
-                percentageFloatChange += 1e18;
-            } else {
-                percentageFloatChange = 1e18;
-            }
 
             uint amount_ = 0;
             //ptuWithFee here is the one with omega applied
@@ -2099,6 +2107,18 @@ contract ZirconPylon is IZirconPylon {
                     _to);
 
             amountOut = amount_;
+
+            percentageFloatChange = (ptb - ptuWithFee) * 1e18/ptb;
+            console.log("percF", percentageFloatChange);
+            if(percentageFloatChange < 97e16) {
+                //                uint _oldPtu = ptuWithFee;
+                ptuWithFee = (ptuWithFee * percentageFloatChange)/1e18;
+                //                ptu = (ptu * percentageFloatChange)/1e18;
+            }
+
+            //Temping is done, we reassign it to its proper unchanged value
+            percentageFloatChange = 1e18;
+
         } else {
             //Just records % of float liquidity removed here
             percentageFloatChange = uint(1e18).sub((ptu * 1e18)/((gammaMulDecimals * ptb)/1e18));
