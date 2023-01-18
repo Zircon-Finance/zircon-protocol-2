@@ -116,7 +116,6 @@ contract Migrator {
         IZirconPylonFactory(newPylonFactory).startPylon(newPylonAddress,
             IOldZirconPylon(oldPylon).gammaMulDecimals(),
             IOldZirconPylon(oldPylon).virtualAnchorBalance(),
-            IOldZirconPylon(oldPylon).anchorK(),
             IOldZirconPylon(oldPylon).formulaSwitch());
 
         // Migrating Energy Liquidity
