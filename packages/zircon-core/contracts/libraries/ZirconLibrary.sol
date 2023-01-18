@@ -89,7 +89,7 @@ library ZirconLibrary {
     }
 
     function calculateP2(uint k, uint vab, uint vfb) view public returns (uint p2x, uint p2y) {
-        p2y = ((k * 2)/vfb) - vab;
+        p2y = ((k * 2)/vfb) - vab; // anchor decimals
         p2x = (p2y * 1e18)/vfb;
 //        console.log("cal p2y, p2x", p2y, p2x);
     }

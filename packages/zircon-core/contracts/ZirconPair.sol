@@ -174,14 +174,14 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         uint _liquidityFee = IZirconFactory(factory).liquidityFee();
         uint k;
 
-        //We use growth in sqrt(k) to calculate amount of pool tokens to mint. This implicitly takes care of slippage.
-        //Fee is slightly more than half total amount to account for residue you'd have if you swapped then minted normally
+        // We use growth in sqrt(k) to calculate amount of pool tokens to mint. This implicitly takes care of slippage.
+        // Fee is slightly more than half total amount to account for residue you'd have if you swapped then minted normally
 
         if (isReserve0){
-            require(amount0 > 1, "ZP: Insufficient Amount");
+            require(amount0 > 0, "ZP: Insufficient Amount");
             k = Math.sqrt(uint(reserve0 + (amount0.mul(10000-(_liquidityFee/2 + 1))/10000)).mul(balance1));
         }else{
-            require(amount1 > 1, "ZP: Insufficient Amount");
+            require(amount1 > 0, "ZP: Insufficient Amount");
             k = Math.sqrt(balance0.mul(uint(reserve1 + (amount1.mul(10000-(_liquidityFee/2 + 1))/10000))));
         }
         uint kBefore = Math.sqrt(uint(reserve0).mul(reserve1));

@@ -55,6 +55,15 @@ library Math {
     }
 
 
+    function _unDecimalize(uint _value, uint _decimals) pure internal returns (uint) {
+        return 18 > _decimals ? _value/(10**(18 - _decimals)) : _value*(10**(_decimals - 18));
+    }
+    // This is a helper function to put all the decimals to 18
+    function _decimalize(uint _value, uint _decimals) pure internal returns (uint) {
+        return 18 > _decimals ? _value*(10**(18 - _decimals)) : _value/(10**(_decimals - 18));
+    }
+
+
 
 
 }

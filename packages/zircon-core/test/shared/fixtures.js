@@ -28,7 +28,7 @@ exports.coreFixtures = async function coreFixtures(library) {
     // Deploy Tokens
     let tok = await ethers.getContractFactory('Token');
 
-    let tk0 = await tok.deploy('Token1', 'TOK1', 6);
+    let tk0 = await tok.deploy('Token1', 'TOK1', 18);
     let tk1 = await tok.deploy('Token2', 'TOK2', 18);
 
     // Deploy Factory

@@ -317,7 +317,7 @@ async function printState(fixtures, doPrint) {
     let p2y = await pylonInstance.p2y();
     let p2yF = ethers.utils.formatEther(p2y);
 
-    let sync = await pylonInstance.getSyncReserves();
+    let sync = await pylonInstance.getSyncReserves(false);
 
 
     if(doPrint) {

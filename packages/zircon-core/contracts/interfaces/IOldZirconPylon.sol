@@ -1,15 +1,14 @@
 pragma solidity >=0.5.16;
-interface IZirconPylon {
+interface IOldZirconPylon {
     function initialized() external view returns (uint);
-//    function anchorPoolTokenAddress() external view returns (address);
-//    function floatPoolTokenAddress() external view returns (address);
-//    function energyAddress() external view returns (address);
+    //    function anchorPoolTokenAddress() external view returns (address);
+    //    function floatPoolTokenAddress() external view returns (address);
+    //    function energyAddress() external view returns (address);
     function gammaMulDecimals() external view returns (uint);
     function isFloatReserve0() external view returns (bool);
     function virtualAnchorBalance() external view returns (uint);
     function virtualFloatBalance() external view returns (uint);
-    function p2x() external view returns (uint);
-    function p2y() external view returns (uint);
+    function anchorK() external view returns (uint);
     function lastRootKTranslated() external view returns (uint);
     function formulaSwitch() external view returns (bool);
     function lastPrice() external view returns (uint);
@@ -29,7 +28,7 @@ interface IZirconPylon {
     // External Function called to mint pool Token
     // Liquidity have to be sent before
     function mintPoolTokens(address to, bool isAnchor) external returns (uint liquidity);
-//    function mintAsync100(address to, bool isAnchor) external returns (uint liquidity);
+    //    function mintAsync100(address to, bool isAnchor) external returns (uint liquidity);
     function mintAsync(address to, bool shouldMintAnchor) external returns (uint liquidity);
     // Burn Async send both tokens 50-50
     // Liquidity has to be sent before
@@ -41,4 +40,4 @@ interface IZirconPylon {
     function changeEnergyAddress(address _energyAddress, address _energyRevAddress) external;
     function migrateLiquidity(address newPylon) external;
 
-    }
+}

@@ -135,9 +135,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
     }
 
-    function startPylon(address _pylon, uint _gamma, uint _vab, bool _formulaSwitch) external {
+    function startPylon(address _pylon, uint _gamma, uint _vab, uint _anchorK, bool _formulaSwitch) external {
         onlyMigrator();
-        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _formulaSwitch);
+        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _anchorK, _formulaSwitch);
     }
 
 

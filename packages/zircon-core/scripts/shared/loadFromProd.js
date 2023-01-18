@@ -144,6 +144,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             console.log("Tokens minted for: ", tk0.symbol, tk1.symbol, " pylon")
 
             // Passing here all the old information for the vab anchoK ecc
+            console.log("fs", pylon.formulaSwitch)
             await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.formulaSwitch)).wait()
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)
