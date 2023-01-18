@@ -65,7 +65,7 @@ library ZirconLibrary {
             a = aNumerator * 1e18/aDenominator;
             {
                 uint _p2x = p2x;
-                console.log("aNum, a", aNumerator, a);
+                console.log("apos", a);
 
 
             }
@@ -92,6 +92,8 @@ library ZirconLibrary {
             a = (aNumerator * 1e18)/aDenominator;
 
             b = (p2y * 1e18/p2x).add((p2x * a)/1e18); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+
+            console.log("aneg, b", a, b);
 
             aNegative = true;
             bNegative = false;
@@ -135,11 +137,11 @@ library ZirconLibrary {
         uint p3x = (adjustedVab ** 2)/ reserve1;
         p3x = (p3x * 1e18) / reserve0;
 
-        console.log("p3x, p2x, x", p3x, p2x, _x);
+//        console.log("p3x, p2x, x", p3x, p2x, _x);
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
-            ftv = 2 * Math.sqrt((reserve0 * reserve1)/1e18 * _x) - adjustedVab;
+            ftv = (2 * Math.sqrt((reserve0 * reserve1)/1e18 * _x)).sub(adjustedVab);
             reduceOnly = false;
             lineFormula = false;
         } else {
@@ -171,12 +173,14 @@ library ZirconLibrary {
                 : ((((a * x)/1e18) * x).add(b * x))/1e18;
 
             //If derivative is positive at p3x
-            if(!aNeg || b > (2 * a * p3x)/1e18) {
+            //B can only be negative when a is positive
+            if(!aNeg || (b > (2 * a * p3x)/1e18)) {
                 reduceOnly = false;
             } else {
                 //This means there is an excess of floats and the derivative becomes negative at some point before the juncture
                 //At this point float liquidity can only be removed until this condition doesn't persist anymore.
                 reduceOnly = true;
+                console.log("red");
             }
 
         }
