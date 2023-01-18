@@ -5,12 +5,14 @@ const DECIMALS = ethers.BigNumber.from(10).pow(18)
 
 exports.expandTo18Decimals = function expandTo18Decimals(n) {
 
-    // console.log("Debug: n ", n);
+    console.log("Debug: n ", n);
 
     let num = n * 10**9
 
-    // console.log("Debug: num ", num);
-    // console.log("Debug: exp result: ", (ethers.BigNumber.from(10).pow(9)).mul(num))
+    num = Math.floor(num);
+
+    console.log("Debug: num ", num);
+    // console.log("Debug: exp result: ", (ethers.BigNumber.from(10).pow(6)).mul(num))
 
     return (ethers.BigNumber.from(10).pow(9)).mul(num)}
 

@@ -8,16 +8,21 @@ library ZirconPeripheralLibrary {
     using SafeMath for uint256;
     // calculates the CREATE2 address for a pair without making any external calls
     //TODO: Update init code hash with Zircon Pylon code hash
-    function pylonFor(address factory, address tokenA, address tokenB, address pair) internal pure returns (address pylon) {
-        pylon = address(uint(keccak256(abi.encodePacked(
-                hex'ff',
-                factory,
-                keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-                hex'b946c1a980c835b03424e50d125c2cb36367bc360e4e996247533f36ece31409' // init code hash
-            ))));
-    }
 
-    function isInitialized(address factory, address tokenA, address tokenB, address pair) view external returns (bool initialized){
+
+    // DO NOT CHANGE THIS FUNCTION WILL BE UPDATED BY 'yarn bytecode' inside zircon-core
+    function pylonFor(address pylonFactory, address tokenA, address tokenB, address pair) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'370adda0b77ce4fc729681ee30da3889b1ddf7d691912c355e8e4e44b55e02da'))));}
+
+//    function pylonFor(address factory, address tokenA, address tokenB, address pair) internal pure returns (address pylon) {
+//        pylon = address(uint(keccak256(abi.encodePacked(
+//                hex'ff',
+//                factory,
+//                keccak256(abi.encodePacked(tokenA, tokenB, pair)),
+//                hex'afaf6286555f731e9581935e0bb62d3fec24c96b73c638aa7b5a8b9fbc595e39' // init code hash
+//            ))));
+//    }
+
+    function isInitialized(address factory, address tokenA, address tokenB, address pair) view internal returns (bool initialized){
         initialized = IZirconPylon(pylonFor(factory, tokenA, tokenB, pair)).initialized() == 1;
     }
 
@@ -33,7 +38,7 @@ library ZirconPeripheralLibrary {
 
     // TODO: Change this
     // fetches and sorts the reserves for a pair
-    function maximumSync(uint reserve, uint reservePylon, uint syncPercentage, uint maxBase, uint ptt, uint ptb) external pure returns (uint maximum) {
+    function maximumSync(uint reserve, uint reservePylon, uint syncPercentage, uint maxBase, uint ptt, uint ptb) internal pure returns (uint maximum) {
         uint pairReserveTranslated = translate(reserve, ptt, ptb);
         maximum = (pairReserveTranslated == 0 || reservePylon > pairReserveTranslated) ? maxBase :
         (pairReserveTranslated.mul(syncPercentage)/100).sub(reservePylon);
