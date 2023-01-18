@@ -83,7 +83,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
 
-    console.log("\n===MintSync Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
+    console.log("\n===MintSync Complete === AmOut: ", staticResult)
     return results
 }
 //
