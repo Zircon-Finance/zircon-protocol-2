@@ -1579,14 +1579,14 @@ contract ZirconPylon is IZirconPylon {
             );
 
             feeToFloat = ((2 * _pairReserve1.mul(_feeValuePercentage) / 1e18).mul(1e18 - muMulDecimals)) / 1e18;
-
+            uint _feeToFloat = feeToFloat;
             (_p2x, _p2y) = ZirconLibrary.evaluateP2(
                 x,
                 virtualAnchorBalance - _pylonReserve1,
                 virtualFloatBalance - _pylonReserve0,
                 _pairReserve0,
                 _pairReserve1,
-                ftv + feeToFloat //Always in anchor units
+                ftv + _feeToFloat //Always in anchor units
             );
         }
 

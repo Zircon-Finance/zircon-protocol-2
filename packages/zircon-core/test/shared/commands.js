@@ -88,6 +88,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
     let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
     console.log("\n===MintSync Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
+
     return results
 }
 //
@@ -113,10 +114,7 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 
     let results = await pylonInstance.mintAsync(address, isAnchor)
 
-    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
-    await saveValuesForSDK(false, false, token0Decimals, token0Decimals, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
-
-    console.log("\n===MintAsync Complete === AmOut:", format(balanceAfter.sub(balanceBefore)))
+    console.log("\n===MintAsync Complete === AmOut:", staticResult)
     return results
 }
 //
@@ -141,7 +139,7 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
 
     let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
 
-    console.log("\n===Burn Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
+    console.log("\n===Burn Complete === AmOut: ", staticResult)
     return results;
 }
 //
@@ -168,6 +166,7 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
     let balanceAfterB = await token1.balanceOf(address);
 
     console.log("\n===BurnAsync Complete ===, amOut0, 1:", format(balanceAfterA.sub(balanceBeforeA)), format(balanceAfterB.sub(balanceBeforeB)))
+
     return results
 
 }
