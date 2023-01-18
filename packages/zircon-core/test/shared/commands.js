@@ -111,7 +111,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
 
-    console.log("\n===MintSync Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
+    console.log("\n===MintSync Complete === AmOut: ", staticResult)
     return results
 }
 //
@@ -135,10 +135,7 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 
     let results = await pylonInstance.mintAsync(address, isAnchor)
 
-    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
-    await saveValuesForSDK(false, false, token0Decimals, token0Decimals, balanceAfter.sub(balanceBefore), null, isAnchor, fixtures)
-
-    console.log("\n===MintAsync Complete === AmOut:", format(balanceAfter.sub(balanceBefore)))
+    console.log("\n===MintAsync Complete === AmOut:", staticResult)
     return results
 }
 //
@@ -161,7 +158,7 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
     let results = await pylonInstance.burn(address, isAnchor)
 
 
-    console.log("\n===Burn Complete === AmOut: ", format(balanceAfter.sub(balanceBefore)))
+    console.log("\n===Burn Complete === AmOut: ", staticResult)
     return results;
 }
 //
@@ -182,7 +179,7 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
     await saveValuesForSDK(false, true, poolTokenAmount, null, staticCall[0].toString(), staticCall[1].toString(), isAnchor, fixtures)
     let results = await pylonInstance.burnAsync(address, isAnchor)
 
-    console.log("\n===BurnAsync Complete ===, amOut0, 1:", format(balanceAfterA.sub(balanceBeforeA)), format(balanceAfterB.sub(balanceBeforeB)))
+    console.log("\n===BurnAsync Complete ===, amOut0, 1:", staticCall[0].toString(), staticCall[1].toString())
     return results
 
 }
@@ -321,13 +318,9 @@ async function printState(fixtures, doPrint) {
     let p2yF = ethers.utils.formatEther(p2y);
 
     let sync = await pylonInstance.getSyncReserves(false);
-
-
     if(doPrint) {
         console.log("\n===Pylon State: VAB: " + vabF + ", Gamma: " + gammaF + ", VFB: " + vfbF + ", p2x: " + p2xF + ", p2y: " + p2yF);
     }
-
-
     return {
         vab,
         gamma,
