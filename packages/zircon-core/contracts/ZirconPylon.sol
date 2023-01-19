@@ -178,8 +178,12 @@ contract ZirconPylon is IZirconPylon {
     //    }
 
     function getSyncReserves(bool shouldBeDecimalized) public view returns (uint112 _reserve0, uint112 _reserve1) {
-        _reserve0 = shouldBeDecimalized ? uint112(Math._decimalize(reserve0, anchorDecimals)) : reserve0;
-        _reserve1 = shouldBeDecimalized ? uint112(Math._decimalize(reserve1, floatDecimals)) : reserve1;
+        console.log("sync", reserve0, reserve1);
+
+        _reserve0 = shouldBeDecimalized ? uint112(Math._decimalize(reserve0, floatDecimals)) : reserve0;
+        _reserve1 = shouldBeDecimalized ? uint112(Math._decimalize(reserve1, anchorDecimals)) : reserve1;
+        console.log("sync", _reserve0, _reserve1);
+
     }
 
     /// @notice Private function to get pair reserves normalized on float and anchor
@@ -188,7 +192,6 @@ contract ZirconPylon is IZirconPylon {
     function getPairReservesNormalized()  private view returns (uint112 _reserve0, uint112 _reserve1, uint32 _lastTimestamp) {
 
         (uint112 _reservePair0, uint112 _reservePair1, uint32 _lastBlockTimestamp) = IZirconPair(pairAddress).getReserves();
-        console.log("getPairReservesNormalized", _reservePair0, _reservePair1, _lastBlockTimestamp);
         _reserve0 = isFloatReserve0 ? _reservePair0 : _reservePair1;
         _reserve1 = isFloatReserve0 ? _reservePair1 : _reservePair0;
 
@@ -286,8 +289,8 @@ contract ZirconPylon is IZirconPylon {
         uint _pylonReserve0, uint _pylonReserve1,
         uint _translatedReserve0, uint _translatedReserve1) view public returns (uint gamma, bool isLineFormula, bool reduceOnly) {
 
-
         //uint totalPoolValueAnchorPrime = _translatedReserve1 * 2;
+
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
         // Gradual division since adding 1e18 immediately would result in overflow
         //adjustedVab ** 2 /k
@@ -309,7 +312,6 @@ contract ZirconPylon is IZirconPylon {
             adjustedVab);
 
         gamma = ftv.mul(1e18)/(_translatedReserve1 * 2);
-
 
 //        if(x >= p3x) {
 //            gamma = 1e18 - ((adjustedVab)*1e18 /  (_translatedReserve1 * 2));
@@ -348,7 +350,6 @@ contract ZirconPylon is IZirconPylon {
         // Let's see if the pair contains some reserves
 
         (uint112 _reservePair0, uint112 _reservePair1, uint32 timestamp) = getPairReservesNormalized();
-        console.log("Reserves: ", _reservePair0, _reservePair1);
         require(_reservePair0 > 0 && _reservePair1 > 0);
 
         lastOracleTimestamp = timestamp;
@@ -440,7 +441,6 @@ contract ZirconPylon is IZirconPylon {
     // 0.614 kb
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private returns (uint liq0, uint liq1){
         if (max0 < newReserve0) {
-            console.log("Excess Reserves 0");
             if(_safeTransfer(pylonToken.float, pairAddress, newReserve0 - max0) > 1){
                 (liq0, ,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
             }
@@ -450,7 +450,6 @@ contract ZirconPylon is IZirconPylon {
         }
 
         if (max1 < newReserve1) {
-            console.log("Excess Reserves 1");
             if(_safeTransfer(pylonToken.anchor, pairAddress, newReserve1 - max1) > 1){
                 (liq1,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
             }
@@ -567,6 +566,7 @@ contract ZirconPylon is IZirconPylon {
             reservesTranslated1 = newReserve1;
 
         }
+        console.log("desiredFtv calculated");
 
         //Update lastK since we may have added/removed liquidity
         lastRootKTranslated = Math.sqrt(reservesTranslated0.mul(reservesTranslated1));
@@ -589,6 +589,7 @@ contract ZirconPylon is IZirconPylon {
                 desiredFtv
             );
         }
+        console.log("p2 calculated");
 
         //        console.log("vab2", virtualAnchorBalance);
 
@@ -600,11 +601,15 @@ contract ZirconPylon is IZirconPylon {
             pylonReserve0, pylonReserve1,
             reservesTranslated0, reservesTranslated1
         );
+        console.log("gamma calculated");
+
         //        console.log("gammaNew, gammaOld, blockN", gamma, gammaMulDecimals, block.number);
         if(Math.absoluteDiff(gamma, gammaMulDecimals) >= deltaGammaThreshold) {
             //This makes sure that a massive mintAsync can't be exited in the same block
             strikeBlock = block.number;
         }
+
+        console.log("finish update");
 
     }
     // ***** UPDATE ********
