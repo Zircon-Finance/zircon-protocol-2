@@ -11,7 +11,7 @@ const TEST_ADDRESSES = [
 ]
 
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
-    pylonInstance, poolTokenInstance0, poolTokenInstance1,
+    pylonContract, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
     pair, migratorInstance;
 
@@ -22,7 +22,7 @@ function destructure(fixtures) {
     poolTokenInstance0 = fixtures.poolTokenInstance0
     poolTokenInstance1 = fixtures.poolTokenInstance1
     pair = fixtures.pair
-    pylonInstance = fixtures.pylonInstance
+    pylonContract = fixtures.pylonContract
     factoryInstance = fixtures.factoryInstance
     factoryPTInstance = fixtures.ptFactoryInstance
     factoryPylonInstance = fixtures.factoryPylonInstance
@@ -38,9 +38,15 @@ const overrides = {
     gasLimit: 9999999
 }
 
+async function getPylonInstance(pylonIndex) {
+    let pylon = await factoryPylonInstance.allPylons(pylonIndex)
+    return pylonContract.attach(pylon)
+}
+
 exports.initPylonsFromProdSnapshot = async function initProductionData(library) {
     const monitoring = await axios.get(API_MONITORING);
     const tokens = await createTokens(monitoring)
+
 
     let fixtures = await initData(library);
     destructure(fixtures);
@@ -60,12 +66,26 @@ exports.initPylonsFromProdSnapshot = async function initProductionData(library) 
 
 }
 
-exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPercentage, library) {
-
-    let fixtures = await initData(library);
+exports.addPylon = async function addPylon(fixtures, token0Decimals, token1Decimals) {
     destructure(fixtures);
 
-    // console.log("fixtures: ", fixtures)
+    let tok = await ethers.getContractFactory('Token');
+    let tk0 = await tok.deploy('Token1', 'TOK1', token0Decimals);
+    let tk1 = await tok.deploy('Token2', 'TOK2', token1Decimals);
+
+    await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);
+    let lpAddress = await factoryInstance.getPair(tk0.address, tk1.address)
+
+    await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
+    let pylonAddress = await factoryPylonInstance.getPylon(token0.address, token1.address)
+
+    return pylonAddress
+}
+
+exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPercentage, library, pylonIndex=0) {
+    let fixtures = await initData(library);
+    destructure(fixtures);
+    let pylonInstance = await getPylonInstance(pylonIndex)
 
     let token0Decimals = expandTo18Decimals(token0Amount);
     let token1Decimals = expandTo18Decimals(token1Amount);
@@ -91,9 +111,9 @@ exports.initPylon = async function initPylon(token0Amount, token1Amount, pylonPe
 
 }
 
-exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtures, isDecimals) {
-
+exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtures, isDecimals, pylonIndex=0) {
     destructure(fixtures)
+    let pylonInstance = await getPylonInstance(pylonIndex)
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(tokenAmount) : tokenAmount;
 
@@ -115,9 +135,9 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
     return results
 }
 //
-exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount, isAnchor, fixtures, isDecimals) {
-
+exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount, isAnchor, fixtures, isDecimals, pylonIndex=0) {
     destructure(fixtures)
+    let pylonInstance = await getPylonInstance(pylonIndex)
 
     let token0Decimals = !isDecimals? expandTo18Decimals(token0Amount) : token0Amount;
     let token1Decimals = !isDecimals? expandTo18Decimals(token1Amount) : token1Amount;
@@ -139,9 +159,9 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
     return results
 }
 //
-exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures, isDecimals) {
-
+exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures, isDecimals, pylonIndex=0) {
     destructure(fixtures)
+    let pylonInstance = await getPylonInstance(pylonIndex)
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
@@ -162,9 +182,9 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
     return results;
 }
 //
-exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor, fixtures, isDecimals) {
-
+exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor, fixtures, isDecimals, pylonIndex=0) {
     destructure(fixtures)
+    let pylonInstance = await getPylonInstance(pylonIndex)
 
     let tokenDecimals = !isDecimals ? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
@@ -252,8 +272,9 @@ exports.unblockOracle = async function unblockOracle(provider, fixtures) {
 }
 //
 
-async function updateMint(fixtures) {
+async function updateMint(fixtures, pylonsIndex=0) {
     destructure(fixtures)
+    let pylonInstance = await getPylonInstance(pylonsIndex)
     console.log("\n===Starting updateMint ===")
     await token0.transfer(pylonInstance.address, MINIMUM_LIQUIDITY)
     //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
@@ -297,10 +318,10 @@ async function printPoolTokens(address, fixtures, doPrint) {
 exports.printPoolTokens = printPoolTokens;
 
 
-async function printState(fixtures, doPrint) {
+async function printState(fixtures, doPrint, pylonsIndex=0) {
 
     destructure(fixtures)
-
+    let pylonInstance = await getPylonInstance(pylonsIndex)
     //we want to return and print all key variables necessary to define the state of a pylon
     //these are vab, vfb, p2x, p2y, gamma
     //Separately we print sync reserves, translated reserves and price
@@ -351,11 +372,10 @@ exports.getPTPrice = async function getPTPrice(fixtures, doPrint) {
 }
 
 
-
-
-async function printPairState(fixtures, doPrint) {
+async function printPairState(fixtures, doPrint, pylonIndex=0) {
 
     destructure(fixtures)
+    let pylonInstance = await getPylonInstance(pylonIndex)
 
     let pairResT = await pair.getReserves();
 

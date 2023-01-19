@@ -14,7 +14,7 @@ exports.createTokens = async function createTokens(monitoring) {
 }
 
 exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens, library) {
-    console.log("Loading from prod")
+    console.log("<><><><><> Loading from prod <><><><><><><>")
     const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
 
     // Getting all the information from the monitoring API

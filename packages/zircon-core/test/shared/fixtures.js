@@ -13,6 +13,7 @@ exports.librarySetup = async function librarySetup() {
 }
 
 exports.coreFixtures = async function coreFixtures(library) {
+
     // Deploy feeToSetter contract
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
     let feeToSetterInstance = await feeToSetter.deploy();
@@ -80,17 +81,13 @@ exports.coreFixtures = async function coreFixtures(library) {
     let energyContract = await ethers.getContractFactory('ZirconEnergy')
 
     // Configuring Pool Tokens Anchor And Float
-    let poolAddress0 = await ptFactoryInstance.getPoolToken(pylonAddress, token0.address); //floatPoolTokenAddress();
+    let poolAddress0 = await ptFactoryInstance.getPoolToken(pylonAddress, token0.address); // floatPoolTokenAddress();
     let poolAddress1 = await ptFactoryInstance.getPoolToken(pylonAddress, token1.address);
 
     let poolTokenInstance0 = poolToken1.attach(poolAddress0);
     let poolTokenInstance1 = poolToken2.attach(poolAddress1);
-    console.log("hello", poolTokenInstance0.address, poolTokenInstance1.address);
 
     [account, account2] = await ethers.getSigners();
-
-    // await feeToSetterInstance.setFeePercentageEnergy(20)
-    // await feeToSetterInstance.setFeePercentageRev(20)
 
     return {
         factoryInstance,
@@ -107,7 +104,8 @@ exports.coreFixtures = async function coreFixtures(library) {
         feeToSetterInstance,
         zirconPylonLibrary: library,
         account,
-        account2
+        account2,
+        pylonContract: zPylon
     }
 }
 
