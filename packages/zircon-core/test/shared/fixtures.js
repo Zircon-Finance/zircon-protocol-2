@@ -75,8 +75,7 @@ exports.coreFixtures = async function coreFixtures(library) {
             ZirconLibrary: library.address,
         },
     });
-    let poolToken1 = await ethers.getContractFactory('ZirconPoolToken');
-    let poolToken2 = await ethers.getContractFactory('ZirconPoolToken');
+    let poolTokenContract = await ethers.getContractFactory('ZirconPoolToken');
     let pylonInstance = await zPylon.attach(pylonAddress);
     let energyContract = await ethers.getContractFactory('ZirconEnergy')
 
@@ -84,8 +83,8 @@ exports.coreFixtures = async function coreFixtures(library) {
     let poolAddress0 = await ptFactoryInstance.getPoolToken(pylonAddress, token0.address); // floatPoolTokenAddress();
     let poolAddress1 = await ptFactoryInstance.getPoolToken(pylonAddress, token1.address);
 
-    let poolTokenInstance0 = poolToken1.attach(poolAddress0);
-    let poolTokenInstance1 = poolToken2.attach(poolAddress1);
+    let poolTokenInstance0 = await poolTokenContract.attach(poolAddress0);
+    let poolTokenInstance1 = await poolTokenContract.attach(poolAddress1);
 
     [account, account2] = await ethers.getSigners();
 
@@ -105,7 +104,10 @@ exports.coreFixtures = async function coreFixtures(library) {
         zirconPylonLibrary: library,
         account,
         account2,
-        pylonContract: zPylon
+        pylonContract: zPylon,
+        pairContract,
+        tokenContract: tok,
+        poolTokenContract
     }
 }
 

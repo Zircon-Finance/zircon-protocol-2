@@ -14,7 +14,14 @@ exports.expandTo18Decimals = function expandTo18Decimals(n) {
     console.log("Debug: num ", num);
     // console.log("Debug: exp result: ", (ethers.BigNumber.from(10).pow(6)).mul(num))
 
-    return (ethers.BigNumber.from(10).pow(9)).mul(num)}
+    return (ethers.BigNumber.from(10).pow(9)).mul(num)
+}
+
+exports.expandToNDecimals = function expandTo18Decimals(value, decimals) {
+    let num = value * 10**Math.round(decimals/2)
+    num = Math.floor(num);
+    return (ethers.BigNumber.from(10).pow(Math.round(decimals/2))).mul(num)
+}
 
 exports.getAmountOut = function getAmountOut(amountIn, reserveIn, reserveOut) {
     let amounInWithFees = amountIn.mul(ethers.BigNumber.from("997"))

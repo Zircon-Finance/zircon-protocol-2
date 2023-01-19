@@ -186,12 +186,15 @@ contract ZirconPylon is IZirconPylon {
     // @return _reserve0 -> float
     // @return _reserve1 -> Anchor
     function getPairReservesNormalized()  private view returns (uint112 _reserve0, uint112 _reserve1, uint32 _lastTimestamp) {
+
         (uint112 _reservePair0, uint112 _reservePair1, uint32 _lastBlockTimestamp) = IZirconPair(pairAddress).getReserves();
+        console.log("getPairReservesNormalized", _reservePair0, _reservePair1, _lastBlockTimestamp);
         _reserve0 = isFloatReserve0 ? _reservePair0 : _reservePair1;
         _reserve1 = isFloatReserve0 ? _reservePair1 : _reservePair0;
 
         _reserve0 = uint112(Math._decimalize(_reserve0, floatDecimals));
         _reserve1 = uint112(Math._decimalize(_reserve1, anchorDecimals));
+
         _lastTimestamp = _lastBlockTimestamp;
     }
 
@@ -340,12 +343,12 @@ contract ZirconPylon is IZirconPylon {
     // 1.277 kb
     function initPylon(address _to) external returns (uint floatLiquidity, uint anchorLiquidity) {
         require(initialized == 0 && !IZirconPylonFactory(factoryAddress).paused() && !_entered);
-
         // Let's get the balances so we can see what the user send us
         // As we are initializing the reserves are going to be null
         // Let's see if the pair contains some reserves
+
         (uint112 _reservePair0, uint112 _reservePair1, uint32 timestamp) = getPairReservesNormalized();
-        //console.log("Reserves: ", _reservePair0, _reservePair1);
+        console.log("Reserves: ", _reservePair0, _reservePair1);
         require(_reservePair0 > 0 && _reservePair1 > 0);
 
         lastOracleTimestamp = timestamp;
