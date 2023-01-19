@@ -83,7 +83,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
-    let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
+    let results = await pylonInstance.mintPoolTokens(address, isAnchor)
 
     let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
