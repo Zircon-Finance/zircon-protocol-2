@@ -189,14 +189,14 @@ contract ZirconPylon is IZirconPylon {
     /// @notice Private function to get pair reserves normalized on float and anchor
     // @return _reserve0 -> float
     // @return _reserve1 -> Anchor
-    function getPairReservesNormalized()  private view returns (uint112 _reserve0, uint112 _reserve1, uint32 _lastTimestamp) {
+    function getPairReservesNormalized(bool shouldBeDecimalized)  private view returns (uint112 _reserve0, uint112 _reserve1, uint32 _lastTimestamp) {
 
         (uint112 _reservePair0, uint112 _reservePair1, uint32 _lastBlockTimestamp) = IZirconPair(pairAddress).getReserves();
         _reserve0 = isFloatReserve0 ? _reservePair0 : _reservePair1;
         _reserve1 = isFloatReserve0 ? _reservePair1 : _reservePair0;
 
-        _reserve0 = uint112(Math._decimalize(_reserve0, floatDecimals));
-        _reserve1 = uint112(Math._decimalize(_reserve1, anchorDecimals));
+        _reserve0 = shouldBeDecimalized ? uint112(Math._decimalize(_reserve0, floatDecimals)) : _reserve0;
+        _reserve1 = shouldBeDecimalized ? uint112(Math._decimalize(_reserve1, anchorDecimals)) : _reserve1;
 
         _lastTimestamp = _lastBlockTimestamp;
     }
@@ -205,7 +205,7 @@ contract ZirconPylon is IZirconPylon {
     /// @return Float -> _reserve0
     /// @dev Anchor -> _reserve1
     function getPairReservesTranslated(uint error0, uint error1) view private  returns  (uint _reserve0, uint _reserve1, uint32 timestamp) {
-        (uint _reservePair0, uint _reservePair1, uint32 _timestamp) = getPairReservesNormalized();
+        (uint _reservePair0, uint _reservePair1, uint32 _timestamp) = getPairReservesNormalized(true);
 
         uint ptb = _getBalanceOf(pairAddress, address(this));
         uint ptt = _totalSupply(pairAddress);
@@ -247,7 +247,7 @@ contract ZirconPylon is IZirconPylon {
         muOldGamma = gammaMulDecimals; //gamma value at last mu update
 
         (uint cacheReserve0, uint cacheReserve1,) = getPairReservesTranslated(0, 0);
-        (uint res0, uint res1,) = getPairReservesNormalized();
+        (uint res0, uint res1,) = getPairReservesNormalized(true);
         (uint syncReserve0,) = getSyncReserves(true);
 
         p2x = cacheReserve1*1e18/cacheReserve0;
@@ -349,7 +349,7 @@ contract ZirconPylon is IZirconPylon {
         // As we are initializing the reserves are going to be null
         // Let's see if the pair contains some reserves
 
-        (uint112 _reservePair0, uint112 _reservePair1, uint32 timestamp) = getPairReservesNormalized();
+        (uint112 _reservePair0, uint112 _reservePair1, uint32 timestamp) = getPairReservesNormalized(true);
         require(_reservePair0 > 0 && _reservePair1 > 0);
 
         lastOracleTimestamp = timestamp;
@@ -489,7 +489,7 @@ contract ZirconPylon is IZirconPylon {
         uint112 max1 = uint112(reservesTranslated1.mul(maximumPercentageSync)/200);
         // Pylon Update Minting
         if (balance0 > max0 && balance1 > max1) {
-            (uint pairReserves0, uint pairReserves1,) = getPairReservesNormalized();
+            (uint pairReserves0, uint pairReserves1,) = getPairReservesNormalized(true);
             // Get Maximum finds the highest amount that can be matched at 50/50
             (px, py) = Math._getMaximum(
                 pairReserves0,
@@ -771,7 +771,7 @@ contract ZirconPylon is IZirconPylon {
         // Reduces by amount that was in sync reserves
 
         uint amountIn = _getBalanceOf(isAnchor ? pylonToken.anchor : pylonToken.float, address(this)).sub(isAnchor ? _reserve1 : _reserve0);
-        //        console.log("amIn", amountIn);
+        console.log("amIn", amountIn);
         notZero(amountIn);
 
         {
@@ -951,10 +951,11 @@ contract ZirconPylon is IZirconPylon {
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
-            if(_safeTransfer(pylonToken.float, pairAddress, fee) > 0) {
-                (uint112 _reservePair0, uint112 _reservePair1,) = getPairReservesNormalized();
+            uint realValue = _safeTransfer(pylonToken.float, pairAddress, fee);
+            if(realValue > 0) {
+                (uint112 _reservePair0, uint112 _reservePair1,) = getPairReservesNormalized(false);
 
-                uint amountInWithFee = fee.mul(10000-liquidityFee);
+                uint amountInWithFee = realValue.mul(10000-liquidityFee);
                 uint amountSwapped = amountInWithFee.mul(_reservePair1) / (_reservePair0.mul(10000).add(amountInWithFee));
 
                 // uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, );
@@ -1749,7 +1750,7 @@ contract ZirconPylon is IZirconPylon {
 
         uint feeBps;
         {
-            (uint _pairReserve0, uint _pairReserve1,) = getPairReservesNormalized();
+            (uint _pairReserve0, uint _pairReserve1,) = getPairReservesNormalized(true);
             feeBps = getFeeBps(_pairReserve1*1e18/_pairReserve0);
         }
 
