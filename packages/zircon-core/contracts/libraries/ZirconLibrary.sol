@@ -113,12 +113,9 @@ library ZirconLibrary {
         if(x < p3x) {
             p2y = desiredFtv;
             p2x = x;
-//            console.log("d p2x, p2y", p2x, p2y);
         } else {
             (p2x, p2y) = calculateP2(reserve0 * reserve1, adjustedVab, adjustedVfb);
-//            console.log("d p2x, p2y", p2x, p2y);
         }
-
     }
 
     //         if x < (adjusted_vab ** 2)/k:
