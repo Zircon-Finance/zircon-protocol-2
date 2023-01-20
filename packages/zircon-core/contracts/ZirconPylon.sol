@@ -159,14 +159,14 @@ contract ZirconPylon is IZirconPylon {
 
     // ****** HELPER FUNCTIONS *****
     function _safeTransfer(address token, address to, uint value) private returns (uint amountTransformed) {
-        console.log("safeTransfer", value);
+        console.log("safe transfer::", value);
         if (token == pylonToken.float){
             value = Math._unDecimalize(value, floatDecimals);
         }
         if (token == pylonToken.anchor){
             value = Math._unDecimalize(value, anchorDecimals);
         }
-        console.log("value", value);
+        console.log("value::", value);
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'Z: TF');
         return value;
@@ -441,6 +441,7 @@ contract ZirconPylon is IZirconPylon {
     // 0.614 kb
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private returns (uint liq0, uint liq1){
         if (max0 < newReserve0) {
+            console.log("excess 0");
             if(_safeTransfer(pylonToken.float, pairAddress, newReserve0 - max0) > 1){
                 (liq0, ,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
             }
@@ -450,6 +451,7 @@ contract ZirconPylon is IZirconPylon {
         }
 
         if (max1 < newReserve1) {
+            console.log("excess 1");
             if(_safeTransfer(pylonToken.anchor, pairAddress, newReserve1 - max1) > 1){
                 (liq1,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
             }
@@ -632,6 +634,8 @@ contract ZirconPylon is IZirconPylon {
     // @amount -> Amount on async if not 0
     // >0.172
     function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint amountOut, uint amountPool, uint trueAmountOut) {
+        console.log("handle sync");
+
         // Calculates max tokens to be had in this reserve pool
         uint maxP = maxPercentageSync;
         uint max = _pairReserveTranslated.mul(maxP) / 100;
@@ -942,18 +946,22 @@ contract ZirconPylon is IZirconPylon {
         if(fee <= 10) {
             return(amountIn);
         }
+
         // TODO: This should never go above the balance
         if (isAnchor) {
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
         } else {
-            _safeTransfer(pylonToken.float, pairAddress, fee);
-            (uint112 _reservePair0, uint112 _reservePair1,) = getPairReservesNormalized();
+            if(_safeTransfer(pylonToken.float, pairAddress, fee) > 0) {
+                (uint112 _reservePair0, uint112 _reservePair1,) = getPairReservesNormalized();
 
-            uint amountInWithFee = fee.mul(10000-liquidityFee);
-            uint amountSwapped = amountInWithFee.mul(_reservePair1) / (_reservePair0.mul(10000).add(amountInWithFee));
+                uint amountInWithFee = fee.mul(10000-liquidityFee);
+                uint amountSwapped = amountInWithFee.mul(_reservePair1) / (_reservePair0.mul(10000).add(amountInWithFee));
 
-            // uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, );
-            IZirconPair(pairAddress).swap(isFloatReserve0 ? 0 : amountSwapped, isFloatReserve0 ? amountSwapped : 0, energyAddress, "");
+                // uint amountSwapped = ZirconLibrary.getAmountOut(fee, _reservePair0, _reservePair1, );
+                IZirconPair(pairAddress).swap(isFloatReserve0 ? 0 : amountSwapped, isFloatReserve0 ? amountSwapped : 0, energyAddress, "");
+            }else{
+                return(amountIn);
+            }
         }
         // energyAddress.delegatecall(abi.encodeWithSignature("registerFee()"));
         IZirconEnergy(energyAddress).registerFee();

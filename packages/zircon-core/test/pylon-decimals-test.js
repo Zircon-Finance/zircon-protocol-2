@@ -77,15 +77,15 @@ describe("Pylon", () => {
             await printState(fixtures, true)
             // Transferring some liquidity to pylon
 
-            await mintSync(account.address, expandToNDecimals(token0Amount/200, isAnchor ? 18: 6), isAnchor, fixtures, true, 1, 1)
+            await mintSync(account.address, expandToNDecimals(token0Amount/200, isAnchor ? 18: 6), isAnchor, fixtures, true, 1)
 
             await forwardTime(ethers.provider, 50);
-            await updateMint(fixtures);
+            await updateMint(fixtures, 1);
 
-            await printState(fixtures, true)
-            await printPairState(fixtures, true);
+            await printState(fixtures, true, 1)
+            await printPairState(fixtures, true, 1);
 
-            let poolTokens = await printPoolTokens(account.address, fixtures, true);
+            let poolTokens = await printPoolTokens(account.address, fixtures, true, 1);
 
             expect(poolTokens.pt1).to.eq(expectedOutputAmount1);
             expect(poolTokens.pt0).to.eq(expectedOutputAmount0);

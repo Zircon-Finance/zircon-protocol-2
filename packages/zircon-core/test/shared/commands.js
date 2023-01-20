@@ -52,9 +52,8 @@ function destructure(fixtures, index) {
     pair = pairContract.attach(pylon.pairAddress)
     token0 = poolTokenContract.attach(pylon.token0)
     token1 = poolTokenContract.attach(pylon.token1)
-
-    poolTokenInstance0 = fixtures.poolTokenInstance0
-    poolTokenInstance1 = fixtures.poolTokenInstance1
+    poolTokenInstance0 = poolTokenContract.attach(pylon.poolAddress0)
+    poolTokenInstance1 = poolTokenContract.attach(pylon.poolAddress1)
 }
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
@@ -147,7 +146,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
     let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
 
-    console.log("\n===MintSync Complete === AmOut: ", staticResult)
+    console.log("\n===MintSync Complete === AmOut: ", staticResult.toString())
     return results
 }
 //
@@ -171,7 +170,7 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 
     let results = await pylonInstance.mintAsync(address, isAnchor)
 
-    console.log("\n===MintAsync Complete === AmOut:", staticResult)
+    console.log("\n===MintAsync Complete === AmOut:", staticResult.toString())
     return results
 }
 //
@@ -194,7 +193,7 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
     let results = await pylonInstance.burn(address, isAnchor)
 
 
-    console.log("\n===Burn Complete === AmOut: ", staticResult)
+    console.log("\n===Burn Complete === AmOut: ", staticResult.toString())
     return results;
 }
 //
@@ -274,13 +273,13 @@ async function forwardTime(provider, blocksToMine) {
     await provider.send("hardhat_mine", [blocksBig.toHexString()]);
 
 }
-exports.forwardTime = forwardTime
 
-exports.unblockOracle = async function unblockOracle(provider, fixtures) {
+
+exports.unblockOracle = async function unblockOracle(provider, fixtures, index=0) {
 
     await forwardTime(ethers.provider, 96);
     await forwardTime(ethers.provider, 96);
-    await updateMint(fixtures);
+    await updateMint(fixtures, index);
 
     await forwardTime(ethers.provider, 96);
     await forwardTime(ethers.provider, 96);
@@ -296,11 +295,6 @@ async function updateMint(fixtures, index=0) {
     await pylonInstance.mintPoolTokens(account.address, false)
     console.log("\n=== updateMint complete ===")
 }
-exports.updateMint = updateMint
-
-
-
-//
 
 async function printPoolTokens(address, fixtures, doPrint, index=0) {
 
@@ -330,7 +324,6 @@ async function printPoolTokens(address, fixtures, doPrint, index=0) {
     }
 }
 
-exports.printPoolTokens = printPoolTokens;
 
 
 async function printState(fixtures, doPrint, index=0) {
@@ -372,7 +365,6 @@ async function printState(fixtures, doPrint, index=0) {
 
 }
 
-exports.printState = printState;
 
 exports.getPTPrice = async function getPTPrice(fixtures, doPrint) {
     let pylonState = await printState(fixtures, false)
@@ -418,7 +410,6 @@ async function printPairState(fixtures, doPrint, index=0) {
         console.log("\n===Pair State: TR0: " + tr0F + ", TR1: " + tr1F + ", Price: " + priceF + ", rootK: " + rootKF);
     }
 
-
     return {
         pairResT,
         ptb,
@@ -428,8 +419,11 @@ async function printPairState(fixtures, doPrint, index=0) {
         tr1,
         rootK
     }
-
 }
 
+exports.printState = printState;
+exports.updateMint = updateMint
 exports.printPairState = printPairState;
 exports.initData = initData
+exports.forwardTime = forwardTime
+exports.printPoolTokens = printPoolTokens;
