@@ -23,7 +23,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
     // Getting all the values
     let reserveAnchorEnergy = await token1.balanceOf(energyAddress);
     let reservePtEnergy = await pair.balanceOf(energyAddress);
-    let pylonRes = await pylonInstance.getSyncReserves(false);
+    let pylonRes = await pylonInstance.getSyncReserves();
     let pairResIni = await pair.getReserves();
     let ptb = await pair.balanceOf(pylonInstance.address);
     let ptt = await pair.totalSupply();

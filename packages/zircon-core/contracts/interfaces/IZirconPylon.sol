@@ -14,7 +14,7 @@ interface IZirconPylon {
     function formulaSwitch() external view returns (bool);
     function lastPrice() external view returns (uint);
     function EMABlockNumber() external view returns (bool);
-    function getSyncReserves(bool) external view returns  (uint112 _reserve0, uint112 _reserve1);
+    function getSyncReserves() external view returns  (uint112 _reserve0, uint112 _reserve1);
     // Called once by the factory at time of deployment
     // @_floatPoolToken -> Contains Address Of Float PT
     // @_anchorPoolToken -> Contains Address Of Anchor PT

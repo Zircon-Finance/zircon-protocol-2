@@ -18,7 +18,7 @@ library UniswapV2Library {
 
     // calculates the CREATE2 address for a pair without making any external calls
     // DO NOT CHANGE THIS FUNCTION WILL BE UPDATED BY 'yarn bytecode' inside zircon-core
-    function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {(address token0, address token1) = sortTokens(tokenA, tokenB); pair = address(uint(keccak256(abi.encodePacked(hex'ff', factory, keccak256(abi.encodePacked(token0, token1)), hex'd7bd31366773ee95e79afa45983263730b4d13e360e64b923978db1aa7bc7bdd'))));}
+    function pairFor(address factory, address tokenA, address tokenB) internal pure returns (address pair) {(address token0, address token1) = sortTokens(tokenA, tokenB); pair = address(uint(keccak256(abi.encodePacked(hex'ff', factory, keccak256(abi.encodePacked(token0, token1)), hex'398e3cb6f76a451fcf5bfb8a3a5e40beaadbe6b6cc345b82fb713317fae13443'))));}
 
     // fetches and sorts the reserves for a pair
     function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
