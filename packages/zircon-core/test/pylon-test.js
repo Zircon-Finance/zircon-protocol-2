@@ -64,48 +64,11 @@
 //         return fixtures
 //     }
 //
-//     //Let's try to calculate some cases for pylon
-//     const mintTestCases = [
-//         [10, 20, '4762509926821186', '4749990617651023','5099989902573941080','9999999999999999000', false],
-//         [20, 10, '4749999999999999', '4762499999999999','9999999999999999998', '5099989999999999000', true],
-//         [10, 20, '2374999999999999', '9525000000000000','4999999999999999999', '10049994999999999000', true],
-//         [20, 20, '9525009926820697', '4749995308820878','10099989951286946806', '9999999999999999000', false],
-//         [2000, 2000, '475000000000000000', '952500000000000000','1000000000000000000000', '1009998999999999999000', true],
-//     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
-//     mintTestCases.forEach((mintCase, i) => {
-//         it(`mintPylon:${i}`, async () => {
-//             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor] = mintCase
-//             // Add some liquidity to the Pair...
-//             let fixtures = await init(token0Amount, token1Amount, 50);
-//
-//             await printState(fixtures, true)
-//             // Transferring some liquidity to pylon
-//
-//             if (isAnchor) {
-//                 await mintSync(account.address, token0Amount/200, isAnchor, fixtures, false)
-//             }else{
-//                 await mintSync(account.address, token1Amount/200, isAnchor, fixtures, false)
-//             }
-//
-//             await forwardTime(ethers.provider, 50);
-//             await updateMint(fixtures);
-//
-//             await printState(fixtures, true)
-//             await printPairState(fixtures, true);
-//
-//             let poolTokens = await printPoolTokens(account.address, fixtures, true);
-//
-//             expect(poolTokens.pt1).to.eq(expectedOutputAmount1);
-//             expect(poolTokens.pt0).to.eq(expectedOutputAmount0);
-//             // Anchor
-//         })
-//     })  // Let's try to calculate some cases for pylon
-//
-//     return
+//     // mint-test cases moved to pylon-2-test.js
 //     it('Mint Burn Cycle test', async function () {
 //
 //         const mintCase = [
-//             [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true],]
+//             [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true]]
 //
 //         const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor] = mintCase[0]
 //         // Add some liquidity to the Pair...

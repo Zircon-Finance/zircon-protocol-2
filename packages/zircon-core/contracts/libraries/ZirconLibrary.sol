@@ -70,8 +70,6 @@ library ZirconLibrary {
             {
                 uint _p2x = p2x;
                 console.log("aNum, a", aNumerator, coefficients.a);
-
-
             }
 
             // If b is positive
@@ -140,7 +138,6 @@ library ZirconLibrary {
 
     }
     function getFTVForX(Decimals storage decimals, uint _x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv, bool lineFormula, bool reduceOnly) {
-        console.log("decimals", decimals.float, decimals.anchor);
         uint p3x = (adjustedVab ** 2) / reserve1;
         p3x = (p3x * decimals.float) / reserve0;
         console.log("p3x", p3x, _x);

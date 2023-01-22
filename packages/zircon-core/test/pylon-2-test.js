@@ -31,6 +31,7 @@ async function addLiquidity(token0Amount, token1Amount) {
 
 describe("Pylon", () => {
     before(async () => {
+        console.log("Setting up library");
         library = await librarySetup()
     })
 
@@ -60,16 +61,21 @@ describe("Pylon", () => {
         return fixtures
     }
 
-    //Let's try to calculate some cases for pylon
+    // Let's try to calculate some cases for pylon
     const mintTestCases = [
         [10, 20, '4762211', '4749990617651023','5050992','9999999999999999000', false, 6, 12],
-        [20, 10, '4749211', '4762499999999999','9999999999999999998', '5099989999999999000', true, 18, 6],
+        [20, 10, '4749211', '4762499999999999','9999999999999999998', '5099989999999999000', true, 12, 6],
         [10, 20, '2374911', '9525000000000000','4999999999999999999', '10049994999999999000', true, 6, 22],
-        [20, 20, '9525011', '4749995308820878','10099989951286946806', '9999999999999999000', false, 12, 12],
+        [20, 20, '9525011', '4749995308820878','10099989951286946806', '9999999999999999000', false, 18, 12],
         [2000, 2000, '4750011', '952500000000000000','1000000000000000000000', '1009998999999999999000', true, 6, 6],
+        [10, 20, '4762509926821186', '4749990617651023','5099989902573941080','9999999999999999000', false, 18, 18],
+        [20, 10, '4749999999999999', '4762499999999999','9999999999999999998', '5099989999999999000', true, 18, 18],
+        [10, 20, '2374999999999999', '9525000000000000','4999999999999999999', '10049994999999999000', true, 18, 18],
+        [20, 20, '9525009926820697', '4749995308820878','10099989951286946806', '9999999999999999000', false, 18, 18],
+        [2000, 2000, '475000000000000000', '952500000000000000','1000000000000000000000', '1009998999999999999000', true, 18, 18],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
     mintTestCases.forEach((mintCase, i) => {
-        it(`mintPylon random decimals:${i}`, async () => {
+        it(`mintPylon:${i}`, async () => {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
             // Add some liquidity to the Pair...
             let fixtures = await init(token0Amount, token1Amount, 50, decimals0, decimals1)
@@ -91,9 +97,65 @@ describe("Pylon", () => {
             expect(poolTokens.pt0).to.eq(expectedOutputAmount0);
             // Anchor
         })
-    })  // Let's try to calculate some cases for pylon
+    })
+
+    const burnTestCases = [
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 18],
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 18],
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 18],
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 6],
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 12],
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 12],
+        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
+    ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
+
+    burnTestCases.forEach((mintCase, i) => {
+        it(`Mint Burn Cycle test:${i}`, async () => {
+            const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
+            // Add some liquidity to the Pair...
+            let fixtures =  await init(token0Amount, token1Amount, 50, decimals0, decimals1)
+
+            let poolTokens = await printPoolTokens(account.address, fixtures, true, 1);
+            let initialPtBalance = poolTokens.pt1;
+
+            if (isAnchor) {
+                let t = expandToNDecimals(token0Amount/200, decimals1)
+                await mintSync(account.address, t, isAnchor, fixtures, true, 1);
+            }else{
+                let t = expandToNDecimals(token1Amount/200, decimals0)
+                await mintSync(account.address, t, isAnchor, fixtures, true, 1);
+            }
+
+            //Force update
+
+            await forwardTime(ethers.provider, 50);
+            await updateMint(fixtures, 1);
 
 
+            //Now we burn Anchor balance and see how much we get back.
 
+            await forwardTime(ethers.provider, 50);
+
+            let balancePreBurn = await token1.balanceOf(account.address)
+
+            let aptBalance = await poolTokenInstance1.balanceOf(account.address)
+            // console.log("apt total, apt initial: ", format(aptBalance), format(initialPtBalance));
+
+            aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
+            // console.log("Apt Sent: ", format(aptBalance));
+
+            await burn(account.address, aptBalance, isAnchor, fixtures, true, 1);
+
+            let balancePostBurn = await token1.balanceOf(account.address);
+
+            expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from("99980001000000000"))
+
+            await printState(fixtures, true, 1)
+
+            // expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(expectedOutputAmount1);
+            // expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(expectedOutputAmount0);
+            // Anchor
+        })
+    })
 
 })

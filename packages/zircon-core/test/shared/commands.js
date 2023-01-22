@@ -54,6 +54,15 @@ function destructure(fixtures, index) {
     token1 = poolTokenContract.attach(pylon.token1)
     poolTokenInstance0 = poolTokenContract.attach(pylon.poolAddress0)
     poolTokenInstance1 = poolTokenContract.attach(pylon.poolAddress1)
+    return {
+        ...fixtures,
+        pylonInstance,
+        pair,
+        token0,
+        token1,
+        poolTokenInstance0,
+        poolTokenInstance1
+    }
 }
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
@@ -103,7 +112,7 @@ exports.addPylon = async function addPylon(fixtures, token0Decimals, token1Decim
 }
 
 exports.initPylon = async function initPylon(fixtures, token0Amount, token1Amount, pylonPercentage, index=0) {
-    destructure(fixtures, index);
+    let fixtures2 = destructure(fixtures, index);
     let token0Decimals = token0Amount;
     let token1Decimals = token1Amount;
 
@@ -122,7 +131,7 @@ exports.initPylon = async function initPylon(fixtures, token0Amount, token1Amoun
     // Let's start the pylon
     await pylonInstance.initPylon(account.address)
 
-    return fixtures
+    return fixtures2
     // Let's start the pylon
 }
 
