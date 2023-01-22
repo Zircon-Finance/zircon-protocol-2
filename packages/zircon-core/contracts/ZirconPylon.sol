@@ -212,6 +212,7 @@ contract ZirconPylon is IZirconPylon {
     // 0.048 kb
     function initMigratedPylon(uint _gamma, uint _vab, bool _formulaSwitch) external {
         onlyFactory(); // sufficient check
+        updateFees();
         gammaMulDecimals = _gamma;
         virtualAnchorBalance = _vab;
         formulaSwitch = _formulaSwitch;
@@ -419,7 +420,9 @@ contract ZirconPylon is IZirconPylon {
     // If we have any excess reserves we donate them to the pool
     // 0.614 kb
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private returns (uint liq0, uint liq1){
-        if (max0 < newReserve0) {
+        console.log("sending 0", max0, newReserve0.mul(110) / 100 );
+
+        if (max0 < newReserve0.mul(110) / 100) {
             _safeTransfer(pylonToken.float, pairAddress, newReserve0 - max0);
             (liq0, ,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
             reserve0 = max0;
@@ -427,8 +430,8 @@ contract ZirconPylon is IZirconPylon {
         } else {
             reserve0 = uint112(newReserve0);
         }
-
-        if (max1 < newReserve1) {
+        console.log("sending 1", max1,newReserve1.mul(110) / 100 );
+        if (max1 < newReserve1.mul(110) / 100) {
             _safeTransfer(pylonToken.anchor, pairAddress, newReserve1 - max1);
             (liq1,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
             reserve1 = max1;
@@ -512,10 +515,10 @@ contract ZirconPylon is IZirconPylon {
 
         (uint reservesTranslated0, uint reservesTranslated1,) = getPairReservesTranslated(balance0, balance1);
         {
-            uint112 max0 = uint112((reservesTranslated0 * maxPercentageSync) / 100);
-            // gov-controlld parameter, mul is unnecessary
-            uint112 max1 = uint112((reservesTranslated1 * maxPercentageSync) / 100);
-
+//            uint112 max0 = uint112((reservesTranslated0 * maxPercentageSync) / 100);
+//            // gov-controlld parameter, mul is unnecessary
+//            uint112 max1 = uint112((reservesTranslated1 * maxPercentageSync) / 100);
+            console.log("pair reserves", reservesTranslated0, reservesTranslated1, maxPercentageSync );
             updateReservesRemovingExcess(
                 balance0,
                 balance1,
@@ -1267,14 +1270,17 @@ contract ZirconPylon is IZirconPylon {
 
     }
 
-
-    // 1.384
-    /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
-    function sync() private {
+    function updateFees() private {
+        // TODO: here makes sense to do smth like an update variable just for gas savings
         liquidityFee = IZirconFactory(pairFactoryAddress).liquidityFee();
         maxPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
         deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
         oracleUpdateSecs = IZirconPylonFactory(factoryAddress).oracleUpdateSecs();
+    }
+    // 1.384
+    /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
+    function sync() private {
+        updateFees();
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) {
             IZirconPair(pairAddress).tryLock();

@@ -64,59 +64,8 @@
 //         return fixtures
 //     }
 //
-//     // mint-test cases moved to pylon-2-test.js
-//     it('Mint Burn Cycle test', async function () {
-//
-//         const mintCase = [
-//             [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true]]
-//
-//         const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor] = mintCase[0]
-//         // Add some liquidity to the Pair...
-//         let fixtures = await init(token0Amount, token1Amount, 50)
-//
-//         let poolTokens = await printPoolTokens(account.address, fixtures, true);
-//         let initialPtBalance = poolTokens.pt1;
-//
-//         if (isAnchor) {
-//             let t = token0Amount/200;
-//             await mintSync(account.address, t, isAnchor, fixtures, false);
-//         }else{
-//             let t = token1Amount/200
-//             await mintSync(account.address, t, isAnchor, fixtures, false);
-//         }
-//
-//         //Force update
-//
-//         await forwardTime(ethers.provider, 50);
-//         await updateMint(fixtures);
-//
-//
-//         //Now we burn Anchor balance and see how much we get back.
-//
-//         await forwardTime(ethers.provider, 50);
-//
-//         let balancePreBurn = await token1.balanceOf(account.address)
-//
-//         let aptBalance = await poolTokenInstance1.balanceOf(account.address)
-//         // console.log("apt total, apt initial: ", format(aptBalance), format(initialPtBalance));
-//
-//         aptBalance = aptBalance.sub(initialPtBalance); //We only want the new tokens.
-//         // console.log("Apt Sent: ", format(aptBalance));
-//
-//         await burn(account.address, aptBalance, isAnchor, fixtures, true)
-//
-//         let balancePostBurn = await token1.balanceOf(account.address);
-//
-//         expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from("99980001000000000"))
-//
-//         await printState(fixtures, true)
-//
-//         // expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(expectedOutputAmount1);
-//         // expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(expectedOutputAmount0);
-//
-//     });
-//
-//
+//     // mint-test and mint burn cycle cases moved to pylon-2-test.js
+//    
 //     it('Fee assignment + mu Test', async function () {
 //         let token0Amount = 1700
 //         let token1Amount = 5300
@@ -314,8 +263,8 @@
 //         await expect(updateMint(fixtures)).to.be.revertedWith("Z: FTH")
 //
 //     });
-// //
-// //
+//
+//    
 //     it('Delta Gamma test 2', async function () {
 //
 //         let token0Amount = 1700
