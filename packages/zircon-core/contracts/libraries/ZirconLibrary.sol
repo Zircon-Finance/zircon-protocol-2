@@ -68,7 +68,7 @@ library ZirconLibrary {
             coefficients.a = aNumerator * decimals.anchor/aDenominator;
             {
                 uint _p2x = p2x;
-                console.log("aNum, a", aNumerator, coefficients.a);
+                console.log("apos", coefficients.a);
             }
 
             // If b is positive
@@ -87,11 +87,14 @@ library ZirconLibrary {
         } else {
             //a is negative
             aNumerator = (aPartial2 - aPartial1)/p2x;
-            console.log("aPart2, aPart1, p2x", aPartial2, aPartial1, p2x);
+
+            //            console.log("aPart2, aPart1, p2x", aPartial2, aPartial1, p2x);
 
             coefficients.a = (aNumerator * decimals.anchor)/aDenominator;
 
             coefficients.b = (p2y * decimals.anchor/p2x).add((p2x * coefficients.a)/decimals.anchor); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+
+            console.log("aneg, b", coefficients.a, coefficients.b);
 
             coefficients.aNegative = true;
             coefficients.bNegative = false;
@@ -143,7 +146,7 @@ library ZirconLibrary {
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
-            ftv = 2 * Math.sqrt((reserve0 * reserve1)/decimals.float * _x) - adjustedVab;
+            ftv = 2 * Math.sqrt((reserve0 * reserve1)/decimals.float * _x).sub(adjustedVab);
             reduceOnly = false;
             lineFormula = false;
         } else {
@@ -171,12 +174,15 @@ library ZirconLibrary {
             ftv = calculateFtv(decimals, coefficients, x);
 
             //If derivative is positive at p3x
+            //B can only be negative when a is positive
+
             if(!coefficients.aNegative || coefficients.b > (2 * coefficients.a * p3x)/decimals.anchor) {
                 reduceOnly = false;
             } else {
                 //This means there is an excess of floats and the derivative becomes negative at some point before the juncture
                 //At this point float liquidity can only be removed until this condition doesn't persist anymore.
                 reduceOnly = true;
+                console.log("red");
             }
 
         }

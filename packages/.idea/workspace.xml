@@ -5,18 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/zircon-core/test/shared/safe-commands.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/json/test-cases.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/json/test-cases.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/utils.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/UniswapV2Library.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/UniswapV2Library.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -170,7 +164,7 @@
       <workItem from="1671622984201" duration="21582000" />
       <workItem from="1672142127570" duration="25391000" />
       <workItem from="1673864315966" duration="97000" />
-      <workItem from="1673864453438" duration="27875000" />
+      <workItem from="1673864453438" duration="57426000" />
     </task>
     <servers />
   </component>

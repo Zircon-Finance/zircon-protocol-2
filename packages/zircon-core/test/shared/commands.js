@@ -169,7 +169,11 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
     let staticResult = await pylonInstance.callStatic.mintPoolTokens(account.address, isAnchor)
     await saveValuesForSDK(true, false, tokenDecimals, 0, staticResult, 0, isAnchor, fixtures)
 
-    let results = await pylonInstance.mintPoolTokens(account.address, isAnchor)
+    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+
+    let results = await pylonInstance.mintPoolTokens(address, isAnchor)
+
+    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
     console.log("\n===MintSync Complete === AmOut: ", staticResult.toString())
     return results
@@ -193,6 +197,8 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 
     await saveValuesForSDK(false, false, token0Decimals, token1Decimals, staticResult, null, isAnchor, fixtures)
 
+    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+
     let results = await pylonInstance.mintAsync(address, isAnchor)
 
     console.log("\n===MintAsync Complete === AmOut:", staticResult.toString())
@@ -215,8 +221,10 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
 
     await saveValuesForSDK(true, true, poolTokenAmount, null, staticResult, null, isAnchor, fixtures)
 
+    let balanceBefore = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
     let results = await pylonInstance.burn(address, isAnchor)
 
+    let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
 
     console.log("\n===Burn Complete === AmOut: ", staticResult.toString())
     return results;

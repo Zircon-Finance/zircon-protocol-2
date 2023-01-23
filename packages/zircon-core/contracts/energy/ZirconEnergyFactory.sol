@@ -70,13 +70,13 @@ contract ZirconEnergyFactory is IZirconEnergyFactory{
     }
 
     function energyRevenueCodeHash() public pure returns (bytes32) {
-        return keccak256(type(ZirconEnergyRevenue).creationCode);
+        return keccak256(type(ZirconEnergy).creationCode);
     }
 
     // DO NOT CHANGE THIS FUNCTIONS 'yarn bytecode' will do it for you ;)
     function energyFor(address token, address pair) view internal returns (address energy) {energy = address(uint(keccak256(abi.encodePacked(hex'ff',address(this),keccak256(abi.encodePacked(pair, token)),hex'a84be508a025a1a9d7a8d8c4348d12ad0a11619249ca54e5465341c5210a6201'))));}
 
-    function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'43e6b5909f14128d6614c16e5f525a2f36e3731b45aa60643e64876ef45fb752'))));}
+    function pylonFor(address tokenA, address tokenB, address pair, address pylonFactory) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'0b3a31631516bbff496a070ebce3c70b3ece048899c7347a31657368932c0ec6'))));}
 
     function createEnergyRev(address _pair, address _tokenA, address _tokenB, address _pylonFactory) external returns (address energy) {
         require(_tokenA != _tokenB, 'ZF: IDENTICAL_ADDRESS');
