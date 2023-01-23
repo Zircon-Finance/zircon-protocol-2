@@ -41,7 +41,6 @@ library ZirconLibrary {
             return ParabolaCoefficients(0, p3y.mul(decimals.anchor)/p3x, false, false);
         }
 
-
         // Allows us to use the function for checking without reverting everything
         // For now this particular case we keep to a revert. In principle it should just snap out of line formula.
         if(p3x < p2x) {

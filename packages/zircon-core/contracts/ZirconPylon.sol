@@ -1284,6 +1284,7 @@ contract ZirconPylon is IZirconPylon {
     /// @notice Master update function. Syncs up the vault's state with the pool and any price/fee changes
     function sync() private {
         updateFees();
+
         // Prevents this from being called while the underlying pool is getting flash loaned
         if(msg.sender != pairAddress) {
             IZirconPair(pairAddress).tryLock();
@@ -1383,27 +1384,16 @@ contract ZirconPylon is IZirconPylon {
                 //convert accumulator to 1e18 multiplier form
                 //Shift in two steps to avoid cancellation
 
-                //TODO: check this
                 uint _avgPrice = (uint256(((
                 (currentFloatAccumulator - lastFloatAccumulator)
                 /(blockTimestamp - lastOracleTimestamp))
                 >> 56)) * decimals.anchor) >> 56;
 
-                console.log("avg price", _avgPrice);
-
-
-                //                console.log("oracleRes", _avgPrice);
-                //                console.log("cfa, lfa", currentFloatAccumulator, lastFloatAccumulator);
-                //                console.log("bt, lot", blockTimestamp, lastOracleTimestamp);
-                //                _avgPrice = _avgPrice/(blockTimestamp - lastOracleTimestamp);
-
                 lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;
                 lastFloatAccumulator = currentFloatAccumulator;
-
             }
         }
-
 
 
 
@@ -1484,7 +1474,6 @@ contract ZirconPylon is IZirconPylon {
                 _pairReserveTranslated0, _pairReserveTranslated1
             );
 
-
             {
                 uint oldMu = muMulDecimals;
 
@@ -1503,6 +1492,7 @@ contract ZirconPylon is IZirconPylon {
             }
 
             lastRootKTranslated = rootKTranslated;
+            console.log("gamma calculated");
 
             //updateDelta()
 
@@ -1556,6 +1546,8 @@ contract ZirconPylon is IZirconPylon {
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
         }
+        console.log("sync calculated");
+
     }
 
 
@@ -1658,7 +1650,6 @@ contract ZirconPylon is IZirconPylon {
         _ptTotalSupply - (_ptTotalSupply.mul(_pylonReserve1) / virtualAnchorBalance) :
         _ptTotalSupply - (_ptTotalSupply.mul(_pylonReserve0) / (_reserve0.mul(2*gammaMulDecimals) / 1e18 + _pylonReserve0));
 
-        console.log("ps, ptb", pylonShare, ptb);
         claim = (_liquidity.mul(pylonShare))/maxPoolTokens;
         notZero(claim); // ( > 0, "Z: CZ");
     }
@@ -1811,7 +1802,6 @@ contract ZirconPylon is IZirconPylon {
 
         if(!_isAnchor) {
             ftvChange -= ptu.mul(1e18)/(ptb.mul(gammaMulDecimals)/1e18);
-            console.log("ptb, g", ptb, gammaMulDecimals);
             //            desiredFtv = (2 * _pairReserves1 * gammaMulDecimals)/1e18 - removedAmount;
 
             //TODO: might change to getFTV for x
@@ -1916,7 +1906,7 @@ contract ZirconPylon is IZirconPylon {
         // Let's get how much liquidity was sent to burn
         // Outside of scope to be used for vab/vfb adjustment later
         uint liquidity = _getBalanceOf(pt, address(this));
-
+        console.log("liquidity", liquidity);
 
         notZero(liquidity);
         uint _totalSupply = _totalSupply(pt);
@@ -2093,7 +2083,6 @@ contract ZirconPylon is IZirconPylon {
         );
 
 
-        console.log("desFtv, change", desiredFtv, change);
 
         //Percentage easier when removing, raw amount easier when adding
         if(isPercentage) {

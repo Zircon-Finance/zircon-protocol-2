@@ -37,15 +37,12 @@ describe("Pylon", () => {
 
         console.log("Minting on ZRG ETH Pool")
         // Minting a bit of ETH Stable PT
-        await mintSync(account.address, "1", false, fixtures, false, index)
+        await mintSync(account.address, "1", true, fixtures, false, index)
 
         // Getting the PT Instances
         console.log("Minting a bit of ETH Stable PT")
         let stablePTBalance = await fixtures.poolTokenInstance1.balanceOf(account.address)
-
-        await fixtures.poolTokenInstance1.transfer(pylon.address, stablePTBalance)
-
-        console.log("Transferred the PT to the Pylon", stablePTBalance.toString())
+        console.log("stable transfer", stablePTBalance.toString());
 
         // Burning (should fire FTT hopefully)
         await burn(account.address, stablePTBalance, true, fixtures, true, index);
