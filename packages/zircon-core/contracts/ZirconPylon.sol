@@ -91,6 +91,7 @@ contract ZirconPylon is IZirconPylon {
         require(!_entered, "Z: R");
         _entered = true;
     }
+
     function onlyFactory() internal view{
         require(msg.sender == factoryAddress, 'Z: F'); // sufficient check
     }
@@ -221,21 +222,24 @@ contract ZirconPylon is IZirconPylon {
         muBlockNumber = block.number; //block height of last mu update
         muOldGamma = gammaMulDecimals; //gamma value at last mu update
 
-        (uint cacheReserve0, uint cacheReserve1,) = getPairReservesTranslated(0, 0);
+        // with 0 it reverts in the next lines
+        (uint cacheReserve0, uint cacheReserve1,) = getPairReservesTranslated(1, 1);
         (uint res0, uint res1,) = getPairReservesNormalized();
         (uint syncReserve0,) = getSyncReserves();
+        console.log("hello migration", _vab, gammaMulDecimals);
 
         p2x = cacheReserve1*decimals.float/cacheReserve0;
-        p2y = 2*cacheReserve1*gammaMulDecimals/1e18;
+
+        p2y = (2*cacheReserve1)*gammaMulDecimals/1e18;
+
         if(_formulaSwitch){
             virtualFloatBalance = (res0*res1)/_vab;
-
         }else{
             virtualFloatBalance = 2*cacheReserve0*gammaMulDecimals/1e18 + syncReserve0;
-
         }
+
         //TODO: Might cause issue since it's not adjusted, maybe call with code 42?
-        if (_vab != 0 ) {_update(0, false, cacheReserve0, cacheReserve1, _vab);}
+        if (_vab != 0) {_update(0, false, cacheReserve0, cacheReserve1, _vab);}
         initialized = 1;
     }
 
@@ -277,7 +281,6 @@ contract ZirconPylon is IZirconPylon {
         //        console.log("gp3x, p3y", p3x, adjustedVab);
         //        console.log("pair0, pair1", _translatedReserve0, _translatedReserve1);
 
-        console.log("_translatedReserve1", _translatedReserve1, _translatedReserve0);
 
         uint x = (_translatedReserve1 * decimals.float)/_translatedReserve0;
         console.log("x", decimals.float);
@@ -422,7 +425,7 @@ contract ZirconPylon is IZirconPylon {
     function updateReservesRemovingExcess(uint newReserve0, uint newReserve1, uint112 max0, uint112 max1) private returns (uint liq0, uint liq1){
         console.log("sending 0", max0, newReserve0.mul(110) / 100 );
 
-        if (max0 < newReserve0.mul(110) / 100) {
+        if (max0.mul(110) / 100 < newReserve0) {
             _safeTransfer(pylonToken.float, pairAddress, newReserve0 - max0);
             (liq0, ,) = IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
             reserve0 = max0;
@@ -431,7 +434,7 @@ contract ZirconPylon is IZirconPylon {
             reserve0 = uint112(newReserve0);
         }
         console.log("sending 1", max1,newReserve1.mul(110) / 100 );
-        if (max1 < newReserve1.mul(110) / 100) {
+        if (max1.mul(110) / 100 < newReserve1) {
             _safeTransfer(pylonToken.anchor, pairAddress, newReserve1 - max1);
             (liq1,,) = IZirconPair(pairAddress).mintOneSide(address(this), !isFloatReserve0);
             reserve1 = max1;
@@ -515,9 +518,9 @@ contract ZirconPylon is IZirconPylon {
 
         (uint reservesTranslated0, uint reservesTranslated1,) = getPairReservesTranslated(balance0, balance1);
         {
-//            uint112 max0 = uint112((reservesTranslated0 * maxPercentageSync) / 100);
-//            // gov-controlld parameter, mul is unnecessary
-//            uint112 max1 = uint112((reservesTranslated1 * maxPercentageSync) / 100);
+            //            uint112 max0 = uint112((reservesTranslated0 * maxPercentageSync) / 100);
+            //            // gov-controlld parameter, mul is unnecessary
+            //            uint112 max1 = uint112((reservesTranslated1 * maxPercentageSync) / 100);
             console.log("pair reserves", reservesTranslated0, reservesTranslated1, maxPercentageSync );
             updateReservesRemovingExcess(
                 balance0,

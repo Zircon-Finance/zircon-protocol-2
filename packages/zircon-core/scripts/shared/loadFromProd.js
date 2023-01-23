@@ -17,6 +17,8 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     console.log("<><><><><> Loading from prod <><><><><><><>")
     const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
 
+    let pylons = [];
+
     // Getting all the information from the monitoring API
     let pairs = monitoring.data.pairs
 
@@ -95,22 +97,25 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
         console.log("Creating Pylons...")
 
         for(let pylon of pair.pylons) {
-
+            if (
+                pylon.balanceToken0.hex.toString() === "0x00" &&
+                pylon.balanceToken1.hex.toString() === "0x00" &&
+                pylon.pairBalance.hex.toString() === "0x00"
+            ) continue
             let tk0 = tokens.filter((token) => {return token.oldAddress === pylon.token0.address.toString()})[0]
             let tk1 = tokens.filter((token) => {return token.oldAddress === pylon.token1.address.toString()})[0]
 
             // Same here we have to pass all the old information for the pylon and energy
             await(await pylonFactoryContract.addPylon(pairAddress, tk0.address, tk1.address)).wait()
 
-
             let pylonAddress;
-            console.log("Creating Pylon for ", tk0.address, tk1.address)
             while (true) {
                 pylonAddress = await pylonFactoryContract.getPylon(tk0.address, tk1.address)
                 if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
                     break
                 }
             }
+            console.log("pylon address: ", pylonAddress)
 
             // Minting the Pool Tokens Total Supply
             let ptfTS = pylon.ptFloat.totalSupply
@@ -148,6 +153,9 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.formulaSwitch)).wait()
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)
+
+            pylons.push({token0: tk0.address, token1: tk1.address, pairAddress: pairAddress, pylonAddress, poolAddress0: ptfAddress, poolAddress1: ptsAddress})
         }
     }
+    return pylons
 }

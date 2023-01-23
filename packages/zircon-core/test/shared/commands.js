@@ -15,6 +15,8 @@ let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     factoryInstance, deployerAddress, account2, account,
     pair, poolTokenContract, tokenContract, pairContract, pylonContract;
 
+let tokens = []; // used for load from production
+
 async function initData(library) {
     let fixtures = await coreFixtures(library)
     pylons = []
@@ -65,19 +67,33 @@ function destructure(fixtures, index) {
     }
 }
 
+exports.getFixturesForPylon = function (fixtures, index) {
+    return destructure(fixtures, index)
+}
+
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
 const DECIMALS = ethers.BigNumber.from(10).pow(18)
 const overrides = {
     gasLimit: 9999999
 }
 
+function getTokenBySymbol(symbol) {
+    return tokens.find(token => token.symbol == symbol)
+}
+
+exports.getPylonIndexBy = function getPylonIndexBy(tkSmb0, tkSmb1) {
+    let tk0 = getTokenBySymbol(tkSmb0)
+    let tk1 = getTokenBySymbol(tkSmb1)
+    return pylons.findIndex(pylon => pylon.token0 === tk0.address && pylon.token1 === tk1.address)
+}
+
 exports.initPylonsFromProdSnapshot = async function initProductionData(library) {
     const monitoring = await axios.get(API_MONITORING);
-    const tokens = await createTokens(monitoring)
+    tokens = await createTokens(monitoring)
     let fixtures = await initData(library);
     destructure(fixtures, 0);
 
-    await loadFromProd(
+    let pylonsToAdd = await loadFromProd(
         migratorInstance.address,
         factoryInstance.address,
         factoryPylonInstance.address,
@@ -87,7 +103,7 @@ exports.initPylonsFromProdSnapshot = async function initProductionData(library) 
         tokens,
         library
     )
-
+    pylons.push(...pylonsToAdd);
     return fixtures
 
 }
