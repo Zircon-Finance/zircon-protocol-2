@@ -256,7 +256,52 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
     return results
 
 }
-
+// exports.setPrice = async function setPrice(address, targetPrice, fixtures) {
+//
+//     destructure(fixtures);
+//
+//     let pairResT = await pair.getReserves();
+//     let resIn;
+//     let resOut;
+//     let targetPriceDecimals = expandTo18Decimals(targetPrice)
+//
+//     let price = pairResT[1].mul(DECIMALS).div(pairResT[0]);
+//
+//     console.log("price, targetPrice", format(price), format(targetPriceDecimals));
+//
+//     let dump = targetPriceDecimals.lt(price);
+//
+//     if(dump) {
+//         resIn = pairResT[0]
+//         resOut = pairResT[1]
+//         targetPriceDecimals = (DECIMALS.pow(2)).div(targetPriceDecimals)
+//         console.log("dump target: ", format(targetPriceDecimals))
+//     } else {
+//         resIn = pairResT[1]
+//         resOut = pairResT[0]
+//     }
+//
+//     let x = sqrt((targetPriceDecimals.mul(resIn).div(DECIMALS)).mul(resOut)).sub(resIn)
+//
+//     // let sqrt2 = sqrt(expandTo18Decimals(2).mul(expandTo18Decimals(2)));
+//     // console.log("Sqrt test ", format(sqrt2))
+//     //x = math.sqrt(adjusted_price * res_in * res_out) - res_in
+//
+//     console.log("X", format(x))
+//
+//     //TODO: Adjust by fee as well
+//
+//     let out = getAmountOut(x, resIn, resOut);
+//
+//     if(dump) {
+//         await token0.transfer(pair.address, x)
+//         await pair.swap(0, out, account.address, '0x', overrides)
+//     } else {
+//         await token1.transfer(pair.address, x)
+//         await pair.swap(out, 0, account.address, '0x', overrides)
+//
+//     }
+// }
 exports.setPrice = async function setPrice(address, targetPrice, fixtures, index=0) {
     fixtures = await destructure(fixtures, index);
     let tk0Decimals = await token0.decimals()
@@ -270,10 +315,8 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
     let resOut;
 
     let targetPriceDecimals = expandToNDecimals(targetPrice, fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
-    console.log("pairResT", pairResT[0].toString(), fixtures.isFloatRes0 ? tk0Decimals : tk1Decimals)
-    console.log("pairResT", pairResT[1].toString(), fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
+
     let price = pairResT[1].mul(decimalsR0).div(pairResT[0]);
-    console.log("tp", targetPriceDecimals.toString(), price.toString())
     let dump = targetPriceDecimals.lt(price);
 
     if(dump) {
@@ -299,10 +342,10 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
 
     if(dump) {
         await (fixtures.isFloatRes0 ? token0 : token1).transfer(pair.address, x)
-        await pair.swap(fixtures.isFloatRes0 ? 0 : out, fixtures.isFloatRes0 ? out: 0, account.address, '0x', overrides)
+        await pair.swap(0, out, account.address, '0x', overrides)
     } else {
         await (!fixtures.isFloatRes0 ? token0 : token1).transfer(pair.address, x)
-        await pair.swap(!fixtures.isFloatRes0 ? out : 0, !fixtures.isFloatRes0 ? 0 : out, account.address, '0x', overrides)
+        await pair.swap(out, 0, account.address, '0x', overrides)
     }
 }
 //
