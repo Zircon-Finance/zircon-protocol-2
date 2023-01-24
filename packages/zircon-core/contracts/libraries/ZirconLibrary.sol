@@ -146,7 +146,10 @@ library ZirconLibrary {
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
-            ftv = 2 * Math.sqrt((reserve0 * reserve1)/decimals.float * _x).sub(adjustedVab);
+            ftv = (2 * Math.sqrt(((reserve0 * reserve1)/decimals.float) * _x)).sub(adjustedVab);
+            console.log("ftv", decimals.float, adjustedVab);
+            console.log("ftv", reserve0, _x);
+            console.log("ftv",  Math.sqrt(((reserve0 * reserve1)/decimals.float) * _x));
             reduceOnly = false;
             lineFormula = false;
         } else {

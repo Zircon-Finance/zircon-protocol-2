@@ -1,6 +1,6 @@
 const {ethers} = require("hardhat");
 const {coreFixtures, librarySetup} = require("./fixtures");
-const {expandTo18Decimals, getAmountOut, sqrt, format, getFtv} = require("./utils");
+const {expandTo18Decimals,expandToNDecimals, getAmountOut, sqrt, format, getFtv} = require("./utils");
 const {saveValuesForSDK, casesSDK} = require("./generate-json-sdk-test");
 const {createTokens, loadFromProd} = require("../../scripts/shared/loadFromProd");
 const axios = require("axios")
@@ -46,7 +46,7 @@ function destructureFactories(fixtures) {
     migratorInstance = fixtures.migratorInstance
 }
 
-function destructure(fixtures, index) {
+async function destructure(fixtures, index) {
     destructureFactories(fixtures)
 
     let pylon = pylons[index]
@@ -54,6 +54,9 @@ function destructure(fixtures, index) {
     pair = pairContract.attach(pylon.pairAddress)
     token0 = poolTokenContract.attach(pylon.token0)
     token1 = poolTokenContract.attach(pylon.token1)
+    let pairTk0 = await pair.token0()
+    isFloatRes0 = token0.address === pairTk0
+    console.log("is", isFloatRes0)
     poolTokenInstance0 = poolTokenContract.attach(pylon.poolAddress0)
     poolTokenInstance1 = poolTokenContract.attach(pylon.poolAddress1)
     return {
@@ -63,12 +66,13 @@ function destructure(fixtures, index) {
         token0,
         token1,
         poolTokenInstance0,
-        poolTokenInstance1
+        poolTokenInstance1,
+        isFloatRes0
     }
 }
 
-exports.getFixturesForPylon = function (fixtures, index) {
-    return destructure(fixtures, index)
+exports.getFixturesForPylon = async function (fixtures, index) {
+    return await destructure(fixtures, index)
 }
 
 const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
@@ -91,7 +95,7 @@ exports.initPylonsFromProdSnapshot = async function initProductionData(library) 
     const monitoring = await axios.get(API_MONITORING);
     tokens = await createTokens(monitoring)
     let fixtures = await initData(library);
-    destructure(fixtures, 0);
+    await destructure(fixtures, 0);
 
     let pylonsToAdd = await loadFromProd(
         migratorInstance.address,
@@ -109,7 +113,6 @@ exports.initPylonsFromProdSnapshot = async function initProductionData(library) 
 }
 exports.addPylon = async function addPylon(fixtures, token0Decimals, token1Decimals) {
     destructureFactories(fixtures);
-
     let tok = await ethers.getContractFactory('Token');
     let tk0 = await tok.deploy('Token1', 'TOK1', token0Decimals);
     let tk1 = await tok.deploy('Token2', 'TOK2', token1Decimals);
@@ -128,15 +131,17 @@ exports.addPylon = async function addPylon(fixtures, token0Decimals, token1Decim
 }
 
 exports.initPylon = async function initPylon(fixtures, token0Amount, token1Amount, pylonPercentage, index=0) {
-    let fixtures2 = destructure(fixtures, index);
-    let token0Decimals = token0Amount;
-    let token1Decimals = token1Amount;
+    let fixtures2 = await destructure(fixtures, index);
+    console.log("initializing to init")
+    let token0Decimals = expandToNDecimals(token0Amount, await fixtures2.token0.decimals());
+    let token1Decimals = expandToNDecimals(token1Amount, await fixtures2.token1.decimals());
 
     let token0Pair = token0Decimals.mul(100 - pylonPercentage).div(100);
     let token1Pair = token1Decimals.mul(100 - pylonPercentage).div(100);
 
     let token0Pylon = token0Decimals.mul(pylonPercentage).div(100);
     let token1Pylon = token1Decimals.mul(pylonPercentage).div(100);
+
 
     await token0.transfer(pair.address, token0Pair);
     await token1.transfer(pair.address, token1Pair);
@@ -146,16 +151,16 @@ exports.initPylon = async function initPylon(fixtures, token0Amount, token1Amoun
     await token1.transfer(pylonInstance.address, token1Pylon);
     // Let's start the pylon
     await pylonInstance.initPylon(account.address)
-
+    console.log("finished initializing pylon")
     return fixtures2
     // Let's start the pylon
 }
 
 exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtures, isDecimals, index=0) {
 
-    destructure(fixtures, index)
-
-    let tokenDecimals = !isDecimals ? expandTo18Decimals(tokenAmount) : tokenAmount;
+    await destructure(fixtures, index)
+    let decimals = isAnchor ? await token1.decimals() : await token0.decimals()
+    let tokenDecimals = !isDecimals ? expandToNDecimals(tokenAmount, decimals) : tokenAmount;
 
     console.log("\n===Starting MintSync ", casesSDK.length, isAnchor ? " Anchor ===": " Float ===");
     console.log("== AmountIn:", format(tokenDecimals))
@@ -181,7 +186,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 //
 exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount, isAnchor, fixtures, isDecimals, index=0) {
 
-    destructure(fixtures, index)
+    await destructure(fixtures, index)
 
     let token0Decimals = !isDecimals? expandTo18Decimals(token0Amount) : token0Amount;
     let token1Decimals = !isDecimals? expandTo18Decimals(token1Amount) : token1Amount;
@@ -207,7 +212,7 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 //
 exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures, isDecimals, index=0) {
 
-    destructure(fixtures, index)
+    await destructure(fixtures, index)
 
     let tokenDecimals = !isDecimals? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
@@ -232,7 +237,7 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
 //
 exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor, fixtures, isDecimals, index=0) {
 
-    destructure(fixtures, index)
+    await destructure(fixtures, index)
 
     let tokenDecimals = !isDecimals ? expandTo18Decimals(poolTokenAmount) : poolTokenAmount;
 
@@ -253,49 +258,51 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
 }
 
 exports.setPrice = async function setPrice(address, targetPrice, fixtures, index=0) {
+    fixtures = await destructure(fixtures, index);
+    let tk0Decimals = await token0.decimals()
+    let tk1Decimals = await token1.decimals()
 
-    destructure(fixtures, index);
+    let decimalsR0 = ethers.BigNumber.from(10).pow(fixtures.isFloatRes0 ? tk0Decimals : tk1Decimals)
+    let decimalsR1 = ethers.BigNumber.from(10).pow(fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
 
     let pairResT = await pair.getReserves();
     let resIn;
     let resOut;
-    let targetPriceDecimals = expandTo18Decimals(targetPrice)
 
-    let price = pairResT[1].mul(DECIMALS).div(pairResT[0]);
-
-    console.log("price, targetPrice", format(price), format(targetPriceDecimals));
-
+    let targetPriceDecimals = expandToNDecimals(targetPrice, fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
+    console.log("pairResT", pairResT[0].toString(), fixtures.isFloatRes0 ? tk0Decimals : tk1Decimals)
+    console.log("pairResT", pairResT[1].toString(), fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
+    let price = pairResT[1].mul(decimalsR0).div(pairResT[0]);
+    console.log("tp", targetPriceDecimals.toString(), price.toString())
     let dump = targetPriceDecimals.lt(price);
 
     if(dump) {
         resIn = pairResT[0]
         resOut = pairResT[1]
-        targetPriceDecimals = (DECIMALS.pow(2)).div(targetPriceDecimals)
-        console.log("dump target: ", format(targetPriceDecimals))
+        targetPriceDecimals = (decimalsR1.mul(decimalsR0)).div(targetPriceDecimals)
+        price = (decimalsR0.mul(decimalsR1)).div(price)
+        console.log("dump target: ", targetPriceDecimals.toString(), " from: ", price.toString())
     } else {
         resIn = pairResT[1]
         resOut = pairResT[0]
+        console.log("dump target", targetPriceDecimals.toString(), " from: ", price.toString())
     }
 
-    let x = sqrt((targetPriceDecimals.mul(resIn).div(DECIMALS)).mul(resOut)).sub(resIn)
+    let x = sqrt((targetPriceDecimals.mul(resIn).div(dump ? decimalsR1 : decimalsR0)).mul(resOut)).sub(resIn)
 
     // let sqrt2 = sqrt(expandTo18Decimals(2).mul(expandTo18Decimals(2)));
     // console.log("Sqrt test ", format(sqrt2))
     //x = math.sqrt(adjusted_price * res_in * res_out) - res_in
 
-    console.log("X", format(x))
-
-    //TODO: Adjust by fee as well
-
     let out = getAmountOut(x, resIn, resOut);
+    console.log("changing x: for:", x.toString(), out.toString())
 
     if(dump) {
-        await token0.transfer(pair.address, x)
-        await pair.swap(0, out, account.address, '0x', overrides)
+        await (fixtures.isFloatRes0 ? token0 : token1).transfer(pair.address, x)
+        await pair.swap(fixtures.isFloatRes0 ? 0 : out, fixtures.isFloatRes0 ? out: 0, account.address, '0x', overrides)
     } else {
-        await token1.transfer(pair.address, x)
-        await pair.swap(out, 0, account.address, '0x', overrides)
-
+        await (!fixtures.isFloatRes0 ? token0 : token1).transfer(pair.address, x)
+        await pair.swap(!fixtures.isFloatRes0 ? out : 0, !fixtures.isFloatRes0 ? 0 : out, account.address, '0x', overrides)
     }
 }
 //
@@ -321,7 +328,7 @@ exports.unblockOracle = async function unblockOracle(provider, fixtures, index=0
 //
 
 async function updateMint(fixtures, index=0) {
-    destructure(fixtures, index)
+    await destructure(fixtures, index)
     console.log("\n===Starting updateMint ===")
     await token0.transfer(pylonInstance.address, MINIMUM_LIQUIDITY)
     //await token1.transfer(pylonInstance.address, token0Amount.div(1000))
@@ -331,7 +338,7 @@ async function updateMint(fixtures, index=0) {
 
 async function printPoolTokens(address, fixtures, doPrint, index=0) {
 
-    destructure(fixtures, index);
+    await destructure(fixtures, index);
 
     let ptTotal0 = await poolTokenInstance0.totalSupply();
     let ptTotal0F = ethers.utils.formatEther(ptTotal0);
@@ -361,7 +368,7 @@ async function printPoolTokens(address, fixtures, doPrint, index=0) {
 
 async function printState(fixtures, doPrint, index=0) {
 
-    destructure(fixtures, index)
+    await destructure(fixtures, index)
 
     //we want to return and print all key variables necessary to define the state of a pylon
     //these are vab, vfb, p2x, p2y, gamma
@@ -416,13 +423,17 @@ exports.getPTPrice = async function getPTPrice(fixtures, doPrint) {
 }
 
 
+async function getPairReservesNormalized(fixtures) {
+    let pairResT = await pair.getReserves();
 
+    return [fixtures.isFloatRes0 ? pairResT[0] : pairResT[1], fixtures.isFloatRes0 ? pairResT[1] : pairResT[0]]
+}
 
 async function printPairState(fixtures, doPrint, index=0) {
 
-    destructure(fixtures, index)
+    fixtures = await destructure(fixtures, index)
 
-    let pairResT = await pair.getReserves();
+    let pairResT = await getPairReservesNormalized(fixtures);
 
     let ptb = await pair.balanceOf(pylonInstance.address);
     let ptt = await pair.totalSupply();

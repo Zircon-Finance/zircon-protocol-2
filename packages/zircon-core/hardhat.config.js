@@ -22,6 +22,13 @@ const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
 const moonriverAPI = process.env.API_KEY;
 
+// extendEnvironment(async (hre) => {
+//   library = await librarySetup()
+//
+//   hre.hi = library;
+//   console.log("hello from here");
+// });
+
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */

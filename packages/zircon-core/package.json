@@ -63,5 +63,8 @@
     "add:moonbase": "npx hardhat run --network moonbase scripts/add-pair.js",
     "add:moonriver": "npx hardhat run --network moonriver scripts/add-pair.js",
     "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js"
+  },
+  "jest": {
+    "globalSetup": "./test/shared/jestGlobalSetup.js"
   }
 }

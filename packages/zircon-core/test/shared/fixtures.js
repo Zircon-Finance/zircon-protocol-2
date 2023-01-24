@@ -1,10 +1,14 @@
 const { ethers } = require('hardhat');
 const {expandTo18Decimals} = require("./utils");
 const {LIB_ADDRESS} = require("../../scripts/constants");
+let library = null;
 
 exports.librarySetup = async function librarySetup() {
     // Deploying Library
-    let library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
+    if (library !== null){
+        return library
+    }
+    library = await (await ethers.getContractFactory('ZirconLibrary')).deploy();
     if (library.address !== LIB_ADDRESS[31337]) {
         console.error("UPDATE LIBRARY ADDRESS ON get-bytecodes.js -> 31337: ", library.address)
         throw new Error()
@@ -62,8 +66,9 @@ exports.coreFixtures = async function coreFixtures(library) {
 
     // Sorting Tokens
     const token0Address = await pair.token0();
-    let token0 = tk0.address === token0Address ? tk0 : tk1
-    let token1 = tk1.address === token0Address ? tk0 : tk1
+    let isFloatRes0 = tk0.address === token0Address
+    let token0 = isFloatRes0 ? tk0 : tk1
+    let token1 = !isFloatRes0 ? tk0 : tk1
 
     // Creating Pylon
     await factoryPylonInstance.addPylon(lpAddress, token0.address, token1.address);
@@ -107,7 +112,8 @@ exports.coreFixtures = async function coreFixtures(library) {
         pylonContract: zPylon,
         pairContract,
         tokenContract: tok,
-        poolTokenContract
+        poolTokenContract,
+        isFloatRes0
     }
 }
 
