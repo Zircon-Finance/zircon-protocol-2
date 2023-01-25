@@ -20,6 +20,9 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
     let account = fixtures.account
     let energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address);
 
+    let token0Decimals = await token0.decimals()
+    let token1Decimals = await token1.decimals()
+
     // Getting all the values
     let reserveAnchorEnergy = await token1.balanceOf(energyAddress);
     let reservePtEnergy = await pair.balanceOf(energyAddress);
@@ -92,6 +95,10 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
         p2y: p2y.toString(),
         reservePtEnergy: reservePtEnergy.toString(),
         reserveAnchorEnergy: reserveAnchorEnergy.toString(),
+        decimals: {
+            float: ethers.BigNumber.from(10).pow(token0Decimals).toString(),
+            anchor: ethers.BigNumber.from(10).pow(token1Decimals).toString()
+        }
     }
     casesSDK.push(tx)
 }

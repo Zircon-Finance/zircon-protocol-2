@@ -48,10 +48,11 @@ contract ZirconPylon is IZirconPylon {
 
     // ***** Key variables required to reproduce Pylon state *****
     uint public virtualAnchorBalance;
-    uint public virtualFloatBalance;
     bool public formulaSwitch;
     uint public p2x;
     uint public p2y;
+    uint public virtualFloatBalance;
+
 
     uint public lastRootKTranslated;
     //uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)

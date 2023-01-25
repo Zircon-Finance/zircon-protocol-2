@@ -37,7 +37,7 @@ library ZirconLibrary {
         console.log("parab p2x, p2y", p2x, p2y);
         console.log("p3x, p3y", p3x, p3y);
         // Makes it a line if the points are are within 0.1% of each other;
-        if((p3x * decimals.anchor)/p2x <= (1001*(decimals.anchor-1e3))) {
+        if((p3x * decimals.anchor)/p2x <= (1001*(decimals.anchor/1e3))) {
             return ParabolaCoefficients(0, p3y.mul(decimals.anchor)/p3x, false, false);
         }
 
