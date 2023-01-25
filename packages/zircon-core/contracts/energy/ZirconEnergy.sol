@@ -195,7 +195,7 @@ contract ZirconEnergy is IZirconEnergy {
   external returns (uint retPTU, uint amount){
     // Send slashing should send the extra PTUs to Uniswap.
     // When burn calls the uniswap burn it will also give users the compensation
-    console.log("energyOmega", omegaMulDecimals);
+//    console.log("energyOmega", omegaMulDecimals);
     retPTU = omegaMulDecimals.mul(ptu)/1e18;
     if (omegaMulDecimals < 1e18) {
       //finds amount to cover
