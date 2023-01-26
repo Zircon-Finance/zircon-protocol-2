@@ -49,7 +49,6 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         args: [migrator.address, feeToSetter.address],
         log: true
     });
- electrolytes
     // Deploy Factory
     let factoryInstance = await deploy('ZirconFactory', {
         from: deployer,
