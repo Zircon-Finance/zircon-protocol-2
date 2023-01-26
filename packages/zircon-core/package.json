@@ -16,6 +16,7 @@
     "contracts"
   ],
   "devDependencies": {
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/hardhat-upgrades": "^1.19.0",
@@ -46,6 +47,7 @@
     "deploy:moonriver": "npx hardhat run --network moonriver scripts/get-bytecodes.js && npx hardhat --network  moonriver deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "deploy:bsc": "npx hardhat --network bsc deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "deploy:bscTest": "npx hardhat --network bscTest deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
+    "deploy:arbGoerly": "npx hardhat --network arbGoerly deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat run scripts/get-bytecodes.js && npx hardhat compile && npm test",
@@ -63,7 +65,7 @@
     "fees:moonriver": "npx hardhat run --network moonriver scripts/change-fees.js",
     "add:moonbase": "npx hardhat run --network moonbase scripts/add-pair.js",
     "add:moonriver": "npx hardhat run --network moonriver scripts/add-pair.js",
-    "testCreate:moobase": "npx hardhat run --network moonbase scripts/creating-test.js",
+    "testCreate:moonbase": "npx hardhat run --network moonbase scripts/creating-test.js",
     "testCreate:bscTest": "npx hardhat run --network bscTest scripts/creating-test.js",
     "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js"
   },

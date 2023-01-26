@@ -76,9 +76,14 @@ module.exports = {
   networks: {
     hardhat: {},
     moonbase: {
-      url: 'https://moonbase.unitedbloc.com:1000',
+      url: 'https://moonbase-alpha.blastapi.io/88bb4b04-103a-47c5-ac37-0aecaf3aff46',
       accounts: [privateKeyDev],
       chainId: 1287,
+    },
+    arbGoerly: {
+      url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
+      accounts: [privateKeyDev],
+      chainId: 421613,
     },
     bsc: {
       url: 'https://binance.nodereal.io',
@@ -125,5 +130,4 @@ module.exports = {
       },
     ],
   }
-  ,
 };

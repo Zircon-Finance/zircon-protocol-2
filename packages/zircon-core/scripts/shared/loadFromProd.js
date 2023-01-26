@@ -28,8 +28,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     console.log("Migrator address", migratorAddress, "owner", owner)
 
     let migratorContract = await migrator.attach(migratorAddress);
-    console.log("seems like is failing here")
-    await migratorContract.setMigrator(owner)
+    // await migratorContract.setMigrator(owner)
 
     console.log("Migrator is setted to ", owner)
 
@@ -62,14 +61,16 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
         // We must pass all the information to the pair contract
         // so probably we are gonna need some changes in the Zircon Pair or smth
         await(await factoryContract.createPair(token0.address, token1.address, pylonFactoryContract.address)).wait()
-        console.log("Creating pair for ", token0.symbol, token1.symbol)
 
-        while (true) {
-            pairAddress = await factoryContract.getPair(token0.address, token1.address)
-            if (pairAddress !== "0x0000000000000000000000000000000000000000") {
-                break
-            }
-        }
+        pairAddress = await factoryContract.getPair(token0.address, token1.address)
+        console.log("Creating pair for: ", pairAddress)
+
+        // while (true) {
+        //     pairAddress = await factoryContract.getPair(token0.address, token1.address)
+        //     if (pairAddress !== "0x0000000000000000000000000000000000000000") {
+        //         break
+        //     }
+        // }
         // Transferring some balance to the pair
         let balance0 = pair.balanceToken0
         let balance1 = pair.balanceToken1

@@ -56,7 +56,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         log: true
     });
 
-    // Deploy Pylon
+    //Deploy Pylon
     let factoryPylonInstance = await deploy('ZirconPylonFactory', {
         from: deployer,
         args: [
@@ -69,6 +69,19 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
         log: true
     });
+
+    // let factoryPylonInstance = await deploy('ZirconPylonFactory', {
+    //     from: deployer,
+    //     args: [
+    //         "0x8a043055FC0b4913eBEc4b1B0213e53fb8C41e7f",
+    //         "0x5e521DF66789A776d269553b4e5BD7616c80bd44",
+    //         "0xcB781E13ECA13BbcF87109Ab7f4d26BeD412b8ca",
+    //         "0x88AD12C94891635b680C484c7dF4b887838Fa288",
+    //         "0x1C6d54A24EaAeC8E62104BD1Eb3807008D3b639B"
+    //     ],
+    //     libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
+    //     log: true
+    // });
 
     // await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
     // await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);

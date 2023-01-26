@@ -187,9 +187,11 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount, isAnchor, fixtures, isDecimals, index=0) {
 
     await destructure(fixtures, index)
+    let decimals0 = await token0.decimals()
+    let decimals1 = await token1.decimals()
 
-    let token0Decimals = !isDecimals? expandTo18Decimals(token0Amount) : token0Amount;
-    let token1Decimals = !isDecimals? expandTo18Decimals(token1Amount) : token1Amount;
+    let token0Decimals = !isDecimals ? expandToNDecimals(token0Amount, decimals0) : token0Amount;
+    let token1Decimals = !isDecimals ? expandToNDecimals(token1Amount, decimals1) : token1Amount;
 
     console.log("\n===Starting MintAsync", casesSDK.length, isAnchor ? "Anchor ===": "Float ===")
     console.log("== AmountIn:", format(token0Decimals), format(token1Decimals))
@@ -319,6 +321,10 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
     let price = pairResT[1].mul(decimalsR0).div(pairResT[0]);
     let dump = targetPriceDecimals.lt(price);
 
+    console.log("price:", price.toString())
+    console.log("target price:", targetPriceDecimals.toString())
+    console.log("dump:", dump)
+
     if(dump) {
         resIn = pairResT[0]
         resOut = pairResT[1]
@@ -331,7 +337,7 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
         console.log("dump target", targetPriceDecimals.toString(), " from: ", price.toString())
     }
 
-    let x = sqrt((targetPriceDecimals.mul(resIn).div(dump ? decimalsR1 : decimalsR0)).mul(resOut)).sub(resIn)
+    let x = sqrt((targetPriceDecimals.mul(resIn)).mul(resOut).div(dump ? decimalsR1 : decimalsR0)).sub(resIn)
 
     // let sqrt2 = sqrt(expandTo18Decimals(2).mul(expandTo18Decimals(2)));
     // console.log("Sqrt test ", format(sqrt2))
