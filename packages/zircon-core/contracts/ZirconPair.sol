@@ -329,18 +329,18 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // Just for testing purposes
     // Should be deleted on deployment
-//    function mintTest(address to, uint amount) external {
-//        _mint(to, amount);
-//    }
-//
-//    // Same here
-//    function reservesTest() external {
-//        uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
-//        uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
-//
-//        reserve0 = uint112(balance0);
-//        reserve1 = uint112(balance1);
-//
-//        kLast = uint(reserve0).mul(reserve1);
-//    }
+    function mintTest(address to, uint amount) external {
+        _mint(to, amount);
+    }
+
+    // Same here
+    function reservesTest() external {
+        uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
+        uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
+
+        reserve0 = uint112(balance0);
+        reserve1 = uint112(balance1);
+
+        kLast = uint(reserve0).mul(reserve1);
+    }
 }

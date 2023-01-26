@@ -1,13 +1,15 @@
 const hre = require('hardhat');
 const axios = require('axios');
 
-exports.createTokens = async function createTokens(monitoring) {
+exports.createTokens = async function createTokens(monitoring, chainId) {
     let tokens = monitoring.data.tokens
+    console.log("monitoring tokens", tokens)
     for (let token of tokens) {
         const tokenContract = await hre.ethers.getContractFactory("Token");
         const newToken = await tokenContract.deploy(token.symbol + " Token", token.symbol, token.decimals);
         token["oldAddress"] = token.address
         token["address"] = newToken.address
+        token["chainId"] = chainId
     }
     console.log("Tokens created...")
     return tokens
@@ -26,6 +28,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     console.log("Migrator address", migratorAddress, "owner", owner)
 
     let migratorContract = await migrator.attach(migratorAddress);
+    console.log("seems like is failing here")
     await migratorContract.setMigrator(owner)
 
     console.log("Migrator is setted to ", owner)

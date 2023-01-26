@@ -76,7 +76,7 @@ module.exports = {
   networks: {
     hardhat: {},
     moonbase: {
-      url: 'https://moonbase-alpha.blastapi.io/02c84726-5104-4c91-9697-0ac7efe2b0f6',
+      url: 'https://moonbase.unitedbloc.com:1000',
       accounts: [privateKeyDev],
       chainId: 1287,
     },
@@ -84,6 +84,11 @@ module.exports = {
       url: 'https://binance.nodereal.io',
       accounts: [privateKey],
       chainId: 56,
+    },
+    bscTest: {
+      url: 'https://data-seed-prebsc-2-s1.binance.org:8545',
+      accounts: [privateKeyDev],
+      chainId: 97,
     },
     dev: {
       url: 'http://127.0.0.1:7545',

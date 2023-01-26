@@ -79,6 +79,11 @@ module.exports = {
       accounts: [privateKey],
       chainId: 56,
     },
+    bscTest: {
+      url: 'https://data-seed-prebsc-2-s1.binance.org:8545',
+      accounts: [privateKeyDev],
+      chainId: 97,
+    },
     moonriver: {
       url: 'https://moonriver.public.blastapi.io',
       accounts: [privateKey],

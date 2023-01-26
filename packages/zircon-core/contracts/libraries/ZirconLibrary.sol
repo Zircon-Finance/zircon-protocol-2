@@ -105,7 +105,6 @@ library ZirconLibrary {
     function calculateP2(Decimals storage decimals, uint k, uint vab, uint vfb) view public returns (uint p2x, uint p2y) {
         p2y = ((k * 2)/vfb) - vab; // anchor decimals
         p2x = (p2y * decimals.float)/vfb;
-        //        console.log("cal p2y, p2x", p2y, p2x);
     }
 
     function evaluateP2(Decimals storage decimals, uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) view external returns (uint p2x, uint p2y) {
