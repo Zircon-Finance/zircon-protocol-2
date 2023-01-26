@@ -91,7 +91,7 @@ module.exports = {
       chainId: 56,
     },
     bscTest: {
-      url: 'https://data-seed-prebsc-2-s1.binance.org:8545',
+      url: 'https://dimensional-capable-mountain.bsc-testnet.discover.quiknode.pro/a18cd4a763aa2651731546483a4b0a521262ae47/',
       accounts: [privateKeyDev],
       chainId: 97,
     },

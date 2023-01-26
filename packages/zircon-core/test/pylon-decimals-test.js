@@ -68,6 +68,80 @@ describe("Pylon Decimals", () => {
         return fixtures
     }
 
+    const muuTest = [
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 18],
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 18],
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 18],
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 6],
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 12],
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 12],
+        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
+    ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
+    muuTest.forEach((mintCase, i) => {
+        it.only('Change mu Test', async function () {
+            const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
+
+            let fixtures = await init(token0Amount, token1Amount, 1, decimals0, decimals1)
+
+            //Pylon initialized. Now we advance time by muSamplingPeriod
+
+            let blockNumber = await ethers.provider.getBlockNumber()
+            let blocksToMine = await factoryPylonInstance.muUpdatePeriod();
+            await forwardTime(ethers.provider, blocksToMine.add(1))
+            // await ethers.provider.send("hardhat_mine", [blocksToMine.add(1).toHexString()]);
+
+            let newBlockNumber = await ethers.provider.getBlockNumber();
+
+            console.log("newBN, oldBN diff:", newBlockNumber - blockNumber);
+
+            await setPrice(account.address, 1.5, fixtures, 1);
+
+            //Mint dust tokens to force sync
+            //Should assign according to new gamma
+
+            //Need to advance time again because of deltaGamma protection
+
+            await forwardTime(ethers.provider, blocksToMine.div(10),1)
+
+            console.log("mu before new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
+            console.log("gamma before new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
+            console.log("vab before new token: ", ethers.utils.formatEther(await pylonInstance.virtualAnchorBalance()));
+
+
+            await updateMint(fixtures, 1)
+
+            let initialGamma = await pylonInstance.gammaMulDecimals()
+
+            let initialMu = await pylonInstance.muMulDecimals();
+
+
+            console.log("mu after new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
+            console.log("gamma after new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
+            //Advance time again
+
+            await forwardTime(ethers.provider, blocksToMine.add(1), 1)
+
+            await setPrice(account.address, 2.5, fixtures, 1);
+
+            await updateMint(fixtures, 1)
+
+            let mu = await pylonInstance.muMulDecimals();
+            let gamma = await pylonInstance.gammaMulDecimals();
+
+            expect(initialMu).to.eq(initialGamma);
+            expect(mu).not.to.eq(initialMu);
+
+            let derivedMu = initialMu.add((gamma.sub(initialGamma)).mul(DECIMALS.div(2).sub(gamma)).div(DECIMALS).mul(3));
+
+            let deviation = findDeviation(mu, derivedMu);
+            //Gamma moved by 5% to 0.45, we expect mu to change by 5%* 5%*3 = 0.0075 (ish)
+            expect(deviation).to.lt(IMPRECISION_TOLERANCE);
+
+
+        });
+    });
+
+
     const omegaTestCases = [
         [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 18],
         [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 18],
@@ -78,7 +152,7 @@ describe("Pylon Decimals", () => {
         [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
     omegaTestCases.forEach((mintCase, i) => {
-        it.only(`Omega test:${i}`, async function () {
+        it(`Omega test:${i}`, async function () {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
             let fixtures = await init(token0Amount, token1Amount, 99, decimals0, decimals1)
 
@@ -272,12 +346,12 @@ describe("Pylon Decimals", () => {
 
     // Let's try to calculate some cases for pylon
     const mintTestCases = [
-        [10, 20, '4762211', '4749990617651023','5050992','9999999999999999000', false, 6, 12],
-        [20, 10, '4749211', '4762499999999999','9999999999999999998', '5099989999999999000', true, 12, 6],
-        [10, 20, '2374911', '9525000000000000','4999999999999999999', '10049994999999999000', true, 6, 22],
-        [20, 20, '9525011', '4749995308820878','10099989951286946806', '9999999999999999000', false, 18, 12],
-        [2000, 2000, '4750011', '952500000000000000','1000000000000000000000', '1009998999999999999000', true, 6, 6],
-        [10, 20, '4762509926821186', '4749990617651023','5099989902573941080','9999999999999999000', false, 18, 18],
+        [10, 20, '4762211', '4749990617651023','5049999','9999999999000', false, 6, 12],
+        [20, 10, '4749211', '4762499999999999','9999999999000', '5099000', true, 12, 6],
+        [10, 20, '2374911', '9525000000000000','5000000', '100499949999999999999000', true, 6, 22],
+        [20, 20, '9525011', '4749995308820878','10099989951286944600', '9999999999000', false, 18, 12],
+        [2000, 2000, '4750011', '952500000000000000','1000000000', '1009998000', true, 6, 6],
+        [10, 20, '4762509926821186', '4749990617651023','5049994975643473402','9999999999999999000', false, 18, 18],
         [20, 10, '4749999999999999', '4762499999999999','9999999999999999998', '5099989999999999000', true, 18, 18],
         [10, 20, '2374999999999999', '9525000000000000','4999999999999999999', '10049994999999999000', true, 18, 18],
         [20, 20, '9525009926820697', '4749995308820878','10099989951286946806', '9999999999999999000', false, 18, 18],

@@ -28,7 +28,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     console.log("Migrator address", migratorAddress, "owner", owner)
 
     let migratorContract = await migrator.attach(migratorAddress);
-    // await migratorContract.setMigrator(owner)
+    await migratorContract.setMigrator(owner)
 
     console.log("Migrator is setted to ", owner)
 

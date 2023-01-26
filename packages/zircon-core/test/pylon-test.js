@@ -64,7 +64,7 @@ describe("Pylon A", () => {
         account2 = fixtures.account2
         return fixtures
     }
-    
+
     it('Fee assignment + mu Test', async function () {
         let token0Amount = 1700
         let token1Amount = 5300

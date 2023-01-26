@@ -959,7 +959,6 @@ contract ZirconPylon is IZirconPylon {
             } else {
                 feeBps += (10000 - instantPriceDecimals.mul(10000)/lastPrice);
             }
-            console.log("fee", lastPrice, instantPriceDecimals);
         }
 
         //        console.log("feebps, ipd, lp", feeBps, instantPriceDecimals, lastPrice);
@@ -1385,7 +1384,7 @@ contract ZirconPylon is IZirconPylon {
                 (currentFloatAccumulator - lastFloatAccumulator)
                 /(blockTimestamp - lastOracleTimestamp))
                 >> 56)) * decimals.anchor) >> 56;
-                console.log("avg price", _avgPrice);
+                console.log("DD:: avg price", _avgPrice);
                 lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;
                 lastFloatAccumulator = currentFloatAccumulator;

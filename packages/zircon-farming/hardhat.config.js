@@ -84,6 +84,11 @@ module.exports = {
       network_id: '5777',
       chainId: 1281,
     },
+    bscTest: {
+      url: 'https://dimensional-capable-mountain.bsc-testnet.discover.quiknode.pro/a18cd4a763aa2651731546483a4b0a521262ae47/',
+      accounts: [privateKeyDev],
+      chainId: 97,
+    },
     bsc: {
       url: 'https://binance.nodereal.io',
       accounts: [privateKey],

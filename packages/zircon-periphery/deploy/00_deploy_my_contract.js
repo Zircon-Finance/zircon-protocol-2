@@ -4,13 +4,14 @@ const { ethers, waffle } = require('hardhat');
 const psionicFarmFactory = require('../core_contracts/abi/PsionicFarmFactory.json')
 const WETH_ADDRESS = {
     '1287': "0xD909178CC99d318e4D46e7E66a972955859670E1",
-    '1285': "0x98878B06940aE243284CA214f92Bb71a2b032B8A"
+    '1285': "0x98878B06940aE243284CA214f92Bb71a2b032B8A",
+    '97': "0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd"
 }
 
 module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
-    let coreContracts = CORE_DEPLOYED[chainId][0].contracts
-    let farmingContracts = FARMING_DEPLOYED[chainId][0].contracts
+    let coreContracts = CORE_DEPLOYED[chainId.toString()][0].contracts
+    let farmingContracts = FARMING_DEPLOYED[chainId.toString()][0].contracts
 
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
