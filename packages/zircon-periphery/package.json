@@ -39,6 +39,7 @@
     "deploy:moonbase": "npx hardhat --network moonbase deploy --reset",
     "deploy:moonriver": "npx hardhat --network moonriver deploy --reset",
     "deploy:bscTest": "npx hardhat --network bscTest deploy --reset",
+    "deploy:arbGoerly": "npx hardhat --network arbGoerly deploy --reset",
     "deploy:bsc": "npx hardhat --network bsc deploy --reset",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",

@@ -78,7 +78,7 @@ describe("Pylon Decimals", () => {
         [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
     muuTest.forEach((mintCase, i) => {
-        it.only('Change mu Test', async function () {
+        it('Change mu Test', async function () {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
 
             let fixtures = await init(token0Amount, token1Amount, 1, decimals0, decimals1)
@@ -152,7 +152,7 @@ describe("Pylon Decimals", () => {
         [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
     omegaTestCases.forEach((mintCase, i) => {
-        it(`Omega test:${i}`, async function () {
+        it.only(`Omega test:${i}`, async function () {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
             let fixtures = await init(token0Amount, token1Amount, 99, decimals0, decimals1)
 

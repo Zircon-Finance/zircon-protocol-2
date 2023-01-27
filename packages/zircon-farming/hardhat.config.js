@@ -89,6 +89,11 @@ module.exports = {
       accounts: [privateKeyDev],
       chainId: 97,
     },
+    arbGoerly: {
+      url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
+      accounts: [privateKeyDev],
+      chainId: 421613,
+    },
     bsc: {
       url: 'https://binance.nodereal.io',
       accounts: [privateKey],

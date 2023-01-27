@@ -309,16 +309,16 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
     let tk0Decimals = await token0.decimals()
     let tk1Decimals = await token1.decimals()
 
-    let decimalsR0 = ethers.BigNumber.from(10).pow(fixtures.isFloatRes0 ? tk0Decimals : tk1Decimals)
-    let decimalsR1 = ethers.BigNumber.from(10).pow(fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
+    let decimalsTK0 = ethers.BigNumber.from(10).pow(tk0Decimals)
+    let decimalsTK1 = ethers.BigNumber.from(10).pow(tk1Decimals)
 
-    let pairResT = await pair.getReserves();
+    let pairResT = await getPairReservesNormalized(fixtures);
     let resIn;
     let resOut;
 
-    let targetPriceDecimals = expandToNDecimals(targetPrice, fixtures.isFloatRes0 ? tk1Decimals : tk0Decimals)
+    let targetPriceDecimals = expandToNDecimals(targetPrice, tk1Decimals)
 
-    let price = pairResT[1].mul(decimalsR0).div(pairResT[0]);
+    let price = pairResT[1].mul(decimalsTK0).div(pairResT[0]);
     let dump = targetPriceDecimals.lt(price);
 
     console.log("price:", price.toString())
@@ -328,8 +328,8 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
     if(dump) {
         resIn = pairResT[0]
         resOut = pairResT[1]
-        targetPriceDecimals = (decimalsR1.mul(decimalsR0)).div(targetPriceDecimals)
-        price = (decimalsR0.mul(decimalsR1)).div(price)
+        targetPriceDecimals = (decimalsTK1.mul(decimalsTK0)).div(targetPriceDecimals)
+        price = (decimalsTK1.mul(decimalsTK0)).div(price)
         console.log("dump target: ", targetPriceDecimals.toString(), " from: ", price.toString())
     } else {
         resIn = pairResT[1]
@@ -337,7 +337,7 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
         console.log("dump target", targetPriceDecimals.toString(), " from: ", price.toString())
     }
 
-    let x = sqrt((targetPriceDecimals.mul(resIn)).mul(resOut).div(dump ? decimalsR1 : decimalsR0)).sub(resIn)
+    let x = sqrt((targetPriceDecimals.mul(resIn)).mul(resOut).div(dump ? decimalsTK1 : decimalsTK0)).sub(resIn)
 
     // let sqrt2 = sqrt(expandTo18Decimals(2).mul(expandTo18Decimals(2)));
     // console.log("Sqrt test ", format(sqrt2))
@@ -347,11 +347,11 @@ exports.setPrice = async function setPrice(address, targetPrice, fixtures, index
     console.log("changing x: for:", x.toString(), out.toString())
 
     if(dump) {
-        await (fixtures.isFloatRes0 ? token0 : token1).transfer(pair.address, x)
-        await pair.swap(0, out, account.address, '0x', overrides)
+        await token0.transfer(pair.address, x)
+        await pair.swap(fixtures.isFloatRes0 ? 0 : out, fixtures.isFloatRes0 ?  out : 0, account.address, '0x', overrides)
     } else {
-        await (!fixtures.isFloatRes0 ? token0 : token1).transfer(pair.address, x)
-        await pair.swap(out, 0, account.address, '0x', overrides)
+        await token1.transfer(pair.address, x)
+        await pair.swap(fixtures.isFloatRes0 ?  out : 0, fixtures.isFloatRes0 ? 0 : out, account.address, '0x', overrides)
     }
 }
 //

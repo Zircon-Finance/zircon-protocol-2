@@ -79,6 +79,9 @@ module.exports = {
       url: 'https://moonbase-alpha.blastapi.io/88bb4b04-103a-47c5-ac37-0aecaf3aff46',
       accounts: [privateKeyDev],
       chainId: 1287,
+      gasMultiplier: 5 // whatever you want here
+
+      // httpHeaders: { "apiKey": "e75dfacd-1ec2-4d9f-9c25-d778cefbd284" },
     },
     arbGoerly: {
       url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',

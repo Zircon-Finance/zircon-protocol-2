@@ -79,6 +79,11 @@ module.exports = {
       accounts: [privateKey],
       chainId: 56,
     },
+    arbGoerly: {
+      url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
+      accounts: [privateKeyDev],
+      chainId: 421613,
+    },
     bscTest: {
       url: 'https://dimensional-capable-mountain.bsc-testnet.discover.quiknode.pro/a18cd4a763aa2651731546483a4b0a521262ae47/',
       accounts: [privateKeyDev],

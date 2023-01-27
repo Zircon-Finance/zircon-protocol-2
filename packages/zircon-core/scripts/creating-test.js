@@ -43,11 +43,11 @@ async function main() {
     console.log("Deploying contracts with the account:", owner.address);
     const chainId = hre.network.config.chainId
 
-    let migratorAddress = "0x26DcC6B22c7e91B567AB898A193AB705BFFFC1FB"
-    let factory = "0xc453B4E752BF050298BdA29920530d6Ef65270eC"
-    let pylonFactory = "0x825cD0651fe59e831c53B9cEC572ce10d8537fe0"
-    let energyFactory = "0x43141489F8b4EB2AeAdA992D1016777B16C7C4ca"
-    let ptFactory = "0x69ACCe32C7D37D93a1D75385968525f82715797B"
+    let migratorAddress = "0xa5f34C878ec9E81470C66370367F94997DD18684"
+    let factory = "0x599400CC21CE3F9589F2f011D39Ab67231A6200F"
+    let pylonFactory = "0x76f5619266Cf6FC586efA815645e570B184d01b8"
+    let energyFactory = "0x67ab25eD352dFfD04E3EFA9F9bf1e6922B81667e"
+    let ptFactory = "0x42ABD56BdE30bd65fB75755A232B99bD1d6FC256"
 
     let migrator = await hre.ethers.getContractFactory("Migrator");
     console.log("Migrator address", migratorAddress, "owner", owner.address)
@@ -58,7 +58,6 @@ async function main() {
     let libraryContract = await hre.ethers.getContractFactory("ZirconLibrary");
     console.log("chain id")
     let library = libraryContract.attach(LIB_ADDRESS[chainId])
-    //loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens, library) {
 
     await loadFromProd(migratorAddress, factory, pylonFactory, energyFactory, ptFactory, owner.address, tokens.tokens, library)
 }

@@ -1367,8 +1367,8 @@ contract ZirconPylon is IZirconPylon {
 
                 uint timeElapsed = blockTimestamp - lastUniTimestamp;
                 uint _reservePair1 = pairReserveTranslated1 << 112; //UQ encode
-                //We simulate the Uni oracle in case no update, as per implementation.
-                //Manually handling UQs to avoid library calls etc.
+                // We simulate the Uni oracle in case no update, as per implementation.
+                // Manually handling UQs to avoid library calls etc.
                 currentFloatAccumulator += uint(_reservePair1/pairReserveTranslated0) * timeElapsed;
 
             }
