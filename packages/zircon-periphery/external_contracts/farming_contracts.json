@@ -554,7 +554,7 @@
       "chainId": "1287",
       "contracts": {
         "PsionicFarmFactory": {
-          "address": "0x931dEA8C13472452c77065B6eB087E87A16a1BFe",
+          "address": "0xDE96a89c51Ced683314AffD25c3EDe71378E575B",
           "abi": [
             {
               "inputs": [],

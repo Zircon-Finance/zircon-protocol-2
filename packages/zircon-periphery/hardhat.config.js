@@ -67,6 +67,7 @@ module.exports = {
       url: 'https://rpc.testnet.moonbeam.network',
       accounts: [privateKeyDev],
       chainId: 1287,
+      gasPrice: 10000000000
     },
     dev: {
       url: 'http://127.0.0.1:7545',
