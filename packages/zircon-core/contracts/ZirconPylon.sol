@@ -920,7 +920,7 @@ contract ZirconPylon is IZirconPylon {
         }
         // energyAddress.delegatecall(abi.encodeWithSignature("registerFee()"));
         IZirconEnergy(energyAddress).registerFee();
-        amountOut =  amountIn - fee;
+        amountOut =  amountIn.sub(fee); // SubFlow Check here if fee > amountIn (MintAsync)
     }
 
     /// @notice private function that sends to pair the LP tokens
@@ -1101,7 +1101,7 @@ contract ZirconPylon is IZirconPylon {
                 //taking the fee applied to the float and using it to mint a bit extra after the main event.
 
                 floatExtra = amountIn0 * (2 * feeBps)/10000;
-                amountIn0 -= floatExtra;
+                amountIn0 = amountIn0.sub(floatExtra); // SubFlow Protection Here
                 console.log("balance", balance1, _syncReserve1);
                 amountIn1 = payFees(balance1.sub(_syncReserve1), 2 * feeBps, true);
                 //                console.log("p of am", amountIn1.mul(1e18)/amountIn0);

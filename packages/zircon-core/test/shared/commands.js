@@ -249,7 +249,7 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
         console.log("\n===Burn Complete === AmOut: ", staticResult.toString())
         return results;
     }catch (e) {
-        await saveValuesForSDK(true, true, poolTokenAmount, null, 0, null, isAnchor, true, fixtures)
+        await saveValuesForSDK(true, true, tokenDecimals, null, 0, null, isAnchor, true, fixtures)
         return await pylonInstance.burn(address, isAnchor)
     }
 }

@@ -55,6 +55,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
     let initTimestamp = (await ethers.provider.getBlock(initBlock)).timestamp;
 
     let tx = {
+        testCase: casesSDK.length,
         resPair0: pairResIni[0].toString(),
         resPair1: pairResIni[1].toString(),
         resPylon0: pylonRes[0].toString(),
