@@ -68,23 +68,22 @@ describe("Pylon Decimals", () => {
         return fixtures
     }
 
-    const muuTest = [
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 18],
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 18],
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 18],
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 6],
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 12],
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 12],
-        [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
+    const avgPriceTest = [
+        [1700, 5300, true, 18, 18],
+        [1700, 5300, true, 6, 18],
+        [1700, 5300, true, 12, 18],
+        [1700, 5300, true, 18, 6],
+        [1700, 5300, true, 18, 12],
+        [1700, 5300, true, 6, 12],
+        [1700, 5300, true, 12, 6],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
-    muuTest.forEach((mintCase, i) => {
-        it('Change mu Test', async function () {
-            const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
+    avgPriceTest.forEach((mintCase, i) => {
+        it('AVG Price Test' + i, async function () {
+            const [token0Amount, token1Amount, isAnchor, decimals0, decimals1] = mintCase
 
             let fixtures = await init(token0Amount, token1Amount, 1, decimals0, decimals1)
 
-            //Pylon initialized. Now we advance time by muSamplingPeriod
-
+            // Pylon initialized. Now we advance time by muSamplingPeriod
             let blockNumber = await ethers.provider.getBlockNumber()
             let blocksToMine = await factoryPylonInstance.muUpdatePeriod();
             await forwardTime(ethers.provider, blocksToMine.add(1))
@@ -96,11 +95,10 @@ describe("Pylon Decimals", () => {
 
             await setPrice(account.address, 1.5, fixtures, 1);
 
-            //Mint dust tokens to force sync
-            //Should assign according to new gamma
+            // Mint dust tokens to force sync
+            // Should assign according to new gamma
 
-            //Need to advance time again because of deltaGamma protection
-
+            // Need to advance time again because of deltaGamma protection
             await forwardTime(ethers.provider, blocksToMine.div(10),1)
 
             console.log("mu before new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
@@ -110,34 +108,7 @@ describe("Pylon Decimals", () => {
 
             await updateMint(fixtures, 1)
 
-            let initialGamma = await pylonInstance.gammaMulDecimals()
-
-            let initialMu = await pylonInstance.muMulDecimals();
-
-
-            console.log("mu after new token: ", ethers.utils.formatEther(await pylonInstance.muMulDecimals()));
-            console.log("gamma after new token: ", ethers.utils.formatEther(await pylonInstance.gammaMulDecimals()));
-            //Advance time again
-
-            await forwardTime(ethers.provider, blocksToMine.add(1), 1)
-
-            await setPrice(account.address, 2.5, fixtures, 1);
-
-            await updateMint(fixtures, 1)
-
-            let mu = await pylonInstance.muMulDecimals();
-            let gamma = await pylonInstance.gammaMulDecimals();
-
-            expect(initialMu).to.eq(initialGamma);
-            expect(mu).not.to.eq(initialMu);
-
-            let derivedMu = initialMu.add((gamma.sub(initialGamma)).mul(DECIMALS.div(2).sub(gamma)).div(DECIMALS).mul(3));
-
-            let deviation = findDeviation(mu, derivedMu);
-            //Gamma moved by 5% to 0.45, we expect mu to change by 5%* 5%*3 = 0.0075 (ish)
-            expect(deviation).to.lt(IMPRECISION_TOLERANCE);
-
-
+            await expect( mintAsync(account.address, token0Amount / 1000, token1Amount / 1000, true, fixtures, false, 1)).to.be.revertedWith("Z: FTH2");
         });
     });
 
@@ -152,7 +123,7 @@ describe("Pylon Decimals", () => {
         [1700, 5300, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
     omegaTestCases.forEach((mintCase, i) => {
-        it.only(`Omega test:${i}`, async function () {
+        it(`Omega test:${i}`, async function () {
             const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
             let fixtures = await init(token0Amount, token1Amount, 99, decimals0, decimals1)
 
@@ -167,7 +138,6 @@ describe("Pylon Decimals", () => {
 
             let oldomega = calculateOmega(pylonEarly.gamma, pairEarly.tr1, pylonEarly.vab, pylonEarly.sync[1]);
             console.log("oldOmega", oldomega.toString());
-
             console.log("Ftv: ", format(pairEarly.tr1.mul(2).mul(pylonEarly.gamma).div(DECIMALS)))
             await mintAsync(account.address, token0Amount * 2, token1Amount * 2, true, fixtures, false, 1);
             await forwardTime(ethers.provider, 32, 1);

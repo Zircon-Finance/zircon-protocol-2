@@ -171,17 +171,23 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
     }
 
     // Just simulating for SDK, callStatic doesn't have an impact on the blockchain
-    let staticResult = await pylonInstance.callStatic.mintPoolTokens(account.address, isAnchor)
-    await saveValuesForSDK(true, false, tokenDecimals, 0, staticResult, 0, isAnchor, fixtures)
+    try {
+        let staticResult = await pylonInstance.callStatic.mintPoolTokens(account.address, isAnchor)
+        await saveValuesForSDK(true, false, tokenDecimals, 0, staticResult, 0, isAnchor, false, fixtures)
 
-    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+        let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
-    let results = await pylonInstance.mintPoolTokens(address, isAnchor)
+        let results = await pylonInstance.mintPoolTokens(address, isAnchor)
 
-    let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+        let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
-    console.log("\n===MintSync Complete === AmOut: ", staticResult.toString())
-    return results
+        console.log("\n===MintSync Complete === AmOut: ", staticResult.toString())
+        return results
+    }catch (e) {
+        // Saving Blocked TX for SDK Testing and returning normal error to our tests
+        await saveValuesForSDK(true, false, tokenDecimals, 0, 0, 0, isAnchor, true, fixtures)
+        return await pylonInstance.mintPoolTokens(address, isAnchor)
+    }
 }
 //
 exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount, isAnchor, fixtures, isDecimals, index=0) {
@@ -200,16 +206,22 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
     await token1.transfer(pylonInstance.address, token1Decimals)
 
     // Just simulating for SDK, callStatic doesn't have an impact on the blockchain
-    let staticResult = await pylonInstance.callStatic.mintAsync(address, isAnchor)
+    try {
+        let staticResult = await pylonInstance.callStatic.mintAsync(address, isAnchor)
 
-    await saveValuesForSDK(false, false, token0Decimals, token1Decimals, staticResult, null, isAnchor, fixtures)
+        await saveValuesForSDK(false, false, token0Decimals, token1Decimals, staticResult, null, isAnchor, false, fixtures)
 
-    let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
+        let balanceBefore = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
-    let results = await pylonInstance.mintAsync(address, isAnchor)
+        let results = await pylonInstance.mintAsync(address, isAnchor)
 
-    console.log("\n===MintAsync Complete === AmOut:", staticResult.toString())
-    return results
+        console.log("\n===MintAsync Complete === AmOut:", staticResult.toString())
+        return results
+    }catch (e) {
+        await saveValuesForSDK(false, false, token0Decimals, token1Decimals, 0, null, isAnchor, true, fixtures)
+        return await pylonInstance.mintAsync(address, isAnchor)
+    }
+
 }
 //
 exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures, isDecimals, index=0) {
@@ -224,19 +236,25 @@ exports.burn = async function burn(address, poolTokenAmount, isAnchor, fixtures,
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
-    let staticResult = await pylonInstance.callStatic.burn(address, isAnchor)
+    try{
+        let staticResult = await pylonInstance.callStatic.burn(address, isAnchor)
 
-    await saveValuesForSDK(true, true, poolTokenAmount, null, staticResult, null, isAnchor, fixtures)
+        await saveValuesForSDK(true, true, tokenDecimals, null, staticResult, null, isAnchor, false, fixtures)
 
-    let balanceBefore = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
-    let results = await pylonInstance.burn(address, isAnchor)
+        let balanceBefore = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
+        let results = await pylonInstance.burn(address, isAnchor)
 
-    let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
+        let balanceAfter = isAnchor ? await token1.balanceOf(address) : await token0.balanceOf(address)
 
-    console.log("\n===Burn Complete === AmOut: ", staticResult.toString())
-    return results;
+        console.log("\n===Burn Complete === AmOut: ", staticResult.toString())
+        return results;
+    }catch (e) {
+        await saveValuesForSDK(true, true, poolTokenAmount, null, 0, null, isAnchor, true, fixtures)
+        return await pylonInstance.burn(address, isAnchor)
+    }
 }
-//
+
+
 exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor, fixtures, isDecimals, index=0) {
 
     await destructure(fixtures, index)
@@ -250,13 +268,16 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
     } else {
         await poolTokenInstance0.transfer(pylonInstance.address, tokenDecimals)
     }
-    let staticCall = await pylonInstance.callStatic.burnAsync(address, isAnchor)
-    await saveValuesForSDK(false, true, poolTokenAmount, null, staticCall[0].toString(), staticCall[1].toString(), isAnchor, fixtures)
-    let results = await pylonInstance.burnAsync(address, isAnchor)
-
-    console.log("\n===BurnAsync Complete ===, amOut0, 1:", staticCall[0].toString(), staticCall[1].toString())
-    return results
-
+    try{
+        let staticCall = await pylonInstance.callStatic.burnAsync(address, isAnchor)
+        await saveValuesForSDK(false, true, poolTokenAmount, null, staticCall[0].toString(), staticCall[1].toString(), isAnchor, false, fixtures)
+        let results = await pylonInstance.burnAsync(address, isAnchor)
+        console.log("\n===BurnAsync Complete ===, amOut0, 1:", staticCall[0].toString(), staticCall[1].toString())
+        return results
+    }catch (e) {
+        await saveValuesForSDK(false, true, poolTokenAmount, null, 0, 0, isAnchor, true, fixtures)
+        return await pylonInstance.burnAsync(address, isAnchor)
+    }
 }
 // exports.setPrice = async function setPrice(address, targetPrice, fixtures) {
 //

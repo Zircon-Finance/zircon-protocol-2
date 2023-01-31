@@ -297,7 +297,8 @@ contract ZirconPylon is IZirconPylon {
             adjustedVab);
 
         gamma = ftv.mul(1e18)/(_translatedReserve1 * 2);
-        console.log("gamma", ftv, _translatedReserve1);
+        console.log("gamma", gamma, _translatedReserve1);
+        console.log("ftv", ftv);
 
         //        if(x >= p3x) {
         //            gamma = 1e18 - ((adjustedVab)*1e18 /  (_translatedReserve1 * 2));
@@ -902,10 +903,11 @@ contract ZirconPylon is IZirconPylon {
         }
 
         if (isAnchor) {
-            //Require primarily for UX purposes of sending a custom error
+            // Require primarily for UX purposes of sending a custom error
+            console.log("bal", _getBalanceOf(pylonToken.anchor, address(this)), fee);
             require(_getBalanceOf(pylonToken.anchor, address(this)) > fee, "Z: FTH2");
             _safeTransfer(pylonToken.anchor, energyAddress, fee);
-            //            console.log("fee", fee);
+            // console.log("fee", fee);
         } else {
             _safeTransfer(pylonToken.float, pairAddress, fee);
             (uint112 _reservePair0, uint112 _reservePair1,) = getPairReservesNormalized();
@@ -974,6 +976,7 @@ contract ZirconPylon is IZirconPylon {
             // It's meant to ensure that a single episode gives time to gammaEMA to return below threshold.
 
             uint cooldownBlocks = 1e18/deltaGammaThreshold;
+//            console.log("strikeDiff cb", strikeDiff, cooldownBlocks);
 
             //            console.log("strike, current", strikeBlock, block.number);
 
@@ -1099,6 +1102,7 @@ contract ZirconPylon is IZirconPylon {
 
                 floatExtra = amountIn0 * (2 * feeBps)/10000;
                 amountIn0 -= floatExtra;
+                console.log("balance", balance1, _syncReserve1);
                 amountIn1 = payFees(balance1.sub(_syncReserve1), 2 * feeBps, true);
                 //                console.log("p of am", amountIn1.mul(1e18)/amountIn0);
             }
@@ -1383,7 +1387,7 @@ contract ZirconPylon is IZirconPylon {
                 uint _avgPrice = (uint256(((
                 (currentFloatAccumulator - lastFloatAccumulator)
                 /(blockTimestamp - lastOracleTimestamp))
-                >> 56)) * decimals.anchor) >> 56;
+                >> 56)) * decimals.float) >> 56;
                 console.log("DD:: avg price", _avgPrice);
                 lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;
@@ -1488,7 +1492,6 @@ contract ZirconPylon is IZirconPylon {
             }
 
             lastRootKTranslated = rootKTranslated;
-            console.log("gamma calculated");
 
             //updateDelta()
 
@@ -1542,8 +1545,6 @@ contract ZirconPylon is IZirconPylon {
             // Sync pool also gets a claim to these
             emit PylonSync(virtualAnchorBalance, virtualFloatBalance, gammaMulDecimals);
         }
-        console.log("sync calculated");
-
     }
 
 

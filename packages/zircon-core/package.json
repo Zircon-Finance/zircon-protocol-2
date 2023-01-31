@@ -65,6 +65,8 @@
     "fees:moonbase": "npx hardhat run --network moonbase scripts/change-fees.js",
     "fees:moonriver": "npx hardhat run --network moonriver scripts/change-fees.js",
     "add:moonbase": "npx hardhat run --network moonbase scripts/add-pair.js",
+    "sendTokens:moonbase": "npx hardhat run --network moonbase scripts/send-tokens.js",
+    "sendTokens:arbGoerly": "npx hardhat run --network arbGoerly scripts/send-tokens.js",
     "add:moonriver": "npx hardhat run --network moonriver scripts/add-pair.js",
     "testCreate:moonbase": "npx hardhat run --network moonbase scripts/creating-test.js",
     "testCreate:bscTest": "npx hardhat run --network bscTest scripts/creating-test.js",

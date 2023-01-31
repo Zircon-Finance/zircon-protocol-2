@@ -66,14 +66,16 @@ library ZirconLibrary {
             // a is positive
             aNumerator = (aPartial1 - aPartial2)/p2x;
             coefficients.a = aNumerator * decimals.anchor/aDenominator;
+            console.log("a Num:: coeff.a::", aNumerator, coefficients.a);
+
             {
                 uint _p2x = p2x;
-                console.log("apos", coefficients.a);
             }
 
             // If b is positive
             if(p2y * decimals.anchor/p2x >= (p2x * coefficients.a)/decimals.anchor) {
                 coefficients.b = p2y * decimals.anchor/p2x - (p2x * coefficients.a)/decimals.anchor; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+                console.log("b coeff::", coefficients.b);
                 coefficients.bNegative = false;
             } else {
                 // If b is negative we must construct a further piecewise definition upstream
@@ -141,14 +143,11 @@ library ZirconLibrary {
     function getFTVForX(Decimals storage decimals, uint _x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv, bool lineFormula, bool reduceOnly) {
         uint p3x = (adjustedVab ** 2) / reserve1;
         p3x = (p3x * decimals.float) / reserve0;
-        console.log("p3x", p3x, _x);
+        console.log("p3x & x", p3x, _x);
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
             ftv = (2 * Math.sqrt(((reserve0 * reserve1)/decimals.float) * _x)).sub(adjustedVab);
-            console.log("ftv", decimals.float, adjustedVab);
-            console.log("ftv", reserve0, _x);
-            console.log("ftv",  Math.sqrt(((reserve0 * reserve1)/decimals.float) * _x));
             reduceOnly = false;
             lineFormula = false;
         } else {

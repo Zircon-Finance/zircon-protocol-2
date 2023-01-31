@@ -87,6 +87,8 @@ module.exports = {
       url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
       accounts: [privateKeyDev],
       chainId: 421613,
+      // gasPrice: 100000000 // whatever you want here
+
     },
     bsc: {
       url: 'https://binance.nodereal.io',

@@ -7,7 +7,7 @@ const generateJSONFile = async () => {
 }
 
 // This function save all the values needed to replicate transaction in the SDK
-const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0, amountOut1, isAnchor, fixtures) => {
+const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0, amountOut1, isAnchor, isBlocked, fixtures) => {
 
     // Destructuring
     let token0 = fixtures.token0
@@ -95,6 +95,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
         p2y: p2y.toString(),
         reservePtEnergy: reservePtEnergy.toString(),
         reserveAnchorEnergy: reserveAnchorEnergy.toString(),
+        isBlocked,
         decimals: {
             float: ethers.BigNumber.from(10).pow(token0Decimals).toString(),
             anchor: ethers.BigNumber.from(10).pow(token1Decimals).toString()

@@ -3,7 +3,7 @@ const axios = require('axios');
 
 exports.createTokens = async function createTokens(monitoring, chainId) {
     let tokens = monitoring.data.tokens
-    console.log("monitoring tokens", tokens)
+    // console.log("monitoring tokens", tokens)
     for (let token of tokens) {
         const tokenContract = await hre.ethers.getContractFactory("Token");
         const newToken = await tokenContract.deploy(token.symbol + " Token", token.symbol, token.decimals);
@@ -52,7 +52,10 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     let pairFact = await hre.ethers.getContractFactory("ZirconPair");
 
     console.log("Creating pairs...")
+    let index = 0
     for (let pair of pairs) {
+        // index++
+        // if (index <= 14) continue;
         let token0 = tokens.filter((token) => {return token.oldAddress === pair.token0.address.toString() })[0]
         let token1 = tokens.filter((token) => {return token.oldAddress === pair.token1.address.toString() })[0]
         // Creating Pair Contract
