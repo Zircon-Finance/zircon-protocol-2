@@ -15,6 +15,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
     let poolTokenInstance0 = fixtures.poolTokenInstance0
     let poolTokenInstance1 = fixtures.poolTokenInstance1
     let pair = fixtures.pair
+    let isToken0 = fixtures.isFloatRes0
     let pylonInstance = fixtures.pylonInstance
     let factoryEnergyInstance = fixtures.factoryEnergyInstance
     let account = fixtures.account
@@ -56,6 +57,7 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
 
     let tx = {
         testCase: casesSDK.length,
+        isFloatRes0: fixtures.isFloatRes0,
         resPair0: pairResIni[0].toString(),
         resPair1: pairResIni[1].toString(),
         resPylon0: pylonRes[0].toString(),

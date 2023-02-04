@@ -144,7 +144,6 @@ describe("Pylon Decimals", () => {
 
             await updateMint(fixtures, 1);
 
-
             let pylonState = await printState(fixtures, true, 1);
             let pairState = await printPairState(fixtures, true, 1);
 

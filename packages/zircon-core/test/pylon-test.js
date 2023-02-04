@@ -1064,7 +1064,7 @@ describe("Pylon A", () => {
 
         console.log("Val of 1% burn anchor", format(initialAnchorBalance));
 
-        let floatRemove = initialFloatPtBalance.div(30);//3.3% every burn
+        let floatRemove = initialFloatPtBalance.div(30);// 3.3% every burn
         let anchorRemove = initialAnchorPtBalance.div(30);
         //We remove liquidity in cycles
         for(let i = 0; i < 20; i++) { //Should remove 2/3 of liquidity

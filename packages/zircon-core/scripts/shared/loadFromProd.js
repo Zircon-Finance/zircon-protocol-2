@@ -15,6 +15,7 @@ exports.createTokens = async function createTokens(monitoring, chainId) {
     return tokens
 }
 
+
 exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens, library) {
     console.log("<><><><><> Loading from prod <><><><><><><>")
     const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
@@ -112,6 +113,8 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             let tk0 = tokens.filter((token) => {return token.oldAddress === pylon.token0.address.toString()})[0]
             let tk1 = tokens.filter((token) => {return token.oldAddress === pylon.token1.address.toString()})[0]
 
+            let pylonTk0Contract = await token.attach(tk0.address);
+            let pylonTk1Contract = await token.attach(tk1.address);
             // Same here we have to pass all the old information for the pylon and energy
             await(await pylonFactoryContract.addPylon(pairAddress, tk0.address, tk1.address)).wait()
 
@@ -144,14 +147,14 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             // let balance0 = energy.balanceToken0
 
             // await tk0Contract.mint(energyAddress, balance0)
-            await (await tk1Contract.mint(energyAddress, pylon.energy.balanceToken1)).wait()
+            await (await pylonTk1Contract.mint(energyAddress, pylon.energy.balanceToken1)).wait()
             await (await pairContract.mintTest(energyAddress, pylon.energy.pairBalance)).wait()
             console.log("Energy created for ", tk0.symbol, tk1.symbol)
 
 
             // Transferring some balance to the pylon
-            await (await tk0Contract.mint(pylonAddress, pylon.balanceToken0)).wait()
-            await (await tk1Contract.mint(pylonAddress, pylon.balanceToken1)).wait()
+            await (await pylonTk0Contract.mint(pylonAddress, pylon.balanceToken0)).wait()
+            await (await pylonTk1Contract.mint(pylonAddress, pylon.balanceToken1)).wait()
             await (await pairContract.mintTest(pylonAddress, pylon.pairBalance)).wait()
             console.log("Tokens minted for: ", tk0.symbol, tk1.symbol, " pylon")
 
@@ -161,7 +164,25 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)
 
-            pylons.push({token0: tk0.address, token1: tk1.address, pairAddress: pairAddress, pylonAddress, poolAddress0: ptfAddress, poolAddress1: ptsAddress})
+            let ptfPrice = pylon.ptFloat.price
+            let ptsPrice = pylon.ptAnchor.price
+
+
+            pylons.push({
+                token0: tk0.address,
+                token1: tk1.address,
+                pairAddress: pairAddress,
+                pylonAddress,
+                poolAddress0: ptfAddress,
+                poolAddress1: ptsAddress,
+                ptfPrice,
+                ptsPrice,
+                vfb: pylon.vfb,
+                vab: pylon.vab,
+                gamma: pylon.gamma,
+                ptfTS,
+                ptsTS
+            })
         }
     }
     return pylons

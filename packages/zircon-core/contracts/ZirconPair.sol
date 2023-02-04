@@ -227,6 +227,8 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
+        console.log("amount", liquidity);
+        console.log("totalSupply", _totalSupply);
         if (isReserve0) {
             amount0 += getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0, _liquidityFee);
             amount = amount0;
@@ -236,6 +238,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
             amount = amount1;
             require(amount < balance1, "UniswapV2: EXTENSION_NOT_ENOUGH_LIQUIDITY");
         }
+
         require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
         _burn(address(this), liquidity);
         if (isReserve0) {

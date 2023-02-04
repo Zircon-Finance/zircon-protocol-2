@@ -55,8 +55,7 @@ async function destructure(fixtures, index) {
     token0 = poolTokenContract.attach(pylon.token0)
     token1 = poolTokenContract.attach(pylon.token1)
     let pairTk0 = await pair.token0()
-    isFloatRes0 = token0.address === pairTk0
-    console.log("is", isFloatRes0)
+    isFloatRes0 = pylon.token0 === pairTk0
     poolTokenInstance0 = poolTokenContract.attach(pylon.poolAddress0)
     poolTokenInstance1 = poolTokenContract.attach(pylon.poolAddress1)
     return {
@@ -181,7 +180,7 @@ exports.mintSync = async function mintSync(address, tokenAmount, isAnchor, fixtu
 
         let balanceAfter = isAnchor ? await poolTokenInstance1.balanceOf(address) : await poolTokenInstance0.balanceOf(address)
 
-        console.log("\n===MintSync Complete === AmOut: ", staticResult.toString())
+        console.log("\n===MintSync Complete === AmOut: ", ethers.utils.formatEther(staticResult))
         return results
     }catch (e) {
         // Saving Blocked TX for SDK Testing and returning normal error to our tests
@@ -215,7 +214,7 @@ exports.mintAsync = async function mintAsync(address, token0Amount, token1Amount
 
         let results = await pylonInstance.mintAsync(address, isAnchor)
 
-        console.log("\n===MintAsync Complete === AmOut:", staticResult.toString())
+        console.log("\n===MintAsync Complete === AmOut:", ethers.utils.formatEther(staticResult))
         return results
     }catch (e) {
         await saveValuesForSDK(false, false, token0Decimals, token1Decimals, 0, null, isAnchor, true, fixtures)
@@ -270,12 +269,12 @@ exports.burnAsync = async function burnAsync(address, poolTokenAmount, isAnchor,
     }
     try{
         let staticCall = await pylonInstance.callStatic.burnAsync(address, isAnchor)
-        await saveValuesForSDK(false, true, poolTokenAmount, null, staticCall[0].toString(), staticCall[1].toString(), isAnchor, false, fixtures)
+        await saveValuesForSDK(false, true, tokenDecimals, null, staticCall[0].toString(), staticCall[1].toString(), isAnchor, false, fixtures)
         let results = await pylonInstance.burnAsync(address, isAnchor)
         console.log("\n===BurnAsync Complete ===, amOut0, 1:", staticCall[0].toString(), staticCall[1].toString())
         return results
     }catch (e) {
-        await saveValuesForSDK(false, true, poolTokenAmount, null, 0, 0, isAnchor, true, fixtures)
+        await saveValuesForSDK(false, true, tokenDecimals, null, 0, 0, isAnchor, true, fixtures)
         return await pylonInstance.burnAsync(address, isAnchor)
     }
 }
@@ -534,7 +533,11 @@ async function printPairState(fixtures, doPrint, index=0) {
         rootK
     }
 }
+function getPylons() {
+    return pylons
+}
 
+exports.getPylons = getPylons;
 exports.printState = printState;
 exports.updateMint = updateMint
 exports.printPairState = printPairState;

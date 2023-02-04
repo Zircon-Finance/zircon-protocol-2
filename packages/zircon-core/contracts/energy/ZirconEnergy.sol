@@ -197,13 +197,15 @@ contract ZirconEnergy is IZirconEnergy {
     // When burn calls the uniswap burn it will also give users the compensation
 //    console.log("energyOmega", omegaMulDecimals);
     retPTU = omegaMulDecimals.mul(ptu)/1e18;
+    console.log("omega", omegaMulDecimals);
     if (omegaMulDecimals < 1e18) {
       //finds amount to cover
       uint amountToAdd = ptu * (1e18-omegaMulDecimals)/1e18; // already checked
 
       // finds how much we can cover
       uint energyPTBalance = IUniswapV2ERC20(pylon.pairAddress).balanceOf(address(this));
-
+      console.log("amountToAdd", amountToAdd);
+      console.log("energyPTBalance", energyPTBalance);
       if (amountToAdd < energyPTBalance) {
         // Sending PT tokens to Pair because burn one side is going to be called after
         // sends pool tokens directly to pair
@@ -214,6 +216,7 @@ contract ZirconEnergy is IZirconEnergy {
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
 
         uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
+
         {
           uint _fee = fee;
           uint _ptu = retPTU;
@@ -225,6 +228,7 @@ contract ZirconEnergy is IZirconEnergy {
 
           //Simplified, the previous system was necessary because it was two separate functions
           amount = (amountToAdd - energyPTBalance).mul(2 * _reserve1)/ts;
+
 //          uint amount0 = liquidity.mul(_reserve0) / ts;
 //          uint amount1 = liquidity.mul(_reserve1) / ts;
 //
@@ -241,6 +245,7 @@ contract ZirconEnergy is IZirconEnergy {
         uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
 
         amount = eBalance > amount ? amount : eBalance;
+        console.log("slash amount", amount);
 
         _safeTransfer(pylon.anchorToken, _to, amount);
 

@@ -156,8 +156,8 @@ library ZirconLibrary {
             ParabolaCoefficients memory coefficients = calculateParabolaCoefficients(
                 decimals, p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
-            console.log("gf aNeg, a, b", coefficients.a, coefficients.b);
-            console.log("gf aNeg, a, b", coefficients.aNegative, coefficients.bNegative);
+            console.log("a, b", coefficients.a, coefficients.b);
+            console.log("aNeg, bNeg", coefficients.aNegative, coefficients.bNegative);
 
             uint x = _x;
 
