@@ -63,8 +63,16 @@ describe("Pylon", () => {
 
         const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
 
+
         const tokens = await createTokens(monitoring)
-        await loadFromProd(migratorInstance.address, factoryInstance.address, factoryPylonInstance.address, factoryEnergyInstance.address, factoryPTInstance.address, account.address, tokens)
+        await loadFromProd(
+            migratorInstance.address,
+            factoryInstance.address,
+            factoryPylonInstance.address,
+            factoryEnergyInstance.address,
+            factoryPTInstance.address,
+            account.address,
+            tokens)
 
         let zrg = getTokenBySymbol(tokens, "ZRG")
         let eth = getTokenBySymbol(tokens, "ETH")

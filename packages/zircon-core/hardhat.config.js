@@ -72,6 +72,7 @@ module.exports = {
       url: 'https://moonbase-alpha.blastapi.io/02c84726-5104-4c91-9697-0ac7efe2b0f6',
       accounts: [privateKeyDev],
       chainId: 1287,
+      gasPrice: 10000000000
     },
     bsc: {
       url: 'https://binance.nodereal.io',

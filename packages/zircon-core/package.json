@@ -51,6 +51,7 @@
     "ctest": "npx hardhat compile && npm test",
     "bytecode": "npx hardhat run scripts/get-bytecodes.js",
     "check:bsc": "npx hardhat run --network bsc scripts/add-pair.js",
+    "testCreate:moonbase": "npx hardhat run --network moonbase scripts/creating-test.js",
     "migrate:moonbase": "npx hardhat --network moonbase run scripts/migrate.js",
     "migrate:moonriver": "npx hardhat --network moonriver run scripts/migrate.js",
     "pause:moonriver": "npx hardhat --network moonriver run scripts/pause.js",

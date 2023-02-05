@@ -1,21 +1,26 @@
 const hre = require('hardhat');
 const axios = require('axios');
 
-exports.createTokens = async function createTokens(monitoring) {
+exports.createTokens = async function createTokens(monitoring, chainId) {
     let tokens = monitoring.data.tokens
+    // console.log("monitoring tokens", tokens)
     for (let token of tokens) {
         const tokenContract = await hre.ethers.getContractFactory("Token");
         const newToken = await tokenContract.deploy(token.symbol + " Token", token.symbol, token.decimals);
         token["oldAddress"] = token.address
         token["address"] = newToken.address
+        token["chainId"] = chainId
     }
     console.log("Tokens created...")
     return tokens
 }
 
-exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens) {
-    console.log("Loading from prod")
+
+exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens, library) {
+    console.log("<><><><><> Loading from prod <><><><><><><>")
     const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
+
+    let pylons = [];
 
     // Getting all the information from the monitoring API
     let pairs = monitoring.data.pairs
@@ -31,7 +36,12 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     let factory = await hre.ethers.getContractFactory("ZirconFactory");
     let factoryContract = await factory.attach(factoryAddress);
 
-    let pylonFactory = await hre.ethers.getContractFactory("ZirconPylonFactory");
+    let pylonFactory = await hre.ethers.getContractFactory("ZirconPylonFactory")
+    //     , {
+    //     libraries: {
+    //         ZirconLibrary: library.address,
+    //     }
+    // });
     let pylonFactoryContract = await pylonFactory.attach(pFactoryAddress);
 
     let energyFactory = await hre.ethers.getContractFactory("ZirconEnergyFactory");
@@ -44,7 +54,10 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
     let pairFact = await hre.ethers.getContractFactory("ZirconPair");
 
     console.log("Creating pairs...")
+    let index = 0
     for (let pair of pairs) {
+        // index++
+        // if (index <= 14) continue;
         let token0 = tokens.filter((token) => {return token.oldAddress === pair.token0.address.toString() })[0]
         let token1 = tokens.filter((token) => {return token.oldAddress === pair.token1.address.toString() })[0]
         // Creating Pair Contract
@@ -53,14 +66,16 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
         // We must pass all the information to the pair contract
         // so probably we are gonna need some changes in the Zircon Pair or smth
         await(await factoryContract.createPair(token0.address, token1.address, pylonFactoryContract.address)).wait()
-        console.log("Creating pair for ", token0.symbol, token1.symbol)
 
-        while (true) {
-            pairAddress = await factoryContract.getPair(token0.address, token1.address)
-            if (pairAddress !== "0x0000000000000000000000000000000000000000") {
-                break
-            }
-        }
+        pairAddress = await factoryContract.getPair(token0.address, token1.address)
+        console.log("Creating pair for: ", pairAddress)
+
+        // while (true) {
+        //     pairAddress = await factoryContract.getPair(token0.address, token1.address)
+        //     if (pairAddress !== "0x0000000000000000000000000000000000000000") {
+        //         break
+        //     }
+        // }
         // Transferring some balance to the pair
         let balance0 = pair.balanceToken0
         let balance1 = pair.balanceToken1
@@ -91,22 +106,27 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
         console.log("Creating Pylons...")
 
         for(let pylon of pair.pylons) {
-
+            if (
+                pylon.balanceToken0.hex.toString() === "0x00" &&
+                pylon.balanceToken1.hex.toString() === "0x00" &&
+                pylon.pairBalance.hex.toString() === "0x00"
+            ) continue
             let tk0 = tokens.filter((token) => {return token.oldAddress === pylon.token0.address.toString()})[0]
             let tk1 = tokens.filter((token) => {return token.oldAddress === pylon.token1.address.toString()})[0]
 
+            let pylonTk0Contract = await token.attach(tk0.address);
+            let pylonTk1Contract = await token.attach(tk1.address);
             // Same here we have to pass all the old information for the pylon and energy
             await(await pylonFactoryContract.addPylon(pairAddress, tk0.address, tk1.address)).wait()
 
-
             let pylonAddress;
-            console.log("Creating Pylon for ", tk0.address, tk1.address)
             while (true) {
                 pylonAddress = await pylonFactoryContract.getPylon(tk0.address, tk1.address)
                 if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
                     break
                 }
             }
+            console.log("pylon address: ", pylonAddress)
 
             // Minting the Pool Tokens Total Supply
             let ptfTS = pylon.ptFloat.totalSupply
@@ -128,21 +148,44 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             // let balance0 = energy.balanceToken0
 
             // await tk0Contract.mint(energyAddress, balance0)
-            await (await tk1Contract.mint(energyAddress, pylon.energy.balanceToken1)).wait()
+            await (await pylonTk1Contract.mint(energyAddress, pylon.energy.balanceToken1)).wait()
             await (await pairContract.mintTest(energyAddress, pylon.energy.pairBalance)).wait()
             console.log("Energy created for ", tk0.symbol, tk1.symbol)
 
 
             // Transferring some balance to the pylon
-            await (await tk0Contract.mint(pylonAddress, pylon.balanceToken0)).wait()
-            await (await tk1Contract.mint(pylonAddress, pylon.balanceToken1)).wait()
+            await (await pylonTk0Contract.mint(pylonAddress, pylon.balanceToken0)).wait()
+            await (await pylonTk1Contract.mint(pylonAddress, pylon.balanceToken1)).wait()
             await (await pairContract.mintTest(pylonAddress, pylon.pairBalance)).wait()
             console.log("Tokens minted for: ", tk0.symbol, tk1.symbol, " pylon")
 
             // Passing here all the old information for the vab anchoK ecc
+            console.log("fs", pylon.formulaSwitch)
+
             await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.anchorKFactor, pylon.formulaSwitch)).wait()
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)
+
+            let ptfPrice = pylon.ptFloat.price
+            let ptsPrice = pylon.ptAnchor.price
+
+
+            pylons.push({
+                token0: tk0.address,
+                token1: tk1.address,
+                pairAddress: pairAddress,
+                pylonAddress,
+                poolAddress0: ptfAddress,
+                poolAddress1: ptsAddress,
+                ptfPrice,
+                ptsPrice,
+                vfb: pylon.vfb,
+                vab: pylon.vab,
+                gamma: pylon.gamma,
+                ptfTS,
+                ptsTS
+            })
         }
     }
+    return pylons
 }
