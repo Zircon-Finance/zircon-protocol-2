@@ -4638,7 +4638,7 @@
       "chainId": "1287",
       "contracts": {
         "Migrator": {
-          "address": "0x1268997b6AEB2b4e8401e4F6e2A7B622A1E5b665",
+          "address": "0x10E5DFa53b3386db661E6B539Eb7f602aaBaD105",
           "abi": [
             {
               "inputs": [],
@@ -4889,7 +4889,7 @@
           ]
         },
         "FeeToSetter": {
-          "address": "0xe35d62A7e125018D68dA07F2C598af0f9bD2Fa23",
+          "address": "0x14faD4bcA37e184eA4F0F2F1a1Bd5B99a8935fC1",
           "abi": [
             {
               "inputs": [],
@@ -5195,7 +5195,7 @@
           ]
         },
         "ZirconEnergyFactory": {
-          "address": "0xE18971aCa01B0928cAF04a9668E469FD5308c1e8",
+          "address": "0x5458C5981DAB7c701FB8Ead4e8187b8bA935A022",
           "abi": [
             {
               "inputs": [
@@ -5785,7 +5785,7 @@
           ]
         },
         "ZirconPTFactory": {
-          "address": "0x66eB144fAc83F5c13735649f5E665Bd6112DDCd9",
+          "address": "0x966c50aF06D81bE8d7c4bdF2ea34157c233052AE",
           "abi": [
             {
               "inputs": [
@@ -5996,7 +5996,7 @@
           ]
         },
         "ZirconFactory": {
-          "address": "0x60EB2D9fb42450438187D119af32f30C914d6006",
+          "address": "0xc7DF87028363A13600b5d559139B0BdF5b6e7383",
           "abi": [
             {
               "inputs": [
@@ -6348,7 +6348,7 @@
           ]
         },
         "ZirconPylonFactory": {
-          "address": "0xa6D2b86AAB2C51B55a9174e80c88E5417D2EdB6E",
+          "address": "0xACD6165D071C9009509F55F28a2C3Ea4eF8aD853",
           "abi": [
             {
               "inputs": [
