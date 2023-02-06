@@ -281,8 +281,8 @@ contract ZirconPylon is IZirconPylon {
         //console.log("pair0, pair1", _translatedReserve0, _translatedReserve1);
 
         uint x = (_translatedReserve1 * decimals.float)/_translatedReserve0;
-        console.log("dec: tr0:", decimals.float, _translatedReserve0 );
-        console.log("x: tr1", x, _translatedReserve1 );
+//        console.log("dec: tr0:", decimals.float, _translatedReserve0 );
+//        console.log("x: tr1", x, _translatedReserve1 );
 
         uint ftv;
 
@@ -296,8 +296,8 @@ contract ZirconPylon is IZirconPylon {
             adjustedVab);
 
         gamma = ftv.mul(1e18)/(_translatedReserve1 * 2);
-        console.log("gamma", gamma, _translatedReserve1);
-        console.log("ftv", ftv);
+//        console.log("gamma", gamma, _translatedReserve1);
+//        console.log("ftv", ftv);
 
         //        if(x >= p3x) {
         //            gamma = 1e18 - ((adjustedVab)*1e18 /  (_translatedReserve1 * 2));
@@ -470,7 +470,6 @@ contract ZirconPylon is IZirconPylon {
         // Pylon Update Minting
         if (balance0 > max0 && balance1 > max1) {
 
-            console.log("freeSpace");
             (uint pairReserves0, uint pairReserves1,) = getPairReservesNormalized();
             // Get Maximum finds the highest amount that can be matched at 50/50
             (px, py) = Math._getMaximum(
@@ -611,7 +610,7 @@ contract ZirconPylon is IZirconPylon {
     // >0.172
     function _handleSyncAndAsync(uint _amountIn, uint _pairReserveTranslated, uint _reserve, bool _isAnchor) private returns (uint amountOut, uint amountPool, uint trueAmountOut) {
         // Calculates max tokens to be had in this reserve pool
-        console.log("amountIn", _amountIn);
+//        console.log("amountIn", _amountIn);
         uint maxP = maxPercentageSync;
         uint max = _pairReserveTranslated.mul(maxP) / 100;
         uint freeSpace;
@@ -653,7 +652,6 @@ contract ZirconPylon is IZirconPylon {
             if(freeSpace > 0) {
                 if(_amountIn <= freeSpace) {
                     (uint px,) = _syncMinting(maxP);
-                    console.log("here");
                     return (_amountIn, px, _amountIn);
                 } else {
                     amountOut += freeSpace;
@@ -999,7 +997,7 @@ contract ZirconPylon is IZirconPylon {
             }
         }
 
-        console.log("feebps", feeBps);
+//        console.log("feebps", feeBps);
         // Avoids underflow issues downstream
         require(feeBps < 10000, "Z: FTH");
 
@@ -1387,7 +1385,7 @@ contract ZirconPylon is IZirconPylon {
                 (currentFloatAccumulator - lastFloatAccumulator)
                 /(blockTimestamp - lastOracleTimestamp))
                 >> 56)) * decimals.float) >> 56;
-                console.log("DD:: avg price", _avgPrice);
+//                console.log("DD:: avg price", _avgPrice);
                 lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;
                 lastFloatAccumulator = currentFloatAccumulator;
@@ -1797,7 +1795,7 @@ contract ZirconPylon is IZirconPylon {
         {
             // Sends for burning
             _safeTransfer(pairAddress, pairAddress, ptuWithFee);
-            console.log("ptuWithFee", ptuWithFee);
+//            console.log("ptuWithFee", ptuWithFee);
             (uint amountA, uint amountB) = IZirconPair(pairAddress).burn(to);
             amount0 += isFloatReserve0 ? amountA : amountB;
             amount1 += isFloatReserve0 ? amountB : amountA;
@@ -2107,7 +2105,7 @@ contract ZirconPylon is IZirconPylon {
     function handleAsyncBurn(bool isAnchor, uint adjustedLiquidity, uint feeBps, uint reservesTranslated1, address to, uint totalSupply) private returns (uint floatPercentage, uint ptu, uint amountOut) {
 
         ptu = calculateLPTU(isAnchor, adjustedLiquidity, totalSupply);
-        console.log("Burn Async PTU", ptu);
+//        console.log("Burn Async PTU", ptu);
         //Two vars since we can't pay fees until omega calculations are done
         uint ptuWithFee = ptu - (ptu * feeBps)/10000;
         uint ptb = _getBalanceOf(pairAddress, address(this));
@@ -2141,7 +2139,7 @@ contract ZirconPylon is IZirconPylon {
                 _to);
 
             amountOut = amount_;
-            console.log("liq", ptuWithFee);
+//            console.log("liq", ptuWithFee);
 
             percentageFloatChange = (ptb - ptuWithFee) * 1e18/ptb;
             //            console.log("percF", percentageFloatChange);
@@ -2150,7 +2148,7 @@ contract ZirconPylon is IZirconPylon {
                 ptuWithFee = (ptuWithFee * percentageFloatChange)/1e18;
                 //                ptu = (ptu * percentageFloatChange)/1e18;
             }
-            console.log("% float", percentageFloatChange);
+//            console.log("% float", percentageFloatChange);
 
             //Temping is done, we reassign it to its proper unchanged value
             percentageFloatChange = 1e18;
@@ -2162,7 +2160,7 @@ contract ZirconPylon is IZirconPylon {
         }
 
         //payFees(syncAmount, feeBps, isAnchor);
-        console.log("ptuWithFee", ptuWithFee);
+//        console.log("ptuWithFee", ptuWithFee);
         _safeTransfer(pairAddress, pairAddress, ptuWithFee);
         // address to_ = _to; //stack too deep
         // bool isReserve0 = isFloatReserve0 ? !isAnchor : isAnchor;

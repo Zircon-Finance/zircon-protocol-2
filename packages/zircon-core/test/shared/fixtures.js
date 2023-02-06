@@ -50,7 +50,12 @@ exports.coreFixtures = async function coreFixtures(library) {
             ZirconLibrary: library.address,
         },
     });
-    let factoryPylonInstance = await factoryPylon.deploy(factoryInstance.address, factoryEnergyInstance.address, ptFactoryInstance.address, feeToSetterInstance.address, migratorInstance.address);
+    let factoryPylonInstance = await factoryPylon.deploy(
+        factoryInstance.address,
+        factoryEnergyInstance.address,
+        ptFactoryInstance.address,
+        feeToSetterInstance.address,
+        migratorInstance.address);
 
     // Creating Pair
     await factoryInstance.createPair(tk0.address, tk1.address, factoryPylonInstance.address);

@@ -113,7 +113,8 @@ contract Migrator {
         IZirconPylonFactory(pylonFactory).migrateLiquidity(oldPylon, newPylonAddress);
 
         // Communicating new Pylon Variables
-        IZirconPylonFactory(newPylonFactory).startPylon(newPylonAddress,
+        IZirconPylonFactory(newPylonFactory).startPylon(
+            newPylonAddress,
             IOldZirconPylon(oldPylon).gammaMulDecimals(),
             IOldZirconPylon(oldPylon).virtualAnchorBalance(),
             IOldZirconPylon(oldPylon).formulaSwitch());

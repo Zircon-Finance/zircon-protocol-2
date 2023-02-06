@@ -13,7 +13,7 @@ let pylons = []
 let factoryPylonInstance, factoryEnergyInstance,  token0, token1,
     pylonInstance, poolTokenInstance0, poolTokenInstance1,
     factoryInstance, deployerAddress, account2, account,
-    pair, poolTokenContract, tokenContract, pairContract, pylonContract;
+    pair, poolTokenContract, tokenContract, pairContract, pylonContract, migratorInstance,feeToSetterInstance;
 
 let tokens = []; // used for load from production
 
@@ -44,6 +44,7 @@ function destructureFactories(fixtures) {
     pylonContract = fixtures.pylonContract
     poolTokenContract = fixtures.poolTokenContract
     migratorInstance = fixtures.migratorInstance
+    feeToSetterInstance = fixtures.feeToSetterInstance
 }
 
 async function destructure(fixtures, index) {
@@ -82,6 +83,76 @@ const overrides = {
 
 function getTokenBySymbol(symbol) {
     return tokens.find(token => token.symbol == symbol)
+}
+
+exports.migrate = async function(fixtures, library, index=0) {
+    await destructure(fixtures, index)
+
+    await factoryInstance.setMigrator(migratorInstance.address)
+    await factoryPylonInstance.setMigrator(migratorInstance.address)
+    await factoryEnergyInstance.setMigrator(migratorInstance.address)
+    await factoryPTInstance.setMigrator(migratorInstance.address)
+
+    let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
+    factoryEnergyInstance2 = await factoryEnergy.deploy(feeToSetterInstance.address, migratorInstance.address);
+    let zPylon = await ethers.getContractFactory('ZirconPylon', {
+        libraries: {
+            ZirconLibrary: library.address
+        }
+    });
+    // let pAddress = await factoryPylonInstance.getPylon(token1.address, token0.address);
+    // let pylonInstance2;
+    // if (pAddress === '0x0000000000000000000000000000000000000000') {
+    //     await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
+    //     pylonInstance2 = zPylon.attach(pAddress);
+    // }
+    let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory', {
+        libraries: {
+            ZirconLibrary: library.address
+        }
+    });
+
+    newFactoryPylonInstance = await factoryPylon.deploy(
+        factoryInstance.address,
+        factoryEnergyInstance2.address,
+        factoryPTInstance.address,
+        feeToSetterInstance.address,
+        migratorInstance.address);
+    console.log("newFactoryPylonInstance", factoryPylonInstance.address)
+
+    await migratorInstance.migrate(newFactoryPylonInstance.address, factoryEnergyInstance2.address, token0.address, token1.address);
+    // await migratorInstance.migrate(newFactoryPylonInstance.address, factoryEnergyInstance2.address, token1.address, token0.address);
+
+
+    // await migrator.startNewPylon(pylonInstance.address, newFactoryPylonInstance.address, pair.address, token0.address, token1.address)
+    // await migrator.startNewPylon(pylonInstance2.address, newFactoryPylonInstance.address, pair.address, token1.address, token0.address)
+
+    let pylonAddress = await newFactoryPylonInstance.getPylon(token0.address, token1.address)
+    // let pylonAddress2 = await newFactoryPylonInstance.getPylon(token1.address, token0.address)
+
+    let newPylonInstance = await zPylon.attach(pylonAddress)
+    // let newPylonInstance2 = await zPylon.attach(pylonAddress2)
+
+
+    let energy1 = await factoryEnergyInstance2.getEnergy(token0.address, token1.address)
+    // let energy2 = await factoryEnergyInstance2.getEnergy(token1.address, token0.address)
+    let energyRev = await factoryEnergyInstance2.getEnergyRevenue(token1.address, token0.address)
+
+    // await migrator.migrateEnergyRevenue(pair.address, await pair.energyRevenueAddress(), token0.address, token1.address, newFactoryPylonInstance.address, factoryEnergyInstance2.address)
+    //
+    // let energyAddress = await factoryEnergyInstance.getEnergy(token0.address, token1.address)
+    // let energyAddress2 = await factoryEnergyInstance.getEnergy(token1.address, token0.address)
+    // console.log("energy:: ", energyAddress, energyAddress2)
+    //
+    // await migrator.updateEnergyOnPylon(energyAddress, await pair.energyRevenueAddress(), await newPylonInstance.address, pair.address, token0.address, token1.address, newFactoryPylonInstance.address)
+    // await migrator.updateEnergyOnPylon(energyAddress2, await pair.energyRevenueAddress(), await newPylonInstance2.address, pair.address, token1.address, token0.address, newFactoryPylonInstance.address)
+    // console.log("porco ")
+    // await migrator.updateFactories(factoryEnergyInstance2.address, ptFactoryInstance.address, newFactoryPylonInstance.address, factoryInstance.address)
+    // console.log("pAddress", pair.address, pylonAddress)
+    // console.log("pAddress", pylonAddress, pylonAddress2)
+    // console.log("pAddress", energy1, energy2, energyRev)
+    await migratorInstance.initialize(factoryEnergyInstance2.address, factoryPTInstance.address, newFactoryPylonInstance.address, factoryInstance.address)
+    return [newPylonInstance]//, newPylonInstance2]
 }
 
 exports.getPylonIndexBy = function getPylonIndexBy(tkSmb0, tkSmb1) {

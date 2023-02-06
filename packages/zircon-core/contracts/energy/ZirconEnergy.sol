@@ -68,6 +68,23 @@ contract ZirconEnergy is IZirconEnergy {
   function _safeTransfer(address token, address to, uint value) private {
     (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
     require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FAILED');
+
+//    // call failed
+//    if (!success) {
+//      // decode returndata
+//      // we need assembly cause there's no 'decodeWithSelector'
+//      string memory error;
+//      assembly {
+//      // mload(returndata) -> length of bytes
+//      // mload(returndata + 0x20) -> start of body
+//      //    first 4 bytes are TimeError.selector
+//        error := mload(data)
+//      }
+//
+//      // return time using logs
+//      require(success, error);
+//    }
+
   }
 
   modifier _onlyPylon() {
@@ -117,7 +134,8 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
     uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
-
+    console.log("balance", balance, balanceAnchor);
+    console.log("addresses", pylon.anchorToken, pylon.pairAddress);
     _safeTransfer(pylon.pairAddress, newEnergy, balance);
     _safeTransfer(pylon.anchorToken, newEnergy, balanceAnchor);
   }

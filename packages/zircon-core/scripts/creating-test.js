@@ -38,6 +38,8 @@ var loading = (function(log) {
     }, 300);
 });
 
+
+
 const ADDRESSES = {
     WETH: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     factory: '0x599400CC21CE3F9589F2f011D39Ab67231A6200F',
@@ -56,12 +58,6 @@ async function main() {
     const [owner] = await hre.ethers.getSigners();
     console.log("Deploying contracts with the account:", owner.address);
     const chainId = hre.network.config.chainId
-
-    // let migratorAddress = "0xe7cDB74777Ef58c49907a71874Dc97C826B2cB2c"
-    // let factory = "0x404439c088d46ae4F5986167882aF58D318d0CcC"
-    // let pylonFactory = "0x8eF773220884845B3D09081291A42E92bcC4cA64"
-    // let energyFactory = "0x3cbf12Fd562e8343471EF17cFaefB55854662B62"
-    // let ptFactory = "0xF266c734Fcd099a1e59F1d52B44193d08D2bdc31"
 
     let migrator = await hre.ethers.getContractFactory("Migrator");
     console.log("Migrator address", ADDRESSES["migrator"], "owner", owner.address)

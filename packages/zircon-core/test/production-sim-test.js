@@ -6,7 +6,7 @@ const BN = require("bignumber.js");
 
 const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
 const {coreFixtures} = require("./shared/fixtures");
-const {initPylonsFromProdSnapshot, getPylonIndexBy, getFixturesForPylon, mintSync, burn, forwardTime, getPylons} = require("./shared/commands");
+const {initPylonsFromProdSnapshot, getPylonIndexBy, getFixturesForPylon, mintSync, burn, forwardTime, getPylons, migrate} = require("./shared/commands");
 const {librarySetup} = require("./shared/fixtures");
 const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
 const fs = require('fs')
@@ -26,7 +26,7 @@ describe("Prod to test Pylons", () => {
     before(async () => {
         library = await loadFixture(librarySetup);
 
-        library = await librarySetup()
+        // library = await librarySetup()
         fixtures = await initPylonsFromProdSnapshot(library);
     })
 
@@ -87,7 +87,7 @@ describe("Prod to test Pylons", () => {
         })
     }
 
-    it.only("Compare Prices", async () => {
+    it("Compare Prices", async () => {
         // let index = getPylonIndexBy("ZRG", "xcKSM")
         console.log("Getting Some Tokens")
 
@@ -114,9 +114,9 @@ describe("Prod to test Pylons", () => {
     })
 
     //Let's try to calculate some cases for pylon
-    it(`Prod Testing ZRG/WMOVR`, async () => {
+    it.only(`Prod Testing ZRG/WMOVR`, async () => {
         console.log("\n\n\n<><><><><> STARTING TEST <><><><><><><><>\n")
-        let index = getPylonIndexBy("ZRG", "xcKSM")
+        let index = getPylonIndexBy("ZRG", "WMOVR")
         fixtures = await getFixturesForPylon(fixtures, index)
 
         let account = fixtures.account
@@ -130,6 +130,8 @@ describe("Prod to test Pylons", () => {
         // 17.38
         // Minting a bit of ETH Stable PT
         await mintSync(account.address, "1", false, fixtures, false, index)
+        await migrate(fixtures, library, index)
+        console.log("migration completed")
 
         // Getting the PT Instances
         console.log("Minting a bit of ETH Stable PT")

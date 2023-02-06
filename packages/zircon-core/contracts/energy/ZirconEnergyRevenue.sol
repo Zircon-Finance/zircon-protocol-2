@@ -29,7 +29,23 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
     function _safeTransfer(address token, address to, uint value) private {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FAILED');
+        //    require(success && (data.length == 0 || abi.decode(data, (bool))), 'Zircon Pylon: TRANSFER_FAILED');
+
+        // call failed
+        if (!success) {
+            // decode returndata
+            // we need assembly cause there's no 'decodeWithSelector'
+            string memory error;
+            assembly {
+            // mload(returndata) -> length of bytes
+            // mload(returndata + 0x20) -> start of body
+            //    first 4 bytes are TimeError.selector
+                error := mload(add(data, 0x24))
+            }
+
+            // return time using logs
+            require(success, error);
+        }
     }
     // **** MODIFIERS *****
     uint public initialized = 0;
@@ -132,11 +148,6 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             feeValue1 = 0;
         }
     }
-
-
-
-
-
 
     function getFees(address _token, uint _amount, address _to) external {
         require(msg.sender == energyFactory, "ZER: Not properly called");
