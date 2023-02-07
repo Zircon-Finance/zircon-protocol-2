@@ -10,6 +10,10 @@ const WETH_ADDRESS = {
 
 }
 
+
+
+
+
 module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let chainId = await getChainId()
     let coreContracts = CORE_DEPLOYED[chainId.toString()][0].contracts
@@ -29,11 +33,10 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     //     log: true
     // });
 
-
     // /// Deploy Factory
     let router = await deploy('ZirconRouter', {
         from: deployer,
-        args: [coreContracts['ZirconFactory']['address'], coreContracts['ZirconPylonFactory']['address'], WETH_ADDRESS[chainId.toString()]],
+        args: ["0x40D3b4105Eb640Db284CB46Fc8308F3f9a9aE591", "0x84924Cec3ce463e115d61196B5EAb1a302D28E4e", WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 
@@ -49,7 +52,7 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     let pylonRouter = await deploy('ZirconPylonRouter', {
         from: deployer,
         libraries: {ZirconPeripheralLibrary: peripheralLibrary.address},
-        args: [coreContracts['ZirconFactory']['address'], coreContracts['ZirconPylonFactory']['address'], coreContracts['ZirconPTFactory']['address'], WETH_ADDRESS[chainId.toString()]],
+        args: ["0x40D3b4105Eb640Db284CB46Fc8308F3f9a9aE591", "0x84924Cec3ce463e115d61196B5EAb1a302D28E4e", "0x889b791e207FA05208F7c95E9058490D0F5645d6", WETH_ADDRESS[chainId.toString()]],
         log: true
     });
 

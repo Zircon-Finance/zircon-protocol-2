@@ -4638,11 +4638,11 @@
       "chainId": "1287",
       "contracts": {
         "ZirconLibrary": {
-          "address": "0xf7a7BAA92cF9b6d91D1102552C4B079cDBb4B1C8",
+          "address": "0xC98224ACC27Fe72ddCdfEEC5EE39d2a904620855",
           "abi": []
         },
         "Migrator": {
-          "address": "0x44e3A941b77C2bAfD8Dd1123BE237fA12351093A",
+          "address": "0x5e910cdB31ABb717620B3960368d838AbdE1B74f",
           "abi": [
             {
               "inputs": [],
