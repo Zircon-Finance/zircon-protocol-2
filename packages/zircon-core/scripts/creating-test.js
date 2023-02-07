@@ -39,11 +39,11 @@ var loading = (function(log) {
 async function main() {
     const [owner] = await hre.ethers.getSigners();
 
-    let migratorAddress = "0xfE2C2DAfcc29320Ece37aF11ac9D86624Cf6C3d0"
-    let factory = "0x40D3b4105Eb640Db284CB46Fc8308F3f9a9aE591"
-    let pylonFactory = "0x092ddF2C267BF45c3CCaB3BF4197A498e61B9b5A"
-    let energyFactory = "0x1138EAcBefbe4E9f38fe86D6f120Ce4C4d6b1e08"
-    let ptFactory = "0x889b791e207FA05208F7c95E9058490D0F5645d6"
+    let migratorAddress = "0x5E59b2e5e75f7Ee1a15024c324c1a65A49661611"
+    let factory = "0x510D9BEcBd3C7E89d9d48dB51e99Ae5B72c27226"
+    let pylonFactory = "0x0044f6653a1f2ddc873Ca6e964e324c888ba73cF"
+    let energyFactory = "0xeB2F197df953bd306E7B2Ed1074423d80Da7199C"
+    let ptFactory = "0x55A5D6571711524Cd4d0d4aBaC8952b8eF237B74"
 
     let migrator = await hre.ethers.getContractFactory("Migrator");
     console.log("Migrator address", migratorAddress, "owner", owner.address)
