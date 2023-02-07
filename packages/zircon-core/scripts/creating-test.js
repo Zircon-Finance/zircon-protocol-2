@@ -38,13 +38,12 @@ var loading = (function(log) {
 
 async function main() {
     const [owner] = await hre.ethers.getSigners();
-    console.log("Deploying contracts with the account:", owner.address);
 
-    let migratorAddress = "0x10E5DFa53b3386db661E6B539Eb7f602aaBaD105"
-    let factory = "0xc7DF87028363A13600b5d559139B0BdF5b6e7383"
-    let pylonFactory = "0xACD6165D071C9009509F55F28a2C3Ea4eF8aD853"
-    let energyFactory = "0x5458C5981DAB7c701FB8Ead4e8187b8bA935A022"
-    let ptFactory = "0x966c50aF06D81bE8d7c4bdF2ea34157c233052AE"
+    let migratorAddress = "0xfE2C2DAfcc29320Ece37aF11ac9D86624Cf6C3d0"
+    let factory = "0x40D3b4105Eb640Db284CB46Fc8308F3f9a9aE591"
+    let pylonFactory = "0x092ddF2C267BF45c3CCaB3BF4197A498e61B9b5A"
+    let energyFactory = "0x1138EAcBefbe4E9f38fe86D6f120Ce4C4d6b1e08"
+    let ptFactory = "0x889b791e207FA05208F7c95E9058490D0F5645d6"
 
     let migrator = await hre.ethers.getContractFactory("Migrator");
     console.log("Migrator address", migratorAddress, "owner", owner.address)
