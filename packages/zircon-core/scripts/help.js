@@ -2,9 +2,9 @@ const { ethers } = require('hardhat');
 
 
 async function helloBugs() {
-    let pylon = await ethers.getContractFactory('ZirconPylon');
-    let pylonInstance = await pylon.attach("0x46a20Fb35E95e6c9f6DB635C63Da9A63D12d85a5")
-    let vab = await pylonInstance.virtualAnchorBalance()
+    let pylon = await ethers.getContractFactory('FeeToSetter');
+    let pylonInstance = await pylon.attach("0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce")
+    let vab = await pylonInstance.energyFactory()
     console.log("vab::", vab.toString())
 }
 
@@ -100,7 +100,7 @@ async function check() {
 
 }
 
-changeOwner()
+helloBugs()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
