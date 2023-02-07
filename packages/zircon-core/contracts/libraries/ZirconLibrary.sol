@@ -19,23 +19,8 @@ library ZirconLibrary {
         bool bNegative;
     }
 
-    // @notice This function converts amount, specifying which tranch uses with @isAnchor, to pool token share
-    // @_amount is the quantity to convert
-    // @_totalSupply is the supply of the pt's tranch
-    // @reserve0, @_gamma, @vab are the variables needed to the calculation of the amount
-    // @deprecated TBD
-    //    function calculatePTU(bool _isAnchor, uint _amount, uint _totalSupply, uint _reserve, uint _reservePylon, uint _gamma, uint _vab) pure public returns (uint liquidity){
-    //        if (_isAnchor) {
-    //            liquidity = _amount.mul(_totalSupply)/_vab;
-    //        }else {
-    //            liquidity = ((_amount.mul(_totalSupply))/(_reservePylon.add(_reserve.mul(_gamma).mul(2)/1e18)));
-    //        }
-    //    }
-
-
     function calculateParabolaCoefficients(Decimals storage decimals, uint p2x, uint p2y, uint p3x, uint p3y, bool check) view public returns (ParabolaCoefficients memory coefficients) {
-//        console.log("parab p2x, p2y", p2x, p2y);
-//        console.log("p3x, p3y", p3x, p3y);
+
         // Makes it a line if the points are are within 0.1% of each other;
         if((p3x * decimals.anchor)/p2x <= (1001*(decimals.anchor/1e3))) {
             return ParabolaCoefficients(0, p3y.mul(decimals.anchor)/p3x, false, false);
@@ -61,13 +46,10 @@ library ZirconLibrary {
         uint aPartial1 = p3y.mul(p2x);
         uint aPartial2 = p3x.mul(p2y);
         uint aDenominator = p3x.mul(p3x - p2x)/decimals.anchor; //Always positive
-//        console.log("aDen", aDenominator);
         if(aPartial1 >= aPartial2) {
             // a is positive
             aNumerator = (aPartial1 - aPartial2)/p2x;
             coefficients.a = aNumerator * decimals.anchor/aDenominator;
-//            console.log("a Num:: coeff.a::", aNumerator, coefficients.a);
-
             {
                 uint _p2x = p2x;
             }
@@ -75,7 +57,6 @@ library ZirconLibrary {
             // If b is positive
             if(p2y * decimals.anchor/p2x >= (p2x * coefficients.a)/decimals.anchor) {
                 coefficients.b = p2y * decimals.anchor/p2x - (p2x * coefficients.a)/decimals.anchor; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
-//                console.log("b coeff::", coefficients.b);
                 coefficients.bNegative = false;
             } else {
                 // If b is negative we must construct a further piecewise definition upstream
@@ -90,13 +71,8 @@ library ZirconLibrary {
             //a is negative
             aNumerator = (aPartial2 - aPartial1)/p2x;
 
-            //            console.log("aPart2, aPart1, p2x", aPartial2, aPartial1, p2x);
-
             coefficients.a = (aNumerator * decimals.anchor)/aDenominator;
-
             coefficients.b = (p2y * decimals.anchor/p2x).add((p2x * coefficients.a)/decimals.anchor); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
-
-//            console.log("aneg, b", coefficients.a, coefficients.b);
 
             coefficients.aNegative = true;
             coefficients.bNegative = false;
@@ -208,29 +184,6 @@ library ZirconLibrary {
         }
 
     }
-
-    //    def get_ftv_for_x(x, p2x, p2y, k, adjusted_vab):
-    //    print("Debug: getFTV adj_vab: {}, getFTV k: {}".format(adjusted_vab, k))
-    //    p3x = (adjusted_vab ** 2) / k
-    //
-    //    result = 0
-    //    if x > p3x:
-    //        result = 2 * math.sqrt(k * x) - adjusted_vab
-    //    else:
-    //
-    //        a, b = calculate_parabola_coefficients(p2x, p2y, p3x, adjusted_vab)
-    //
-    //        # derivative check at p3x (crossing point)
-    //        # sufficient to check if the parabola is too curved at any point
-    //        if 2 * a * p3x + b > 0:
-    //            result = a * (x ** 2) + b * x
-    //        else:
-    //            # In solidity this should just revert
-    //            print("Error: Derivative is negative")
-    //            return -1
-    //    print("Debug: GetFTV: X: {}, result: {}, p3x: {}".format(x, result, p3x))
-    //    return result
-
 
 
 

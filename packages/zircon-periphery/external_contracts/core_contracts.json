@@ -4638,8 +4638,259 @@
       "chainId": "1287",
       "contracts": {
         "ZirconLibrary": {
-          "address": "0xaA20e5Bbf1F1aF05E7E72B485d971423C242Ae91",
+          "address": "0xf7a7BAA92cF9b6d91D1102552C4B079cDBb4B1C8",
           "abi": []
+        },
+        "Migrator": {
+          "address": "0x44e3A941b77C2bAfD8Dd1123BE237fA12351093A",
+          "abi": [
+            {
+              "inputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newEnergyFactoryAddress",
+                  "type": "address"
+                }
+              ],
+              "name": "changeEnergyFactoryAddress",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "energyFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "ptFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pylonFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pairFactory_",
+                  "type": "address"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newPylonFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "newEnergyFactory",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenA",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_tokenB",
+                  "type": "address"
+                }
+              ],
+              "name": "migrate",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pairFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "ptFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pylonFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setEnergyMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setFactoryMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner_",
+                  "type": "address"
+                }
+              ],
+              "name": "setOwner",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setPTMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "migrator_",
+                  "type": "address"
+                }
+              ],
+              "name": "setPylonMigrator",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
         }
       }
     }

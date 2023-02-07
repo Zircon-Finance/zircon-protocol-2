@@ -24,11 +24,11 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     })
 
     // Migrator
-    // let migrator = await deploy('Migrator', {
-    //     from: deployer,
-    //     args: null,
-    //     log: true
-    // });
+    let migrator = await deploy('Migrator', {
+        from: deployer,
+        args: null,
+        log: true
+    });
 
     //Fee to setter
     // let feeToSetter = await deploy('FeeToSetter', {
