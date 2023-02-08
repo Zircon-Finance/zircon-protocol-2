@@ -1,5 +1,5 @@
 
-
+const {BigNumber} =  require("ethers");
 
 const poolInfo = [ //floatToken, anchorToken, Name
     ['0x4545E94974AdACb82FC56BCf136B07943e152055',	'0x98878b06940ae243284ca214f92bb71a2b032b8a', "ZRG/MOVR", 18],
@@ -18,14 +18,22 @@ const poolInfo = [ //floatToken, anchorToken, Name
     ['0xFFFfFfFfF6E528AD57184579beeE00c5d5e646F0',	'0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', "kBTC/USDC", 6],
 ];
 
+const withdraw = false;
+const withdrawalAddress = "0xb6932ae987775Fc317737D35e9df3Cb7CCC9CFEC"
+
 
 async function check() {
     //Deploy Pylon Router
     let energyFactory = await ethers.getContractFactory('ZirconEnergyFactory');
-    let ft1 = energyFactory.attach("0x9b38fD03fAf64Dcc5F1da1101326a072092420A8");
+    let ft1 = energyFactory.attach("0xFc413b0b8481eeBCf335Eb35B1A7a634fef64649");
 
     let pairFactory = await ethers.getContractFactory('ZirconFactory');
     let pairFactoryInstance = pairFactory.attach("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd");
+
+    let feeToSetter = await ethers.getContractFactory('FeeToSetter');
+    let ftInstance = feeToSetter.attach("0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce")
+
+    await ftInstance.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0xFc413b0b8481eeBCf335Eb35B1A7a634fef64649", "0x65815a6e55fA08fcdE76ad772Bd64A4F264a6924")
 
     //console.log("", poolInfo);
 
@@ -42,6 +50,9 @@ async function check() {
         // let energy = await ft1.getEnergy("0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878b06940ae243284ca214f92bb71a2b032b8a")
         console.log("\n\n==========", name);
         console.log("energyRev addr", energyRev);
+        let energyRevInstance = (await ethers.getContractFactory('ZirconEnergyRevenue')).attach(energyRev);
+        let energyForRev = await energyRevInstance.energyFactory();
+        console.log("energyForRev", energyForRev);
 
         let ptt = await pairInstance.totalSupply();
         let energyBalance = await pairInstance.balanceOf(energyRev);
@@ -53,9 +64,34 @@ async function check() {
 
         let anchorBalance = await anchorTokenInstance.balanceOf(energyRev);
 
+        console.log("anchorBalance", ethers.utils.formatEther(anchorBalance))
+        console.log("pairBalance", ethers.utils.formatEther(energyBalance))
+
         let valueInAnchor = isFloatToken0 ? reserves[1].mul(energyBalance).mul(2).div(ptt) : reserves[0].mul(energyBalance).mul(2).div(ptt);
 
         valueInAnchor = valueInAnchor.add(anchorBalance);
+        console.log("erev", energyRev)
+
+        if(withdraw) {
+            //Remember to check addresses
+
+            if(energyBalance.gt(BigNumber.from("0"))) {
+                await ftInstance.getFees(pairAddress, energyBalance, withdrawalAddress, energyRev)
+            } else {
+                console.log("Zero Pair Balance")
+            }
+
+            if(anchorBalance.gt(BigNumber.from("0"))) {
+                await ftInstance.getFees(anchorToken, anchorBalance, withdrawalAddress, energyRev)
+            } else {
+                console.log("Zero Anchor Balance")
+            }
+            // await energyRevInstance.getFees(pairAddress, energyBalance, withdrawalAddress)
+
+            // await energyRevInstance.getFees(anchorToken, anchorBalance, withdrawalAddress)
+            console.log("transferred pool tokens:", ethers.utils.formatEther(energyBalance));
+            console.log("transferred anchor tokens:", ethers.utils.formatEther(anchorBalance));
+        }
 
         let decimalsDiff = 18 - decimals;
         valueInAnchor = valueInAnchor.mul(10 ** decimalsDiff);
