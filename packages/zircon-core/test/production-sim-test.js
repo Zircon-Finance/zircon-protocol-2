@@ -114,7 +114,7 @@ describe("Prod to test Pylons", () => {
     })
 
     //Let's try to calculate some cases for pylon
-    it.only(`Prod Testing ZRG/WMOVR`, async () => {
+    it(`Prod Testing ZRG/WMOVR`, async () => {
         console.log("\n\n\n<><><><><> STARTING TEST <><><><><><><><>\n")
         let index = getPylonIndexBy("ZRG", "WMOVR")
         fixtures = await getFixturesForPylon(fixtures, index)

@@ -9,7 +9,7 @@ import "./interfaces/IZirconFactory.sol";
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import 'hardhat/console.sol';
+//import 'hardhat/console.sol';
 
 contract ZirconPylon is IZirconPylon {
 
@@ -1013,7 +1013,7 @@ contract ZirconPylon is IZirconPylon {
                 uint _avgPrice = (uint256(((
                 (currentFloatAccumulator - lastFloatAccumulator)
                 /(blockTimestamp - lastOracleTimestamp))
-                >> 56)) * decimals.float) >> 56;
+                >> 28)) * decimals.float) >> 84;
 
                 lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;

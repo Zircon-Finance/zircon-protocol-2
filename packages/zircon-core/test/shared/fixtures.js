@@ -66,7 +66,7 @@ exports.coreFixtures = async function coreFixtures(library) {
     //initializing fee to setter
 
     await feeToSetterInstance.initialize(factoryInstance.address, factoryEnergyInstance.address, factoryPylonInstance.address);
-    //await feeToSetterInstance.setFees(10, ethers.BigNumber.from("40000000000000000")  , 100, 240);
+    await feeToSetterInstance.setFees(10, ethers.BigNumber.from("40000000000000000")  , 100, 240, 3, 2, 120);
     await migratorInstance.initialize(factoryEnergyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
 
     // Sorting Tokens

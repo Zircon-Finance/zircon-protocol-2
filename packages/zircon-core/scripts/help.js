@@ -2,9 +2,9 @@ const { ethers } = require('hardhat');
 
 
 async function helloBugs() {
-    let pylon = await ethers.getContractFactory('FeeToSetter');
-    let pylonInstance = await pylon.attach("0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce")
-    let vab = await pylonInstance.energyFactory()
+    let pylon = await ethers.getContractFactory('ZirconPTFactory');
+    let pylonInstance = await pylon.attach("0x55A5D6571711524Cd4d0d4aBaC8952b8eF237B74")
+    let vab = await pylonInstance.getPoolToken("0x461FBF26F46e2E2C82Ec4f59338979E9223961e8", "0x9AF666c9058a964759C902947DB701afAd956F8f")
     console.log("vab::", vab.toString())
 }
 

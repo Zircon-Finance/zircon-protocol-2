@@ -4,7 +4,7 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 import '../libraries/Math.sol';
 
@@ -111,9 +111,7 @@ contract ZirconEnergyRevenue is ReentrancyGuard  {
             uint amount = balance.sub(reserve);
             uint pylon0Liq = (amount.mul(pylonBalance0)/totalSupply).mul(100 - feePercentageForRev)/(100);
             uint pylon1Liq = (amount.mul(pylonBalance1)/totalSupply).mul(100 - feePercentageForRev)/(100);
-            console.log("reserves", amount);
-            console.log("pylon0Liq", pylon0Liq);
-            console.log("pylon1Liq", pylon1Liq);
+
             _safeTransfer(zircon.pairAddress, zircon.energy0, pylon0Liq);
             _safeTransfer(zircon.pairAddress, zircon.energy1, pylon1Liq);
             reserve = balance.sub(pylon0Liq.add(pylon1Liq));

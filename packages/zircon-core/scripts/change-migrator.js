@@ -21,29 +21,55 @@ async function migrateMigrator() {
     // let poolToken = await ethers.getContractFactory('ZirconPoolToken');
     // let pti = poolToken.attach(pt)
     // console.log(await pti.pylonFactory())
-    let eFactory = await ethers.getContractFactory('ZirconFactory');
-    let fFactory = await ethers.getContractFactory('ZirconFactory');
-    let efi = eFactory.attach(ENERGY_FACTORY[chainId])
-    let ffi = fFactory.attach(FACTORY[chainId])
-    let pfi = fFactory.attach(PYLON_FACTORY[chainId])
-    let ptfi = fFactory.attach(PT_FACTORY[chainId])
-    //
-    await (await efi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
-    await (await ffi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
-    await (await pfi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
-    await (await ptfi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
-    console.log("migra", await ptfi.migrator(), await ffi.migrator())
-    //
-    return
+    // let eFactory = await ethers.getContractFactory('ZirconFactory');
+    // let fFactory = await ethers.getContractFactory('ZirconFactory');
+    // let efi = eFactory.attach(ENERGY_FACTORY[chainId])
+    // let ffi = fFactory.attach(FACTORY[chainId])
+    // let pfi = fFactory.attach(PYLON_FACTORY[chainId])
+    // let ptfi = fFactory.attach(PT_FACTORY[chainId])
+    // // // // // //
+    // // // // // await (await efi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
+    // // // // // await (await ffi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
+    // // // // // await (await pfi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
+    // // // // // await (await ptfi.setMigrator(MIGRATOR_ADDRESS[chainId])).wait()
+    // console.log("migra", await efi.migrator(), await ffi.migrator())
+    // // // // // //
+    // return
     let migratorFactory = await ethers.getContractFactory('Migrator');
-    let oldMigrator = await migratorFactory.attach("0x1268997b6AEB2b4e8401e4F6e2A7B622A1E5b665")
-    let newMigrator = await migratorFactory.attach("0xEc0D854E2fCF52F2DB04b5E1eB3C445B8Cfbe7BD")
+    let oldMigrator = await migratorFactory.attach("0xdf109A381F0E9EC6751430279c9d817075a5D3C3")
+    let newMigrator = await migratorFactory.attach(MIGRATOR_ADDRESS[chainId])
+    await(await oldMigrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])).wait()
+    await oldMigrator.setPylonMigrator(newMigrator.address);
+    console.log("pylon")
+    await oldMigrator.setEnergyMigrator(newMigrator.address);
+    console.log("energy")
+    return;
+
+    // await newMigrator.setEnergyMigrator(newMigrator.address);
+    // console.log("energy")
+    // function setPylonMigrator(address migrator_) public onlyOwner {
+    //     IZirconPylonFactory(pylonFactory).setMigrator(migrator_);
+    // }
+    //
+    // function setEnergyMigrator(address migrator_) public onlyOwner {
+    //     IZirconEnergyFactory(energyFactory).setMigrator(migrator_);
+    // }
+    //
+    // function setFactoryMigrator(address migrator_) public onlyOwner {
+    //     IZirconFactory(pairFactory).setMigrator(migrator_);
+    // }
+    //
+    // function setPTMigrator(address migrator_) public onlyOwner {
+    //     IZirconPTFactory(pairFactory).setMigrator(migrator_);
+    // }
+
 
     // console.log("newMigrator", await newMigrator.energyFactory(), await newMigrator.ptFactory(), await newMigrator.pylonFactory(), await newMigrator.pairFactory())
     // await(await oldMigrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])).wait()
     console.log("old migrator initialized")
-    await(await newMigrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])).wait()
-    await(await oldMigrator.setMigrator(newMigrator.address)).wait()
+    // await(await oldMigrator.initialize(PYLON_FACTORY[chainId], PYLON_FACTORY[chainId], ENERGY_FACTORY[chainId], ENERGY_FACTORY[chainId])).wait()
+    // await(await oldMigrator.setMigrator(newMigrator.address)).wait()
+
     console.log("setting new migrator")
     console.log("initializing new migrator")
 
