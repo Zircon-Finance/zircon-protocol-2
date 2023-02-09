@@ -12,9 +12,10 @@ import "../interfaces/IZirconPylon.sol";
 contract ZirconEnergy is IZirconEnergy {
 
   /*
-  Zircon Energy is the protocol-wide accumulator of revenue.
-  Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
-*/
+   * Zircon Energy is the protocol-wide accumulator of revenue.
+   * Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
+  */
+
   using SafeMath for uint112;
   using SafeMath for uint256;
 
@@ -50,15 +51,13 @@ contract ZirconEnergy is IZirconEnergy {
   function initialize(address _pylon, address _pair, address _token0, address _token1) external {
     require(initialized == 0, "ZER: AI");
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
-    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
-    (address tokenA, address tokenB) = isFloatToken0 ? (_token0, _token1) : (_token1, _token0);
+
     pylon = Pylon(
       _pylon,
       _pair,
-      tokenA,
-      tokenB
+      _token0,
+      _token1
     );
-
     initialized = 1;
   }
 
@@ -72,10 +71,12 @@ contract ZirconEnergy is IZirconEnergy {
     require(pylon.pylonAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
+
   modifier _onlyPair() {
     require(pylon.pairAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
+
   function registerFee() external _onlyPylon _initialize {
     uint balance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
     require(balance >= anchorReserve, "ZE: Anchor not sent");
@@ -88,11 +89,6 @@ contract ZirconEnergy is IZirconEnergy {
     anchorReserve = balance.sub(toSend);
     emit RegisterFee(anchorReserve, register, toSend);
   }
-
-  // Called when tokens are withdrawn to ensure pylon doesn't get bricked
-//  function syncReserve() external _onlyPylon _initialize {
-//    anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
-//  }
 
 
   //Returns the fee in basis points (0.01% units, needs to be divided by 10000)
@@ -113,8 +109,11 @@ contract ZirconEnergy is IZirconEnergy {
 
     uint balance = IZirconPair(pylon.pairAddress).balanceOf(address(this));
     uint balanceAnchor = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+    uint balanceFloat = IUniswapV2ERC20(pylon.floatToken).balanceOf(address(this));
+
     _safeTransfer(pylon.pairAddress, newEnergy, balance);
     _safeTransfer(pylon.anchorToken, newEnergy, balanceAnchor);
+    _safeTransfer(pylon.floatToken, newEnergy, balanceFloat);
   }
 
   function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
@@ -215,12 +214,12 @@ contract ZirconEnergy is IZirconEnergy {
           // Simplified, the previous system was necessary because it was two separate functions
           amount = (amountToAdd - energyPTBalance).mul(2 * _reserve1)/ts;
 
-//          // sends pool tokens directly to pair
-//          // TotalAmount is what the user already received, while percentage is what's missing.
-//          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
-//          // Percentage is calculated "natively" as a full 1e18
-//          // ta/(1-p) - ta = ta*p/(1-p)
-//          amount = totalAmount.mul(percentage)/(1e18 - percentage);
+          //          // sends pool tokens directly to pair
+          //          // TotalAmount is what the user already received, while percentage is what's missing.
+          //          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
+          //          // Percentage is calculated "natively" as a full 1e18
+          //          // ta/(1-p) - ta = ta*p/(1-p)
+          //          amount = totalAmount.mul(percentage)/(1e18 - percentage);
         }
 
         uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));

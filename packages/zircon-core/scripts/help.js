@@ -2,10 +2,24 @@ const { ethers } = require('hardhat');
 
 
 async function helloBugs() {
-    let pylon = await ethers.getContractFactory('ZirconPTFactory');
-    let pylonInstance = await pylon.attach("0x55A5D6571711524Cd4d0d4aBaC8952b8eF237B74")
-    let vab = await pylonInstance.getPoolToken("0x461FBF26F46e2E2C82Ec4f59338979E9223961e8", "0x9AF666c9058a964759C902947DB701afAd956F8f")
-    console.log("vab::", vab.toString())
+    let migrator = await ethers.getContractFactory('Migrator');
+    let migratorInstance = await migrator.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
+
+    const energyFactory = await ethers.getContractFactory('ZirconEnergy');
+    const energyInstance = energyFactory.attach("0x86AeA4e1Cf5067Df3e900Df5AB54Fdac0b0A7813")
+
+    console.log("dio", await energyInstance.initialized())
+    // await(await migratorInstance.initialize("0x2b0B3E7B54C3C551A09b01536a52F1DcD1c20405", "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", "0xD424f1312D870d16D2526Ef4e87dDbcd6ca28d2f", "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd")).wait()
+    // console.log("initialized")
+    //
+    // await(await migratorInstance.setEnergyMigrator("0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")).wait()
+    //
+    // console.log("migrator setted")
+    //
+    // await energyInstance.migrateEnergy("0x86AeA4e1Cf5067Df3e900Df5AB54Fdac0b0A7813", "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
+    // console.log("ciao")
+
+
 }
 
 async function changeOwner() {

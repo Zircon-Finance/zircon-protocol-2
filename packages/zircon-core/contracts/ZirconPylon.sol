@@ -210,8 +210,12 @@ contract ZirconPylon is IZirconPylon {
 
         // with 0 it reverts in the next lines
         (uint cacheReserve0, uint cacheReserve1,) = getPairReservesTranslated(1, 1);
-        (uint res0, uint res1,) = getPairReservesNormalized();
+        (uint res0, uint res1, uint timestamp) = getPairReservesNormalized();
         (uint syncReserve0,) = getSyncReserves();
+
+        lastPrice = (res1 * decimals.float)/res0;
+        lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
+        lastOracleTimestamp = timestamp;
 
         p2x = cacheReserve1*decimals.float/cacheReserve0;
 
@@ -283,10 +287,7 @@ contract ZirconPylon is IZirconPylon {
         lastOracleTimestamp = timestamp;
         lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
         lastPrice = (uint256(_reservePair1) * decimals.float)/_reservePair0;
-        liquidityFee = IZirconFactory(pairFactoryAddress).liquidityFee();
-        maxPercentageSync = IZirconPylonFactory(factoryAddress).maximumPercentageSync();
-        deltaGammaThreshold = IZirconPylonFactory(factoryAddress).deltaGammaThreshold();
-        oracleUpdateSecs = IZirconPylonFactory(factoryAddress).oracleUpdateSecs();
+        updateFees();
 
         _entered = true;
         (uint balance0, uint balance1) = _getFloatAnchorBalance();
