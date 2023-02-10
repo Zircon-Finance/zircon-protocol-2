@@ -152,12 +152,15 @@ exports.migrate = async function(fixtures, library, index=0) {
     // console.log("pAddress", pylonAddress, pylonAddress2)
     // console.log("pAddress", energy1, energy2, energyRev)
     await migratorInstance.initialize(factoryEnergyInstance2.address, factoryPTInstance.address, newFactoryPylonInstance.address, factoryInstance.address)
-    return [newPylonInstance]//, newPylonInstance2]
+    return newPylonInstance
 }
 
 exports.getPylonIndexBy = function getPylonIndexBy(tkSmb0, tkSmb1) {
     let tk0 = getTokenBySymbol(tkSmb0)
     let tk1 = getTokenBySymbol(tkSmb1)
+    console.log("tk0", tk0)
+    console.log("tk1", tk1)
+    console.log("pylons", pylons)
     return pylons.findIndex(pylon => pylon.token0 === tk0.address && pylon.token1 === tk1.address)
 }
 
@@ -177,6 +180,7 @@ exports.initPylonsFromProdSnapshot = async function initProductionData(library) 
         tokens,
         library
     )
+    console.log("adding pylons", pylonsToAdd)
     pylons.push(...pylonsToAdd);
     return fixtures
 

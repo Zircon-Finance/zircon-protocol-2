@@ -36,14 +36,16 @@ async function migrateMigrator() {
     // // // // // //
     // return
     let migratorFactory = await ethers.getContractFactory('Migrator');
-    let oldMigrator = await migratorFactory.attach("0xdf109A381F0E9EC6751430279c9d817075a5D3C3")
+    let oldMigrator = await migratorFactory.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
     let newMigrator = await migratorFactory.attach(MIGRATOR_ADDRESS[chainId])
     await(await oldMigrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])).wait()
-    await oldMigrator.setPylonMigrator(newMigrator.address);
-    console.log("pylon")
-    await oldMigrator.setEnergyMigrator(newMigrator.address);
-    console.log("energy")
-    return;
+    await(await oldMigrator.setMigrator(newMigrator.address)).wait()
+
+    // await oldMigrator.setPylonMigrator(newMigrator.address);
+    // console.log("pylon")
+    // await oldMigrator.setEnergyMigrator(newMigrator.address);
+    // console.log("energy")
+    // return;
 
     // await newMigrator.setEnergyMigrator(newMigrator.address);
     // console.log("energy")
@@ -68,7 +70,6 @@ async function migrateMigrator() {
     // await(await oldMigrator.initialize(ENERGY_FACTORY[chainId], PT_FACTORY[chainId], PYLON_FACTORY[chainId], FACTORY[chainId])).wait()
     console.log("old migrator initialized")
     // await(await oldMigrator.initialize(PYLON_FACTORY[chainId], PYLON_FACTORY[chainId], ENERGY_FACTORY[chainId], ENERGY_FACTORY[chainId])).wait()
-    // await(await oldMigrator.setMigrator(newMigrator.address)).wait()
 
     console.log("setting new migrator")
     console.log("initializing new migrator")

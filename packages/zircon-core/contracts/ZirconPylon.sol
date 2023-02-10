@@ -9,7 +9,7 @@ import "./interfaces/IZirconFactory.sol";
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-//import 'hardhat/console.sol';
+import 'hardhat/console.sol';
 
 contract ZirconPylon is IZirconPylon {
 
@@ -185,6 +185,8 @@ contract ZirconPylon is IZirconPylon {
     // @anchorToken -> Anchor token
     function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external {
         onlyFactory();
+//        console.log("f, a", IUniswapV2ERC20(_floatToken).symbol(), _anchorToken);
+
         floatPoolTokenAddress = _floatPoolTokenAddress;
         anchorPoolTokenAddress = _anchorPoolTokenAddress;
         pairAddress = _pairAddress;
@@ -216,6 +218,7 @@ contract ZirconPylon is IZirconPylon {
         lastPrice = (res1 * decimals.float)/res0;
         lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
         lastOracleTimestamp = timestamp;
+        EMABlockNumber = block.number;
 
         p2x = cacheReserve1*decimals.float/cacheReserve0;
 
@@ -229,6 +232,7 @@ contract ZirconPylon is IZirconPylon {
 
         // TODO: Might cause issue since it's not adjusted, maybe call with code 42?
         if (_vab != 0) {_update(0, false, cacheReserve0, cacheReserve1, _vab);}
+
         initialized = 1;
     }
 
@@ -259,14 +263,12 @@ contract ZirconPylon is IZirconPylon {
         // Gradual division since adding 1e18 immediately would result in overflow
         uint x = (_translatedReserve1 * decimals.float)/_translatedReserve0;
         uint ftv;
-
         (ftv, isLineFormula, reduceOnly) = decimals.getFTVForX(
             x,
             p2x, p2y,
             _translatedReserve0,
             _translatedReserve1,
             adjustedVab);
-
         gamma = ftv.mul(1e18)/(_translatedReserve1 * 2);
     }
 
@@ -472,6 +474,7 @@ contract ZirconPylon is IZirconPylon {
                 desiredFtv
             );
         }
+
 
         // Counts gamma change and applies strike condition if necessary
         (gamma, ,reduceOnly) = _calculateGamma(

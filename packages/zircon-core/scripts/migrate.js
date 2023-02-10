@@ -17,10 +17,16 @@ const {
 // Migrate and chill
 
 
-// pylon: 53460514ccec78b7fa0ae72e25c5bce2d57dccdb6edd9bc88c5a537d2d94df66
-// energy: ad28f3714a78e03aaae7ce304372bd46fad17cebb6f4f187e9ef33c6be3a2301
+// pylon: 4eb6ad1b9d6ef9d0c630b758ec25ecc1be3ee4f1c02123869bcec57f5a6f5c1b
+// energy: 13cc476ec89c14a52a00407c4c698ce09eace6be56b0f01b8ba4ffcdb51664c7
 // pair: f89662c519be6475198359d4e7cc67ad7d520afaf45f753cf397275eb7cec7c3
 // pt: c3cc0a1ec38aa8f2d20522d72dbb7d4060300be98c81fb6ff111ec7e85b09464
+
+// Last
+// pylon: bdcd981759969595cbaa18dbe5182f383ceab96981adab30631555fdec2ba5ad
+// energy: 2a67ef3ddc6d83b676fad022beb6757f9d22268b35f2b6e8cb8213fe3e0f4994
+// pair: 51d3eb3793b328f6c18e3b757ee09ed006b54bbb222da219f9d854892ffa90de
+// pt: f5ae1960da8094971226e6c6676ec554696151fa6ea7b2bba59501fd39f5425f
 
 // ADDRESSES
 const migratePylons = async () => {
@@ -42,10 +48,11 @@ const migratePylons = async () => {
     // NEW PYLON FACTORY 0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89
     // NEW ENERGY
     //factoryEnergy.attach(NEW_ENERGY_FACTORY[chainId]);
-    let energyInstance2 = await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS[chainId], MIGRATOR_ADDRESS[chainId]);
+    let energyInstance2 = factoryEnergy.attach("0x3b7D45092A6776b5b2FB6358E41a6e0c7cF5305e")
+        // await factoryEnergy.deploy(FEE_TO_SETTER_ADDRESS[chainId], MIGRATOR_ADDRESS[chainId]);
     console.log("NEW ENERGY", energyInstance2.address)
     //
-    await energyInstance2.deployed();
+    // await energyInstance2.deployed();
 
     // OLD PYLON FACTORY
     let pylonFactory = await ethers.getContractFactory('ZirconPylonFactory', {
@@ -69,16 +76,18 @@ const migratePylons = async () => {
     let allPairsLength = await zFactory.allPairsLength()
 
     // NEW PYLON FACTORY
-    let newFactoryPylonInstance = await pylonFactory.deploy(
-            FACTORY[chainId],
-            energyInstance2.address,
-            PT_FACTORY[chainId],
-            FEE_TO_SETTER_ADDRESS[chainId],
-            MIGRATOR_ADDRESS[chainId])
+    let newFactoryPylonInstance = pylonFactory.attach("0x09f8E0aeA93Bcb511276A166e6e57E02e5cc1E0a")
 
-    await newFactoryPylonInstance.deployed();
+    //     await pylonFactory.deploy(
+    //         FACTORY[chainId],
+    //         energyInstance2.address,
+    //         PT_FACTORY[chainId],
+    //         FEE_TO_SETTER_ADDRESS[chainId],
+    //         MIGRATOR_ADDRESS[chainId])
+    //
+    // await newFactoryPylonInstance.deployed();
 
-    console.log("NEW PYLON FACTORY", newFactoryPylonInstance.address)
+    // console.log("NEW PYLON FACTORY", newFactoryPylonInstance.address)
 
     const migrate = async (token0, token1, pylonAddress, pair, genesisPylonAddress) => {
         // let energyRev = await pair.energyRevenueAddress()
@@ -91,7 +100,7 @@ const migratePylons = async () => {
         console.log("checkAdd",checkAdd)
 
         if (checkAdd === "0x0000000000000000000000000000000000000000") {
-            await migrator.migrate(newFactoryPylonInstance.address, energyInstance2.address, token0, token1)
+            await migrator.migrate(newFactoryPylonInstance.address, energyInstance2.address, token0, token1, {gasLimit: 10000000})
             let newPylonAddress;
             // Loop let's wait here a bit to see that pylon is created before moving to the next one
             while (true) {
@@ -117,7 +126,7 @@ const migratePylons = async () => {
 
     let pairsToMigrate = []
     console.log("starting migration...")
-    for (let i = 0; i < allPairsLength ; i++) {
+    for (let i = 0; i < 2 ; i++) {
         console.log("Pair ", i)
 
         let pairAddress = await zFactory.allPairs(i)

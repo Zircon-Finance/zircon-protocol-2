@@ -332,9 +332,9 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
 
     // Just for testing purposes
     // Should be deleted on deployment
-//    function mintTest(address to, uint amount) external {
-//        _mint(to, amount);
-//    }
+    function mintTest(address to, uint amount) external {
+        _mint(to, amount);
+    }
 
     // Same here
     function reservesTest() external {

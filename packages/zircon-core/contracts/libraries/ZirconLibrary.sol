@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 library ZirconLibrary {
     using SafeMath for uint256;
     using SafeMath for uint112;
@@ -45,11 +45,14 @@ library ZirconLibrary {
 
         uint aPartial1 = p3y.mul(p2x);
         uint aPartial2 = p3x.mul(p2y);
-        uint aDenominator = p3x.mul(p3x - p2x)/decimals.anchor; //Always positive
+        uint aDenominator = p3x.mul(p3x - p2x).mul(1e5)/decimals.anchor; //Always positive
+
         if(aPartial1 >= aPartial2) {
             // a is positive
-            aNumerator = (aPartial1 - aPartial2)/p2x;
-            coefficients.a = aNumerator * decimals.anchor/aDenominator;
+            aNumerator = ((aPartial1 - aPartial2)/p2x).mul(1e5);
+
+
+        coefficients.a = aNumerator * decimals.anchor/aDenominator;
             {
                 uint _p2x = p2x;
             }
@@ -69,7 +72,7 @@ library ZirconLibrary {
 
         } else {
             //a is negative
-            aNumerator = (aPartial2 - aPartial1)/p2x;
+            aNumerator = ((aPartial2 - aPartial1)/p2x).mul(1e5);
 
             coefficients.a = (aNumerator * decimals.anchor)/aDenominator;
             coefficients.b = (p2y * decimals.anchor/p2x).add((p2x * coefficients.a)/decimals.anchor); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
@@ -119,10 +122,10 @@ library ZirconLibrary {
     function getFTVForX(Decimals storage decimals, uint _x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv, bool lineFormula, bool reduceOnly) {
         uint p3x = (adjustedVab ** 2) / reserve1;
         p3x = (p3x * decimals.float) / reserve0;
-//        console.log("p3x & x", p3x, _x);
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
+
             ftv = (2 * Math.sqrt(((reserve0 * reserve1)/decimals.float) * _x)).sub(adjustedVab);
             reduceOnly = false;
             lineFormula = false;
@@ -132,8 +135,6 @@ library ZirconLibrary {
             ParabolaCoefficients memory coefficients = calculateParabolaCoefficients(
                 decimals, p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
-//            console.log("a, b", coefficients.a, coefficients.b);
-//            console.log("aNeg, bNeg", coefficients.aNegative, coefficients.bNegative);
 
             uint x = _x;
 

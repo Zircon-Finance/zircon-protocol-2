@@ -185,5 +185,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
             })
         }
     }
+
+    console.log("pylons", pylons)
     return pylons
 }

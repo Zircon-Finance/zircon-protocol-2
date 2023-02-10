@@ -87,7 +87,7 @@ describe("Prod to test Pylons", () => {
         })
     }
 
-    it("Compare Prices", async () => {
+    itonly("Compare Prices", async () => {
         // let index = getPylonIndexBy("ZRG", "xcKSM")
         console.log("Getting Some Tokens")
 
@@ -116,7 +116,8 @@ describe("Prod to test Pylons", () => {
     //Let's try to calculate some cases for pylon
     it(`Prod Testing ZRG/WMOVR`, async () => {
         console.log("\n\n\n<><><><><> STARTING TEST <><><><><><><><>\n")
-        let index = getPylonIndexBy("ZRG", "WMOVR")
+        let index = getPylonIndexBy("ZRG", "USDC")
+        console.log("index", index)
         fixtures = await getFixturesForPylon(fixtures, index)
 
         let account = fixtures.account

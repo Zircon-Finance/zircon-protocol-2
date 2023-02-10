@@ -45,7 +45,7 @@ contract ZirconPoolToken is ZirconERC20 {
     }
 
     // Only for testing purposes
-//    function mintTest(address account, uint256 amount) external {
-//        _mint(account, amount);
-//    }
+    function mintTest(address account, uint256 amount) external {
+        _mint(account, amount);
+    }
 }
