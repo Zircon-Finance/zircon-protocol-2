@@ -221,7 +221,6 @@ contract ZirconPylon is IZirconPylon {
         EMABlockNumber = block.number;
 
         p2x = cacheReserve1*decimals.float/cacheReserve0;
-
         p2y = (2*cacheReserve1)*gammaMulDecimals/1e18;
 
         if(_formulaSwitch){

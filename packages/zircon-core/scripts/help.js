@@ -1,16 +1,30 @@
 const { ethers } = require('hardhat');
-
-
+const {
+    LIB_ADDRESS,
+    MIGRATOR_ADDRESS,
+    FEE_TO_SETTER_ADDRESS,
+    GENESIS_PYLON_FACTORY,
+    FACTORY,
+    PT_FACTORY,
+    ENERGY_FACTORY,
+    PYLON_FACTORY
+} = require("./constants");
 async function helloBugs() {
-    let migrator = await ethers.getContractFactory('Migrator');
-    let migratorInstance = await migrator.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
-    const energyFactory = await ethers.getContractFactory('ZirconEnergyFactory');
-    const energyInstance = energyFactory.attach("0x2b0B3E7B54C3C551A09b01536a52F1DcD1c20405")
+    // let migrator = await ethers.getContractFactory('Migrator');
+    // let migratorInstance = await migrator.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
+    // const energyFactory = await ethers.getContractFactory('ZirconPylon');
+    let pylonContract = await ethers.getContractFactory('ZirconPylon', {
+        libraries: {
+            ZirconLibrary: LIB_ADDRESS[1285],
+        }
+    });
+
+    const energyInstance = pylonContract.attach("0x7c8512f2ef02CBD11E5Cd6F4D690733d3f138d69")
     // await(await migratorInstance.setEnergyMigrator("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")).wait()
     // await energyInstance.setMigrator("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
 
 
-    console.log("dio", await energyInstance.migrator())
+    console.log("dio", await energyInstance.pairAddress())
     // await(await migratorInstance.initialize("0x2b0B3E7B54C3C551A09b01536a52F1DcD1c20405", "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", "0xD424f1312D870d16D2526Ef4e87dDbcd6ca28d2f", "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd")).wait()
     // console.log("initialized")
     //
