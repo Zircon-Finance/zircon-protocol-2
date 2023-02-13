@@ -10,29 +10,16 @@ const {
     PYLON_FACTORY
 } = require("./constants");
 async function helloBugs() {
-    // let migrator = await ethers.getContractFactory('Migrator');
-    // let migratorInstance = await migrator.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
-    // const energyFactory = await ethers.getContractFactory('ZirconPylon');
-    let pylonContract = await ethers.getContractFactory('ZirconPylon', {
-        libraries: {
-            ZirconLibrary: LIB_ADDRESS[1285],
-        }
-    });
-
-    const energyInstance = pylonContract.attach("0x7c8512f2ef02CBD11E5Cd6F4D690733d3f138d69")
-    // await(await migratorInstance.setEnergyMigrator("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")).wait()
-    // await energyInstance.setMigrator("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
-
-
-    console.log("dio", await energyInstance.pairAddress())
-    // await(await migratorInstance.initialize("0x2b0B3E7B54C3C551A09b01536a52F1DcD1c20405", "0x2D4ddeB8b183413e9D88A98Fa3Dd844e34D41c54", "0xD424f1312D870d16D2526Ef4e87dDbcd6ca28d2f", "0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd")).wait()
-    // console.log("initialized")
-    //
-    //
-    // console.log("migrator setted")
-    //
-    // await energyInstance.migrateEnergy("0x86AeA4e1Cf5067Df3e900Df5AB54Fdac0b0A7813", "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
-    // console.log("ciao")
+    let ftsContract = await ethers.getContractFactory('FeeToSetter');
+    const fts1Instance = ftsContract.attach("0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce")
+    const fts2Instance = ftsContract.attach("0x3F81fBb7ac2848e3e18Bd235EbF854F0308a8Aff")
+    await (await fts1Instance.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x3b7D45092A6776b5b2FB6358E41a6e0c7cF5305e", "0x09f8E0aeA93Bcb511276A166e6e57E02e5cc1E0a")).wait()
+    await (await fts1Instance.setFeeToSetter(fts2Instance.address)).wait()
+    await (await fts2Instance.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0x3b7D45092A6776b5b2FB6358E41a6e0c7cF5305e", "0x09f8E0aeA93Bcb511276A166e6e57E02e5cc1E0a")).wait()
+    // function setFees(uint _maximumPercentageSync, uint _deltaGammaTreshold, uint _deltaGammaMinFee, uint _muUpdatePeriod, uint _muChangeFactor, uint _EMASamples, uint _oracleUpdate) external onlyOwner {
+    await (await fts2Instance.setFeePercentageRev(60)).wait()
+    await (await fts2Instance.setFeePercentageEnergy(60)).wait()
+    await (await fts2Instance.setDynamicRatio(3)).wait()
 }
 
 async function changeOwner() {
