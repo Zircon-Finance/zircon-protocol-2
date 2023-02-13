@@ -29,7 +29,7 @@
     "mocha": "*"
   },
   "dependencies": {
-    "@nomiclabs/hardhat-etherscan": "^3.1.0",
+    "@nomiclabs/hardhat-etherscan": "^3.1.6",
     "@openzeppelin/contracts": "2.5.0",
     "@uniswap/lib": "^4.0.1-alpha",
     "@uniswap/v2-core": "^1.0.1",
@@ -55,6 +55,7 @@
     "bytecode:moonriver": "npx hardhat run --network moonriver scripts/get-bytecodes.js",
     "bytecode:moonbase": "npx hardhat run --network moonbase scripts/get-bytecodes.js",
     "bytecode:bscTest": "npx hardhat run --network bscTest scripts/get-bytecodes.js",
+    "bytecode:bsc": "npx hardhat run --network bsc scripts/get-bytecodes.js",
     "migrate:moonbase": "npx hardhat run --network moonbase scripts/migrate.js",
     "migrate:moonriver": "npx hardhat run --network moonriver scripts/migrate.js",
     "pause:moonriver": "npx hardhat run --network moonriver scripts/pause.js",

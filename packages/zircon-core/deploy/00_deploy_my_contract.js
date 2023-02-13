@@ -17,27 +17,27 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     // console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
     console.log("\n\n 📡 Deploying...\n");
 
-    let library = await deploy("ZirconLibrary", {
-        from: deployer,
-        args: null,
-        log: true
-    })
+    // let library = await deploy("ZirconLibrary", {
+    //     from: deployer,
+    //     args: null,
+    //     log: true
+    // })
 
-    // Migrator
+    // // Migrator
     // let migrator = await deploy('Migrator', {
     //     from: deployer,
     //     args: null,
     //     log: true
     // });
-
-    //Fee to setter
+    //
+    // //Fee to setter
     // let feeToSetter = await deploy('FeeToSetter', {
     //     from: deployer,
     //     args: null,
     //     log: true
     // });
-
-    //Deploy Energy
+    //
+    // //Deploy Energy
     // let energyInstance = await deploy('ZirconEnergyFactory', {
     //     from: deployer,
     //     args: [feeToSetter.address, migrator.address],//MIGRATOR_ADDRESS[chainId]],
@@ -70,18 +70,18 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     //     log: true
     // });
 
-    // let factoryPylonInstance = await deploy('ZirconPylonFactory', {
-    //     from: deployer,
-    //     args: [
-    //         "0x8a043055FC0b4913eBEc4b1B0213e53fb8C41e7f",
-    //         "0x5e521DF66789A776d269553b4e5BD7616c80bd44",
-    //         "0xcB781E13ECA13BbcF87109Ab7f4d26BeD412b8ca",
-    //         "0x88AD12C94891635b680C484c7dF4b887838Fa288",
-    //         "0x1C6d54A24EaAeC8E62104BD1Eb3807008D3b639B"
-    //     ],
-    //     libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
-    //     log: true
-    // });
+    let factoryPylonInstance = await deploy('ZirconPylonFactory', {
+        from: deployer,
+        args: [
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000",
+            "0x0000000000000000000000000000000000000000"
+        ],
+        libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
+        log: true
+    });
 
     // await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
     // await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
