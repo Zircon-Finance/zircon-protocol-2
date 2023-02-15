@@ -53,7 +53,6 @@ const migratePylons = async () => {
         let lastOracleTimestamp = await pylon.lastOracleTimestamp()
         let oracleUpdateSecs = await pylon.oracleUpdateSecs()
         let lastPrice = await pylon.lastPrice()
-        let lastPrice = await pylon.lastPrice()
         let reserves = await pair.getReserves()
         let decimals0 = await token0.decimals()
         let decimals1 = await token1.decimals()
@@ -80,11 +79,11 @@ const migratePylons = async () => {
 
         if (pylonAddress !== "0x0000000000000000000000000000000000000000") {
             console.log(pylonAddress)
-            await poke(token0, token1, pylonAddress, pair, false)
+            await poke(token0, token1, pylonAddress, pair, true)
         }
         if (pylonAddress2 !== "0x0000000000000000000000000000000000000000") {
             console.log(pylonAddress2)
-            await poke(token1, token0, pylonAddress2, pair, true)
+            await poke(token1, token0, pylonAddress2, pair, false)
         }
     }
 }
