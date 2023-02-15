@@ -1,6 +1,9 @@
 const { ethers } = require('hardhat');
 
-
+async function tokenDeploy() {
+    const tokenContract = await ethers.getContractFactory("Token");
+    const newToken = await tokenContract.deploy("ZRGTEST Token", "ZRGT", 18);
+}
 async function helloBugs() {
     let migrator = await ethers.getContractFactory('Migrator');
     let migratorInstance = await migrator.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
@@ -113,7 +116,7 @@ async function check() {
 
 }
 
-helloBugs()
+tokenDeploy()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
