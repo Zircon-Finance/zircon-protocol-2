@@ -1,4 +1,16 @@
 {
+  "56": [
+    {
+      "name": "bsc",
+      "chainId": "56",
+      "contracts": {
+        "ZirconLibrary": {
+          "address": "0x3002E09f8a97AbbA6e9C17DADa2454838EEA722e",
+          "abi": []
+        }
+      }
+    }
+  ],
   "97": [
     {
       "name": "bscTest",
@@ -2318,9 +2330,316 @@
       "name": "moonriver",
       "chainId": "1285",
       "contracts": {
-        "ZirconLibrary": {
-          "address": "0xcF191Dea384F2f2fcA2b73eaE951F9Ee4E7Ec389",
-          "abi": []
+        "FeeToSetter": {
+          "address": "0x3F81fBb7ac2848e3e18Bd235EbF854F0308a8Aff",
+          "abi": [
+            {
+              "inputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "energyFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "factory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_token",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_amount",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_to",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "energyRev",
+                  "type": "address"
+                }
+              ],
+              "name": "getFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "factory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "energyFactory_",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "pylonFactory_",
+                  "type": "address"
+                }
+              ],
+              "name": "initialize",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": true,
+              "inputs": [],
+              "name": "pylonFactory",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "payable": false,
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "dynamicRatio",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setDynamicRatio",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFeePercentageEnergy",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "fee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFeePercentageRev",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "feeToSetter_",
+                  "type": "address"
+                }
+              ],
+              "name": "setFeeToSetter",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "_maximumPercentageSync",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaTreshold",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_deltaGammaMinFee",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_muUpdatePeriod",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_muChangeFactor",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_EMASamples",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_oracleUpdate",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setFees",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "insurancePerMille",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setInsurancePerMille",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "liquidityFee",
+                  "type": "uint256"
+                }
+              ],
+              "name": "setLiquidityFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "uint112",
+                  "name": "minFee",
+                  "type": "uint112"
+                },
+                {
+                  "internalType": "uint112",
+                  "name": "maxFee",
+                  "type": "uint112"
+                }
+              ],
+              "name": "setMinMaxFee",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "owner_",
+                  "type": "address"
+                }
+              ],
+              "name": "setOwner",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "constant": false,
+              "inputs": [
+                {
+                  "internalType": "bool",
+                  "name": "paused",
+                  "type": "bool"
+                }
+              ],
+              "name": "setPaused",
+              "outputs": [],
+              "payable": false,
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
         }
       }
     }
