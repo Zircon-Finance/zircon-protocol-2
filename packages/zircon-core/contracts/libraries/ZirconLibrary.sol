@@ -10,6 +10,7 @@ library ZirconLibrary {
     struct Decimals {
         uint float;
         uint anchor;
+        uint priceMultiplier; //avoids precision loss
     }
 
     struct ParabolaCoefficients {
@@ -23,7 +24,7 @@ library ZirconLibrary {
 
         // Makes it a line if the points are are within 0.1% of each other;
         if((p3x * decimals.anchor)/p2x <= (1001*(decimals.anchor/1e3))) {
-            return ParabolaCoefficients(0, p3y.mul(decimals.anchor)/p3x, false, false);
+            return ParabolaCoefficients(0, p3y.mul(1e18)/p3x, false, false);
         }
 
         // Allows us to use the function for checking without reverting everything
@@ -43,28 +44,26 @@ library ZirconLibrary {
 
         uint aNumerator;
 
-        uint aPartial1 = p3y.mul(p2x);
-        uint aPartial2 = p3x.mul(p2y);
-        uint aDenominator = p3x.mul(p3x - p2x).mul(1e5)/decimals.anchor; //Always positive
+        //convert denominator to anchor decimals
+        uint aPartial1 = p3y.mul(p2x); //1e18 * anchor
+        uint aPartial2 = p3x.mul(p2y); //1e18 * anchor
+        uint aDenominator = ((p3x.mul(p3x - p2x)/1e18) * decimals.anchor)/1e18; //convert to anchor form
 
         if(aPartial1 >= aPartial2) {
             // a is positive
-            aNumerator = ((aPartial1 - aPartial2)/p2x).mul(1e5);
+            aNumerator = ((aPartial1 - aPartial2)/p2x);
 
 
-        coefficients.a = aNumerator * decimals.anchor/aDenominator;
-            {
-                uint _p2x = p2x;
-            }
+            coefficients.a = aNumerator * decimals.anchor/aDenominator;
 
             // If b is positive
-            if(p2y * decimals.anchor/p2x >= (p2x * coefficients.a)/decimals.anchor) {
-                coefficients.b = p2y * decimals.anchor/p2x - (p2x * coefficients.a)/decimals.anchor; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+            if(p2y * 1e18/p2x >= (p2x * coefficients.a)/1e18) {
+                coefficients.b = p2y * 1e18/p2x - (p2x * coefficients.a)/1e18;
                 coefficients.bNegative = false;
             } else {
                 // If b is negative we must construct a further piecewise definition upstream
                 // Parabola becomes a line from 0 to p2, and then returns to its normal self.
-                coefficients.b = (p2x * coefficients.a)/decimals.anchor - p2y * decimals.anchor/p2x; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+                coefficients.b = (p2x * coefficients.a)/1e18 - p2y * 1e18/p2x; //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
                 coefficients.bNegative = true;
             }
 
@@ -72,10 +71,10 @@ library ZirconLibrary {
 
         } else {
             //a is negative
-            aNumerator = ((aPartial2 - aPartial1)/p2x).mul(1e5);
+            aNumerator = ((aPartial2 - aPartial1)/p2x);
 
             coefficients.a = (aNumerator * decimals.anchor)/aDenominator;
-            coefficients.b = (p2y * decimals.anchor/p2x).add((p2x * coefficients.a)/decimals.anchor); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
+            coefficients.b = (p2y * 1e18/p2x).add((p2x * coefficients.a)/1e18); //1e18 * 1e18/1e18 - 1e18*1e18/1e18 = 1e18
 
             coefficients.aNegative = true;
             coefficients.bNegative = false;
@@ -85,13 +84,13 @@ library ZirconLibrary {
 
     function calculateP2(Decimals storage decimals, uint k, uint vab, uint vfb) view public returns (uint p2x, uint p2y) {
         p2y = ((k * 2)/vfb) - vab; // anchor decimals
-        p2x = (p2y * decimals.float)/vfb;
+        p2x = (p2y * decimals.priceMultiplier)/vfb;
     }
 
     function evaluateP2(Decimals storage decimals, uint x, uint adjustedVab, uint adjustedVfb, uint reserve0, uint reserve1, uint desiredFtv) view external returns (uint p2x, uint p2y) {
 
         uint p3x = (adjustedVab ** 2)/ reserve1;
-        p3x = (p3x * decimals.float) / reserve0;
+        p3x = (p3x * decimals.priceMultiplier) / reserve0;
 
         if(x < p3x) {
             p2y = desiredFtv;
@@ -112,26 +111,29 @@ library ZirconLibrary {
 
     function calculateFtv(Decimals storage decimals, ParabolaCoefficients memory coefficients, uint x) view public returns (uint ftv) {
         ftv = coefficients.aNegative
-        ? ((coefficients.b * x).sub(((coefficients.a * x)/decimals.anchor) * x))/decimals.anchor
+        ? ((coefficients.b * x).sub(((coefficients.a * x)/1e18) * x))/1e18
         : coefficients.bNegative
-        ? ((((coefficients.a * x)/decimals.anchor) * x).sub(coefficients.b * x))/decimals.anchor
-        : ((((coefficients.a * x)/decimals.anchor) * x).add(coefficients.b * x))/decimals.anchor;
+        ? ((((coefficients.a * x)/1e18) * x).sub(coefficients.b * x))/1e18
+        : ((((coefficients.a * x)/1e18) * x).add(coefficients.b * x))/1e18;
 
 
     }
     function getFTVForX(Decimals storage decimals, uint _x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv, bool lineFormula, bool reduceOnly) {
         uint p3x = (adjustedVab ** 2) / reserve1;
-        p3x = (p3x * decimals.float) / reserve0;
+        p3x = (p3x * decimals.priceMultiplier) / reserve0;
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
+            console.log("mp");
 
-            ftv = (2 * Math.sqrt(((reserve0 * reserve1)/decimals.float) * _x)).sub(adjustedVab);
+            ftv = (2 * Math.sqrt( (((reserve0 * reserve1)/decimals.float) * _x)/(1e18/decimals.anchor) )).sub(adjustedVab);
             reduceOnly = false;
             lineFormula = false;
         } else {
 
             lineFormula = true;
+
+            console.log("dc");
             ParabolaCoefficients memory coefficients = calculateParabolaCoefficients(
                 decimals, p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
@@ -149,12 +151,13 @@ library ZirconLibrary {
             //if a is positive, we differentiate for b being negative
             //b being negative means parabola can go below 0 for a while, which is no good.
 
+            console.log("pd");
             ftv = calculateFtv(decimals, coefficients, x);
 
             //If derivative is positive at p3x
             //B can only be negative when a is positive
 
-            if(!coefficients.aNegative || coefficients.b > (2 * coefficients.a * p3x)/decimals.anchor) {
+            if(!coefficients.aNegative || coefficients.b > (2 * coefficients.a * p3x)/1e18) {
                 reduceOnly = false;
             } else {
                 //This means there is an excess of floats and the derivative becomes negative at some point before the juncture
@@ -169,7 +172,7 @@ library ZirconLibrary {
     function checkDerivative(Decimals storage decimals, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (bool isNeg) {
 
         uint p3x = (adjustedVab ** 2)/ reserve1;
-        p3x = (p3x * decimals.float) / reserve0;
+        p3x = (p3x * decimals.priceMultiplier) / reserve0;
 
         ParabolaCoefficients memory coefficients = calculateParabolaCoefficients(decimals, p2x, p2y, p3x, adjustedVab, true);
 
@@ -177,7 +180,7 @@ library ZirconLibrary {
             return true;
         }
 
-        if(!coefficients.aNegative || coefficients.bNegative || coefficients.b > (2 * coefficients.a * p3x)/decimals.anchor) {
+        if(!coefficients.aNegative || coefficients.bNegative || coefficients.b > (2 * coefficients.a * p3x)/1e18) {
             return false;
 
         } else {

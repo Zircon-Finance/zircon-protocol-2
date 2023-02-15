@@ -87,7 +87,7 @@ describe("Prod to test Pylons", () => {
         })
     }
 
-    itonly("Compare Prices", async () => {
+    it("Compare Prices", async () => {
         // let index = getPylonIndexBy("ZRG", "xcKSM")
         console.log("Getting Some Tokens")
 

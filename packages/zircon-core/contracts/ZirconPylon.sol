@@ -195,7 +195,12 @@ contract ZirconPylon is IZirconPylon {
         pairFactoryAddress = _pairFactoryAddress;
         energyAddress = _energy;
         energyRevAddress = _energyRev;
-        decimals = ZirconLibrary.Decimals(10**uint(IUniswapV2ERC20(_floatToken).decimals()), 10**uint(IUniswapV2ERC20(_anchorToken).decimals()));
+        decimals = ZirconLibrary.Decimals(
+            10**uint(IUniswapV2ERC20(_floatToken).decimals()),
+            10**uint(IUniswapV2ERC20(_anchorToken).decimals()),
+            10**uint(IUniswapV2ERC20(_floatToken).decimals() + 18 - IUniswapV2ERC20(_anchorToken).decimals()));
+
+        console.log("pm", decimals.priceMultiplier);
     }
 
     // 0.048 kb
@@ -215,12 +220,12 @@ contract ZirconPylon is IZirconPylon {
         (uint res0, uint res1, uint timestamp) = getPairReservesNormalized();
         (uint syncReserve0,) = getSyncReserves();
 
-        lastPrice = (res1 * decimals.float)/res0;
+        lastPrice = (res1 * decimals.priceMultiplier)/res0;
         lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
         lastOracleTimestamp = timestamp;
         EMABlockNumber = block.number;
 
-        p2x = cacheReserve1*decimals.float/cacheReserve0;
+        p2x = cacheReserve1*decimals.priceMultiplier/cacheReserve0;
 
         p2y = (2*cacheReserve1)*gammaMulDecimals/1e18;
 
@@ -261,7 +266,7 @@ contract ZirconPylon is IZirconPylon {
 
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
         // Gradual division since adding 1e18 immediately would result in overflow
-        uint x = (_translatedReserve1 * decimals.float)/_translatedReserve0;
+        uint x = (_translatedReserve1 * (decimals.priceMultiplier))/_translatedReserve0;
         uint ftv;
         (ftv, isLineFormula, reduceOnly) = decimals.getFTVForX(
             x,
@@ -288,7 +293,7 @@ contract ZirconPylon is IZirconPylon {
 
         lastOracleTimestamp = timestamp;
         lastFloatAccumulator = isFloatReserve0 ? IZirconPair(pairAddress).price0CumulativeLast() : IZirconPair(pairAddress).price1CumulativeLast();
-        lastPrice = (uint256(_reservePair1) * decimals.float)/_reservePair0;
+        lastPrice = (uint256(_reservePair1) * decimals.priceMultiplier/_reservePair0);
         updateFees();
 
         _entered = true;
@@ -448,7 +453,7 @@ contract ZirconPylon is IZirconPylon {
 
             desiredFtv = calculateDesiredFtv(
                 reservesTranslated0, reservesTranslated1, // We take old reserves
-                newReserve1.mul(decimals.float)/newReserve0,
+                newReserve1.mul(decimals.priceMultiplier)/newReserve0,
                 oldVab,
                 _floatChange,
                 _isPercentage
@@ -467,7 +472,7 @@ contract ZirconPylon is IZirconPylon {
         // Code for ignoring desired FTV parameter, to be used only in init
         if(floatChange != 42) {
             (p2x, p2y) = decimals.evaluateP2(
-                (reservesTranslated1 * decimals.float)/reservesTranslated0,
+                (reservesTranslated1 * decimals.priceMultiplier)/reservesTranslated0,
                 virtualAnchorBalance - pylonReserve1,
                 virtualFloatBalance - pylonReserve0,
                 reservesTranslated0, reservesTranslated1,
@@ -852,7 +857,7 @@ contract ZirconPylon is IZirconPylon {
             {
                 (uint _pairReserve0, uint _pairReserve1,) = getPairReservesNormalized();
                 (uint balance0, uint balance1) = _getFloatAnchorBalance();
-                uint feeBps = getFeeBps(_pairReserve1*decimals.float/_pairReserve0);
+                uint feeBps = getFeeBps(_pairReserve1*decimals.priceMultiplier/_pairReserve0);
 
                 //We charge all fees to the Anchor side and use a mintOneSide to throw the rest of the float.
                 //Due to how small this is, in most cases the extra slippage is something like 0.0004% of the amountIn so no big deal.
@@ -1014,10 +1019,13 @@ contract ZirconPylon is IZirconPylon {
                 //convert accumulator to 1e18 multiplier form
                 //Shift in two steps to avoid cancellation
 
+                //normalize all prices to 1e18 to avoid loss of precision on shitcoins paired with usd
+                //don't make tokens with low decimals kids
+
                 uint _avgPrice = (uint256(((
                 (currentFloatAccumulator - lastFloatAccumulator)
                 /(blockTimestamp - lastOracleTimestamp))
-                >> 28)) * decimals.float) >> 84;
+                >> 28)) * decimals.priceMultiplier) >> 84;
 
                 lastPrice = _avgPrice;
                 lastOracleTimestamp = blockTimestamp;
@@ -1255,7 +1263,7 @@ contract ZirconPylon is IZirconPylon {
         uint feeBps;
         {
             (uint _pairReserve0, uint _pairReserve1,) = getPairReservesNormalized();
-            feeBps = getFeeBps(_pairReserve1*decimals.float/_pairReserve0);
+            feeBps = getFeeBps(_pairReserve1*decimals.priceMultiplier/_pairReserve0);
         }
 
         // We disable the strike protection for burns
@@ -1485,7 +1493,7 @@ contract ZirconPylon is IZirconPylon {
                 desiredFtv = desiredFtv.mul(change)/1e18;
             }
         } else {
-            uint oldPrice = oldReserve1.mul(decimals.float)/oldReserve0;
+            uint oldPrice = oldReserve1.mul(decimals.priceMultiplier)/oldReserve0;
             if(oldPrice != newPrice) {
                 change = change.mul(newPrice)/oldPrice;
             }

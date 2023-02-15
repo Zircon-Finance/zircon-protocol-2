@@ -8,9 +8,12 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/ZirconPylon.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/energy/ZirconEnergyFactory.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/contracts/libraries/ZirconLibrary.sol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-core/test/production-sim-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/production-sim-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/pylon-test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/commands.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-core/test/shared/json/test-cases.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/test/shared/json/test-cases.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/UniswapV2Library.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/UniswapV2Library.sol" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-periphery/contracts/libraries/ZirconPeripheralLibrary.sol" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -43,20 +46,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "/Users/andriyshevchenko/Zircon/zircon-protocol-2/packages/zircon-core/scripts",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "yarn",
-    "settings.editor.selected.configurable": "Errors",
-    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/andriyshevchenko/Zircon/zircon-protocol-2/packages/zircon-core/scripts&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;Errors&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/zircon-core/scripts" />
