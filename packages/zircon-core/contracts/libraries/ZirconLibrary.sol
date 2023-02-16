@@ -122,11 +122,17 @@ library ZirconLibrary {
         uint p3x = (adjustedVab ** 2) / reserve1;
         p3x = (p3x * decimals.priceMultiplier) / reserve0;
 
+        console.log("decanchor", decimals.anchor);
+
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
             console.log("mp");
 
-            ftv = (2 * Math.sqrt( (((reserve0 * reserve1)/decimals.float) * _x)/(1e18/decimals.anchor) )).sub(adjustedVab);
+            //adjustment for the sqrt so that it's in anchor units
+            uint sqrt = (reserve0 * reserve1/decimals.float).mul(_x);
+            sqrt = decimals.anchor > 1e18 ? sqrt * decimals.anchor/1e18 : sqrt / (1e18/decimals.anchor);
+
+            ftv = (2 * Math.sqrt(sqrt)).sub(adjustedVab);
             reduceOnly = false;
             lineFormula = false;
         } else {
