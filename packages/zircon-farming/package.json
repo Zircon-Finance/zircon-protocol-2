@@ -35,6 +35,7 @@
     "ctest": "npx hardhat compile && npm test",
     "deployPools:moonbase": "npx hardhat run --network moonbase scripts/deploy-script.js",
     "deployPools:moonriver": "npx hardhat run --network moonriver scripts/deploy-script.js",
+    "deployPools:bsc": "npx hardhat run --network bsc scripts/deploy-script.js",
     "update:moonbase": "npx hardhat run --network moonbase scripts/updatePylon.js",
     "update:moonriver": "npx hardhat run --network moonriver scripts/updatePylon.js",
     "addFarm:moonriver": "npx hardhat run --network moonriver scripts/updateFarm.js",

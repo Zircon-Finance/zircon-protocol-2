@@ -57,7 +57,7 @@ async function deploy() {
 
     const bNumber = await ethers.provider.getBlockNumber()
     const farming = await ethers.getContractFactory('PsionicFarmFactory');
-    const masterInstance = farming.attach("0x97b2aE105DAFb7DC8a73c93e5f56d3f095D0DCF3")
+    const masterInstance = farming.attach("0xfFA0c354E3DFA1450544b7CF5Fb376aA3a1E7FFe")
 
 
     // ZRG - MOVR
@@ -68,13 +68,16 @@ async function deploy() {
     // MOONBASE
     // await deployFarm(masterInstance, bNumber, "0x6b5c798dda380bf9bd33bfcf087b09ad9253e50b", ["0xed13b028697febd70f34cf9a9e280a8f1e98fd29"])
 
-    // // ZRG - MOVR
-    await deployFarm(masterInstance, bNumber, "0x770AA7074297E465E823bf2F45194e926aF0D05d", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
-    await deployFarm(masterInstance, bNumber, "0xBB57187c7883d25a64a08640905376f4CeF6C1ef", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    // BSC
+    await deployFarm(masterInstance, bNumber, "0x782A310543aFE27d43bae683d1583F53F701a5c4", ["0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce"])
 
-    // ZRG - USDC
-    await deployFarm(masterInstance, bNumber, "0xc3722E72a64c4Cab0308d72067bC07c7689b4F2F", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
-    await deployFarm(masterInstance, bNumber, "0x61DBB475DBb84Be23A0D555FA269754EDA88F5D1", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    // // ZRG - MOVR
+    // await deployFarm(masterInstance, bNumber, "0x770AA7074297E465E823bf2F45194e926aF0D05d", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    // await deployFarm(masterInstance, bNumber, "0xBB57187c7883d25a64a08640905376f4CeF6C1ef", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    //
+    // // ZRG - USDC
+    // await deployFarm(masterInstance, bNumber, "0xc3722E72a64c4Cab0308d72067bC07c7689b4F2F", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    // await deployFarm(masterInstance, bNumber, "0x61DBB475DBb84Be23A0D555FA269754EDA88F5D1", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
 
     //MOVR-USDC
     // await deployFarm(masterInstance, bNumber, "0x6E9685c324Cdf126e5BF08F54573120A9c19E061", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
