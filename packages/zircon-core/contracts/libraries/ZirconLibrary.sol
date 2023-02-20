@@ -109,7 +109,7 @@ library ZirconLibrary {
     //            self.p2y = (2 * k/adjusted_vfb) - adjusted_vab
     //            self.p2x = self.p2y/adjusted_vfb
 
-    function calculateFtv(Decimals storage decimals, ParabolaCoefficients memory coefficients, uint x) view public returns (uint ftv) {
+    function calculateFtv(ParabolaCoefficients memory coefficients, uint x) pure public returns (uint ftv) {
         ftv = coefficients.aNegative
         ? ((coefficients.b * x).sub(((coefficients.a * x)/1e18) * x))/1e18
         : coefficients.bNegative
@@ -154,7 +154,7 @@ library ZirconLibrary {
             //if a is positive, we differentiate for b being negative
             //b being negative means parabola can go below 0 for a while, which is no good.
 
-            ftv = calculateFtv(decimals, coefficients, x);
+            ftv = calculateFtv(coefficients, x);
 
             //If derivative is positive at p3x
             //B can only be negative when a is positive

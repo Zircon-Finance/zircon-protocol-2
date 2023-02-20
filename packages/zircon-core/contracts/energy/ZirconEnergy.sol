@@ -179,7 +179,7 @@ contract ZirconEnergy is IZirconEnergy {
   /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
   /// Also note that a dump of 60% only generates about 10% of slashing.
   // 0.39kb
-  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint fee, bool isFloatReserve0, address _to) _onlyPylon
+  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, bool isFloatReserve0, address _to) _onlyPylon
   external returns (uint retPTU, uint amount){
     // Send slashing should send the extra PTUs to Uniswap.
     // When burn calls the uniswap burn it will also give users the compensation
@@ -200,15 +200,15 @@ contract ZirconEnergy is IZirconEnergy {
         // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
 
-        uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
+//        uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
 
         {
-          uint _fee = fee;
-          uint _ptu = retPTU;
+//          uint _fee = fee;
+//          uint _ptu = retPTU;
           bool _isFloatReserve0 = isFloatReserve0;
           uint ts = IZirconPair(pylon.pairAddress).totalSupply();
           (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
-          uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
+//          uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
           uint _reserve1 = _isFloatReserve0 ? reserve1 : reserve0;
 
           // Simplified, the previous system was necessary because it was two separate functions

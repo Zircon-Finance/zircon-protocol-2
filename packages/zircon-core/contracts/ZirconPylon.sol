@@ -257,10 +257,9 @@ contract ZirconPylon is IZirconPylon {
     //    # However additions of too much float are still limited in case the parabola gets too bent.
 
     function _calculateGamma(
-        uint _virtualAnchorBalance, uint _virtualFloatBalance,
-        uint p2x, uint p2y,
-        uint _pylonReserve0, uint _pylonReserve1,
-        uint _translatedReserve0, uint _translatedReserve1) public returns (uint gamma, bool isLineFormula, bool reduceOnly) {
+        uint _virtualAnchorBalance,
+         uint _pylonReserve1,
+        uint _translatedReserve0, uint _translatedReserve1) view public returns (uint gamma, bool isLineFormula, bool reduceOnly) {
 
         uint adjustedVab = _virtualAnchorBalance.sub(_pylonReserve1);
         // Gradual division since adding 1e18 immediately would result in overflow
@@ -316,9 +315,6 @@ contract ZirconPylon is IZirconPylon {
             //This should always be 50%
             (gammaMulDecimals, formulaSwitch,) = _calculateGamma(
                 virtualAnchorBalance,
-                virtualFloatBalance,
-                p2x, p2y,
-                (balance0 * maxPercentageSync)/200,
                 (balance1 * maxPercentageSync)/200,
                 balance0Adjusted,
                 balance1Adjusted);
@@ -482,9 +478,7 @@ contract ZirconPylon is IZirconPylon {
         // Counts gamma change and applies strike condition if necessary
         (gamma, ,reduceOnly) = _calculateGamma(
             virtualAnchorBalance,
-            virtualFloatBalance,
-            p2x, p2y,
-            pylonReserve0, pylonReserve1,
+             pylonReserve1,
             reservesTranslated0, reservesTranslated1
         );
 
@@ -572,7 +566,7 @@ contract ZirconPylon is IZirconPylon {
         (uint _reservePairTranslated0, uint _reservePairTranslated1,) = getPairReservesTranslated(0, 0);
         if(_isAnchor) {
 
-            uint reserve_ = _reserve;
+//            uint reserve_ = _reserve;
             //CalculateLiquidity(), destructured since used only once
             uint sqrtK = Math.sqrt(uint(_reservePairTranslated0 * _reservePairTranslated1));
             uint amountInWithFee = amountAsyncToMint * (10000-(liquidityFee/2 + 1))/10000;
@@ -588,7 +582,7 @@ contract ZirconPylon is IZirconPylon {
 
         } else {
 
-            uint reserve_ = _reserve;
+//            uint reserve_ = _reserve;
             //CalculateLiquidity(), destructured since used only once
             uint sqrtK = Math.sqrt(uint(_reservePairTranslated0 * _reservePairTranslated1));
             uint amountInWithFee = amountAsyncToMint * (10000-(liquidityFee/2 + 1))/10000;
@@ -702,7 +696,7 @@ contract ZirconPylon is IZirconPylon {
 
         }
 
-        (uint newGamma, bool reduceOnly) = _update(ftvChange, false, _reservePairTranslated0, _reservePairTranslated1, oldVab);
+        (, bool reduceOnly) = _update(ftvChange, false, _reservePairTranslated0, _reservePairTranslated1, oldVab);
 
         // We block all float mints that place the pool into reduceOnly
         require(!reduceOnly || isAnchor, "ZP: ReduceOnly");
@@ -840,7 +834,7 @@ contract ZirconPylon is IZirconPylon {
 
         uint oldVab;
         {
-            (uint112 _syncReserve0, uint112 _syncReserve1) = getSyncReserves();
+            (, uint112 _syncReserve1) = getSyncReserves();
             oldVab = virtualAnchorBalance - _syncReserve1;
         }
         uint liquidity_;
@@ -892,9 +886,10 @@ contract ZirconPylon is IZirconPylon {
                 uint sqrtKP = Math.sqrt((pairReserveTranslated0 + _amountIn0 + floatExtra) * (pairReserveTranslated1 + _amountIn1));
 
                 if(sqrtKP > sqrtK) {
-                    uint supposedAmount = _shouldMintAnchor ? _amountIn1 * 2 : _amountIn0 * 2;
+//                    uint supposedAmount = _shouldMintAnchor ? _amountIn1 * 2 : _amountIn0 * 2;
 
-                    amount += (sqrtKP - sqrtK).mul(_shouldMintAnchor ? 2 * (pairReserveTranslated1 + _amountIn1) : 2 * (pairReserveTranslated0 + _amountIn0))/sqrtK;
+                    amount += (sqrtKP - sqrtK).mul(_shouldMintAnchor ? 2 * (pairReserveTranslated1 + _amountIn1)
+                        : 2 * (pairReserveTranslated0 + _amountIn0))/sqrtK;
                 }
 
             }
@@ -942,7 +937,7 @@ contract ZirconPylon is IZirconPylon {
         IZirconPair(pairAddress).mintOneSide(address(this), isFloatReserve0);
 
         // We need to pass update the pre-change reserves to ensure the Ftv calculations are correct
-        (uint newGamma, bool reduceOnly) = _update(ftvChange, false, cacheReserve0, cacheReserve1, oldVab);
+        (, bool reduceOnly) = _update(ftvChange, false, cacheReserve0, cacheReserve1, oldVab);
 
         require(!reduceOnly || shouldMintAnchor, "ZP: ReduceOnly");
         _mint(_poolTokenAddress, to, liquidity);
@@ -1075,10 +1070,10 @@ contract ZirconPylon is IZirconPylon {
                     uint feeValuePercentage = (rootKTranslated - lastRootKTranslated) * 1e18 / rootKTranslated;
 
                     uint _pylonReserve1 = pylonReserve1;
-                    uint _pylonReserve0 = pylonReserve0;
+//                    uint _pylonReserve0 = pylonReserve0;
 
                     (uint _feeToAnchor, uint _feeToFloat, uint _p2x, uint _p2y) = processFees(
-                        _pylonReserve0, _pylonReserve1,
+                         _pylonReserve1,
                         _pairReserveTranslated0, _pairReserveTranslated1,
                         feeValuePercentage
                     );
@@ -1101,9 +1096,7 @@ contract ZirconPylon is IZirconPylon {
             virtualFloatBalance += feeToFloat;
 
             (gammaMulDecimals, formulaSwitch,) = _calculateGamma(
-                virtualAnchorBalance, virtualFloatBalance,
-                p2x, p2y,
-                pylonReserve0, pylonReserve1,
+                virtualAnchorBalance, pylonReserve1,
                 _pairReserveTranslated0, _pairReserveTranslated1
             );
 
@@ -1180,7 +1173,6 @@ contract ZirconPylon is IZirconPylon {
 
 
     function processFees(
-        uint pylonReserve0,
         uint pylonReserve1,
         uint pairReserve0,
         uint pairReserve1,
@@ -1306,7 +1298,6 @@ contract ZirconPylon is IZirconPylon {
                     (ptuWithFee, amount1) = IZirconEnergy(energyAddress).handleOmegaSlashing(
                         ptuWithFee,
                         Math.min(1e18, (1e18 - gammaMulDecimals).mul(pairReserves1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                        liquidityFee,
                         isFloatReserve0,
                         to);
                 }
@@ -1377,7 +1368,7 @@ contract ZirconPylon is IZirconPylon {
     /// and the amount of the minimum from liquidity and reserves
     /// @dev Helper function for burn
     /// 0.323kb
-    function burnPylonReserves(bool isAnchor, uint _totalSupply, uint _liquidity) view private returns (uint reservePT, uint amount) {
+    function burnPylonReserves(bool isAnchor, uint _ts, uint _liquidity) view private returns (uint reservePT, uint amount) {
 
 
         (uint _reserve0, uint _reserve1,) = getPairReservesTranslated(0,0); // gas savings
@@ -1389,10 +1380,10 @@ contract ZirconPylon is IZirconPylon {
 
         uint virtualBalance = isAnchor ? virtualAnchorBalance : pylonReserve.add(reserve.mul(gammaMulDecimals).mul(2)/1e18);
 
-        reservePT = pylonReserve.mul(_totalSupply)/virtualBalance;
+        reservePT = pylonReserve.mul(_ts)/virtualBalance;
 
         uint _ptuAmount = Math.min(reservePT, _liquidity);
-        amount = virtualBalance.mul(_ptuAmount)/_totalSupply;
+        amount = virtualBalance.mul(_ptuAmount)/_ts;
     }
 
     // @notice Burn send liquidity back to user burning Pool tokens
@@ -1411,9 +1402,8 @@ contract ZirconPylon is IZirconPylon {
         uint liquidity = _getBalanceOf(pt, address(this));
 
         notZero(liquidity);
-        uint _totalSupply = _totalSupply(pt);
+        uint _ts = _totalSupply(pt);
         (uint reservesTranslated0, uint reservesTranslated1,) = getPairReservesTranslated(0, 0);
-        (, uint syncReserve1) = getSyncReserves();
         uint percentageFloatChange = 1e18;
         {
             //address to = _to;
@@ -1421,7 +1411,7 @@ contract ZirconPylon is IZirconPylon {
             //address _pairAddress = pairAddress;
 
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
-            (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
+            (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _ts, liquidity);
             uint feeBps = getFeeBps(42); //42 is code for sync, disregard price info
             //This is a reserve extraction
             //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
@@ -1433,7 +1423,7 @@ contract ZirconPylon is IZirconPylon {
             //In case the reserves weren't able to pay for everything
             if (reservePT < liquidity) {
                 uint adjustedLiquidity = liquidity - reservePT;
-                uint totalSupply_ = _totalSupply;
+                uint totalSupply_ = _ts;
                 uint _reservesTranslated1 = reservesTranslated1;
 
                 (uint floatPercentage, uint ptu, uint amountOut) = handleAsyncBurn(
@@ -1459,13 +1449,13 @@ contract ZirconPylon is IZirconPylon {
         uint _floatChange = percentageFloatChange;
         uint oldVab;
         {
-            (uint112 _syncReserve0, uint112 _syncReserve1) = getSyncReserves();
+            (, uint112 _syncReserve1) = getSyncReserves();
             oldVab = virtualAnchorBalance - _syncReserve1;
         }
         if(_isAnchor) {
-            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_totalSupply;
+            virtualAnchorBalance -= virtualAnchorBalance.mul(liquidity)/_ts;
         } else {
-            virtualFloatBalance -= virtualFloatBalance.mul(liquidity)/_totalSupply;
+            virtualFloatBalance -= virtualFloatBalance.mul(liquidity)/_ts;
         }
 
 
@@ -1476,7 +1466,7 @@ contract ZirconPylon is IZirconPylon {
 
     }
 
-    function calculateDesiredFtv(uint oldReserve0, uint oldReserve1, uint newPrice, uint adjustedVab, uint change, bool isPercentage) private returns (uint desiredFtv){
+    function calculateDesiredFtv(uint oldReserve0, uint oldReserve1, uint newPrice, uint adjustedVab, uint change, bool isPercentage) view private returns (uint desiredFtv){
         (desiredFtv,,) = decimals.getFTVForX(
             newPrice,
             p2x, p2y,
@@ -1532,7 +1522,6 @@ contract ZirconPylon is IZirconPylon {
             (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
                 ptuWithFee,
                 Math.min(1e18, (1e18 - gammaMulDecimals).mul(_reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),
-                liquidityFee,
                 isFloatReserve0,
                 _to);
 
