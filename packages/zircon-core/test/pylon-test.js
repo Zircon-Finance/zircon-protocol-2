@@ -65,7 +65,7 @@ describe("Pylon A", () => {
         return fixtures
     }
 
-    it('Fee assignment + mu Test', async function () {
+    it.only('Fee assignment + mu Test', async function () {
         let token0Amount = 1700
         let token1Amount = 5300
         let fixtures = await init(token0Amount, token1Amount, 1)

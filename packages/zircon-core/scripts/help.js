@@ -4,6 +4,15 @@ async function tokenDeploy() {
     const tokenContract = await ethers.getContractFactory("Token");
     const newToken = await tokenContract.deploy("ZRGTEST Token", "ZRGT", 18);
 }
+
+async function changeOwner() {
+    const fts = await ethers.getContractFactory("FeeToSetter");
+    let ftsInstance = await fts.attach("0xb2054c950C0AE9e5b570EB217A6023e530878B75")
+    await (await ftsInstance.initialize("0x510D9BEcBd3C7E89d9d48dB51e99Ae5B72c27226", "0x28FDc124F3d92655626594299a997F87d5BF5F96", "0xf9494FFf60982dfFFF0C251b6635245b127c10aE")).wait()
+    // await(await ftsInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")).wait()
+    console.log("fts", await ftsInstance.owner())
+}
+
 async function helloBugs() {
     let migrator = await ethers.getContractFactory('Migrator');
     let migratorInstance = await migrator.attach("0x6B4e731b587250ab717128a02409d0F2f6a6ae7F")
@@ -24,12 +33,12 @@ async function helloBugs() {
     // console.log("ciao")
 }
 
-async function changeOwner() {
-    let feeToSetter = await ethers.getContractFactory('FeeToSetter');
-    let feeToSetterInstance = feeToSetter.attach("0x7A282B0BE9676BCc6377eD81A6f1196f0e7647a6")
-    // await feeToSetterInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")
-    await feeToSetterInstance.initialize("0xCa7EB17663dd2C4A1943aDc80b74f9E02413147C", "0x498957f9c29abF48aa881306d75a3C58B19B26fC", "0xCd334f6BbBED0920fbA37c9dEE81D4058Fed2100")
-}
+// async function changeOwner() {
+//     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
+//     let feeToSetterInstance = feeToSetter.attach("0x7A282B0BE9676BCc6377eD81A6f1196f0e7647a6")
+//     // await feeToSetterInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")
+//     await feeToSetterInstance.initialize("0xCa7EB17663dd2C4A1943aDc80b74f9E02413147C", "0x498957f9c29abF48aa881306d75a3C58B19B26fC", "0xCd334f6BbBED0920fbA37c9dEE81D4058Fed2100")
+// }
 
 async function checkEnergy() {
     const energyFactory = await ethers.getContractFactory('ZirconEnergyFactory');
@@ -116,7 +125,7 @@ async function check() {
 
 }
 
-tokenDeploy()
+changeOwner()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

@@ -100,8 +100,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
 
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
-        address poolTokenA = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, pylonAddress); // FLOAT
-        address poolTokenB = IZirconPTFactory(ptFactory).createPTAddress(_tokenB, pylonAddress); // ANCHOR
+        address poolTokenA = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, _tokenB, pylonAddress, false); // FLOAT
+        address poolTokenB = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, _tokenB, pylonAddress, true); // ANCHOR
 
         configurePylon(_tokenA, _tokenB, poolTokenA, poolTokenB, _pairAddress, pylonAddress);
 

@@ -122,11 +122,9 @@ library ZirconLibrary {
         uint p3x = (adjustedVab ** 2) / reserve1;
         p3x = (p3x * decimals.priceMultiplier) / reserve0;
 
-        console.log("decanchor", decimals.anchor);
 
         if (_x >= p3x) {
             //x and reserves may not match, which is why we use this more general formula
-            console.log("mp");
 
             //adjustment for the sqrt so that it's in anchor units
             uint sqrt = (reserve0 * reserve1/decimals.float).mul(_x);
@@ -139,7 +137,6 @@ library ZirconLibrary {
 
             lineFormula = true;
 
-            console.log("dc");
             ParabolaCoefficients memory coefficients = calculateParabolaCoefficients(
                 decimals, p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
@@ -157,7 +154,6 @@ library ZirconLibrary {
             //if a is positive, we differentiate for b being negative
             //b being negative means parabola can go below 0 for a while, which is no good.
 
-            console.log("pd");
             ftv = calculateFtv(decimals, coefficients, x);
 
             //If derivative is positive at p3x
@@ -169,7 +165,6 @@ library ZirconLibrary {
                 //This means there is an excess of floats and the derivative becomes negative at some point before the juncture
                 //At this point float liquidity can only be removed until this condition doesn't persist anymore.
                 reduceOnly = true;
-//                console.log("red");
             }
 
         }

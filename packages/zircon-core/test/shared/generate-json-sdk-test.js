@@ -101,7 +101,8 @@ const saveValuesForSDK = async (isSync, isBurn, amountIn0, amountIn1, amountOut0
         isBlocked,
         decimals: {
             float: ethers.BigNumber.from(10).pow(token0Decimals).toString(),
-            anchor: ethers.BigNumber.from(10).pow(token1Decimals).toString()
+            anchor: ethers.BigNumber.from(10).pow(token1Decimals).toString(),
+            priceMultiplier: ethers.BigNumber.from(10).pow(token0Decimals + 18 - token1Decimals).toString()
         }
     }
     casesSDK.push(tx)

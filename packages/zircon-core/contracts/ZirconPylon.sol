@@ -9,7 +9,7 @@ import "./interfaces/IZirconFactory.sol";
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-import 'hardhat/console.sol';
+//import 'hardhat/console.sol';
 
 contract ZirconPylon is IZirconPylon {
 
@@ -185,7 +185,6 @@ contract ZirconPylon is IZirconPylon {
     // @anchorToken -> Anchor token
     function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external {
         onlyFactory();
-//        console.log("f, a", IUniswapV2ERC20(_floatToken).symbol(), _anchorToken);
 
         floatPoolTokenAddress = _floatPoolTokenAddress;
         anchorPoolTokenAddress = _anchorPoolTokenAddress;
@@ -200,7 +199,6 @@ contract ZirconPylon is IZirconPylon {
             10**uint(IUniswapV2ERC20(_anchorToken).decimals()),
             10**uint(IUniswapV2ERC20(_floatToken).decimals() + 18 - IUniswapV2ERC20(_anchorToken).decimals()));
 
-        console.log("pm", decimals.priceMultiplier);
     }
 
     // 0.048 kb
@@ -1154,7 +1152,7 @@ contract ZirconPylon is IZirconPylon {
 
 
                 //Bleed ensures pool doesn't get deadlocked by reducing EMA based on inactivity
-                //To do this we use blockDiff instead of strikeDiff since otherwise EMA would almost always bleed to zero.
+                //To do this we use blockDifff instead of strikeDiff since otherwise EMA would almost always bleed to zero.
                 uint bleed = (block.number - strikeBlock > 10) ? blockDiff / 10 : 0;
 
                 //Adds old blockEMA
@@ -1195,7 +1193,6 @@ contract ZirconPylon is IZirconPylon {
 
         _p2x = p2x;
         _p2y = p2y.add(feeToFloat.mul(p2x)/1e18); //convert float into anchor at old p2 price
-
 
         //        //This function basically needs to assign the fee to the float
         //        //Which is automatically done if we're in sqrtkx
@@ -1303,6 +1300,7 @@ contract ZirconPylon is IZirconPylon {
 
 //                console.log("g", gammaMulDecimals, pairReserves1);
 //                console.log("g2", virtualAnchorBalance, reserveAnchor);
+
                 {
                     address to = _to;
                     (ptuWithFee, amount1) = IZirconEnergy(energyAddress).handleOmegaSlashing(
@@ -1425,7 +1423,6 @@ contract ZirconPylon is IZirconPylon {
             // Here we calculate max PTU to extract from sync reserve + amount in reserves
             (uint reservePT, uint _amount) = burnPylonReserves(isAnchor, _totalSupply, liquidity);
             uint feeBps = getFeeBps(42); //42 is code for sync, disregard price info
-
             //This is a reserve extraction
             //Tpv doesn't change and neither does adjusted vab, so we don't care about anchor factor
             address to_ = _to;
@@ -1531,6 +1528,7 @@ contract ZirconPylon is IZirconPylon {
 
             uint amount_ = 0;
             // ptuWithFee here is the one with omega applied
+
             (ptuWithFee, amount_) = IZirconEnergy(energyAddress).handleOmegaSlashing(
                 ptuWithFee,
                 Math.min(1e18, (1e18 - gammaMulDecimals).mul(_reservesTranslated1 * 2)/(virtualAnchorBalance - reserveAnchor)),

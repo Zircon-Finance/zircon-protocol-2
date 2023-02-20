@@ -1,9 +1,6 @@
 pragma solidity >=0.5.16;
 
 interface IZirconFactory {
-    //    function feeTo() external view returns (address);
-    //    function feeToSetter() external view returns (address);
-    //    function migrator() external view returns (address);
     function energyFactory() external view returns (address);
 
     function getPair(address, address) external view returns (address pair);
@@ -22,5 +19,4 @@ interface IZirconFactory {
 
     function changeEnergyFactoryAddress(address _newEnergyFactory) external;
     function setDynamicRatio(uint _dynamicRatio) external;
-
 }

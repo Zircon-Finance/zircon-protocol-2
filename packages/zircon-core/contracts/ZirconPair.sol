@@ -3,7 +3,6 @@ pragma solidity =0.5.16;
 
 import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
-//import './interfaces/IERC20.sol';
 import './interfaces/IZirconPair.sol';
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol';
 import './libraries/SafeMath.sol';
@@ -67,7 +66,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
     event Sync(uint112 reserve0, uint112 reserve1);
 
 
-    constructor() public {
+    constructor() ZirconERC20("Zircon", "ZPT") public {
         factory = msg.sender;
     }
 
@@ -95,8 +94,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         }
         reserve0 = uint112(balance0);
         reserve1 = uint112(balance1);
-        console.log("Uni: Updated reserve0, reserve1", reserve0, reserve1);
-        console.log("Uni: Internal price", uint(reserve1) * 1e18/uint(reserve0));
+
         blockTimestampLast = blockTimestamp;
         emit Sync(reserve0, reserve1);
     }
@@ -108,7 +106,6 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         (uint112 _reserve0, uint112 _reserve1,) = getReserves();
 
         _mintFee(_reserve0, _reserve1);
-        console.log("UniPMF: Internal price", uint(reserve1) * 1e18/uint(reserve0));
 
         kLast = uint(reserve0).mul(reserve1); //Reserves don't change from mintFee
     }
@@ -126,9 +123,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
                 uint liquidityPercentage = numerator / denominator;
 
                 if (liquidityPercentage > 0) {
-                    //                    console.log("C ore: liqPercentage", liquidityPercentage);
                     _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
-                    //                    _mint(energyRevenueAddress, liquidityPercentage.mul(totalSupply)/1e18);
                     uint totalPercentage = ((rootK.sub(rootKLast)).mul(1e18))/rootKLast;
                     IZirconEnergyRevenue(energyRevenueAddress).calculate(totalPercentage.sub(liquidityPercentage));
                 }
@@ -227,8 +222,7 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
-        console.log("amount", liquidity);
-        console.log("totalSupply", _totalSupply);
+
         if (isReserve0) {
             amount0 += getAmountOut(amount1, _reserve1 - amount1, _reserve0 - amount0, _liquidityFee);
             amount = amount0;
@@ -330,20 +324,20 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         energyRevenueAddress = _revAddress;
     }
 
-    // Just for testing purposes
-    // Should be deleted on deployment
-    function mintTest(address to, uint amount) external {
-        _mint(to, amount);
-    }
+//    // Just for testing purposes
+//    // Should be deleted on deployment
+//    function mintTest(address to, uint amount) external {
+//        _mint(to, amount);
+//    }
 
-    // Same here
-    function reservesTest() external {
-        uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
-        uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
-
-        reserve0 = uint112(balance0);
-        reserve1 = uint112(balance1);
-
-        kLast = uint(reserve0).mul(reserve1);
-    }
+//    // Same here
+//    function reservesTest() external {
+//        uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
+//        uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
+//
+//        reserve0 = uint112(balance0);
+//        reserve1 = uint112(balance1);
+//
+//        kLast = uint(reserve0).mul(reserve1);
+//    }
 }
