@@ -18,22 +18,22 @@ const poolInfo = [ //floatToken, anchorToken, Name
     ['0xFFFfFfFfF6E528AD57184579beeE00c5d5e646F0',	'0xE3F5a90F9cb311505cd691a46596599aA1A0AD7D', "kBTC/USDC", 6],
 ];
 
-const withdraw = false;
-const withdrawalAddress = "0xb6932ae987775Fc317737D35e9df3Cb7CCC9CFEC"
+const withdraw = true;
+const withdrawalAddress = "0xe314e4F7A61950AD73F93C92f9A1f5770Bf279bf"
 
 
 async function check() {
     //Deploy Pylon Router
     let energyFactory = await ethers.getContractFactory('ZirconEnergyFactory');
-    let ft1 = energyFactory.attach("0xFc413b0b8481eeBCf335Eb35B1A7a634fef64649");
+    let ft1 = energyFactory.attach("0x3b7D45092A6776b5b2FB6358E41a6e0c7cF5305e");
 
     let pairFactory = await ethers.getContractFactory('ZirconFactory');
     let pairFactoryInstance = pairFactory.attach("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd");
 
     let feeToSetter = await ethers.getContractFactory('FeeToSetter');
-    let ftInstance = feeToSetter.attach("0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce")
+    let ftInstance = feeToSetter.attach("0x3F81fBb7ac2848e3e18Bd235EbF854F0308a8Aff")
 
-    await ftInstance.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0xFc413b0b8481eeBCf335Eb35B1A7a634fef64649", "0x65815a6e55fA08fcdE76ad772Bd64A4F264a6924")
+    // await ftInstance.initialize("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd", "0xFc413b0b8481eeBCf335Eb35B1A7a634fef64649", "0x65815a6e55fA08fcdE76ad772Bd64A4F264a6924")
 
     //console.log("", poolInfo);
 
