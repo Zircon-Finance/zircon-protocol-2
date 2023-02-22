@@ -7,10 +7,10 @@ async function tokenDeploy() {
 
 async function changeOwner() {
     const fts = await ethers.getContractFactory("FeeToSetter");
-    let ftsInstance = await fts.attach("0xb2054c950C0AE9e5b570EB217A6023e530878B75")
-    await (await ftsInstance.initialize("0x510D9BEcBd3C7E89d9d48dB51e99Ae5B72c27226", "0x28FDc124F3d92655626594299a997F87d5BF5F96", "0xf9494FFf60982dfFFF0C251b6635245b127c10aE")).wait()
-    // await(await ftsInstance.setOwner("0x004B2bC5F27E7399E56Aab55B8bcB3e90935564d")).wait()
-    console.log("fts", await ftsInstance.owner())
+    let ftsInstance = await fts.attach("0xBF25a32FeBeC8f104eB6685c95011Ae793F3753e")
+    await (await ftsInstance.initialize("0x510D9BEcBd3C7E89d9d48dB51e99Ae5B72c27226", "0xE6336ED822977ddc6C98459F0ADa1397e6F7649f", "0xE6336ED822977ddc6C98459F0ADa1397e6F7649f")).wait()
+    await(await ftsInstance.setFeeToSetter("0xb2054c950C0AE9e5b570EB217A6023e530878B75")).wait()
+    console.log("fts", await ftsInstance.feeToSetter())
 }
 
 async function helloBugs() {
