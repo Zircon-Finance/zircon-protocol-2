@@ -97,7 +97,6 @@ contract PsionicFarmInitializable is Ownable, ReentrancyGuard {
     )  external  {
         require(!isInitialized, "Already initialized");
         require(msg.sender == PSIONIC_FACTORY, "Not factory");
-
         // Make this contract initialized
         isInitialized = true;
 

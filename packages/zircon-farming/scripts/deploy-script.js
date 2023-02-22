@@ -1,4 +1,6 @@
 const { ethers } = require('hardhat');
+const hre = require("hardhat");
+const {FARM_FACTORY, MONTHLY_BLOCKS} = require("./constants");
 
 async function script() {
     try{
@@ -18,11 +20,14 @@ async function script() {
 }
 
 async function deployFarm(masterInstance, bNumber, lpAddress, rewardTokens) {
+    const chainId = hre.network.config.chainId
+    let monthlyBlocks = MONTHLY_BLOCKS[chainId]
+
     await masterInstance.deployPool(
         lpAddress,
         rewardTokens,
         bNumber,
-        bNumber + 215800,
+        bNumber + monthlyBlocks,
         0,
         0,
         "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
@@ -30,7 +35,7 @@ async function deployFarm(masterInstance, bNumber, lpAddress, rewardTokens) {
         lpAddress,
         rewardTokens,
         bNumber,
-        bNumber + 215800,
+        bNumber + monthlyBlocks,
         0,
         0,
         "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
@@ -40,6 +45,8 @@ async function deployFarm(masterInstance, bNumber, lpAddress, rewardTokens) {
 
 // Deploy function
 async function deploy() {
+    const chainId = hre.network.config.chainId
+
     // const [account] = await ethers.getSigners();
     // let deployerAddress = account.address;
     // console.log(`Deploying contracts using ${deployerAddress}`);
@@ -57,7 +64,7 @@ async function deploy() {
 
     const bNumber = await ethers.provider.getBlockNumber()
     const farming = await ethers.getContractFactory('PsionicFarmFactory');
-    const masterInstance = farming.attach("0xfFA0c354E3DFA1450544b7CF5Fb376aA3a1E7FFe")
+    const masterInstance = farming.attach(FARM_FACTORY[chainId])
 
 
     // ZRG - MOVR
