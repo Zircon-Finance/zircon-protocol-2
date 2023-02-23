@@ -71,12 +71,26 @@ async function deploy() {
     // await deployFarm(masterInstance, bNumber, "0x6E9685c324Cdf126e5BF08F54573120A9c19E061", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
     // await deployFarm(masterInstance, bNumber, "0x17Bd5A512ac2906C89C37B3b863D69e418fBdaAa", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
 
-
+///////////////////
     // BSC
     // await deployFarm(masterInstance, bNumber, "0x6b5c798dda380bf9bd33bfcf087b09ad9253e50b", ["0x687109cc02bd5d0c70B99437E8baAe5e2e999dDD"])
 
+    //ZRG-BNB
+    await deployFarm(masterInstance, bNumber, "0xAD6E9EfdF3c485eCC4b3F729779211BC954Bb20F", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+    await deployFarm(masterInstance, bNumber, "0x60C9D769B34CB3D6f3EBd29BBAa2fEa73FcE7a55", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+    //ZRG-USDT
+    await deployFarm(masterInstance, bNumber, "0x57C30A992a2300E6e7B9f632Dc344F477F77F585", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+    await deployFarm(masterInstance, bNumber, "0x2aB9A45122653158937c8d681876376D5e9A1594", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+    //BNB-USDT
+    await deployFarm(masterInstance, bNumber, "0x268b57fdFc78703406A5be86e16ae3794a0cc44B", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+    await deployFarm(masterInstance, bNumber, "0xFB816D078b95E416408F2C73cD455B1484024129", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+////////////////
+
     // MOONBASE
-    await deployFarm(masterInstance, bNumber, "0x782A310543aFE27d43bae683d1583F53F701a5c4", ["0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce"])
+    // await deployFarm(masterInstance, bNumber, "0x782A310543aFE27d43bae683d1583F53F701a5c4", ["0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce"])
 
     // // ZRG - MOVR
     // await deployFarm(masterInstance, bNumber, "0x770AA7074297E465E823bf2F45194e926aF0D05d", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])

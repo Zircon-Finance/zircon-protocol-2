@@ -6,8 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f0fe3d4a-4cc2-4dc4-bb96-4afc6842acf0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/zircon-core/scripts/change-fees.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-core/scripts/change-fees.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-farming/scripts/constants.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/scripts/constants.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-farming/scripts/deploy-script.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zircon-token/script/send-tokens.js" beforeDir="false" afterPath="$PROJECT_DIR$/zircon-token/script/send-tokens.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
