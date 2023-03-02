@@ -1,4 +1,370 @@
 {
+  "56": [
+    {
+      "name": "bsc",
+      "chainId": "56",
+      "contracts": {
+        "PsionicFarmFactory": {
+          "address": "0x319d993420E884f9eB285720C14121626Ba889fa",
+          "abi": [
+            {
+              "inputs": [],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "psionicFarm",
+                  "type": "address"
+                }
+              ],
+              "name": "NewPsionicFarmContract",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "PYLON_ROUTER",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract IERC20Metadata",
+                  "name": "_stakedToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "rewardTokens",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_startBlock",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_bonusEndBlock",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_poolLimitPerUser",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_numberBlocksForUserLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_admin",
+                  "type": "address"
+                }
+              ],
+              "name": "deployPool",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "psionicFarmAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "psionicVault",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "isPaused",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "switchPause",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylonRouter",
+                  "type": "address"
+                }
+              ],
+              "name": "updatePylonRouter",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "97": [
+    {
+      "name": "bscTest",
+      "chainId": "97",
+      "contracts": {
+        "PsionicFarmFactory": {
+          "address": "0xd17Ecbf7f19d966E74eB342121C6aC46C5bAC220",
+          "abi": [
+            {
+              "inputs": [],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "psionicFarm",
+                  "type": "address"
+                }
+              ],
+              "name": "NewPsionicFarmContract",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "PYLON_ROUTER",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract IERC20Metadata",
+                  "name": "_stakedToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "rewardTokens",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_startBlock",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_bonusEndBlock",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_poolLimitPerUser",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_numberBlocksForUserLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_admin",
+                  "type": "address"
+                }
+              ],
+              "name": "deployPool",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "psionicFarmAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "psionicVault",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "isPaused",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "switchPause",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylonRouter",
+                  "type": "address"
+                }
+              ],
+              "name": "updatePylonRouter",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  ],
   "1285": [
     {
       "name": "moonriver",
@@ -188,7 +554,190 @@
       "chainId": "1287",
       "contracts": {
         "PsionicFarmFactory": {
-          "address": "0x931dEA8C13472452c77065B6eB087E87A16a1BFe",
+          "address": "0xDE96a89c51Ced683314AffD25c3EDe71378E575B",
+          "abi": [
+            {
+              "inputs": [],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "psionicFarm",
+                  "type": "address"
+                }
+              ],
+              "name": "NewPsionicFarmContract",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "previousOwner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "OwnershipTransferred",
+              "type": "event"
+            },
+            {
+              "inputs": [],
+              "name": "PYLON_ROUTER",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "contract IERC20Metadata",
+                  "name": "_stakedToken",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address[]",
+                  "name": "rewardTokens",
+                  "type": "address[]"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_startBlock",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_bonusEndBlock",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_poolLimitPerUser",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "_numberBlocksForUserLimit",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "address",
+                  "name": "_admin",
+                  "type": "address"
+                }
+              ],
+              "name": "deployPool",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "psionicFarmAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "psionicVault",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "isPaused",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "renounceOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "switchPause",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "newOwner",
+                  "type": "address"
+                }
+              ],
+              "name": "transferOwnership",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "_pylonRouter",
+                  "type": "address"
+                }
+              ],
+              "name": "updatePylonRouter",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "421613": [
+    {
+      "name": "arbGoerly",
+      "chainId": "421613",
+      "contracts": {
+        "PsionicFarmFactory": {
+          "address": "0xe955fA317B6120A222f30f354B730200b7Da2f71",
           "abi": [
             {
               "inputs": [],

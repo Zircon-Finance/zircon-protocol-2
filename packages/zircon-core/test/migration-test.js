@@ -1,17 +1,19 @@
-// // TODO: clean this...
 // const { expect } = require("chai");
 // const { ethers } = require('hardhat');
 // const assert = require("assert");
 // const {BigNumber} = require("ethers");
 // const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
 // const {coreFixtures} = require("./shared/fixtures");
+// const {librarySetup} = require("./shared/fixtures");
+// const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
+//
 // const TEST_ADDRESSES = [
 //     '0x1000000000000000000000000000000000000000',
 //     '0x2000000000000000000000000000000000000000'
 // ]
 // let factoryPylonInstance,  token0, token1,
 //     pylonInstance, poolTokenInstance0, poolTokenInstance1,
-//     factoryInstance, deployerAddress, account2, account,
+//     factoryInstance, deployerAddress, account2, account,library,
 //     pair, migrator, factoryEnergyInstance, ptFactoryInstance, feeToSetterInstance, newFactoryPylonInstance, factoryEnergyInstance2;
 //
 // const MINIMUM_LIQUIDITY = ethers.BigNumber.from(10).pow(3)
@@ -28,10 +30,16 @@
 //
 // // TODO: See case where we have a big dump
 // describe("Migrations", () => {
+//     before(async () => {
+//         library = await loadFixture(librarySetup);
+//
+//         // library = await librarySetup()
+//         // fixtures = await initPylonsFromProdSnapshot(library);
+//     })
 //     beforeEach(async () => {
 //         [account, account2] = await ethers.getSigners();
 //         deployerAddress = account.address;
-//         let fixtures = await coreFixtures(deployerAddress)
+//         let fixtures = await coreFixtures(library)
 //         migrator = fixtures.migratorInstance
 //         factoryInstance = fixtures.factoryInstance
 //         token0 = fixtures.token0
@@ -49,14 +57,22 @@
 //     const migratePylon = async () => {
 //         let factoryEnergy = await ethers.getContractFactory('ZirconEnergyFactory');
 //         factoryEnergyInstance2 = await factoryEnergy.deploy(feeToSetterInstance.address, migrator.address);
-//         let zPylon = await ethers.getContractFactory('ZirconPylon');
+//         let zPylon = await ethers.getContractFactory('ZirconPylon', {
+//             libraries: {
+//                 ZirconLibrary: library.address
+//             }
+//         });
 //         let pAddress = await factoryPylonInstance.getPylon(token1.address, token0.address);
 //         let pylonInstance2;
 //         if (pAddress === '0x0000000000000000000000000000000000000000') {
 //             await factoryPylonInstance.addPylon(pair.address, token1.address, token0.address);
 //             pylonInstance2 = zPylon.attach(pAddress);
 //         }
-//         let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory');
+//         let factoryPylon = await ethers.getContractFactory('ZirconPylonFactory', {
+//             libraries: {
+//                 ZirconLibrary: library.address
+//             }
+//         });
 //
 //         newFactoryPylonInstance = await factoryPylon.deploy(
 //             factoryInstance.address,
@@ -66,8 +82,8 @@
 //             migrator.address);
 //         console.log("newFactoryPylonInstance", factoryPylonInstance.address)
 //
-//         await migrator.migrate(newFactoryPylonInstance.address, factoryEnergyInstance2.address, token0.address, token1.address, factoryPylonInstance.address);
-//         await migrator.migrate(newFactoryPylonInstance.address, factoryEnergyInstance2.address, token1.address, token0.address, factoryPylonInstance.address);
+//         await migrator.migrate(newFactoryPylonInstance.address, factoryEnergyInstance2.address, token0.address, token1.address);
+//         await migrator.migrate(newFactoryPylonInstance.address, factoryEnergyInstance2.address, token1.address, token0.address);
 //
 //
 //         // await migrator.startNewPylon(pylonInstance.address, newFactoryPylonInstance.address, pair.address, token0.address, token1.address)
@@ -129,9 +145,9 @@
 //
 //     // Let's try to calculate some cases for pylon
 //     it('should migrate pylon', async function () {
-//         //         // Adding some tokens and minting
-// //         // here we initialize the pool
-//         await init(expandTo18Decimals(1700), expandTo18Decimals(  5300))
+//         // Adding some tokens and minting
+//         // here we initialize the pool
+//         await init(expandTo18Decimals(1700), expandTo18Decimals(5300))
 //
 //         let pairRes = await pair.getReserves();
 //         console.log("Pylon Pair Reserve0 initial: ", ethers.utils.formatEther(pairRes[0]))
@@ -143,7 +159,7 @@
 //         console.log("ptt: ", ethers.utils.formatEther(ptt));
 //
 //         // Let's check if pair tokens and poolToken have b000een given correctly...
-//         expect(await pair.balanceOf(pylonInstance.address)).to.eq(ethers.BigNumber.from("259234808523880957500"))
+//         // expect(await pair.balanceOf(pylonInstance.address)).to.eq(ethers.BigNumber.from("259234808523880957500"))
 //         // On init the tokens sent to the pylon exceeds maxSync
 //         // So we have less tokens
 //         // We donated some tokens to the pylon over there
@@ -155,8 +171,8 @@
 //         console.log("PoolToken1: ", ethers.utils.formatEther(pt1));
 //
 //
-//         expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from("154545454545454544454"))
-//         expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from("481818181818181817181"))
+//         // expect(await poolTokenInstance0.balanceOf(account.address)).to.eq(ethers.BigNumber.from("154545454545454544454"))
+//         // expect(await poolTokenInstance1.balanceOf(account.address)).to.eq(ethers.BigNumber.from("481818181818181817181"))
 //
 //         let pylonRes2 = await pylonInstance.getSyncReserves();
 //         console.log("\nPylon Sync Reserve0 before first mint: ", ethers.utils.formatEther(pylonRes2[0]));
@@ -190,6 +206,33 @@
 //         ptt = await pair.totalSupply();
 //         console.log("ptb after first mint: ", ethers.utils.formatEther(ptb));
 //         console.log("ptt after first mint: ", ethers.utils.formatEther(ptt));
+//     })
+//
+//     it("solo bestemmie", async function () {
+//         const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] =         [10, 20, '4762509926821186', '4749990617651023','5049994975643473402','9999999999999999000', false, 18, 18],
+//
+//             // Add some liquidity to the Pair...
+//         let fixtures = await init(token0Amount, token1Amount, 50, decimals0, decimals1)
+//
+//         await printState(fixtures, true, 1)
+//         // Transferring some liquidity to pylon
+//
+//         let newPylon = (await migratePylon())[0]
+//
+//         await newPylon.
+//         await mintSync(account.address, expandToNDecimals(token0Amount/200, isAnchor ? decimals1: decimals0), isAnchor, fixtures, true, 1)
+//
+//         await forwardTime(ethers.provider, 50);
+//         await updateMint(fixtures, 1);
+//
+//         await printState(fixtures, true, 1)
+//         await printPairState(fixtures, true, 1);
+//
+//         let poolTokens = await printPoolTokens(account.address, fixtures, true, 1);
+//
+//         expect(poolTokens.pt1).to.eq(expectedOutputAmount1);
+//         expect(poolTokens.pt0).to.eq(expectedOutputAmount0);
+//         // Anchor
 //     })
 //
 //     it('should burn after init with migrated pylon', async function () {

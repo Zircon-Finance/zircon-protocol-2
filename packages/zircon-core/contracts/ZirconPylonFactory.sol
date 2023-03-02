@@ -35,7 +35,7 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         migrator = _migrator;
 
         // Starting Variables
-        maximumPercentageSync = 10;
+        maximumPercentageSync = 40;
         deltaGammaThreshold = 4 * 1e16; // 4%
         deltaGammaMinFee = 100; // 1%
         EMASamples = 2; //Previous average is multiplied by this number, sum is divided by samples + 1
@@ -100,8 +100,8 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         require(getPylon[_tokenA][_tokenB] == address(0), 'ZF: PE');
 
         pylonAddress = createPylon(_tokenA, _tokenB, _pairAddress);
-        address poolTokenA = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, pylonAddress); // FLOAT
-        address poolTokenB = IZirconPTFactory(ptFactory).createPTAddress(_tokenB, pylonAddress); // ANCHOR
+        address poolTokenA = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, _tokenB, pylonAddress, false); // FLOAT
+        address poolTokenB = IZirconPTFactory(ptFactory).createPTAddress(_tokenA, _tokenB, pylonAddress, true); // ANCHOR
 
         configurePylon(_tokenA, _tokenB, poolTokenA, poolTokenB, _pairAddress, pylonAddress);
 
@@ -135,9 +135,9 @@ contract ZirconPylonFactory is IZirconPylonFactory {
         ZirconPylon(_oldPylon).migrateLiquidity(_newPylon);
     }
 
-    function startPylon(address _pylon, uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external {
+    function startPylon(address _pylon, uint _gamma, uint _vab, bool _formulaSwitch) external {
         onlyMigrator();
-        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _anchorKFactor, _formulaSwitch);
+        ZirconPylon(_pylon).initMigratedPylon(_gamma, _vab, _formulaSwitch);
     }
 
 

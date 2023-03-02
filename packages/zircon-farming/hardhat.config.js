@@ -21,6 +21,7 @@ require("@nomiclabs/hardhat-etherscan");
 const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
 const moonriverAPI = process.env.API_KEY;
+const bscAPI = process.env.API_KEY_BSC;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -53,7 +54,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      moonriver: moonriverAPI
+      moonriver: moonriverAPI,
+      bsc: bscAPI
     },
     customChains: [
       {
@@ -83,6 +85,21 @@ module.exports = {
       accounts: [privateKeyDev],
       network_id: '5777',
       chainId: 1281,
+    },
+    bscTest: {
+      url: 'https://dimensional-capable-mountain.bsc-testnet.discover.quiknode.pro/a18cd4a763aa2651731546483a4b0a521262ae47/',
+      accounts: [privateKeyDev],
+      chainId: 97,
+    },
+    arbGoerly: {
+      url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
+      accounts: [privateKeyDev],
+      chainId: 421613,
+    },
+    bsc: {
+      url: 'https://binance.nodereal.io',
+      accounts: [privateKey],
+      chainId: 56,
     },
     moonriver: {
       url: 'https://moonriver.public.blastapi.io',

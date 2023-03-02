@@ -22,7 +22,7 @@ const poolInfo = [ //floatToken, anchorToken, Name
 async function check() {
     //Deploy Pylon Router
     let energyFactory = await ethers.getContractFactory('ZirconEnergyFactory');
-    let ft1 = energyFactory.attach("0x9b38fD03fAf64Dcc5F1da1101326a072092420A8");
+    let ft1 = energyFactory.attach("0xfc413b0b8481eebcf335eb35b1a7a634fef64649");
 
     let pairFactory = await ethers.getContractFactory('ZirconFactory');
     let pairFactoryInstance = pairFactory.attach("0x6B6071Ccc534fcee7B699aAb87929fAF8806d5bd");

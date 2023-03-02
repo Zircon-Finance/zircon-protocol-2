@@ -1,8 +1,8 @@
 Arguments: 
-  /usr/local/bin/node /usr/local/bin/yarn revcheck
+  /usr/local/bin/node /usr/local/bin/yarn
 
 PATH: 
-  /Library/Frameworks/Python.framework/Versions/3.8/bin:/Users/andriyshevchenko/.cargo/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin
+  /Library/Frameworks/Python.framework/Versions/3.11/bin:/Library/Frameworks/Python.framework/Versions/3.8/bin:/Users/andriyshevchenko/.cargo/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
 Yarn version: 
   1.22.19
@@ -14,7 +14,7 @@ Platform:
   darwin arm64
 
 Trace: 
-  SyntaxError: /Users/andriyshevchenko/Zircon/zircon-protocol-2/packages/zircon-core/package.json: Unexpected token } in JSON at position 2927
+  SyntaxError: /Users/andriyshevchenko/Zircon/zircon-protocol-2/packages/zircon-core/package.json: Unexpected token / in JSON at position 577
       at JSON.parse (<anonymous>)
       at /usr/local/lib/node_modules/yarn/lib/cli.js:1629:59
       at Generator.next (<anonymous>)
@@ -46,7 +46,7 @@ npm manifest:
       "chai": "*",
       "ethereum-waffle": "^3.4.0",
       "ethers": "^5.5.1",
-      "hardhat": "^2.6.8",
+      /*"hardhat": "^2.6.8",*/
       "hardhat-abi-exporter": "https://github.com/VittoriDavide/hardhat-abi-exporter",
       "hardhat-contract-sizer": "^2.3.0",
       "hardhat-dependency-compiler": "^1.1.2",
@@ -60,6 +60,8 @@ npm manifest:
       "@uniswap/v2-core": "^1.0.1",
       "@uniswap/v2-periphery": "^1.1.0-beta.0",
       "dotenv": "^10.0.0",
+      "hardhat": "^2.12.4",
+      "hardhat-contract-sizer": "^2.6.1",
       "hardhat-gas-reporter": "^1.0.8",
       "hardhat-watcher": "^2.1.1",
       "solidity-docgen": "^0.6.0-beta.10"
@@ -67,6 +69,7 @@ npm manifest:
     "scripts": {
       "deploy:moonbase": "npx hardhat --network moonbase deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
       "deploy:moonriver": "npx hardhat --network  moonriver deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
+      "deploy:bsc": "npx hardhat --network bsc deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
       "test": "npx hardhat test",
       "compile": "npx hardhat compile --show-stack-traces",
       "ctest": "npx hardhat run scripts/get-bytecodes.js && npx hardhat compile && npm test",
@@ -84,7 +87,7 @@ npm manifest:
       "fees:moonriver": "npx hardhat run --network moonriver scripts/change-fees.js",
       "add:moonbase": "npx hardhat run --network moonbase scripts/add-pair.js",
       "add:moonriver": "npx hardhat run --network moonriver scripts/add-pair.js",
-      "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js",
+      "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js"
     }
   }
 

@@ -1,6 +1,6 @@
 const {LIB_ADDRESS} = require("../scripts/constants");
-const FEE_TO_SETTER_ADDRESS = {1285: "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce", 1287: '0xbCea98Df85045F2Fcf5310fE4237ca95C9C24622'};
-const MIGRATOR_ADDRESS = {1285: "0x03209097D62b3EB7e62b2dB13Bb2729A3431F437", 1287: '0xec89E7389Cfa95A801f8ddC18dA92C1165280971'};
+const FEE_TO_SETTER_ADDRESS = {1285: "0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce", 1287: '0x50D51c05641F506C78c6792290E690059C98Ba8d'};
+const MIGRATOR_ADDRESS = {1285: "0x03209097D62b3EB7e62b2dB13Bb2729A3431F437", 1287: '0x8FD8A143b83CaaF922d4511a4Bb283712f0ccA2E'};
 const ENERGY_FACTORY = {1285: "0x49e15A5ea67FD7ebe70EB539a51abf1919282De8", 1287: '0x625ad88bb31E7119E963F2C718C9419c23Cd6F10'};
 const NEW_ENERGY_FACTORY = {1285: "0x9b38fD03fAf64Dcc5F1da1101326a072092420A8", 1287: '0x9A747f8cF3A9aD39B7A5770B694160A56c86a592'};
 const PYLON_FACTORY = {1285: "0xe9DB6Edc6b4330e7C06f5A7F79822C1361d38548", 1287: '0x3fBb6ed3b8384fDdC18501BB62Ff3AdF50490E89'};
@@ -14,8 +14,14 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     const {deployer} = await getNamedAccounts();
     let chainId = await getChainId()
 
-    console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
+    // console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
     console.log("\n\n 📡 Deploying...\n");
+    //
+    // let library = await deploy("ZirconLibrary", {
+    //     from: deployer,
+    //     args: null,
+    //     log: true
+    // })
 
     // Migrator
     let migrator = await deploy('Migrator', {
@@ -31,19 +37,18 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
         log: true
     });
 
-    // // Deploy Energy
+    // Deploy Energy
     let energyInstance = await deploy('ZirconEnergyFactory', {
         from: deployer,
         args: [feeToSetter.address, migrator.address],//MIGRATOR_ADDRESS[chainId]],
         log: true
     });
-    // /// Deploy Energy
+    // Deploy Energy
     let ptFactoryInstance = await deploy('ZirconPTFactory', {
         from: deployer,
         args: [migrator.address, feeToSetter.address],
         log: true
     });
-
     // Deploy Factory
     let factoryInstance = await deploy('ZirconFactory', {
         from: deployer,
@@ -59,11 +64,24 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
             energyInstance.address,
             ptFactoryInstance.address,
             feeToSetter.address,
-            migrator.address //MIGRATOR_ADDRESS[chainId]
+            migrator.address
         ],
         libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
         log: true
     });
+
+    // let factoryPylonInstance = await deploy('ZirconPylonFactory', {
+    //     from: deployer,
+    //     args: [
+    //         "0x8a043055FC0b4913eBEc4b1B0213e53fb8C41e7f",
+    //         "0x5e521DF66789A776d269553b4e5BD7616c80bd44",
+    //         "0xcB781E13ECA13BbcF87109Ab7f4d26BeD412b8ca",
+    //         "0x88AD12C94891635b680C484c7dF4b887838Fa288",
+    //         "0x1C6d54A24EaAeC8E62104BD1Eb3807008D3b639B"
+    //     ],
+    //     libraries: {ZirconLibrary: LIB_ADDRESS[chainId]},
+    //     log: true
+    // });
 
     // await feeToSetter.initialize(factoryInstance.address, energyInstance.address, factoryPylonInstance.address);
     // await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);

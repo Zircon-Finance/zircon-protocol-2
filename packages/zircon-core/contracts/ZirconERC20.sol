@@ -5,8 +5,8 @@ import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 contract ZirconERC20 is IUniswapV2ERC20 {
     using SafeMath for uint;
     // TODO: change name of token
-    string public constant name = 'Zircon';
-    string public constant symbol = 'ZPT';
+    string public name;
+    string public symbol;
     uint8 public constant decimals = 18;
     uint public totalSupply;
     mapping(address => uint)  public balanceOf;
@@ -19,15 +19,17 @@ contract ZirconERC20 is IUniswapV2ERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
     event Transfer(address indexed from, address indexed to, uint value);
 
-    constructor() public {
+    constructor(string memory _name, string memory _symbol) public {
         uint chainId;
         assembly {
             chainId := chainid()
         }
+        name = _name;
+        symbol = _symbol;
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
-                keccak256(bytes(name)),
+                keccak256(bytes(_name)),
                 keccak256(bytes('1')),
                 chainId,
                 address(this)

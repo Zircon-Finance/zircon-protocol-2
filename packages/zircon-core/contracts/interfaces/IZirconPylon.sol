@@ -7,7 +7,9 @@ interface IZirconPylon {
     function gammaMulDecimals() external view returns (uint);
     function isFloatReserve0() external view returns (bool);
     function virtualAnchorBalance() external view returns (uint);
-    function anchorKFactor() external view returns (uint);
+    function virtualFloatBalance() external view returns (uint);
+    function p2x() external view returns (uint);
+    function p2y() external view returns (uint);
     function lastRootKTranslated() external view returns (uint);
     function formulaSwitch() external view returns (bool);
     function lastPrice() external view returns (uint);
@@ -18,7 +20,7 @@ interface IZirconPylon {
     // @_anchorPoolToken -> Contains Address Of Anchor PT
     // @token0 -> Float token
     // @token1 -> Anchor token
-    function initMigratedPylon(uint _gamma, uint _vab, uint _anchorKFactor, bool _formulaSwitch) external;
+    function initMigratedPylon(uint _gamma, uint _vab, bool _formulaSwitch) external;
     function initialize(address _floatPoolTokenAddress, address _anchorPoolTokenAddress, address _floatToken, address _anchorToken, address _pairAddress, address _pairFactoryAddress, address _energy, address _energyRev) external;
     // On init pylon we have to handle two cases
     // The first case is when we initialize the pair through the pylon

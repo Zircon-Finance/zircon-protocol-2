@@ -2,7 +2,7 @@
 pragma solidity =0.5.16;
 // a library for performing various math operations
 import "./SafeMath.sol";
-
+import "hardhat/console.sol";
 library Math {
     using SafeMath for uint256;
 
@@ -53,6 +53,16 @@ library Math {
             maxY = _b1;
         }
     }
+
+//
+//    function _unDecimalize(uint _value, uint _decimals) view internal returns (uint) {
+//        return 18 > _decimals ? _value/(10**(18 - _decimals)) : _value*(10**(_decimals - 18));
+//
+//    }
+//    // This is a helper function to put all the decimals to 18
+//    function _decimalize(uint _value, uint _decimals) view internal returns (uint) {
+//        return 18 > _decimals ? _value*(10**(18 - _decimals)) : _value/(10**(_decimals - 18));
+//    }
 
 
 

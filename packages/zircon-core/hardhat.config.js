@@ -21,6 +21,14 @@ require("@nomiclabs/hardhat-etherscan");
 const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
 const moonriverAPI = process.env.API_KEY;
+const bscAPI = process.env.API_KEY_BSC;
+
+// extendEnvironment(async (hre) => {
+//   library = await librarySetup()
+//
+//   hre.hi = library;
+//   console.log("hello from here");
+// });
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -45,7 +53,8 @@ module.exports = {
   // },
   etherscan: {
     apiKey: {
-      moonriver: moonriverAPI
+      moonriver: moonriverAPI,
+      bsc: bscAPI,
     },
     customChains: [
       {
@@ -69,14 +78,29 @@ module.exports = {
   networks: {
     hardhat: {},
     moonbase: {
-      url: 'https://moonbase-alpha.blastapi.io/02c84726-5104-4c91-9697-0ac7efe2b0f6',
+      url: 'https://moonbase-alpha.blastapi.io/88bb4b04-103a-47c5-ac37-0aecaf3aff46',
       accounts: [privateKeyDev],
       chainId: 1287,
+      gasPrice: 10000000000 // whatever you want here
+
+      // httpHeaders: { "apiKey": "e75dfacd-1ec2-4d9f-9c25-d778cefbd284" },
+    },
+    arbGoerly: {
+      url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
+      accounts: [privateKeyDev],
+      chainId: 421613,
+      // gasPrice: 100000000 // whatever you want here
+
     },
     bsc: {
       url: 'https://binance.nodereal.io',
       accounts: [privateKey],
       chainId: 56,
+    },
+    bscTest: {
+      url: 'https://dimensional-capable-mountain.bsc-testnet.discover.quiknode.pro/a18cd4a763aa2651731546483a4b0a521262ae47/',
+      accounts: [privateKeyDev],
+      chainId: 97,
     },
     dev: {
       url: 'http://127.0.0.1:7545',
@@ -113,5 +137,4 @@ module.exports = {
       },
     ],
   }
-  ,
 };

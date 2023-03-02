@@ -11,16 +11,8 @@ library ZirconPeripheralLibrary {
 
 
     // DO NOT CHANGE THIS FUNCTION WILL BE UPDATED BY 'yarn bytecode' inside zircon-core
-    function pylonFor(address pylonFactory, address tokenA, address tokenB, address pair) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'81985ed09de0660f404ee56953538324b18c1367f554bf48cb5da6c6cf2a1bc8'))));}
+    function pylonFor(address pylonFactory, address tokenA, address tokenB, address pair) pure internal returns (address pylon){pylon=address(uint(keccak256(abi.encodePacked(hex'ff',pylonFactory,keccak256(abi.encodePacked(tokenA, tokenB,pair)),hex'4501f86492af3fbce51eea30e6c9059c9681bb0105c9d2d9619f6884f0276183'))));}
 
-//    function pylonFor(address factory, address tokenA, address tokenB, address pair) internal pure returns (address pylon) {
-//        pylon = address(uint(keccak256(abi.encodePacked(
-//                hex'ff',
-//                factory,
-//                keccak256(abi.encodePacked(tokenA, tokenB, pair)),
-//                hex'afaf6286555f731e9581935e0bb62d3fec24c96b73c638aa7b5a8b9fbc595e39' // init code hash
-//            ))));
-//    }
 
     function isInitialized(address factory, address tokenA, address tokenB, address pair) view internal returns (bool initialized){
         initialized = IZirconPylon(pylonFor(factory, tokenA, tokenB, pair)).initialized() == 1;
@@ -36,7 +28,6 @@ library ZirconPeripheralLibrary {
     }
 
 
-    // TODO: Change this
     // fetches and sorts the reserves for a pair
     function maximumSync(uint reserve, uint reservePylon, uint syncPercentage, uint maxBase, uint ptt, uint ptb) internal pure returns (uint maximum) {
         uint pairReserveTranslated = translate(reserve, ptt, ptb);

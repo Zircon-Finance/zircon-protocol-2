@@ -22,6 +22,9 @@ interface IZirconPair {
     function PERMIT_TYPEHASH() external pure returns (bytes32);
     function nonces(address owner) external view returns (uint);
 
+//    //again only for test
+//    function mintTest(address to, uint amount) external;
+
     function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
 
     event Mint(address indexed sender, uint amount0, uint amount1);

@@ -1,6 +1,27 @@
 const {ethers} = require("hardhat");
+const {BigNumber} = require("ethers");
 
-exports.expandTo18Decimals = function expandTo18Decimals(n) {return ethers.BigNumber.from(n).mul(ethers.BigNumber.from(10).pow(18))}
+const DECIMALS = ethers.BigNumber.from(10).pow(18)
+
+exports.expandTo18Decimals = function expandTo18Decimals(n) {
+
+    console.log("Debug: n ", n);
+
+    let num = n * 10**9
+
+    num = Math.floor(num);
+
+    console.log("Debug: num ", num);
+    // console.log("Debug: exp result: ", (ethers.BigNumber.from(10).pow(6)).mul(num))
+
+    return (ethers.BigNumber.from(10).pow(9)).mul(num)
+}
+
+exports.expandToNDecimals = function expandTo18Decimals(value, decimals) {
+    let num = value * 10**Math.round(decimals/2)
+    num = Math.floor(num);
+    return (ethers.BigNumber.from(10).pow(Math.round(decimals/2))).mul(num)
+}
 
 exports.getAmountOut = function getAmountOut(amountIn, reserveIn, reserveOut) {
     let amounInWithFees = amountIn.mul(ethers.BigNumber.from("997"))
@@ -9,3 +30,66 @@ exports.getAmountOut = function getAmountOut(amountIn, reserveIn, reserveOut) {
     return numerator.div(denominator);
 }
 
+exports.format = function format(num) {
+    return ethers.utils.formatEther(num);
+}
+
+exports.sqrt = function sqrt(x) {
+
+    let z = x.add(1).div(2);
+    let y = x;
+    while (z.sub(y).isNegative()) {
+        y = z;
+        z = x.div(z).add(z).div(2);
+    }
+    return y;
+}
+
+exports.findDeviation = function findDeviation(value1, value2) {
+
+    let ratio = value1.mul(DECIMALS).div(value2);
+    let deviation;
+    if(ratio.gt(DECIMALS)) {
+        deviation = ratio.sub(DECIMALS);
+    } else {
+        deviation = DECIMALS.sub(ratio);
+    }
+
+    return deviation
+
+}
+
+exports.calculateOmega = function calculateOmega(gamma, reserve1, vab, syncReserve1) {
+    return (ethers.BigNumber.from('1000000000000000000').sub(gamma)).mul(reserve1.mul(2)).div(vab.sub(syncReserve1));
+}
+
+exports.getFtv = function getFtv(reserve0, reserve1, gamma, sync0) {
+    return (reserve1.mul(gamma.mul(2)).div(DECIMALS).add(sync0.mul(reserve1).div(reserve0)))
+}
+
+//function sqrt(value) {
+//     x = ethers.BigNumber.from(value);
+//     let z = x.add(ONE).div(TWO);
+//     let y = x;
+//     while (z.sub(y).isNegative()) {
+//         y = z;
+//         z = x.div(z).add(z).div(TWO);
+//     }
+//     return y;
+// }
+
+
+
+
+//function sqrt(uint y) internal pure returns (uint z) {
+//         if (y > 3) {
+//             z = y;
+//             uint x = y / 2 + 1;
+//             while (x < z) {
+//                 z = x;
+//                 x = (y / x + x) / 2;
+//             }
+//         } else if (y != 0) {
+//             z = 1;
+//         }
+//     }

@@ -3,6 +3,7 @@ import '../interfaces/IZirconPylonFactory.sol';
 import '../interfaces/IZirconPTFactory.sol';
 import '../interfaces/IZirconFactory.sol';
 import '../interfaces/IZirconPylon.sol';
+import '../interfaces/IOldZirconPylon.sol';
 import '../interfaces/IZirconPoolToken.sol';
 import '../energy/interfaces/IZirconEnergyFactory.sol';
 //import "hardhat/console.sol";
@@ -112,16 +113,14 @@ contract Migrator {
         IZirconPylonFactory(pylonFactory).migrateLiquidity(oldPylon, newPylonAddress);
 
         // Communicating new Pylon Variables
-        IZirconPylonFactory(newPylonFactory).startPylon(newPylonAddress,
-            IZirconPylon(oldPylon).gammaMulDecimals(),
-            IZirconPylon(oldPylon).virtualAnchorBalance(),
-            IZirconPylon(oldPylon).anchorKFactor(),
-            IZirconPylon(oldPylon).formulaSwitch());
+        IZirconPylonFactory(newPylonFactory).startPylon(
+            newPylonAddress,
+            IOldZirconPylon(oldPylon).gammaMulDecimals(),
+            IOldZirconPylon(oldPylon).virtualAnchorBalance(),
+            IOldZirconPylon(oldPylon).formulaSwitch());
 
         // Migrating Energy Liquidity
         IZirconEnergyFactory(energyFactory).migrateEnergy(oldEnergy, newEnergy);
-
-        //IZirconPylonFactory(newPylonFactory).changeEnergyAddress(newEnergyRev, _pylonAddress, _pairAddress, _tokenA, _tokenB);
     }
 
     function changeEnergyFactoryAddress(address newEnergyFactoryAddress) external onlyOwner {

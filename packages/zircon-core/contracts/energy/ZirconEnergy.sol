@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity =0.5.16;
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import "./interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
 import '../libraries/Math.sol';
-//import "./libraries/SafeMath.sol";
 import "./interfaces/IZirconEnergyFactory.sol";
 import "../interfaces/IZirconPair.sol";
 import "../interfaces/IZirconPylon.sol";
@@ -13,9 +12,10 @@ import "../interfaces/IZirconPylon.sol";
 contract ZirconEnergy is IZirconEnergy {
 
   /*
-  Zircon Energy is the protocol-wide accumulator of revenue.
-  Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
-*/
+   * Zircon Energy is the protocol-wide accumulator of revenue.
+   * Each Pylon ahas an energy that works as a "bank account" and works as an insurance portion balance
+  */
+
   using SafeMath for uint112;
   using SafeMath for uint256;
 
@@ -32,6 +32,9 @@ contract ZirconEnergy is IZirconEnergy {
   bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
   // **** MODIFIERS *****
   uint public initialized = 0;
+  event RegisterFee(uint newReserve, uint fee, uint rev);
+  event MuUpdate(uint fee);
+  event Slashing(uint omega, uint ptToSend, uint anchorToSend);
 
   modifier _initialize() {
     require(initialized == 1, 'Zircon: FORBIDDEN');
@@ -48,20 +51,14 @@ contract ZirconEnergy is IZirconEnergy {
   function initialize(address _pylon, address _pair, address _token0, address _token1) external {
     require(initialized == 0, "ZER: AI");
     require(msg.sender == energyFactory, 'Zircon: FORBIDDEN'); // sufficient check
-    //    bool isFloatToken0 = IZirconPair(_pair).token0() == _token0;
-    (address tokenA, address tokenB) = (_token0, _token1);
+
     pylon = Pylon(
       _pylon,
       _pair,
-      tokenA,
-      tokenB
+      _token0,
+      _token1
     );
-    // Approving pylon to use anchor tokens
-    //    IUniswapV2ERC20(_pair).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-    //    IUniswapV2ERC20(tokenB).approve(_pylon, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
-
     initialized = 1;
-
   }
 
   // ****** HELPER FUNCTIONS *****
@@ -74,26 +71,23 @@ contract ZirconEnergy is IZirconEnergy {
     require(pylon.pylonAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
+
   modifier _onlyPair() {
     require(pylon.pairAddress == msg.sender, "ZE: Not Pylon");
     _;
   }
-  function registerFee() external _onlyPylon _initialize{
+
+  function registerFee() external _onlyPylon _initialize {
     uint balance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
     require(balance >= anchorReserve, "ZE: Anchor not sent");
-
     uint register = balance.sub(anchorReserve);
+
     uint feePercentageForRev = IZirconEnergyFactory(energyFactory).feePercentageEnergy();
     address energyRevAddress = IZirconEnergyFactory(energyFactory).getEnergyRevenue(pylon.floatToken, pylon.anchorToken);
     uint toSend = register.mul(feePercentageForRev)/(100);
     if(toSend != 0) _safeTransfer(pylon.anchorToken, energyRevAddress, toSend);
-
     anchorReserve = balance.sub(toSend);
-  }
-
-  //Called when tokens are withdrawn to ensure pylon doesn't get bricked
-  function syncReserve() external _onlyPylon _initialize {
-    anchorReserve = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
+    emit RegisterFee(anchorReserve, register, toSend);
   }
 
 
@@ -110,8 +104,6 @@ contract ZirconEnergy is IZirconEnergy {
       amount = (_minFee.mul(x).mul(x).mul(36)/(1e36)).add(_minFee); //Ensures minFee is the lowest value.
     }
   }
-
-
   function migrateLiquidity(address newEnergy) external{
     require(msg.sender == energyFactory, 'ZP: FORBIDDEN'); // sufficient check
 
@@ -124,7 +116,6 @@ contract ZirconEnergy is IZirconEnergy {
     _safeTransfer(pylon.floatToken, newEnergy, balanceFloat);
   }
 
-
   function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut, uint fee) internal pure returns (uint amountOut) {
     require(amountIn > 0, 'UV2: IIA');
     require(reserveIn > 0 && reserveOut > 0, 'UV2: IL');
@@ -134,8 +125,7 @@ contract ZirconEnergy is IZirconEnergy {
     amountOut = numerator / denominator;
   }
 
-  function _updateMu(uint muUpdatePeriod, uint muChangeFactor, uint muBlockNumber, uint muMulDecimals, uint gammaMulDecimals, uint muOldGamma) view external returns (uint mu) {
-//    uint _newBlockHeight = ; // t2
+  function _updateMu(uint muUpdatePeriod, uint muChangeFactor, uint muBlockNumber, uint muMulDecimals, uint gammaMulDecimals, uint muOldGamma) external returns (uint mu) {
 
     // We only go ahead with this if a sufficient amount of time passes
     // This is primarily to reduce noise, we want to capture sweeping changes over fairly long periods
@@ -173,10 +163,14 @@ contract ZirconEnergy is IZirconEnergy {
       }
 
       mu = Math.clamp(muMulDecimals, 1e17, 9e17);
+
+      emit MuUpdate(mu);
       // update variables for next step
-//      muOldGamma = _newGamma;
-//      muBlockNumber = _newBlockHeight;
+    } else {
+      mu = muMulDecimals;
     }
+
+
   }
 
 
@@ -185,13 +179,13 @@ contract ZirconEnergy is IZirconEnergy {
   /// @dev Note that in practice this system doesn't activate unless the syncReserves are empty.
   /// Also note that a dump of 60% only generates about 10% of slashing.
   // 0.39kb
-  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, uint fee, bool isFloatReserve0, address _to) _onlyPylon
+  function handleOmegaSlashing(uint ptu, uint omegaMulDecimals, bool isFloatReserve0, address _to) _onlyPylon
   external returns (uint retPTU, uint amount){
     // Send slashing should send the extra PTUs to Uniswap.
     // When burn calls the uniswap burn it will also give users the compensation
     retPTU = omegaMulDecimals.mul(ptu)/1e18;
     if (omegaMulDecimals < 1e18) {
-      //finds amount to cover
+      // finds amount to cover
       uint amountToAdd = ptu * (1e18-omegaMulDecimals)/1e18; // already checked
 
       // finds how much we can cover
@@ -206,41 +200,36 @@ contract ZirconEnergy is IZirconEnergy {
         // @dev if amountToAdd is too small the remainingPercentage will be 0 so that is ok
         _safeTransfer(pylon.pairAddress, pylon.pairAddress, energyPTBalance);
 
-        uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
+//        uint percentage = (amountToAdd - energyPTBalance).mul(1e18)/(ptu);
+
         {
-          uint _fee = fee;
-          uint _ptu = retPTU;
+//          uint _fee = fee;
+//          uint _ptu = retPTU;
           bool _isFloatReserve0 = isFloatReserve0;
           uint ts = IZirconPair(pylon.pairAddress).totalSupply();
           (uint reserve0, uint reserve1,) = IZirconPair(pylon.pairAddress).getReserves();
-
-          uint liquidity = _ptu + energyPTBalance;
-          uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
+//          uint _reserve0 = _isFloatReserve0 ? reserve0 : reserve1;
           uint _reserve1 = _isFloatReserve0 ? reserve1 : reserve0;
 
-          uint amount0 = liquidity.mul(_reserve0) / ts;
-          uint amount1 = liquidity.mul(_reserve1) / ts;
+          // Simplified, the previous system was necessary because it was two separate functions
+          amount = (amountToAdd - energyPTBalance).mul(2 * _reserve1)/ts;
 
-          // sends pool tokens directly to pair
-          uint totalAmount = amount1 + getAmountOut(amount0, _reserve0, _reserve1, _fee);
-
-          // TotalAmount is what the user already received, while percentage is what's missing.
-          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
-          // Percentage is calculated "natively" as a full 1e18
-          // ta/(1-p) - ta = ta*p/(1-p)
-          amount = totalAmount.mul(percentage)/(1e18 - percentage);
+          //          // sends pool tokens directly to pair
+          //          // TotalAmount is what the user already received, while percentage is what's missing.
+          //          // We divide to arrive to the original amount and diff it with totalAmount to get final number.
+          //          // Percentage is calculated "natively" as a full 1e18
+          //          // ta/(1-p) - ta = ta*p/(1-p)
+          //          amount = totalAmount.mul(percentage)/(1e18 - percentage);
         }
 
         uint eBalance = IUniswapV2ERC20(pylon.anchorToken).balanceOf(address(this));
 
         amount = eBalance > amount ? amount : eBalance;
-
         _safeTransfer(pylon.anchorToken, _to, amount);
-
-
         // updating the reserves of energy
         anchorReserve = eBalance-amount;
       }
+      emit Slashing(omegaMulDecimals, amountToAdd, amount);
     }
   }
 

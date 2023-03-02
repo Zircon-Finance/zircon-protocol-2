@@ -1,7 +1,8 @@
 pragma solidity =0.5.16;
 import "./ZirconERC20.sol";
 import "./interfaces/IZirconPoolToken.sol";
-//import "hardhat/hardhat/console.sol.sol";
+//import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+//import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
 contract ZirconPoolToken is ZirconERC20 {
     address public token;
@@ -11,7 +12,7 @@ contract ZirconPoolToken is ZirconERC20 {
     address public pylonFactory;
     address public factory;
 
-    constructor(address _pylonFactory) public {
+    constructor(address _pylonFactory, string memory name, string memory symbol) ZirconERC20(name, symbol) public {
         pylonFactory = _pylonFactory;
         factory = msg.sender;
     }
@@ -43,4 +44,5 @@ contract ZirconPoolToken is ZirconERC20 {
         require(msg.sender == factory, 'ZPT: FORBIDDEN');
         pylon = _pylon;
     }
+
 }

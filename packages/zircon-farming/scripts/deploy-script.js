@@ -1,4 +1,6 @@
 const { ethers } = require('hardhat');
+const hre = require("hardhat");
+const {FARM_FACTORY, MONTHLY_BLOCKS} = require("./constants");
 
 async function script() {
     try{
@@ -18,11 +20,14 @@ async function script() {
 }
 
 async function deployFarm(masterInstance, bNumber, lpAddress, rewardTokens) {
+    const chainId = hre.network.config.chainId
+    let monthlyBlocks = MONTHLY_BLOCKS[chainId]
+
     await masterInstance.deployPool(
         lpAddress,
         rewardTokens,
         bNumber,
-        bNumber + 215800,
+        bNumber + monthlyBlocks,
         0,
         0,
         "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
@@ -30,7 +35,7 @@ async function deployFarm(masterInstance, bNumber, lpAddress, rewardTokens) {
         lpAddress,
         rewardTokens,
         bNumber,
-        bNumber + 215800,
+        bNumber + monthlyBlocks,
         0,
         0,
         "0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5")
@@ -40,6 +45,8 @@ async function deployFarm(masterInstance, bNumber, lpAddress, rewardTokens) {
 
 // Deploy function
 async function deploy() {
+    const chainId = hre.network.config.chainId
+
     // const [account] = await ethers.getSigners();
     // let deployerAddress = account.address;
     // console.log(`Deploying contracts using ${deployerAddress}`);
@@ -57,30 +64,47 @@ async function deploy() {
 
     const bNumber = await ethers.provider.getBlockNumber()
     const farming = await ethers.getContractFactory('PsionicFarmFactory');
-    const masterInstance = farming.attach("0x97b2aE105DAFb7DC8a73c93e5f56d3f095D0DCF3")
+    const masterInstance = farming.attach(FARM_FACTORY[chainId])
 
 
     // ZRG - MOVR
     // await deployFarm(masterInstance, bNumber, "0x6E9685c324Cdf126e5BF08F54573120A9c19E061", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
     // await deployFarm(masterInstance, bNumber, "0x17Bd5A512ac2906C89C37B3b863D69e418fBdaAa", ["0x4545E94974AdACb82FC56BCf136B07943e152055", "0x98878B06940aE243284CA214f92Bb71a2b032B8A"])
 
+///////////////////
+    // BSC
+    await deployFarm(masterInstance, bNumber, "0xad6e9efdf3c485ecc4b3f729779211bc954bb20f", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+    //ZRG-BNB
+    await deployFarm(masterInstance, bNumber, "0xAD6E9EfdF3c485eCC4b3F729779211BC954Bb20F", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+    await deployFarm(masterInstance, bNumber, "0x60C9D769B34CB3D6f3EBd29BBAa2fEa73FcE7a55", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+    //ZRG-USDT
+    await deployFarm(masterInstance, bNumber, "0x57C30A992a2300E6e7B9f632Dc344F477F77F585", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+    await deployFarm(masterInstance, bNumber, "0x2aB9A45122653158937c8d681876376D5e9A1594", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+    //BNB-USDT
+    await deployFarm(masterInstance, bNumber, "0x268b57fdFc78703406A5be86e16ae3794a0cc44B", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+    await deployFarm(masterInstance, bNumber, "0xFB816D078b95E416408F2C73cD455B1484024129", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
+
+////////////////
 
     // MOONBASE
-    // await deployFarm(masterInstance, bNumber, "0x6b5c798dda380bf9bd33bfcf087b09ad9253e50b", ["0xed13b028697febd70f34cf9a9e280a8f1e98fd29"])
+    // await deployFarm(masterInstance, bNumber, "0x782A310543aFE27d43bae683d1583F53F701a5c4", ["0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce"])
 
     // // ZRG - MOVR
     // await deployFarm(masterInstance, bNumber, "0x770AA7074297E465E823bf2F45194e926aF0D05d", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
     // await deployFarm(masterInstance, bNumber, "0xBB57187c7883d25a64a08640905376f4CeF6C1ef", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
-
+    //
     // // ZRG - USDC
     // await deployFarm(masterInstance, bNumber, "0xc3722E72a64c4Cab0308d72067bC07c7689b4F2F", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
     // await deployFarm(masterInstance, bNumber, "0x61DBB475DBb84Be23A0D555FA269754EDA88F5D1", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
 
     //MOVR-USDC
-    await deployFarm(masterInstance, bNumber, "0x6E9685c324Cdf126e5BF08F54573120A9c19E061", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
-    await deployFarm(masterInstance, bNumber, "0x17Bd5A512ac2906C89C37B3b863D69e418fBdaAa", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    // await deployFarm(masterInstance, bNumber, "0x6E9685c324Cdf126e5BF08F54573120A9c19E061", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
+    // await deployFarm(masterInstance, bNumber, "0x17Bd5A512ac2906C89C37B3b863D69e418fBdaAa", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
 
-    // // ZRG-ETH
+    // ZRG-ETH
     // await deployFarm(masterInstance, bNumber, "0x0c2887643e23Fbf4b3205E60492A5618eDdd4103", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
     // await deployFarm(masterInstance, bNumber, "0xc50A53dc95e3875640f5f9c3C65643b984918c66", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
     //

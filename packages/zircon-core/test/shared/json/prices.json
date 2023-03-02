@@ -1,0 +1,130 @@
+[
+  {
+    "tk0Symbol": "ZRG",
+    "tk1Symbol": "USDC",
+    "vfbChange": "1.41496539349470253017",
+    "gammaChange": "1.29629256969185899928",
+    "price0Change": "1.41496554969363761547",
+    "price1Change": "1.00000000000000000081"
+  },
+  {
+    "tk0Symbol": "ZRG",
+    "tk1Symbol": "xcKSM",
+    "vfbChange": "1.00000012502330079225",
+    "gammaChange": "1.00052689765374110409",
+    "price0Change": "1.0000002415735168032",
+    "price1Change": "1.00000000000000000075"
+  },
+  {
+    "tk0Symbol": "WMOVR",
+    "tk1Symbol": "USDC",
+    "vfbChange": "0.99836047714880599869",
+    "gammaChange": "0.9999995281579213477",
+    "price0Change": "0.99999838430007153853",
+    "price1Change": "1.00000000000000000044"
+  },
+  {
+    "tk0Symbol": "USDC",
+    "tk1Symbol": "WMOVR",
+    "vfbChange": "0.0368911876839835631",
+    "gammaChange": "1.8026407194593333805",
+    "price0Change": "0.09539559832117372989",
+    "price1Change": "0.99999860348668466237"
+  },
+  {
+    "tk0Symbol": "ETH",
+    "tk1Symbol": "WMOVR",
+    "vfbChange": "0.00204130249666263546",
+    "gammaChange": "0.23512513934987426194",
+    "price0Change": "0.00404586154838534348",
+    "price1Change": "1"
+  },
+  {
+    "tk0Symbol": "WMOVR",
+    "tk1Symbol": "ETH",
+    "vfbChange": "0.99814029055453895848",
+    "gammaChange": "0.90447722250042458118",
+    "price0Change": "0.99989141525474349377",
+    "price1Change": "0.99999159998677500258"
+  },
+  {
+    "tk0Symbol": "WMOVR",
+    "tk1Symbol": "xcKSM",
+    "vfbChange": "0.99818029777977240047",
+    "gammaChange": "1.00085149222698775775",
+    "price0Change": "0.99999213421163069996",
+    "price1Change": "1.00000000000000000062"
+  },
+  {
+    "tk0Symbol": "xcKSM",
+    "tk1Symbol": "WMOVR",
+    "vfbChange": "0.00219276118472729203",
+    "gammaChange": "1.03847659194439212444",
+    "price0Change": "0.00433088545074188174",
+    "price1Change": "0.99999998231646587149"
+  },
+  {
+    "tk0Symbol": "xcKSM",
+    "tk1Symbol": "USDC",
+    "vfbChange": "0.89672631914070201259",
+    "gammaChange": "1.00000011326197163265",
+    "price0Change": "1.00984990725870957366",
+    "price1Change": "1.00000000000000000084"
+  },
+  {
+    "tk0Symbol": "ETH",
+    "tk1Symbol": "USDC",
+    "vfbChange": "0.92699519590407887495",
+    "gammaChange": "1.06440008812954753427",
+    "price0Change": "1.09096405708940335062",
+    "price1Change": "1.00000000000000000008"
+  },
+  {
+    "tk0Symbol": "LDO",
+    "tk1Symbol": "USDC",
+    "vfbChange": "0.62337712040785666155",
+    "gammaChange": "0.60709110806938797258",
+    "price0Change": "0.62610205255198281641",
+    "price1Change": "1"
+  },
+  {
+    "tk0Symbol": "LDO",
+    "tk1Symbol": "WMOVR",
+    "vfbChange": "1.13423966649525096991",
+    "gammaChange": "1.09840703865960412609",
+    "price0Change": "1.13502052396851056432",
+    "price1Change": "1.0000000000000000008"
+  },
+  {
+    "tk0Symbol": "WMOVR",
+    "tk1Symbol": "LDO",
+    "vfbChange": "2.5334286614103e-7",
+    "gammaChange": "1.15551872178296278478",
+    "price0Change": "8.9024683161958e-7",
+    "price1Change": "0.99999999992614218549"
+  },
+  {
+    "tk0Symbol": "MFAM",
+    "tk1Symbol": "WMOVR",
+    "vfbChange": "0.99999322004905664486",
+    "gammaChange": "1.0000000000000000022",
+    "price0Change": "0.99999999512230154555",
+    "price1Change": "1.00000000000000000068"
+  },
+  {
+    "tk0Symbol": "xcRMRK",
+    "tk1Symbol": "WMOVR",
+    "vfbChange": "0.92091240552196752257",
+    "gammaChange": "0.92277250685680388001",
+    "price0Change": "0.92656143328450515663",
+    "price1Change": "1.00000000000000000083"
+  },
+  {
+    "tk0Symbol": "xcKBTC",
+    "tk1Symbol": "USDC",
+    "vfbChange": "0.01672789584113165667",
+    "gammaChange": "0.94217739211461635303",
+    "price0Change": "0.0434731688485451239",
+    "price1Change": "1"
+  }
+]
