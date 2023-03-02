@@ -54,7 +54,7 @@ module.exports = {
   etherscan: {
     apiKey: {
       moonriver: moonriverAPI,
-      bsc: bscAPI
+      bsc: bscAPI,
     },
     customChains: [
       {
