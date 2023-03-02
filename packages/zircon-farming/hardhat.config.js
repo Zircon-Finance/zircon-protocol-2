@@ -21,6 +21,7 @@ require("@nomiclabs/hardhat-etherscan");
 const privateKey = process.env.PRIVKEY;
 const privateKeyDev = process.env.PRIVKEY_DEV;
 const moonriverAPI = process.env.API_KEY;
+const bscAPI = process.env.API_KEY_BSC;
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -53,7 +54,8 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      moonriver: moonriverAPI
+      moonriver: moonriverAPI,
+      bsc: bscAPI
     },
     customChains: [
       {

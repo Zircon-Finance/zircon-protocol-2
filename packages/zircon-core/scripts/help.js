@@ -1,5 +1,28 @@
 const { ethers } = require('hardhat');
 
+async function defillama() {
+    // let logs = await ethers.provider.getLogs({
+    //     fromBlock: 25836698,
+    //     toBlock: 25912629,
+    //     target: "0x05d5E46F9d17591f7eaCdfE43E3d6a8F789Df698",
+    //     // topics: [
+    //     //     "0xab83557b3a718996d408afe08287d09bafed3590c7ae61a430d518d3199d4590"
+    //     // ]
+    // })
+
+
+    let logs = await ethers.provider.getLogs({
+        fromBlock: 3587214,
+        toBlock: 3684191,
+        target: "0x09f8E0aeA93Bcb511276A166e6e57E02e5cc1E0a",
+        topics: [
+            "0xab83557b3a718996d408afe08287d09bafed3590c7ae61a430d518d3199d4590"
+        ]
+    })
+
+    console.log("logs", logs)
+}
+
 async function tokenDeploy() {
     const tokenContract = await ethers.getContractFactory("Token");
     const newToken = await tokenContract.deploy("ZRGTEST Token", "ZRGT", 18);
@@ -125,7 +148,7 @@ async function check() {
 
 }
 
-changeOwner()
+defillama()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

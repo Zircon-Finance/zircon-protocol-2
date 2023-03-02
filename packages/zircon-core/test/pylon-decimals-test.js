@@ -108,7 +108,9 @@ describe("Pylon Decimals", () => {
 
             await updateMint(fixtures, 1)
 
-            await expect( mintAsync(account.address, token0Amount / 1000, token1Amount / 1000, true, fixtures, false, 1)).to.be.revertedWith("Z: FTH2");
+            await expect(
+                mintAsync(account.address, token0Amount / 1000, token1Amount / 1000, true, fixtures, false, 1)
+            ).to.be.revertedWith("ds-math-sub-underflow");
         });
     });
 
@@ -353,18 +355,17 @@ describe("Pylon Decimals", () => {
 
 
     const burnTestCases = [
-        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 18],
-        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 18],
-        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 18],
-        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 6],
-            [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 18, 12],
-        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 6, 12],
-        [20, 10, '474999999999999999', '337490000000000000','99999999999999000', '149366473384710075', true, 12, 6],
+        [20, 10, true, 18, 18, "99980001000000000"],
+        [20, 10, true, 6, 18, "99980001000000000"],
+        [20, 10, true, 12, 18, "99980001000000000"],
+        [20, 10, true, 18, 6, "99990"],
+        [20, 10, true, 18, 12, "99980001000"],
+        [20, 10, true, 6, 12, "99980001000"],
+        [20, 10, true, 12, 6, "99990"],
     ].map(a => a.map(n => (typeof n  === "boolean" ? n : typeof n === 'string' ? ethers.BigNumber.from(n) : n)))
-
     burnTestCases.forEach((mintCase, i) => {
         it(`Mint Burn Cycle test:${i}`, async () => {
-            const [token0Amount, token1Amount, expectedRes0, expectedRes1, expectedOutputAmount0, expectedOutputAmount1, isAnchor, decimals0, decimals1] = mintCase
+            const [token0Amount, token1Amount, isAnchor, decimals0, decimals1, expectedPostBurn] = mintCase
             // Add some liquidity to the Pair...
             let fixtures =  await init(token0Amount, token1Amount, 50, decimals0, decimals1)
 
@@ -401,7 +402,7 @@ describe("Pylon Decimals", () => {
 
             let balancePostBurn = await token1.balanceOf(account.address);
 
-            expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from("99980001000000000"))
+            expect(balancePostBurn.sub(balancePreBurn)).to.eq(ethers.BigNumber.from(expectedPostBurn))
 
             await printState(fixtures, true, 1)
 

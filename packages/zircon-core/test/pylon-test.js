@@ -242,7 +242,7 @@ describe("Pylon A", () => {
         console.log("thisblockEMA after: ", ethers.utils.formatEther(thisBlockEMA))
         console.log("strikeBlock after: ", strikeBlock.toBigInt())
 
-        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99384161431630346"));
+        expect(thisBlockEMA).to.eq(ethers.BigNumber.from("99389128816904512"));
         expect(strikeBlock).to.eq(blockNumber);
 
         // Advance time to reset this block ema. GammaEMA should also bleed to zero

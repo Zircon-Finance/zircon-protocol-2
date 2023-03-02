@@ -1,15 +1,12 @@
 pragma solidity =0.5.16;
-//import './libraries/Math.sol';
 import './interfaces/IZirconPair.sol';
 import './interfaces/IZirconPoolToken.sol';
-//import "./libraries/SafeMath.sol";
 import "./libraries/ZirconLibrary.sol";
 import "./interfaces/IZirconPylonFactory.sol";
 import "./interfaces/IZirconFactory.sol";
 import "./interfaces/IZirconPylon.sol";
 import "./energy/interfaces/IZirconEnergy.sol";
 import '@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol';
-//import 'hardhat/console.sol';
 
 contract ZirconPylon is IZirconPylon {
 
@@ -37,9 +34,6 @@ contract ZirconPylon is IZirconPylon {
     address private energyAddress;
     address private energyRevAddress;
 
-    //    uint private lastAvgPrice;
-    //    uint private lastOracleTimestamp;
-
     // Indicates if in the pair the token0 is float or anchor
     bool public isFloatReserve0;
 
@@ -56,7 +50,6 @@ contract ZirconPylon is IZirconPylon {
 
 
     uint public lastRootKTranslated;
-    //uint public dynamicFeePercentage; //Uses basis points (0.01%, /10000)
     uint public gammaMulDecimals; // Percentage of float over total pool value. Name represents the fact that this is always the numerator of a fraction with 10**18 as denominator.
     uint public muMulDecimals; // A "permanence" factor that is used to adjust fee redistribution. Stored as mu + 1 because unsigned math
 
@@ -79,10 +72,6 @@ contract ZirconPylon is IZirconPylon {
 
     uint112 private reserve0;// uses single storage slot, accessible via getReserves (always anchor)
     uint112 private reserve1;// us es single storage slot, accessible via getReserves (always float)
-
-    // uint32 private blockTimestampLast; // uses single storage slot, accessible via getReserves
-    // global variable used for testing
-    // uint private testMultiplier = 1e16;
 
     // **** MODIFIERS *****
     uint public initialized = 0;
@@ -198,7 +187,6 @@ contract ZirconPylon is IZirconPylon {
             10**uint(IUniswapV2ERC20(_floatToken).decimals()),
             10**uint(IUniswapV2ERC20(_anchorToken).decimals()),
             10**uint(IUniswapV2ERC20(_floatToken).decimals() + 18 - IUniswapV2ERC20(_anchorToken).decimals()));
-
     }
 
     // 0.048 kb

@@ -73,10 +73,10 @@ async function deploy() {
 
 
     // BSC
-    // await deployFarm(masterInstance, bNumber, "0x6b5c798dda380bf9bd33bfcf087b09ad9253e50b", ["0x687109cc02bd5d0c70B99437E8baAe5e2e999dDD"])
+    await deployFarm(masterInstance, bNumber, "0xad6e9efdf3c485ecc4b3f729779211bc954bb20f", ["0x808A3F2639a5CD54D64eD768192369BCd729100e"])
 
     // MOONBASE
-    await deployFarm(masterInstance, bNumber, "0x782A310543aFE27d43bae683d1583F53F701a5c4", ["0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce"])
+    // await deployFarm(masterInstance, bNumber, "0x782A310543aFE27d43bae683d1583F53F701a5c4", ["0x4bA754989b77925F47e26C54aaa1b03Df23B32Ce"])
 
     // // ZRG - MOVR
     // await deployFarm(masterInstance, bNumber, "0x770AA7074297E465E823bf2F45194e926aF0D05d", ["0x4545E94974AdACb82FC56BCf136B07943e152055"])
