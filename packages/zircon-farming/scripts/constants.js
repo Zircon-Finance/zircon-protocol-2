@@ -13,5 +13,5 @@ exports.MONTHLY_BLOCKS = {
     1287: 215800,
     97: 0,
     421613: 0,
-    56: 5000
+    56: 798000 //28 days i.e. 4 weeks i.e. lunar month
 };
