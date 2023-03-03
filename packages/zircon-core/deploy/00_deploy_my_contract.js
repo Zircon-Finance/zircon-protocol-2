@@ -87,6 +87,5 @@ module.exports = async ({getNamedAccounts, deployments, getChainId}) => {
     // await migrator.initialize(energyInstance.address, ptFactoryInstance.address, factoryPylonInstance.address, factoryInstance.address);
 
     console.log("REMEMBER TO CHANGE THE BYTECODES IN THE CONTRACT FILES!");
-
 };
 module.exports.tags = ['CoreFactories'];

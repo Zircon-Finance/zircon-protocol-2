@@ -50,6 +50,7 @@
     "deploy:bsc": "npx hardhat --network bsc deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "deploy:bscTest": "npx hardhat run --network bscTest scripts/get-bytecodes.js && npx hardhat --network bscTest deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "deploy:arbGoerly": "npx hardhat run --network arbGoerly scripts/get-bytecodes.js && npx hardhat --network arbGoerly deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
+    "deploy:arbitrum": "npx hardhat run --network arbitrum scripts/get-bytecodes.js && npx hardhat --network arbitrum deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
     "ctest": "npx hardhat run scripts/get-bytecodes.js && npx hardhat compile && npm test",
@@ -76,7 +77,8 @@
     "testCreate:moonbase": "npx hardhat run --network moonbase scripts/creating-test.js",
     "testCreate:bscTest": "npx hardhat run --network bscTest scripts/creating-test.js",
     "testCreate:arbGoerly": "npx hardhat run --network arbGoerly scripts/creating-test.js",
-    "revcheck": "npx hardhat run --network moonriver scripts/rev-check.js"
+    "revcheck:bsc": "npx hardhat run --network bsc scripts/rev-check.js",
+    "revcheck:moonriver": "npx hardhat run --network moonriver scripts/rev-check.js"
   },
   "jest": {
     "globalSetup": "./test/shared/jestGlobalSetup.js"

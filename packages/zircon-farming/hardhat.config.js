@@ -96,15 +96,15 @@ module.exports = {
       accounts: [privateKeyDev],
       chainId: 421613,
     },
-    bsc: {
-      url: 'https://binance.nodereal.io',
-      accounts: [privateKey],
-      chainId: 56,
-    },
     moonriver: {
       url: 'https://moonriver.public.blastapi.io',
       accounts: [privateKey],
       chainId: 1285,
+    },
+    arbitrum: {
+      url: 'https://arb-mainnet.g.alchemy.com/v2/1mgjwYNZEZtVhyikEE6iGzZio6g6XIqO',
+      accounts: [privateKey],
+      chainId: 42161,
     },
   },
   solidity: {

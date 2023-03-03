@@ -97,6 +97,11 @@ module.exports = {
       accounts: [privateKey],
       chainId: 1285,
     },
+    arbitrum: {
+      url: 'https://arb-mainnet.g.alchemy.com/v2/1mgjwYNZEZtVhyikEE6iGzZio6g6XIqO',
+      accounts: [privateKey],
+      chainId: 42161,
+    },
   },
   solidity: {
     compilers: [

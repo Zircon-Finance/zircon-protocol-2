@@ -41,6 +41,7 @@
     "deploy:bscTest": "npx hardhat --network bscTest deploy --reset",
     "deploy:arbGoerly": "npx hardhat --network arbGoerly deploy --reset",
     "deploy:bsc": "npx hardhat --network bsc deploy --reset",
+    "deploy:arbitrum": "npx hardhat --network arbitrum deploy --reset",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile",
     "ctest": "npx hardhat compile && npm test",

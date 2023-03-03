@@ -82,8 +82,6 @@ module.exports = {
       accounts: [privateKeyDev],
       chainId: 1287,
       gasPrice: 10000000000 // whatever you want here
-
-      // httpHeaders: { "apiKey": "e75dfacd-1ec2-4d9f-9c25-d778cefbd284" },
     },
     arbGoerly: {
       url: 'https://arb-goerli.g.alchemy.com/v2/vuu8lHxfsEcCnk1BENpnZHDmvuDlXtNl',
@@ -113,6 +111,11 @@ module.exports = {
       accounts: [privateKey],
       chainId: 1285,
       blockGasLimit: 100000000429720 // whatever you want here
+    },
+    arbitrum: {
+      url: 'https://arb-mainnet.g.alchemy.com/v2/1mgjwYNZEZtVhyikEE6iGzZio6g6XIqO',
+      accounts: [privateKey],
+      chainId: 42161,
     },
   },
   solidity: {

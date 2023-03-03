@@ -29,6 +29,7 @@
     "deploy:moonriver": "npx hardhat --network moonriver deploy --export-all ../zircon-periphery/external_contracts/farming_contracts.json",
     "deploy:bscTest": "npx hardhat --network bscTest deploy --export-all ../zircon-periphery/external_contracts/farming_contracts.json",
     "deploy:arbGoerly": "npx hardhat --network arbGoerly deploy --export-all ../zircon-periphery/external_contracts/farming_contracts.json",
+    "deploy:arbitrum": "npx hardhat --network arbitrum deploy --export-all ../zircon-periphery/external_contracts/farming_contracts.json",
     "deploy:bsc": "npx hardhat --network bsc deploy --export-all ../zircon-periphery/external_contracts/farming_contracts.json",
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --show-stack-traces",
