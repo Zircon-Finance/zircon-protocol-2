@@ -190,7 +190,7 @@ contract ZirconPylon is IZirconPylon {
     }
 
     // 0.048 kb
-    function initMigratedPylon(uint _gamma, uint _vab, bool _formulaSwitch) external {
+    function initMigratedPylon(uint _gamma, uint _vab, uint _vfb, uint _p2x, uint _p2y, bool _formulaSwitch) external {
         onlyFactory(); // sufficient check
         updateFees();
         gammaMulDecimals = _gamma;
@@ -211,16 +211,9 @@ contract ZirconPylon is IZirconPylon {
         lastOracleTimestamp = timestamp;
         EMABlockNumber = block.number;
 
-        p2x = cacheReserve1*decimals.priceMultiplier/cacheReserve0;
-
-        p2y = (2*cacheReserve1)*gammaMulDecimals/1e18;
-
-        if(_formulaSwitch){
-            virtualFloatBalance = (res0*res1)/_vab;
-        }else{
-            virtualFloatBalance = 2*cacheReserve0*gammaMulDecimals/1e18 + syncReserve0;
-        }
-
+        p2x = _p2x;
+        p2y = _p2y;
+        virtualFloatBalance = _vfb;
         // TODO: Might cause issue since it's not adjusted, maybe call with code 42?
         if (_vab != 0) {_update(0, false, cacheReserve0, cacheReserve1, _vab);}
 

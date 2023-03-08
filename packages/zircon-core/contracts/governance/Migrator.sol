@@ -115,9 +115,13 @@ contract Migrator {
         // Communicating new Pylon Variables
         IZirconPylonFactory(newPylonFactory).startPylon(
             newPylonAddress,
-            IOldZirconPylon(oldPylon).gammaMulDecimals(),
-            IOldZirconPylon(oldPylon).virtualAnchorBalance(),
-            IOldZirconPylon(oldPylon).formulaSwitch());
+            IZirconPylon(oldPylon).gammaMulDecimals(),
+            IZirconPylon(oldPylon).virtualAnchorBalance(),
+            IZirconPylon(oldPylon).virtualFloatBalance(),
+            IZirconPylon(oldPylon).p2x(),
+            IZirconPylon(oldPylon).p2y(),
+            IZirconPylon(oldPylon).formulaSwitch()
+        );
 
         // Migrating Energy Liquidity
         IZirconEnergyFactory(energyFactory).migrateEnergy(oldEnergy, newEnergy);

@@ -160,7 +160,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
 
             // Passing here all the old information for the vab anchoK ecc
             console.log("fs", pylon.formulaSwitch)
-            await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.formulaSwitch)).wait()
+            await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.vfb, pylon.p2x, pylon.p2y, pylon.formulaSwitch)).wait()
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)
 
