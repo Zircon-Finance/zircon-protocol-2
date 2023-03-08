@@ -1,15 +1,46 @@
 const axios = require('axios');
 const hre = require("hardhat");
+const {BigNumber} =  require("ethers");
+const {FEE_TO_SETTER_ADDRESS, FACTORY, ENERGY_FACTORY, PYLON_FACTORY} = require("./constants");
+
+const withdraw = true;
+const withdrawalAddress = "0xe314e4F7A61950AD73F93C92f9A1f5770Bf279bf"
+
 async function newCheck() {
     const chainId = hre.network.config.chainId
     let revs = (await axios.get('https://edgeapi.zircon.finance/static/monitoring/' + chainId )).data
 
     console.log("Total in USD From REVS: ", revs["totalRev"])
+    let feeToSetter = await hre.ethers.getContractFactory('FeeToSetter');
+    let ftInstance = feeToSetter.attach(FEE_TO_SETTER_ADDRESS[chainId])
+    // await(await feeToSetter.initialize(FACTORY[chainId], ENERGY_FACTORY[chainId], PYLON_FACTORY[chainId])).wait()
+
     for (let pair of revs["pairs"]) {
         let symbol1 = pair["token1"]["symbol"]
         console.log("Pair: ", pair["token0"]["symbol"], "/", symbol1)
         console.log("Amount in " + symbol1, hre.ethers.utils.formatUnits(hre.ethers.BigNumber.from(pair["energyRev"]["valueInToken1"]), pair["token1"]["decimals"]).toString() + " (" +
               + pair["energyRev"]["valueInUSD"] + " USD)")
+
+        let balanceToken1 = BigNumber.from(pair["energyRev"]["balanceToken1"])
+        let balanceToken0 = BigNumber.from(pair["energyRev"]["balanceToken0"])
+        let pairBalance = BigNumber.from(pair["energyRev"]["pairBalance"])
+        if (withdraw) {
+            if(pairBalance.gt(BigNumber.from("0"))) {
+                await ftInstance.getFees(pair.address, pairBalance, withdrawalAddress, pair.energyRev.address)
+            } else {
+                console.log("Zero Pair Balance")
+            }
+            if(balanceToken0.gt(BigNumber.from("0"))) {
+                await ftInstance.getFees(pair.token0.address, balanceToken0, withdrawalAddress, pair.energyRev.address)
+            } else {
+                console.log("Zero Anchor Balance")
+            }
+            if(balanceToken1.gt(BigNumber.from("0"))) {
+                await ftInstance.getFees(pair.token1.address, balanceToken1, withdrawalAddress, pair.energyRev.address)
+            } else {
+                console.log("Zero Anchor Balance")
+            }
+        }
     }
 }
 
