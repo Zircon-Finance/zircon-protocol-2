@@ -1,16 +1,29 @@
 const { ethers } = require('hardhat');
+const {LIB_ADDRESS, FEE_TO_SETTER_ADDRESS} = require("./constants");
+const hre = require("hardhat");
+const axios = require("axios");
+const {BigNumber} = require("ethers");
+
+
+async function getPylonReserves() {
+    const chainId = hre.network.config.chainId
+    let revs = (await axios.get('https://edgeapi.zircon.finance/static/monitoring/' + chainId )).data
+
+    console.log("Total in USD From REVS: ", revs["totalRev"])
+    let feeToSetter = await hre.ethers.getContractFactory('FeeToSetter');
+    let ftInstance = feeToSetter.attach(FEE_TO_SETTER_ADDRESS[chainId])
+
+    for (let pair of revs["pairs"]) {
+
+        let symbol1 = pair["token1"]["symbol"]
+        console.log("Pair: ", pair["token0"]["symbol"], "/", symbol1)
+        console.log("Amount in " + symbol1, hre.ethers.utils.formatUnits(hre.ethers.BigNumber.from(pair["energyRev"]["valueInToken1"]), pair["token1"]["decimals"]).toString() + " (" +
+            + pair["energyRev"]["valueInUSD"] + " USD)")
+
+    }
+}
 
 async function defillama() {
-    // let logs = await ethers.provider.getLogs({
-    //     fromBlock: 25836698,
-    //     toBlock: 25912629,
-    //     target: "0x05d5E46F9d17591f7eaCdfE43E3d6a8F789Df698",
-    //     // topics: [
-    //     //     "0xab83557b3a718996d408afe08287d09bafed3590c7ae61a430d518d3199d4590"
-    //     // ]
-    // })
-
-
     let logs = await ethers.provider.getLogs({
         fromBlock: 3587214,
         toBlock: 3684191,
@@ -19,13 +32,19 @@ async function defillama() {
             "0xab83557b3a718996d408afe08287d09bafed3590c7ae61a430d518d3199d4590"
         ]
     })
-
     console.log("logs", logs)
 }
 
-async function tokenDeploy() {
-    const tokenContract = await ethers.getContractFactory("Token");
-    const newToken = await tokenContract.deploy("ZRGTEST Token", "ZRGT", 18);
+async function getP2x() {
+    let chainId = 1285
+    const tokenContract = await ethers.getContractFactory("ZirconPylon", {
+        libraries: {
+            ZirconLibrary: LIB_ADDRESS[chainId],
+        }
+    });
+    let pylon = await tokenContract.attach("0xA99f75217024d73665222D401534A2Ac513d36A8")
+    console.log("pylon", (await pylon.p2x()).toString())
+    // const newToken = await tokenContract.deploy("ZRGTEST Token", "ZRGT", 18);
 }
 
 async function changeOwner() {
@@ -148,7 +167,7 @@ async function check() {
 
 }
 
-defillama()
+getP2x()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

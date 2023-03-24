@@ -204,8 +204,8 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         amountOut = numerator / denominator;
     }
 
+
     // this low-level function should be called from a contract which performs important safety checks
-    // TODO: Test this function
     // TODO: maybe allow burning both sides to one
     function burnOneSide(address to, bool isReserve0) external lock returns (uint amount) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
@@ -324,20 +324,20 @@ contract ZirconPair is IZirconPair, ZirconERC20 { //Name change does not affect 
         energyRevenueAddress = _revAddress;
     }
 
-//    // Just for testing purposes
-//    // Should be deleted on deployment
-//    function mintTest(address to, uint amount) external {
-//        _mint(to, amount);
-//    }
+    // Just for testing purposes
+    // Should be deleted on deployment
+    function mintTest(address to, uint amount) external {
+        _mint(to, amount);
+    }
 
-//    // Same here
-//    function reservesTest() external {
-//        uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
-//        uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
-//
-//        reserve0 = uint112(balance0);
-//        reserve1 = uint112(balance1);
-//
-//        kLast = uint(reserve0).mul(reserve1);
-//    }
+    // Same here
+    function reservesTest() external {
+        uint balance0 = IUniswapV2ERC20(token0).balanceOf(address(this));
+        uint balance1 = IUniswapV2ERC20(token1).balanceOf(address(this));
+
+        reserve0 = uint112(balance0);
+        reserve1 = uint112(balance1);
+
+        kLast = uint(reserve0).mul(reserve1);
+    }
 }

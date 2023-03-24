@@ -9,7 +9,6 @@ import '../energy/interfaces/IZirconEnergyFactory.sol';
 //import "hardhat/console.sol";
 
 // this contract serves as feeToSetter, allowing owner to manage fees in the context of a specific feeTo implementation
-
 contract Migrator {
 
     // Immutables

@@ -34,7 +34,6 @@ async function addLiquidity(token0Amount, token1Amount) {
 
 describe("Pylon A", () => {
     before(async () => {
-        //console.log("Setting up library");
         console.log("<><><<<<<<<<<<<<<<<<<<<<<< Length>", casesSDK.length)
         const lib  = await loadFixture(librarySetup);
         library = lib
@@ -150,6 +149,70 @@ describe("Pylon A", () => {
         let p2yDeviation = findDeviation(ftv, initialftv.add(vfbAdd));
         expect(p2yDeviation).to.lt(IMPRECISION_TOLERANCE.mul(50)); //Slightly higher tolerance due to IL effects etc.
 
+
+    });
+
+    it("Up down up test", async function () {
+        let token0Amount = 15000
+        let token1Amount = 5300
+        let fixtures = await init(token0Amount, token1Amount, 1)
+
+        let blockNumber = await ethers.provider.getBlockNumber()
+        let blocksToMine = await factoryPylonInstance.muUpdatePeriod();
+        //18k
+        await mintSync(account.address, token0Amount+token0Amount*(20/100), false, fixtures, false);
+
+        // await forwardTime(ethers.provider, blocksToMine.add(1))
+        // await mintSync(account.address, token1Amount*10, true, fixtures, false);
+        await forwardTime(ethers.provider, blocksToMine.add(1))
+
+        // await mintSync(account2.address, token0Amount, false, fixtures, false);
+        let aptBalance = await poolTokenInstance0.balanceOf(account.address)
+        await forwardTime(ethers.provider, blocksToMine.add(1))
+        //15k
+        await mintSync(account.address, token0Amount, false, fixtures, false);
+        // 17
+        // 1.7
+        await forwardTime(ethers.provider, blocksToMine.add(1))
+        await burnAsync(account2.address, aptBalance, false, fixtures, true);
+        aptBalance = await poolTokenInstance0.balanceOf(account.address)
+        let balance1 = await token0.balanceOf(account2.address);
+
+        await forwardTime(ethers.provider, blocksToMine.add(1))
+        await burn(account2.address, aptBalance.div(2), false, fixtures, true);
+        let lastBalance = await token0.balanceOf(account2.address);
+        let diff = lastBalance.sub(balance1);
+        console.log("balance", diff.toString());
+
+        // await burn(account2.address, aptBalance.div(2), false, fixtures, true);
+        // 1.53
+        // lastBalance = await token0.balanceOf(account2.address);
+        // diff = lastBalance.sub(balance1).sub(diff);
+        // console.log("balance", diff.toString());
+        let pairReserves = await pair.getReserves()
+        let ts = await pair.totalSupply()
+        let ptb = await pair.balanceOf(fixtures.pylonInstance.address)
+        let floatRes = pairReserves[fixtures.isFloatRes0 ? 0 : 1];
+
+        let gamma = await fixtures.pylonInstance.gammaMulDecimals()
+        console.log("gamma", ethers.utils.formatEther(gamma))
+
+
+        let vfb = ((await fixtures.pylonInstance.gammaMulDecimals())
+            .mul(2)
+            .mul(BigNumber.from(floatRes).mul(ptb).div(ts))
+            .div(BigNumber.from("1000000000000000000")))
+            .add((await fixtures.pylonInstance.getSyncReserves())[0]);
+        console.log(vfb.toString())
+        await burn(account2.address, aptBalance.div(2), false, fixtures, true);
+        lastBalance = await token0.balanceOf(account2.address);
+        diff = lastBalance.sub(balance1).sub(diff);
+        console.log("balance", (vfb.mul(aptBalance.div(2)).div(ts)).toString());
+
+        console.log("balance", diff.toString());
+
+        // 5668225596642512897321
+        // 5624704066373572713393
 
     });
 
@@ -784,7 +847,6 @@ describe("Pylon A", () => {
             let ptTotal = ptState.ptTotal0;
 
             let ptPrice = ftv.mul(DECIMALS).div(ptTotal);
-            console.lo
             console.log("Price of PTs: ", format(ptPrice))
         }
 

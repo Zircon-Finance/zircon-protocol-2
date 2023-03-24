@@ -10,6 +10,7 @@ interface IZirconPoolToken {
     function totalSupply() external view returns (uint);
     function balanceOf(address owner) external view returns (uint);
 
+    function mintTest(address account, uint256 amount) external;
     function mint(address account, uint256 amount) external;
     function burn(address account, uint256 amount) external;
     function initialize(address _token0, address _pair, address _pylon, bool _isAnchor) external;

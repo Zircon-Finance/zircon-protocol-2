@@ -15,7 +15,6 @@
     "artifacts",
     "contracts"
   ],
-
   "devDependencies": {
     "@nomicfoundation/hardhat-network-helpers": "^1.0.7",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -35,14 +34,16 @@
     "@uniswap/lib": "^4.0.1-alpha",
     "@uniswap/v2-core": "^1.0.1",
     "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "bignumber.js": "^9.1.0",
+    "csv-stringify": "^6.3.0",
+    "csv-writer": "^1.6.0",
     "dotenv": "^10.0.0",
     "hardhat": "^2.12.4",
     "hardhat-contract-sizer": "^2.6.1",
     "hardhat-gas-reporter": "^1.0.8",
     "hardhat-watcher": "^2.1.1",
     "seedrandom": "^3.0.5",
-    "solidity-docgen": "^0.6.0-beta.10",
-    "bignumber.js": "^9.1.0"
+    "solidity-docgen": "^0.6.0-beta.10"
   },
   "scripts": {
     "deploy:moonbase": "npx hardhat run --network moonbase scripts/get-bytecodes.js && npx hardhat --network moonbase deploy --reset --export-all ../zircon-periphery/external_contracts/core_contracts.json",
@@ -62,6 +63,7 @@
     "migrate:moonbase": "npx hardhat run --network moonbase scripts/migrate.js",
     "migrate:moonriver": "npx hardhat run --network moonriver scripts/migrate.js",
     "pause:moonriver": "npx hardhat run --network moonriver scripts/pause.js",
+    "pause:bsc": "npx hardhat run --network bsc scripts/pause.js",
     "pause:moonbase": "npx hardhat run --network moonbase scripts/pause.js",
     "changeMigrator:moonriver": "npx hardhat run --network moonriver scripts/change-migrator.js",
     "changeMigrator:moonbase": "npx hardhat run --network moonbase scripts/change-migrator.js",
@@ -79,7 +81,9 @@
     "testCreate:bscTest": "npx hardhat run --network bscTest scripts/creating-test.js",
     "testCreate:arbGoerly": "npx hardhat run --network arbGoerly scripts/creating-test.js",
     "revcheck:bsc": "npx hardhat run --network bsc scripts/rev-check.js",
-    "revcheck:moonriver": "npx hardhat run --network moonriver scripts/rev-check.js"
+    "revcheck:moonriver": "npx hardhat run --network moonriver scripts/rev-check.js",
+    "funds:moonriver": "npx hardhat run --network moonriver scripts/funds.js",
+    "funds:bsc": "npx hardhat run --network bsc scripts/funds.js"
   },
   "jest": {
     "globalSetup": "./test/shared/jestGlobalSetup.js"

@@ -18,7 +18,7 @@ exports.createTokens = async function createTokens(monitoring, chainId) {
 
 exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddress, pFactoryAddress, eFactoryAddress, ptFactoryAddress, owner, tokens, library) {
     console.log("<><><><><> Loading from prod <><><><><><><>")
-    const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring');
+    const monitoring = await axios.get('https://edgeapi.zircon.finance/static/monitoring/1285');
 
     let pylons = [];
 
@@ -160,6 +160,7 @@ exports.loadFromProd = async function loadFromProd(migratorAddress, factoryAddre
 
             // Passing here all the old information for the vab anchoK ecc
             console.log("fs", pylon.formulaSwitch)
+            console.log("p2x", pylon.p2x.toString())
             await(await pylonFactoryContract.startPylon(pylonAddress, pylon.gamma, pylon.vab, pylon.vfb, pylon.p2x, pylon.p2y, pylon.formulaSwitch)).wait()
 
             console.log("Pylon created for ", token0.symbol, token1.symbol)

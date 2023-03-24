@@ -40,8 +40,8 @@ library Math {
     // This function takes two variables and look at the maximum possible with the ration given by the reserves
     // @pR0, @pR1 the pair reserves
     // @b0, @b1 the balances to calculate
-    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) pure internal returns (uint maxX, uint maxY)  {
-
+    function _getMaximum(uint _reserve0, uint _reserve1, uint _b0, uint _b1) view internal returns (uint maxX, uint maxY)  {
+        console.log("b0", _b0);
         //Expresses b1 in units of reserve0
         uint px = _reserve0.mul(_b1)/_reserve1;
 

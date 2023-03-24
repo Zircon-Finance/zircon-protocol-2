@@ -6,7 +6,9 @@ const BN = require("bignumber.js");
 
 const {expandTo18Decimals, getAmountOut} = require("./shared/utils");
 const {coreFixtures} = require("./shared/fixtures");
-const {initPylonsFromProdSnapshot, getPylonIndexBy, getFixturesForPylon, mintSync, burn, forwardTime, getPylons, migrate} = require("./shared/commands");
+const {initPylonsFromProdSnapshot, getPylonIndexBy, getFixturesForPylon, mintSync, burn, forwardTime, getPylons, migrate,
+    burnAsync
+} = require("./shared/commands");
 const {librarySetup} = require("./shared/fixtures");
 const {loadFixture} = require("@nomicfoundation/hardhat-network-helpers");
 const fs = require('fs')
@@ -29,7 +31,6 @@ describe("Prod to test Pylons", () => {
         // library = await librarySetup()
         fixtures = await initPylonsFromProdSnapshot(library);
     })
-
     async function comparePrices(fixtures, {ptfPrice, ptsPrice, vfb, vab, gamma, ptfTS, ptsTS}) {
 
         console.log("Comparing Prices")
@@ -90,8 +91,6 @@ describe("Prod to test Pylons", () => {
     it("Compare Prices", async () => {
         // let index = getPylonIndexBy("ZRG", "xcKSM")
         console.log("Getting Some Tokens")
-
-
         let pylons = getPylons()
         for(let index = 1; index < pylons.length; index++) {
             let pylon = pylons[index];
@@ -114,9 +113,9 @@ describe("Prod to test Pylons", () => {
     })
 
     //Let's try to calculate some cases for pylon
-    it.only(`Prod Testing ZRG/WMOVR`, async () => {
+    it(`Prod Testing ZRG/ETH`, async () => {
         console.log("\n\n\n<><><><><> STARTING TEST <><><><><><><><>\n")
-        let index = getPylonIndexBy("ZRG", "USDC")
+        let index = getPylonIndexBy("ZRG", "ETH")
         console.log("index", index)
         fixtures = await getFixturesForPylon(fixtures, index)
 
@@ -130,10 +129,10 @@ describe("Prod to test Pylons", () => {
         console.log("Minting on ZRG ETH Pool")
         // 17.38
         // Minting a bit of ETH Stable PT
-        await mintSync(account.address, "1", false, fixtures, false, index)
+        // await mintSync(account.address, "1", false, fixtures, false, index)
         await migrate(fixtures, library, index)
         console.log("migration completed")
-
+        await fixtures.poolTokenInstance0.mintTest(account.address, expandTo18Decimals(10))
         // Getting the PT Instances
         console.log("Minting a bit of ETH Stable PT")
         let stablePTBalance = await fixtures.poolTokenInstance0.balanceOf(account.address)
@@ -141,7 +140,7 @@ describe("Prod to test Pylons", () => {
         await forwardTime(ethers.provider, 50, index);
 
         // Burning (should fire FTT hopefully)
-        await burn(account.address, stablePTBalance, false, fixtures, true, index);
+        await burnAsync(account.address, stablePTBalance, false, fixtures, true, index);
         console.log("Burned the PT")
     })
 })

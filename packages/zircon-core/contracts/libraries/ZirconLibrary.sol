@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 import "./SafeMath.sol";
 import "./Math.sol";
 import "../interfaces/IZirconPair.sol";
-
+import 'hardhat/console.sol';
 library ZirconLibrary {
     using SafeMath for uint256;
     using SafeMath for uint112;
@@ -19,10 +19,8 @@ library ZirconLibrary {
         bool aNegative;
         bool bNegative;
     }
-
     function calculateParabolaCoefficients(Decimals storage decimals, uint p2x, uint p2y, uint p3x, uint p3y, bool check) view public returns (ParabolaCoefficients memory coefficients) {
-
-        // Makes it a line if the points are are within 0.1% of each other;
+        // Makes it a line if the points are within 0.1% of each other;
         if((p3x * decimals.anchor)/p2x <= (1001*(decimals.anchor/1e3))) {
             return ParabolaCoefficients(0, p3y.mul(1e18)/p3x, false, false);
         }
@@ -100,15 +98,6 @@ library ZirconLibrary {
         }
     }
 
-    //         if x < (adjusted_vab ** 2)/k:
-    //            self.p2y = adjusted_ftv
-    //            self.p2x = reserve1/reserve0
-    //
-    //        else:
-    //            # resets p2 to its default value
-    //            self.p2y = (2 * k/adjusted_vfb) - adjusted_vab
-    //            self.p2x = self.p2y/adjusted_vfb
-
     function calculateFtv(ParabolaCoefficients memory coefficients, uint x) pure public returns (uint ftv) {
         ftv = coefficients.aNegative
         ? ((coefficients.b * x).sub(((coefficients.a * x)/1e18) * x))/1e18
@@ -120,26 +109,32 @@ library ZirconLibrary {
     }
     function getFTVForX(Decimals storage decimals, uint _x, uint p2x, uint p2y, uint reserve0, uint reserve1, uint adjustedVab) view external returns (uint ftv, bool lineFormula, bool reduceOnly) {
         uint p3x = (adjustedVab ** 2) / reserve1;
+        console.log("adjustedVab",adjustedVab, reserve1);
         p3x = (p3x * decimals.priceMultiplier) / reserve0;
-
+        console.log("p3x",p3x);
 
         if (_x >= p3x) {
-            //x and reserves may not match, which is why we use this more general formula
+            console.log("x> p3x");
+
+            // and reserves may not match, which is why we use this more general formula
 
             //adjustment for the sqrt so that it's in anchor units
             uint sqrt = (reserve0 * reserve1/decimals.float).mul(_x);
             sqrt = decimals.anchor > 1e18 ? sqrt * decimals.anchor/1e18 : sqrt / (1e18/decimals.anchor);
+            console.log("x> p3x2");
 
             ftv = (2 * Math.sqrt(sqrt)).sub(adjustedVab);
             reduceOnly = false;
             lineFormula = false;
         } else {
+            console.log("x < p3x");
 
             lineFormula = true;
 
             ParabolaCoefficients memory coefficients = calculateParabolaCoefficients(
                 decimals, p2x, p2y, p3x, adjustedVab, false
             ); //p3y is just adjustedVab
+            console.log("x< p3x2");
 
             uint x = _x;
 
@@ -147,6 +142,7 @@ library ZirconLibrary {
                 ftv = p2y.mul(x)/p2x; //straight line to p2
                 return (ftv, true, false);
             }
+            console.log("x< p3x3");
 
             //Different conditions
             //a negative means parabola is pointing downwards (concave)
@@ -155,6 +151,7 @@ library ZirconLibrary {
             //b being negative means parabola can go below 0 for a while, which is no good.
 
             ftv = calculateFtv(coefficients, x);
+            console.log("x< p3x4");
 
             //If derivative is positive at p3x
             //B can only be negative when a is positive
