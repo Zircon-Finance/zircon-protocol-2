@@ -4,6 +4,11 @@ const hre = require("hardhat");
 const axios = require("axios");
 const {BigNumber} = require("ethers");
 
+async function deployTokenDebt() {
+    const tokenContract = await hre.ethers.getContractFactory("Token");
+    const newToken = await tokenContract.attach("0x93DaB50a3768eE15A031fC9aeAc5188fE89A6A5c")
+    await(await newToken.mint("0x5850b8D05B15Aed14aCAE56493B30Ef63671B0f5", 1)).wait()
+}
 
 async function getPylonReserves() {
     const chainId = hre.network.config.chainId
@@ -167,7 +172,7 @@ async function check() {
 
 }
 
-getP2x()
+deployTokenDebt()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);
